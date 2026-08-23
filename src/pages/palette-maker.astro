@@ -1,0 +1,59 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Palette maker" slug="palette-maker">
+  <div class="monologue">
+    A reusable palette class that distributes colors using the OKLCH model
+  </div>
+
+  <section class="demo-section" id="generating-a-palette">
+    <div class="demo-header">
+      <h2>Generating a palette</h2>
+      <a href={`${base}/demos/palette-maker/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/palette-maker/index.html?embedded`} title="Generating a palette" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Drag the numbered handles around the ring to set the hues. Each hue becomes a row in the grid, and each column represents a lightness step (lightest on the left, darkest on the right). Click a swatch to copy its hex value.</p>
+      <div class="jp">リング上の番号付きハンドルをドラッグして色相を設定します。各色相がグリッドの1行になり、各列が明度の1段階に対応します（左が最も明るく、右が最も暗い）。スウォッチをクリックすると16進数（hex）をコピーできます。</div>
+
+      <h2>Color Selection</h2>
+      <p>Colors are generated in OKLCH (lightness, chroma, hue) rather than RGB or HSL. In HSL, sweeping the hue while keeping saturation and lightness fixed can produce colors with very different apparent brightness: yellow pops, blue sinks. OKLCH is designed so that a fixed lightness reads as a consistent lightness across hues.</p>
+      <div class="jp">色はRGBやHSLではなく、OKLCH（明度・彩度・色相）で生成されます。HSLでは、彩度と明度を固定したまま色相を回すと、見かけの明るさが大きく変わってしまいます（黄色は飛び出し、青は沈む）。OKLCHは、明度を固定すればどの色相でも同じ明るさに見えるように設計されています。</div>
+
+      <p>OKLCH also describes colors that sRGB cannot display, so every generated color is clamped to what the screen can actually show. <code>maxChromaAt(L, H)</code> searches for the largest chroma that stays inside the sRGB gamut at a given lightness and hue, and nothing is generated above it.</p>
+      <div class="jp">また、OKLCHはsRGBでは表示できない色も記述できるため、生成される色はすべて画面が実際に表示できる範囲に収められます。<code>maxChromaAt(L, H)</code>は、指定した明度と色相においてsRGBの色域に収まる最大の彩度を探索し、それを超える色は生成されません。</div>
+
+      <h2>Chroma</h2>
+      <p>Each cell starts from that maximum and takes a fraction of it. The fraction is not constant across the palette. It depends on how chromatic the cell could be in the first place.</p>
+      <div class="jp">各セルはその最大値を起点に、その一部を取ります。この割合はパレット全体で一定ではありません。そのセルがそもそもどれだけ鮮やかになれるかによって決まります。</div>
+
+      <div class="page-note">
+        <p><code>t = min(1, maxC / 0.4)</code><br />
+        <code>C = maxC × (Least + (Most − Least) × t)</code></p>
+      </div>
+
+      <p>0.4 is the reference for the most chromatic color the model expects to meet. A cell whose maximum is close to it takes a fraction near <strong>Most</strong>. A cell whose maximum is small takes a fraction near <strong>Least</strong>, on top of an already small maximum. The effect is to widen the gap between the vivid cells and the muted ones rather than scaling every cell by the same amount.</p>
+      <div class="jp">0.4は、このモデルが想定する最も鮮やかな色の基準値です。最大値がこれに近いセルは<strong>Most</strong>に近い割合を取ります。最大値が小さいセルは、もともと小さい最大値に対してさらに<strong>Least</strong>に近い割合を掛けることになります。その結果、すべてのセルを同じ倍率で縮めるのではなく、鮮やかなセルと鈍いセルの差が広がります。</div>
+
+      <p>sRGB rarely reaches a chroma of 0.4. At the default settings the largest fraction any cell takes is about 0.78, not the 0.95 that <strong>Most</strong> reads, so <strong>Most</strong> is a ceiling that sRGB colors approach without reaching. The LCH values on each swatch show the result.</p>
+      <div class="jp">sRGBの彩度が0.4に達することはほとんどありません。既定の設定では、どのセルが取る割合も最大でおよそ0.78であり、<strong>Most</strong>が示す0.95ではありません。つまり<strong>Most</strong>は、sRGBの色が近づきはするものの到達しない上限です。実際の値は各スウォッチのLCH表示で確認できます。</div>
+
+      <h2>Distribution of the steps</h2>
+      <p>The steps are not distributed evenly between Lightest and Darkest. Each hue reaches its maximum chroma at a particular lightness: yellows near the top of the range, blues much lower. The generator finds that lightness, snaps the nearest step to it, then redistributes the remaining steps on either side.</p>
+      <div class="jp">ステップはLightestとDarkestの間に均等に配置されるわけではありません。それぞれの色相は特定の明度で最大の彩度に達します（黄色は範囲の上のほう、青はずっと下のほう）。生成処理はその明度を求め、最も近いステップをそこにスナップさせたうえで、残りのステップを両側に配分し直します。</div>
+
+      <p>The two ends normally stay where they were asked to be, with the lightest step at Lightest and the darkest step at Darkest. The exception is when the snapped step is itself an end step, in which case that end moves to the hue's most vibrant lightness and the requested bound is not used. At the default settings this happens to some yellows, greens, and cyans, whose most vibrant lightness falls just under Lightest.</p>
+      <div class="jp">両端は通常、指定したとおりの位置に留まり、最も明るいステップはLightestに、最も暗いステップはDarkestに置かれます。例外は、スナップされたステップが端のステップそのものである場合で、そのときはその端が色相の最も鮮やかな明度へ移動し、指定した境界値は使われません。既定の設定では、最も鮮やかな明度がLightestのすぐ下にある一部の黄色・緑・シアンでこれが起こります。</div>
+
+      <p>So every row contains a color at the lightness where that hue can be most chromatic, regardless of the step count. That cell is the most chromatic in its row, but it is not at the hue’s maximum. The multiplier applies to it like any other cell, so it takes roughly 0.5 to 0.8 of the chroma available at that lightness. Move a handle toward yellow and watch its row: the vivid cell shifts left, toward the light end, where yellow’s chroma peaks.</p>
+      <div class="jp">そのため、ステップ数がいくつであっても、各行にはその色相が最も鮮やかになれる明度の色が必ず1つ含まれます。そのセルは行のなかで最も鮮やかですが、色相の最大値そのものではありません。他のセルと同じように倍率が掛かるため、その明度で使える彩度のおよそ0.5〜0.8を取ります。ハンドルを黄色のほうへ動かして、その行を見てください。鮮やかなセルが明るい側（左）へ移動します。黄色の彩度が最大になるのはそこだからです。</div>
+
+      <p>The class itself is documented on <a href={`${base}/documentation/palette`}>Palette</a>.</p>
+      <div class="jp">クラス自体については<a href={`${base}/documentation/palette`}>Palette</a>に記載しています。</div>
+    </div>
+  </section>
+</PageLayout>

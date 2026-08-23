@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Material strokes — chrome, mirror and glass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Height field</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Dome</span>
+        <input id="dome" class="dp-range" type="range" min="0" max="2" step="0.05" value="1.00" />
+        <span class="dp-val" id="dome-val">1.00</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Liquid</span>
+        <input id="noise" class="dp-range" type="range" min="0" max="0.8" step="0.02" value="0.22" />
+        <span class="dp-val" id="noise-val">0.22</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Stretch</span>
+        <input id="stretch" class="dp-range" type="range" min="0.2" max="6" step="0.1" value="1.40" />
+        <span class="dp-val" id="stretch-val">1.40</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Across</span>
+        <input id="across" class="dp-range" type="range" min="0.5" max="12" step="0.5" value="3.0" />
+        <span class="dp-val" id="across-val">3.0</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Surface</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Specular</span>
+        <input id="specular" class="dp-range" type="range" min="0" max="1.5" step="0.05" value="0.85" />
+        <span class="dp-val" id="specular-val">0.85</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Bend</span>
+        <input id="bend" class="dp-range" type="range" min="0" max="0.15" step="0.005" value="0.050" />
+        <span class="dp-val" id="bend-val">0.050</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Shape</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Width</span>
+        <input id="width" class="dp-range" type="range" min="0.04" max="0.20" step="0.005" value="0.130" />
+        <span class="dp-val" id="width-val">0.130</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Strokes</span></div>
+      <div class="dp-note">Top to bottom: chrome, mirror, glass.</div>
+      <div class="dp-btn-row">
+        <button id="random-btn" class="dp-btn secondary">Randomize background</button>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-section collapsed">
+        <div class="dp-section-hd">
+          <span class="dp-chevron"></span>
+          <span class="dp-title">Geometry</span>
+        </div>
+        <div class="dp-section-body"><div id="readout"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

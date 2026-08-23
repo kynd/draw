@@ -1,0 +1,41 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Brush strokes" slug="brush-strokes">
+  <div class="monologue">
+    A stroke renderer that shades the ribbon as bristles rather than filling it
+  </div>
+
+  <section class="demo-section" id="two-pigments">
+    <div class="demo-header">
+      <h2>Two pigments</h2>
+      <a href={`${base}/demos/brush-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/brush-strokes/index.html?embedded`} title="Two pigments" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p><strong>Bristles</strong> sets how many lanes run across the width and <strong>Streak</strong> how far they stretch along the mark. <strong>Rough</strong> erodes the edge and <strong>Dry</strong> removes paint where the brush lifted. <strong>Randomize colors</strong> gives each stroke a new pair of pigments.</p>
+      <div class="jp"><strong>Bristles</strong>は幅方向のレーン数を、<strong>Streak</strong>はそれが線に沿ってどこまで伸びるかを決めます。<strong>Rough</strong>は輪郭を削り、<strong>Dry</strong>は筆が離れた箇所の絵の具を取り除きます。<strong>Randomize colors</strong>は各ストロークに新しい2色の組を与えます。</div>
+
+      <h2>Shading instead of filling</h2>
+      <p>The basic renderer fills the ribbon with a color. This one hands the ribbon to a fragment shader and computes a color per pixel, which is what lets the texture follow the mark rather than sit on top of it as a repeating image.</p>
+      <div class="jp">基本のレンダラはリボンを単色で塗りつぶします。こちらはリボンをフラグメントシェーダに渡し、ピクセルごとに色を計算します。そのため、テクスチャは繰り返し画像として上に載るのではなく、線そのものに沿って走ります。</div>
+
+      <p>One noise field does three jobs. It draws the bristle lanes, it pushes the edge in and out so the mark does not end on a clean curve, and it decides which of the two pigments shows at each point. Using separate fields for each would let the streaks, the edge and the color disagree, and the mark would stop reading as one gesture.</p>
+      <div class="jp">ひとつのノイズが3つの役割を果たします。毛の筋を描き、輪郭を内外に押して線がきれいな曲線で終わらないようにし、各点でどちらの顔料が表に出るかを決めます。それぞれに別のノイズを使うと、筋と輪郭と色が食い違い、線はひとつの身振りとして読めなくなります。</div>
+
+      <h2>Two colors on one brush</h2>
+      <p>A loaded brush carries more than one pigment and puts them down unevenly. The stroke takes two colors and mixes them along the bristle noise, with a slow drift along the mark so one end is not a copy of the other.</p>
+      <div class="jp">絵の具を含んだ筆は複数の顔料を抱え、それらを不均一に置いていきます。このストロークは2つの色を受け取り、毛の筋のノイズに沿って混ぜます。さらに線に沿ってゆっくりと変化させ、片方の端がもう一方の複製にならないようにしています。</div>
+
+      <p>The two colors come from different hues of one generated palette, which keeps them related without making them the same.</p>
+      <div class="jp">2色は、ひとつのパレットの異なる色相から選ばれます。これにより、同じ色にならずに互いの関係は保たれます。</div>
+
+      <p>The class is documented on <a href={`${base}/documentation/renderers`}>Renderers</a>.</p>
+      <div class="jp">クラスについては<a href={`${base}/documentation/renderers`}>Renderers</a>に記載しています。</div>
+    </div>
+  </section>
+</PageLayout>

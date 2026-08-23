@@ -1,0 +1,12 @@
+---
+import { getCollection } from 'astro:content';
+import PageLayout from '../layouts/PageLayout.astro';
+
+const allPages = await getCollection('pages');
+const page = allPages.find(p => p.slug === 'index')!;
+const { Content } = await page.render();
+---
+
+<PageLayout title={page.data.title} slug="">
+  <Content />
+</PageLayout>

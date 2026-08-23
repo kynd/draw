@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Graphic strokes — pixels, facets and lanes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Pixels</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Cell</span>
+        <input id="cell" class="dp-range" type="range" min="0.015" max="0.10" step="0.005" value="0.040" />
+        <span class="dp-val" id="cell-val">0.040</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Drop</span>
+        <input id="jitter" class="dp-range" type="range" min="0" max="0.5" step="0.02" value="0.12" />
+        <span class="dp-val" id="jitter-val">0.12</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Facets</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Count</span>
+        <input id="facets" class="dp-range" type="range" min="3" max="60" step="1" value="14" />
+        <span class="dp-val" id="facets-val">14</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Jitter</span>
+        <input id="facetJitter" class="dp-range" type="range" min="0" max="1" step="0.02" value="0.45" />
+        <span class="dp-val" id="facetJitter-val">0.45</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Lanes</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Count</span>
+        <input id="lanes" class="dp-range" type="range" min="2" max="24" step="1" value="7" />
+        <span class="dp-val" id="lanes-val">7</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Fill</span>
+        <input id="duty" class="dp-range" type="range" min="0.1" max="1" step="0.02" value="0.45" />
+        <span class="dp-val" id="duty-val">0.45</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Shape</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Width</span>
+        <input id="width" class="dp-range" type="range" min="0.04" max="0.20" step="0.005" value="0.130" />
+        <span class="dp-val" id="width-val">0.130</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Strokes</span></div>
+      <div class="dp-note">Top to bottom: pixels, facets, lanes.</div>
+      <div class="dp-btn-row">
+        <button id="random-btn" class="dp-btn secondary">Randomize colors</button>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-section collapsed">
+        <div class="dp-section-hd">
+          <span class="dp-chevron"></span>
+          <span class="dp-title">Geometry</span>
+        </div>
+        <div class="dp-section-body"><div id="readout"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

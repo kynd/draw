@@ -1,0 +1,674 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+interface Props {
+  title: string;
+  slug: string;
+}
+
+interface NavItem {
+  label: string;
+  href: string;
+  slug: string;
+  sketch?: boolean;
+  children?: NavItem[];
+  subLinks?: { label: string; href: string }[];
+}
+
+const { title, slug } = Astro.props;
+
+const navItems: NavItem[] = [
+  { label: 'Intro', href: `${base}/`, slug: '' },
+  { label: 'Palette maker', href: `${base}/palette-maker`, slug: 'palette-maker',
+    subLinks: [
+      { label: 'Generating a palette',       href: '#generating-a-palette' },
+      { label: 'Color Selection',            href: '#color-selection' },
+      { label: 'Chroma',                     href: '#chroma' },
+      { label: 'Distribution of the steps',  href: '#distribution-of-the-steps' },
+    ]
+  },
+  { label: 'Strokes', href: `${base}/strokes`, slug: 'strokes',
+    subLinks: [
+      { label: 'Basic strokes',           href: '#basic-strokes' },
+      { label: 'Cap styles',              href: '#cap-styles' },
+      { label: 'The buffer is the canvas', href: '#the-buffer-is-the-canvas' },
+      { label: 'Depth',                   href: '#depth' },
+      { label: 'Sampling',                href: '#sampling' },
+      { label: 'Color',                   href: '#color' },
+    ]
+  },
+  { label: 'Brush strokes', href: `${base}/brush-strokes`, slug: 'brush-strokes',
+    subLinks: [
+      { label: 'Two pigments',           href: '#two-pigments' },
+      { label: 'Shading instead of filling', href: '#shading-instead-of-filling' },
+      { label: 'Two colors on one brush', href: '#two-colors-on-one-brush' },
+    ]
+  },
+  { label: 'Wet strokes', href: `${base}/wet-strokes`, slug: 'wet-strokes',
+    subLinks: [
+      { label: 'Reading the background',   href: '#reading-the-background' },
+      { label: 'The test pattern',         href: '#the-test-pattern' },
+      { label: 'Geometry wider than the mark', href: '#geometry-wider-than-the-mark' },
+      { label: 'Watercolor',               href: '#watercolor' },
+      { label: 'Smear',                    href: '#smear' },
+      { label: 'Wet brush',                href: '#wet-brush' },
+    ]
+  },
+  { label: 'Material strokes', href: `${base}/material-strokes`, slug: 'material-strokes',
+    subLinks: [
+      { label: 'A surface, not a fill', href: '#a-surface-not-a-fill' },
+      { label: 'The height field',      href: '#the-height-field' },
+      { label: 'Chrome',                href: '#chrome' },
+      { label: 'Mirror',                href: '#mirror' },
+      { label: 'Glass',                 href: '#glass' },
+    ]
+  },
+  { label: 'Graphic strokes', href: `${base}/graphic-strokes`, slug: 'graphic-strokes',
+    subLinks: [
+      { label: 'Other geometry',        href: '#other-geometry' },
+      { label: 'Pixels',                href: '#pixels' },
+      { label: 'Facets',                href: '#facets' },
+      { label: 'Lanes',                 href: '#lanes' },
+      { label: 'Repeatable randomness', href: '#repeatable-randomness' },
+    ]
+  },
+  { label: 'Documentation', href: `${base}/documentation`, slug: 'documentation',
+    children: [
+      { label: 'Stroke Definition', href: `${base}/documentation/stroke-definition`, slug: 'documentation/stroke-definition',
+        subLinks: [
+          { label: 'StrokeDef', href: '#strokedef' },
+          { label: 'Width',     href: '#width' },
+          { label: 'The renderer reference', href: '#the-renderer-reference' },
+        ]
+      },
+      { label: 'Renderers', href: `${base}/documentation/renderers`, slug: 'documentation/renderers',
+        subLinks: [
+          { label: 'The base class',           href: '#the-base-class' },
+          { label: 'Common to every renderer', href: '#common-to-every-renderer' },
+          { label: 'RibbonStrokeRenderer',     href: '#ribbonstrokerenderer' },
+          { label: 'Square, rounded, ragged',  href: '#square-rounded-ragged' },
+          { label: 'ShaderStrokeRenderer',     href: '#shaderstrokerenderer' },
+          { label: 'BrushStrokeRenderer',      href: '#brushstrokerenderer' },
+          { label: 'Background samplers',      href: '#background-samplers' },
+          { label: 'Height field materials',   href: '#height-field-materials' },
+          { label: 'Geometry renderers',       href: '#geometry-renderers' },
+        ]
+      },
+      { label: 'Palette', href: `${base}/documentation/palette`, slug: 'documentation/palette',
+        subLinks: [
+          { label: 'Gamut',      href: '#gamut' },
+          { label: 'Generating', href: '#generating' },
+          { label: 'Chroma',     href: '#chroma' },
+          { label: 'Selecting',  href: '#selecting' },
+        ]
+      },
+      { label: 'Writing Style', href: `${base}/documentation/writing-style`, slug: 'documentation/writing-style',
+        subLinks: [
+          { label: 'Punctuation', href: '#punctuation' },
+          { label: 'Sentences',   href: '#sentences' },
+          { label: 'Words',       href: '#words' },
+          { label: 'Endings',     href: '#endings' },
+          { label: 'Openings',    href: '#openings' },
+          { label: 'Headings',    href: '#headings' },
+          { label: 'Japanese',    href: '#japanese' },
+        ]
+      },
+    ]
+  },
+];
+
+// Flattened depth-first, so "next page" walks the tree in reading order.
+function flatten(items: NavItem[]): NavItem[] {
+  return items.flatMap(item => [item, ...(item.children ? flatten(item.children) : [])]);
+}
+
+// Same walk, carrying nesting depth so the sidebar can indent child pages.
+function withDepth(items: NavItem[], depth = 0): { item: NavItem; depth: number }[] {
+  return items.flatMap(item => [
+    { item, depth },
+    ...(item.children ? withDepth(item.children, depth + 1) : []),
+  ]);
+}
+const renderItems = withDepth(navItems);
+
+const publicItems = flatten(navItems).filter(item => !item.sketch);
+const currentIdx  = publicItems.findIndex(item => item.slug === slug);
+const nextItem    = currentIdx >= 0 && currentIdx < publicItems.length - 1 ? publicItems[currentIdx + 1] : null;
+const isPublic    = currentIdx >= 0;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title === 'Draw' ? 'Draw' : `${title} — Draw`}</title>
+  <script is:inline>
+    (function() {
+      var f = localStorage.getItem('font-mode') || 'serif';
+      document.documentElement.setAttribute('data-font', f);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Sora:wght@300;400;500;600&family=Google+Sans+Code:ital,wght@0,400;0,500;1,400&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Serif+JP:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', function() {
+      function tryRender() {
+        if (typeof renderMathInElement !== 'undefined') {
+          renderMathInElement(document.body, {
+            delimiters: [
+              { left: '\\(', right: '\\)', display: false },
+              { left: '\\[', right: '\\]', display: true }
+            ]
+          });
+        } else {
+          setTimeout(tryRender, 50);
+        }
+      }
+      tryRender();
+    });
+  </script>
+  <style is:global>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* light theme defaults */
+      --bg:              #ffffff;
+      --fg:              #1a1a1a;
+      --fg-muted:        #7a7a7a;
+      --border:          #e3e3e3;
+      --surface-hover:   rgba(0,0,0,0.045);
+      --surface-active:  rgba(0,0,0,0.07);
+      --topbar-bg:       rgba(255,255,255,0.88);
+      --code-bg:         #f2f2f2;
+      --sidebar-shadow:  4px 0 24px rgba(0,0,0,0.10);
+      --overlay-bg:      rgba(0,0,0,0.22);
+      --sep-color:       #cccccc;
+      --link:            #1a6dd6;
+      --link-underline:  rgba(26,109,214,0.40);
+      --sidebar-width:   280px;
+      --header-height:   64px;
+      --font-body:       'Sora', sans-serif;
+      --font-code:       'Google Sans Code', 'Fira Mono', monospace;
+      --font-jp:         'Noto Sans JP', sans-serif;
+    }
+    html[data-font="serif"] { --font-body: 'Lora', serif; --font-jp: 'Noto Serif JP', serif; }
+
+    html, body {
+      background: var(--bg);
+      color: #3a3a3a;
+      font-family: var(--font-body);
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .shell { display: block; min-height: 100vh; }
+
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .topbar-controls {
+      display: flex; align-items: center;
+      background: var(--topbar-bg);
+      border-radius: 8px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      pointer-events: all;
+    }
+    .topbar-controls-left { padding: 0.22rem; }
+    .topbar-controls-right { padding: 0.22rem 0.55rem; display: flex; align-items: center; gap: 0.6rem; }
+    .topbar-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px;
+      background: none; border: none; cursor: pointer;
+      color: var(--fg); border-radius: 5px; transition: background 0.15s;
+    }
+    .topbar-toggle:hover { background: var(--surface-hover); }
+    .topbar-font-switcher { display: flex; align-items: center; gap: 0.25rem; }
+    .font-opt {
+      background: none; border: none; cursor: pointer;
+      padding: 0.2rem 0.1rem; font-size: 0.75rem;
+      color: var(--fg-muted); letter-spacing: 0.01em; transition: color 0.15s;
+    }
+    .font-opt:hover { color: var(--fg); }
+    .font-opt.active { color: var(--fg); font-weight: 600; }
+    .font-sep { color: var(--sep-color); font-size: 0.75rem; user-select: none; }
+
+    .sidebar-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: var(--overlay-bg); z-index: 98;
+    }
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: var(--sidebar-width); background: var(--bg);
+      overflow-y: auto; z-index: 101;
+      transform: translateX(calc(-1 * var(--sidebar-width)));
+      transition: transform 0.22s ease;
+      padding: 1rem 0 2rem;
+    }
+    .shell.sidebar-open .sidebar { transform: translateX(0); box-shadow: var(--sidebar-shadow); }
+    .shell.no-transition .sidebar,
+    .shell.no-transition .main-wrap { transition: none !important; }
+    .shell.sidebar-open .sidebar-backdrop { display: block; }
+
+    .sidebar-nav { list-style: none; padding: 0; margin: 0; }
+    .sidebar-nav a {
+      display: block; font-family: 'Sora', sans-serif;
+      font-size: 0.82rem; color: var(--fg-muted);
+      text-decoration: none; padding: 0.42rem 1.25rem;
+      transition: background 0.1s;
+    }
+    .sidebar-nav a:hover { background: var(--surface-hover); color: var(--fg); }
+    .sidebar-nav a.current { font-weight: 600; color: var(--fg); background: var(--surface-active); }
+    .sidebar-nav a.sub { padding-left: 2rem; font-size: 0.78rem; }
+    .sidebar-nav a.child { padding-left: 2rem; }
+    .sidebar-nav a.child-sub { padding-left: 2.85rem; }
+    .sidebar-nav a.sketch { opacity: 0.45; font-size: 0.74rem; }
+
+    .main-wrap {
+      margin-top: var(--header-height);
+      transition: margin-left 0.22s ease;
+    }
+    .shell.sidebar-open .main-wrap { margin-left: var(--sidebar-width); }
+
+    .main-inner { max-width: 1080px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+
+    h1, h2 { color: var(--fg); }
+
+    h1 {
+      font-size: 3rem; font-weight: 300;
+      letter-spacing: -0.03em; margin-bottom: 3.5rem;
+    }
+
+    .monologue {
+      max-width: 640px; margin-bottom: 3.5rem;
+      font-size: 1.22rem; font-weight: 300; line-height: 1.75; font-style: italic;
+      color: var(--fg-muted); letter-spacing: -0.01em;
+    }
+    .monologue p { margin: 0; }
+    .monologue a { color: var(--fg-muted); text-decoration: underline; text-decoration-color: var(--fg-muted); text-underline-offset: 3px; transition: text-decoration-color 0.15s; }
+    .monologue a:hover { text-decoration-color: var(--fg); }
+    .monologue strong { color: var(--fg); font-weight: 500; }
+
+    /* Demo sections */
+    .demo-section { width: 960px; max-width: calc(100% - 1.5rem); margin: 0 0 4rem 1.5rem; }
+    .demo-header { display: flex; align-items: baseline; gap: 1.2rem; margin-bottom: 1rem; }
+    .demo-header h2 { font-size: 1.22rem; font-weight: 500; letter-spacing: -0.01em; }
+    .demo-header a {
+      font-family: var(--font-code); font-size: 0.78rem;
+      color: var(--fg-muted); text-decoration: none;
+      border-bottom: 1px solid var(--border); padding-bottom: 1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .demo-header a:hover { color: var(--fg); border-color: var(--fg); }
+    .demo-embed {
+      width: 960px; height: 620px;
+      max-width: 100%; position: relative;
+      border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+    }
+    .demo-embed iframe {
+      width: 960px; height: 620px; border: none; display: block;
+      transform-origin: top left;
+    }
+    .demo-embed.sq { width: 540px; height: 540px; }
+    .demo-embed.sq iframe { width: 540px; height: 540px; }
+
+    /* Top-level content blocks (not nested in a .demo-section) match the
+       same left indent and bottom rhythm so pages without demos still line up. */
+    .main-inner > .prose { margin-left: 1.5rem; margin-bottom: 4rem; }
+    .main-inner > .demo-embed { margin-left: 1.5rem; margin-bottom: 4rem; }
+
+    /* Prose */
+    .prose {
+      max-width: 800px; margin-top: 2.5rem;
+      font-size: 1rem; line-height: 1.75;
+    }
+    .prose p { margin-bottom: 1.1rem; }
+    .prose em { font-style: italic; }
+    .jp {
+      display: block; font-family: var(--font-jp);
+      font-size: 0.8rem; line-height: 1.9;
+      color: var(--fg-muted);
+      margin-top: 1.1rem; margin-bottom: 1.1rem;
+    }
+    .monologue .jp { font-size: 0.86rem; margin-bottom: 0; }
+    .page-note .jp,
+    .shape-desc .jp,
+    details .jp { font-size: 0.76rem; margin-bottom: 0.8rem; }
+    .prose a {
+      color: var(--link); text-decoration: underline;
+      text-decoration-color: var(--link-underline); text-underline-offset: 3px;
+      transition: text-decoration-color 0.15s;
+    }
+    .prose a:hover { text-decoration-color: var(--link); }
+    .prose .math-block { margin: 1.4rem 0; text-align: left; overflow-x: auto; }
+    .prose .math-block .katex-display { text-align: left; }
+    .prose .math-block .katex-display > .katex { text-align: left; }
+    .page-note {
+      max-width: 800px; margin: 1.5rem 0; padding: 0.9rem 1.1rem;
+      border-left: 3px solid var(--border);
+      font-size: 0.82rem; line-height: 1.6; color: var(--fg-muted);
+    }
+    .page-note a { color: var(--fg-muted); text-decoration: underline; }
+    .page-note strong { color: var(--fg); font-weight: 500; }
+    .page-note p:last-child { margin-bottom: 0; }
+    .page-note .math-block { margin: 1rem 0; }
+    .prose h3 {
+      font-size: 0.92rem; font-weight: 600; letter-spacing: -0.005em;
+      margin-top: 2rem; margin-bottom: 0.6rem;
+    }
+    .prose h2 {
+      font-size: 1rem; font-weight: 600; letter-spacing: -0.01em;
+      margin-top: 2.5rem; margin-bottom: 0.8rem;
+    }
+    .prose .subhead {
+      font-family: 'Sora', sans-serif; font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-muted);
+      margin-top: 2rem; margin-bottom: 0.6rem;
+    }
+    .prose ul { list-style: disc; padding-left: 1.4rem; }
+    .prose ul li { margin-bottom: 0.4rem; }
+    .prose ol { list-style: decimal; padding-left: 1.4rem; }
+    .prose ol li { margin-bottom: 0.4rem; }
+    .prose .shape-desc p,
+    .prose .shape-desc li { font-size: 0.82rem; line-height: 1.6; color: var(--fg-muted); }
+    .prose .shape-desc strong,
+    .prose details strong { color: var(--fg); font-weight: 500; }
+    .prose > details { margin-top: 1rem; }
+    .prose details p,
+    .prose details h3,
+    .prose details strong { font-size: 0.82rem; line-height: 1.6; }
+    .prose details p { color: var(--fg-muted); }
+    .prose details h3 { color: var(--fg); font-weight: 500; }
+    .prose > details > summary {
+      display: inline-block; list-style: none; cursor: pointer;
+      font-family: 'Sora', sans-serif; font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-muted); opacity: 0.6;
+      padding: 0.2rem 0;
+    }
+    .prose > details > summary::-webkit-details-marker { display: none; }
+    .prose > details > summary::marker { display: none; }
+    .prose > details > summary::before { content: '▸\00a0'; font-size: 0.7rem; }
+    .prose > details[open] > summary::before { content: '▾\00a0'; }
+    .prose > details[open] > summary { opacity: 1; margin-bottom: 1rem; }
+    .prose code {
+      font-family: var(--font-code); font-size: 0.88em;
+      background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 3px;
+    }
+
+    /* ── Heading anchor links ─────────────────────────────────────────── */
+    .prose h2,
+    .prose h3,
+    .demo-header h2 {
+      position: relative;
+    }
+    .anchor-copy-btn {
+      position: absolute;
+      left: -1.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.5rem;
+      height: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      color: var(--fg-muted);
+      transition: opacity 0.15s;
+    }
+    .anchor-copy-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ── Page footer ──────────────────────────────────────────────────── */
+    .page-footer {
+      margin-top: 4rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .footer-row {
+      display: flex; align-items: baseline; flex-wrap: wrap;
+      gap: 0.75rem 1.5rem; margin-bottom: 1.5rem;
+    }
+    .next-page {
+      font-family: 'Sora', sans-serif; font-size: 0.85rem; font-weight: 500;
+      color: var(--fg); text-decoration: none;
+    }
+    .next-page:hover { text-decoration: underline; }
+    .site-footer {
+      display: flex; flex-wrap: wrap; gap: 1.25rem;
+      margin-left: auto;
+      font-family: var(--font-body); font-size: 0.8rem;
+    }
+    .footer-license {
+      max-width: 700px;
+      font-family: var(--font-body); font-size: 0.75rem; line-height: 1.6;
+      color: var(--fg-muted);
+    }
+    .footer-license a { color: var(--fg-muted); text-decoration: underline; }
+    .footer-license a:hover { color: var(--fg); }
+    .site-footer a { color: var(--fg-muted); text-decoration: none; transition: color 0.15s; }
+    .site-footer a:hover { color: var(--fg); }
+
+    @media (max-width: 768px) {
+      .shell.sidebar-open .main-wrap { margin-left: 0; }
+      .main-inner { padding: 1.5rem 1.25rem 3rem; }
+      h1 { font-size: 2rem; }
+      .prose { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-controls topbar-controls-left">
+      <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+          <line x1="0" y1="1" x2="18" y2="1"/>
+          <line x1="0" y1="7" x2="18" y2="7"/>
+          <line x1="0" y1="13" x2="18" y2="13"/>
+        </svg>
+      </button>
+    </div>
+    <div class="topbar-controls topbar-controls-right">
+      <div class="topbar-font-switcher">
+        <button class="font-opt" id="font-btn-serif" style="font-family:'Lora',serif">Serif</button>
+        <span class="font-sep">|</span>
+        <button class="font-opt" id="font-btn-sans" style="font-family:'Sora',sans-serif">Sans</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell" id="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <nav class="sidebar" aria-label="Site navigation">
+      <ul class="sidebar-nav">
+        {renderItems.map(({ item, depth }) => (
+          <>
+            <li>
+              <a
+                href={item.href}
+                class={[
+                  depth > 0 ? 'child' : '',
+                  item.slug === slug ? 'current' : '',
+                  item.sketch ? 'sketch' : '',
+                ].filter(Boolean).join(' ') || undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+            {item.slug === slug && item.subLinks && item.subLinks.map(sub => (
+              <li><a href={sub.href} class={depth > 0 ? 'sub child-sub' : 'sub'}>{sub.label}</a></li>
+            ))}
+          </>
+        ))}
+      </ul>
+    </nav>
+
+    <main class="main-wrap">
+      <div class="main-inner">
+        <h1>{title}</h1>
+        <slot />
+        {isPublic && (
+          <footer class="page-footer">
+            <div class="footer-row">
+              {nextItem && <a class="next-page" href={nextItem.href}>Next: {nextItem.label} →</a>}
+              <div class="site-footer">
+                <a href={`${base}/`}>Draw</a>
+                <a href="https://www.kynd.info/" target="_blank" rel="noopener">kynd.info</a>
+              </div>
+            </div>
+            <div class="footer-license">
+              Code and writing: <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a> — Kenichi Yoneda (Kynd).
+            </div>
+          </footer>
+        )}
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const shell     = document.getElementById('app-shell')!;
+    const toggleBtn = document.getElementById('sidebar-toggle')!;
+    const backdrop  = document.getElementById('sidebar-backdrop')!;
+
+    const isMobile = () => window.innerWidth <= 768;
+
+    // Scale fixed-size demo iframes to fit their container on narrow screens
+    function scaleDemoEmbeds() {
+      document.querySelectorAll<HTMLElement>('.demo-embed').forEach(wrap => {
+        const iframe = wrap.querySelector<HTMLIFrameElement>('iframe');
+        if (!iframe) return;
+        const w = parseInt(wrap.dataset.w ?? '960');
+        const h = parseInt(wrap.dataset.h ?? '620');
+        const scale = Math.min(1, wrap.clientWidth / w);
+        iframe.style.transform = scale < 1 ? `scale(${scale})` : '';
+        wrap.style.height      = scale < 1 ? `${Math.round(h * scale)}px` : '';
+      });
+    }
+    window.addEventListener('resize', scaleDemoEmbeds);
+    // Run after layout settles
+    requestAnimationFrame(scaleDemoEmbeds);
+
+    function applyOpen(open: boolean) {
+      shell.classList.toggle('sidebar-open', open);
+      localStorage.setItem('sidebar-open', String(open));
+      // Re-scale iframes after sidebar transition completes
+      setTimeout(scaleDemoEmbeds, 250);
+    }
+    shell.classList.add('no-transition');
+    // On mobile, default to closed regardless of stored state
+    const storedOpen = localStorage.getItem('sidebar-open') === 'true';
+    applyOpen(isMobile() ? false : storedOpen);
+    requestAnimationFrame(() => shell.classList.remove('no-transition'));
+    toggleBtn.addEventListener('click', () => applyOpen(!shell.classList.contains('sidebar-open')));
+    backdrop.addEventListener('click',  () => applyOpen(false));
+
+    const btnSerif = document.getElementById('font-btn-serif')!;
+    const btnSans  = document.getElementById('font-btn-sans')!;
+    function applyFont(mode: string) {
+      document.documentElement.setAttribute('data-font', mode);
+      localStorage.setItem('font-mode', mode);
+      btnSerif.classList.toggle('active', mode === 'serif');
+      btnSans.classList.toggle('active',  mode === 'sans');
+    }
+    applyFont(localStorage.getItem('font-mode') || 'serif');
+    btnSerif.addEventListener('click', () => applyFont('serif'));
+    btnSans.addEventListener('click',  () => applyFont('sans'));
+  </script>
+  <script>
+    (function () {
+      const LINK_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+
+      function copyLink(url: string) {
+        navigator.clipboard.writeText(url).catch(() => {
+          const ta = document.createElement('textarea');
+          ta.value = url;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        });
+      }
+
+      function makeBtn(url: string): HTMLButtonElement {
+        const btn = document.createElement('button');
+        btn.className = 'anchor-copy-btn';
+        btn.setAttribute('aria-label', 'Copy link to section');
+        btn.innerHTML = LINK_ICON;
+        btn.addEventListener('click', (e: MouseEvent) => { e.preventDefault(); copyLink(url); });
+        return btn;
+      }
+
+      function wireHover(heading: HTMLElement, btn: HTMLButtonElement) {
+        let hideTimer: ReturnType<typeof setTimeout> | null = null;
+        function show() {
+          if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+          btn.classList.add('visible');
+        }
+        function scheduleHide() {
+          hideTimer = setTimeout(() => { btn.classList.remove('visible'); hideTimer = null; }, 200);
+        }
+        heading.addEventListener('mouseenter', show);
+        heading.addEventListener('mouseleave', scheduleHide);
+        btn.addEventListener('mouseenter', show);
+        btn.addEventListener('mouseleave', scheduleHide);
+      }
+
+      function slugify(text: string): string {
+        return text.trim().toLowerCase()
+          .replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/^-+|-+$/g, '');
+      }
+      const seen: Record<string, number> = {};
+      function uniqueId(base: string): string {
+        if (!base) base = 'section';
+        if (!seen[base]) { seen[base] = 1; return base; }
+        seen[base]++;
+        return base + '-' + seen[base];
+      }
+
+      // Prose headings: auto-generate IDs from text content
+      document.querySelectorAll<HTMLElement>('.prose h2, .prose h3').forEach(heading => {
+        const id = uniqueId(slugify(heading.textContent || ''));
+        heading.id = id;
+        const url = window.location.origin + window.location.pathname + '#' + id;
+        const btn = makeBtn(url);
+        heading.prepend(btn);
+        wireHover(heading, btn);
+      });
+
+      // Demo section headers: link to parent section's existing ID
+      document.querySelectorAll<HTMLElement>('.demo-header h2').forEach(heading => {
+        const section = heading.closest<HTMLElement>('section[id]');
+        if (!section) return;
+        const url = window.location.origin + window.location.pathname + '#' + section.id;
+        const btn = makeBtn(url);
+        heading.prepend(btn);
+        wireHover(heading, btn);
+      });
+    })();
+  </script>
+</body>
+</html>

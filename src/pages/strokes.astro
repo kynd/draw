@@ -1,0 +1,84 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Strokes" slug="strokes">
+  <div class="monologue">
+    A stroke class that turns a path and a width into drawable geometry
+  </div>
+
+  <section class="demo-section" id="basic-strokes">
+    <div class="demo-header">
+      <h2>Basic strokes</h2>
+      <a href={`${base}/demos/strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/strokes/index.html?embedded`} title="Basic strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Three strokes run the same path and differ only in how they end (rounded, square, ragged from top to bottom). <strong>Density</strong> sets how many spine samples the renderer takes per unit of arc length and <strong>Width</strong> scales all three strokes. <strong>Wireframe</strong> shows the triangles produced and <strong>Spine</strong> marks the resampled center line. <strong>Randomize colors</strong> generates a new palette and draws the background and the three strokes from it. <strong>Geometry</strong> opens a per-stroke count.</p>
+      <div class="jp">3本のストロークは同じパスをたどり、終端の処理だけが異なります（上から順にrounded、square、ragged）。<strong>Density</strong>はレンダラが弧長1単位あたりに取るスパインのサンプル数を決め、<strong>Width</strong>は3本すべての太さを変えます。<strong>Wireframe</strong>は生成された三角形を、<strong>Spine</strong>は再サンプリングされた中心線を表示します。<strong>Randomize colors</strong>は新しいパレットを生成し、背景と3本のストロークの色をそこから選びます。<strong>Geometry</strong>を開くとストロークごとの数値が表示されます。</div>
+
+      <p>The classes are documented on <a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a> and <a href={`${base}/documentation/renderers`}>Renderers</a>.</p>
+      <div class="jp">各クラスについては<a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a>と<a href={`${base}/documentation/renderers`}>Renderers</a>に記載しています。</div>
+
+      <h2>Cap styles</h2>
+      <p>The three strokes share one renderer class and one ribbon build. Only the ending differs, which is why the cap is an option rather than three separate renderers.</p>
+      <div class="jp">3本のストロークは、ひとつのレンダラクラスとひとつのリボン生成処理を共有しています。異なるのは終端だけであり、だからこそ端の処理は3つの別々のレンダラではなくオプションになっています。</div>
+
+      <div class="page-note">
+        <ul>
+          <li><strong>Square</strong> adds no geometry. The ribbon stops at its last sample.<br /><span class="jp">ジオメトリを追加しません。リボンは最後のサンプルで終わります。</span></li>
+          <li><strong>Rounded</strong> sweeps a triangle fan from the left edge, round through the outward tangent, to the right edge.<br /><span class="jp">左端から外向きの接線を通って右端まで、トライアングルファンを掃引します。</span></li>
+          <li><strong>Ragged</strong> pushes a strip of spikes past the end at varying depths.<br /><span class="jp">終端の先へ、深さの異なるスパイクの帯を押し出します。</span></li>
+        </ul>
+      </div>
+
+      <p>The ragged depths come from two sine samples rather than a random call, seeded per stroke. The same seed always tears the same way, so changing the density or the colors redraws the identical end.</p>
+      <div class="jp">raggedの深さは乱数ではなく2つの正弦波のサンプルから求められ、ストロークごとにシードが与えられます。同じシードからは常に同じ裂け方が得られるため、Densityや色を変えても終端は同じ形で描き直されます。</div>
+
+      <p>Open Geometry and raise Width. The square stroke keeps its triangle count, and the rounded stroke gains triangles, because a rounded cap takes its arc resolution from its own radius rather than from a fixed number.</p>
+      <div class="jp">Geometryを開いてWidthを上げてみてください。squareのストロークは三角形の数が変わらず、roundedのストロークは増えます。roundedの端点は、固定の分割数ではなく自身の半径から円弧の解像度を決めるからです。</div>
+
+      <h2>The buffer is the canvas</h2>
+      <p>The strokes are not drawn to the screen. They are drawn into a <code>CanvasBuffer</code>, an offscreen render target with its own scene and orthographic camera, which is then blitted to the visible canvas in one pass.</p>
+      <div class="jp">ストロークは画面に直接描かれるのではありません。<code>CanvasBuffer</code>、つまり独自のシーンと正射影カメラを持つオフスクリーンのレンダーターゲットに描かれ、それが1パスで可視のキャンバスに転送されます。</div>
+
+      <p>The drawing exists as a texture, so later stages can read what has been drawn rather than only what is being drawn. Setting <code>autoClear</code> to false turns the buffer into an accumulating surface, where each frame's strokes are laid over what is already there.</p>
+      <div class="jp">描画結果はテクスチャとして存在するため、後段の処理は「今描いているもの」だけでなく「すでに描かれたもの」を読めます。<code>autoClear</code>をfalseにすると、バッファは蓄積する面になり、各フレームのストロークがすでにそこにあるものの上に重ねられます。</div>
+
+      <p>Antialiasing comes from the target's sample count, not from the renderer's own <code>antialias</code> flag. That flag covers the default framebuffer, which never receives geometry here.</p>
+      <div class="jp">アンチエイリアスは、レンダラ自身の<code>antialias</code>フラグではなく、レンダーターゲットのサンプル数によって得られます。このフラグが対象とするのは既定のフレームバッファであり、ここではそこにジオメトリが描かれることはありません。</div>
+
+      <h2>Depth</h2>
+      <p>The strokes are 2D. They move in X and Y, and their Z sits just above the paper. Z is not constant: each stroke starts at a base depth stepped by its index and rises slightly along its own length.</p>
+      <div class="jp">ストロークは2Dです。XとYの中で動き、Zは紙のすぐ上にあります。ただしZは一定ではありません。各ストロークはインデックスに応じて段階的にずらした基準の深度から始まり、自身の長さに沿ってわずかに上昇します。</div>
+
+      <p>Two surfaces at the same depth have no defined winner, and the depth test picks one per fragment. The step and the rise remove that question before it can be asked, which matters as soon as strokes overlap or the fill stops being opaque.</p>
+      <div class="jp">同じ深度にある2つの面には定まった勝者がなく、深度テストはフラグメントごとにどちらかを選びます。段差と上昇は、その問いが生じる前に答えを確定させます。これは、ストロークが重なったり、塗りが不透明でなくなったりした時点で重要になります。</div>
+
+      <p>The renderer must not mistake this for shape. If the ramped Z were fed into the tangent used to build the ribbon's frame, the mark would twist out of the plane by exactly the amount the ordering needed, so framing drops the tangent's Z.</p>
+      <div class="jp">レンダラはこれを形状と取り違えてはなりません。傾斜のついたZをリボンのフレームを作る接線に渡してしまうと、線は順序付けに必要だった分だけ平面から捻れてしまいます。そのため、フレームの構築では接線のZ成分を捨てます。</div>
+
+      <div class="page-note">
+        <p>The camera is orthographic, so depth is linear and offsets of a few thousandths resolve exactly. Under a perspective camera the same offsets would compete with the depth buffer's non-linear precision, and the ordering would stop being reliable at some distances.</p>
+        <span class="jp">カメラは正射影なので深度は線形で、1000分の数程度のオフセットも正確に解決されます。透視投影カメラでは、同じオフセットが深度バッファの非線形な精度と競合し、距離によっては順序が保証されなくなります。</span>
+      </div>
+
+      <h2>Sampling</h2>
+      <p>Turn Density down and the wireframe coarsens evenly along the whole mark. The sample count is derived from measured arc length, not from how many control points the path was authored with. Sixty-four control points and six hundred produce the same geometry if they trace the same curve.</p>
+      <div class="jp">Densityを下げると、ワイヤーフレームは線全体にわたって一様に粗くなります。サンプル数は、パスが何個の制御点で書かれたかではなく、実測した弧長から導かれます。同じ曲線をなぞるなら、制御点が64個でも600個でも、同じジオメトリになります。</div>
+
+      <p>Sampling is spaced by arc length rather than by curve parameter, so density stays uniform where control points bunch up. Turn on Spine to see the markers stay evenly spread through the turns.</p>
+      <div class="jp">サンプリングは曲線パラメータではなく弧長で等間隔に行うため、制御点が密集する箇所でも密度は一様に保たれます。Spineを表示すると、曲がりの部分でもマーカーが均等に散らばったままであることが分かります。</div>
+
+      <h2>Color</h2>
+      <p>The colors come from the same <a href={`${base}/documentation/palette`}>Palette</a> class the palette maker uses. Randomize generates a palette from four random hues, takes the background from the light end, and gives each stroke a color from a different hue at the dark end.</p>
+      <div class="jp">色は、Palette makerで使っているものと同じ<a href={`${base}/documentation/palette`}>Palette</a>クラスから取得します。Randomizeは4つのランダムな色相からパレットを生成し、背景を明るい側から、各ストロークの色を暗い側の異なる色相から選びます。</div>
+
+      <p>Grouping by hue before picking is what keeps the three strokes apart. Drawing three entries from the dark end at random returns two near-identical shades of one hue often enough to notice.</p>
+      <div class="jp">選ぶ前に色相ごとにまとめておくことが、3本のストロークを互いに区別させています。暗い側から3つを無作為に取ると、ひとつの色相のほぼ同じ濃淡が2つ返ってくることが、目につく程度の頻度で起こります。</div>
+    </div>
+  </section>
+</PageLayout>

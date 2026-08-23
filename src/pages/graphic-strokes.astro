@@ -1,0 +1,52 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Graphic strokes" slug="graphic-strokes">
+  <div class="monologue">
+    Stroke renderers that replace the ribbon with another kind of geometry
+  </div>
+
+  <section class="demo-section" id="other-geometry">
+    <div class="demo-header">
+      <h2>Other geometry</h2>
+      <a href={`${base}/demos/graphic-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/graphic-strokes/index.html?embedded`} title="Other geometry" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p><strong>Cell</strong> and <strong>Drop</strong> control the pixel grid, <strong>Count</strong> and <strong>Jitter</strong> the facets, and <strong>Count</strong> and <strong>Fill</strong> the lanes. All three draw their colors from one generated palette.</p>
+      <div class="jp"><strong>Cell</strong>と<strong>Drop</strong>はピクセルのグリッドを、<strong>Count</strong>と<strong>Jitter</strong>は多角形を、<strong>Count</strong>と<strong>Fill</strong>は平行線を調整します。3つとも、ひとつのパレットから色を取ります。</div>
+
+      <p>These renderers keep the path, the width and the resampling and throw away the ribbon. Everything on <a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a> still applies: the same StrokeDef drives all three, and swapping the renderer is the only change.</p>
+      <div class="jp">これらのレンダラは、パス、幅、再サンプリングを保ったまま、リボンだけを捨てます。<a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a>の内容はそのまま当てはまります。同じStrokeDefが3つすべてを駆動し、変わるのはレンダラだけです。</div>
+
+      <h2>Pixels</h2>
+      <p>Cells are stamped from the spine outward rather than tested from a grid inward. A grid over the bounding box would test far more empty cells than filled ones for a thin diagonal mark. A Set keyed by grid coordinate keeps overlapping stamps from emitting a cell twice.</p>
+      <div class="jp">セルは、グリッド側から内向きに判定するのではなく、スパインから外向きにスタンプされます。細い斜めの線では、バウンディングボックス全体を走査すると、埋まるセルよりも空のセルのほうがはるかに多くなります。グリッド座標をキーにしたSetが、重なったスタンプが同じセルを二度出力するのを防ぎます。</div>
+
+      <p>The inside test uses the signed distance across the spine, so a stroke with different left and right widths keeps that asymmetry in its cells.</p>
+      <div class="jp">内外の判定にはスパインを挟んだ符号付きの距離を使うため、左右の幅が異なるストロークは、その非対称さをセルにも保ちます。</div>
+
+      <h2>Facets</h2>
+      <p>The spine is resampled far more coarsely than a smooth ribbon would need, and each triangle takes one flat color, so the facets stay legible as facets.</p>
+      <div class="jp">スパインは、滑らかなリボンに必要な密度よりもはるかに粗く再サンプリングされ、各三角形は単色を取ります。そのため面は面として読めるまま残ります。</div>
+
+      <p>Vertices are jittered across the width. That is what stops the result reading as a low-resolution ribbon: the silhouette has to break, not just the shading.</p>
+      <div class="jp">頂点は幅方向にばらつかされます。これがあるからこそ、結果が低解像度のリボンに見えずに済みます。崩れる必要があるのは陰影だけでなく、輪郭のほうです。</div>
+
+      <h2>Lanes</h2>
+      <p>Each lane is its own thin ribbon offset across the width, so the lanes follow the curve. Clipping gaps out of a solid mark would leave them running straight while the stroke turned.</p>
+      <div class="jp">各レーンは幅方向にずらされた独自の細いリボンなので、レーンは曲線に沿って進みます。塗りつぶした線から隙間を切り抜く方式では、ストロークが曲がっても隙間はまっすぐ走ったままになります。</div>
+
+      <h2>Repeatable randomness</h2>
+      <p>All three place colors and drop cells with a seeded generator rather than <code>Math.random</code>. A drawing that looks random has to redraw identically, or a change to one control could never be compared against the frame before it.</p>
+      <div class="jp">3つとも、色の配置やセルの間引きに <code>Math.random</code> ではなくシード付きの生成器を使います。ランダムに見える絵は、同じ結果で描き直せなければなりません。そうでなければ、あるコントロールを変えた結果を直前のフレームと比べることができません。</div>
+
+      <p>The classes are documented on <a href={`${base}/documentation/renderers`}>Renderers</a>.</p>
+      <div class="jp">各クラスについては<a href={`${base}/documentation/renderers`}>Renderers</a>に記載しています。</div>
+    </div>
+  </section>
+</PageLayout>

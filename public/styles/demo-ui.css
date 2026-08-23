@@ -1,0 +1,220 @@
+/*
+ * draw — shared demo UI components.
+ *
+ * Every demo page links this file and builds its controls from these classes. Anything
+ * that applies to more than one demo belongs here, not in a per-demo <style> block.
+ * Per-demo CSS is for that demo's own stage only (grid shapes, specialty canvases).
+ *
+ * Layout is always: stage on the left, a narrow control panel on the right.
+ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --demo-bg:      #ffffff;
+  --demo-fg:      #111111;
+  --demo-muted:   #7a7a7a;
+  --demo-line:    #e3e3e3;
+  --demo-line-sub:#f0f0f0;
+  --demo-hover:   #f0f0f0;
+  --panel-width:  240px;
+  --font-ui:      'Sora', sans-serif;
+  --font-mono:    'Google Sans Code', ui-monospace, monospace;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--demo-bg);
+  color: var(--demo-fg);
+  font-family: var(--font-ui);
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+
+/*
+ * Full size the layout fills the window. Embedded it is pinned to the size the
+ * page's iframe reserves; `Viewport` adds `.embedded` when the URL says so.
+ */
+.demo-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100vw; height: 100vh;
+}
+.demo-layout.embedded { width: 960px; height: 620px; }
+
+.canvas-wrap {
+  flex: 1 1 auto;
+  position: relative;
+  min-width: 0;
+  background: var(--demo-bg);
+  overflow: hidden;
+}
+.canvas-wrap > canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+
+/* ── Panel ───────────────────────────────────────────────────────────────── */
+
+.dp-panel {
+  width: var(--panel-width);
+  flex: none;
+  background: var(--demo-bg);
+  border-left: 1px solid var(--demo-line);
+  padding: 12px 14px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.dp-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 7px;
+}
+.dp-title {
+  font-family: var(--font-ui);
+  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.2px;
+  color: var(--demo-fg);
+}
+.dp-note {
+  font-family: var(--font-ui);
+  font-size: 0.54rem; line-height: 1.5; color: var(--demo-muted);
+  margin-bottom: 8px;
+}
+
+.dp-divider { border: none; border-top: 1px solid var(--demo-line); margin: 10px 0; }
+.dp-sub-divider { border: none; border-top: 1px solid var(--demo-line-sub); margin: 8px 0; }
+
+.dp-label + .dp-row { margin-top: 5px; }
+
+.dp-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 5px;
+}
+.dp-label {
+  font-family: var(--font-ui);
+  font-size: 0.58rem; font-weight: 400; color: var(--demo-fg);
+  min-width: 52px; flex-shrink: 0;
+}
+.dp-sub-label {
+  font-family: var(--font-ui);
+  font-size: 0.52rem; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--demo-muted);
+  margin: 10px 0 5px;
+}
+
+/* Range slider */
+.dp-range {
+  flex: 1; min-width: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  height: 2px; background: #dddddd; outline: none;
+}
+.dp-range::-webkit-slider-runnable-track { height: 2px; background: #dddddd; }
+.dp-range::-webkit-slider-thumb {
+  -webkit-appearance: none; margin-top: -3.5px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--demo-fg); cursor: pointer;
+}
+.dp-range::-moz-range-track { height: 2px; background: #dddddd; }
+.dp-range::-moz-range-thumb {
+  width: 9px; height: 9px; border: none; border-radius: 50%;
+  background: var(--demo-fg); cursor: pointer;
+}
+
+/* Read-only numeric value beside a slider */
+.dp-val {
+  font-family: var(--font-mono); font-size: 0.54rem;
+  color: var(--demo-muted);
+  width: 32px; text-align: right; flex-shrink: 0;
+}
+
+/* Select */
+.dp-select {
+  font-family: var(--font-ui); font-size: 0.58rem; font-weight: 500;
+  border: 1px solid #cccccc; background: var(--demo-bg);
+  padding: 3px 5px; width: 100%; cursor: pointer; color: var(--demo-fg);
+}
+
+/* Buttons */
+.dp-btn {
+  flex: 1;
+  font-family: var(--font-ui); font-size: 0.56rem; font-weight: 500;
+  border: 1px solid var(--demo-fg); background: var(--demo-fg); color: #ffffff;
+  padding: 5px 8px; cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.dp-btn:hover { background: #333333; border-color: #333333; }
+.dp-btn.secondary { background: transparent; color: var(--demo-fg); }
+.dp-btn.secondary:hover { background: var(--demo-hover); }
+.dp-btn.active { background: var(--demo-fg); color: #ffffff; border-color: var(--demo-fg); }
+.dp-btn-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.dp-btn-row:last-child { margin-bottom: 0; }
+
+/* Toggle button — ghost until on */
+.dp-toggle {
+  flex: 1;
+  font-family: var(--font-ui); font-size: 0.56rem; font-weight: 400;
+  border: 1px solid var(--demo-line); background: transparent; color: var(--demo-muted);
+  padding: 5px 8px; cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.dp-toggle:hover:not(.active) { background: var(--demo-hover); color: var(--demo-fg); }
+.dp-toggle.active { background: var(--demo-fg); border-color: var(--demo-fg); color: #ffffff; }
+
+/* Collapsible section */
+.dp-section-hd {
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer; user-select: none;
+  margin-bottom: 7px;
+}
+.dp-section-hd:hover .dp-title { color: var(--demo-muted); }
+.dp-chevron {
+  width: 0; height: 0;
+  border-left: 4px solid currentColor;
+  border-top: 3.5px solid transparent;
+  border-bottom: 3.5px solid transparent;
+  color: var(--demo-muted);
+  transform: rotate(90deg);
+  transition: transform 0.15s;
+}
+.dp-section.collapsed .dp-chevron { transform: rotate(0deg); }
+.dp-section-body {
+  overflow: hidden;
+  max-height: 1200px;
+  transition: max-height 0.2s ease;
+}
+.dp-section.collapsed .dp-section-body { max-height: 0; }
+.dp-section.collapsed .dp-section-hd { margin-bottom: 0; }
+
+/* Stats readout, shown at the foot of a panel */
+.dp-stats {
+  font-family: var(--font-mono); font-size: 0.54rem; line-height: 1.7;
+  color: var(--demo-muted);
+}
+.dp-stats strong { color: var(--demo-fg); font-weight: 500; }
+.dp-stats span { display: flex; justify-content: space-between; gap: 8px; }
+.dp-stats + .dp-sub-label { margin-top: 8px; }
+
+/* Transient confirmation, centred over the stage */
+.dp-toast {
+  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: 0.6rem;
+  background: var(--demo-fg); color: #ffffff;
+  padding: 4px 10px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.18s;
+}
+.dp-toast.visible { opacity: 1; }
+
+/* Hue ring canvas in a panel */
+.dp-ring {
+  display: block;
+  width: 100%; max-width: 180px; height: auto;
+  margin: 2px auto 7px;
+  cursor: grab;
+  touch-action: none;
+}
+.dp-ring:active { cursor: grabbing; }
