@@ -2,7 +2,7 @@
 
 A working log for building a drawing tool, and the library it documents.
 
-Live at **https://kynd.github.io/draw/**
+Live at **https://www.kynd.info/draw/**
 
 The site is both the documentation and the evidence: every page is a thin harness over
 shared library code, so what the writing claims can be checked against what the demo

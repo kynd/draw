@@ -3,7 +3,7 @@ import mdx from '@astrojs/mdx';
 
 export default defineConfig({
   integrations: [mdx()],
-  site: 'https://kynd.github.io',
+  site: 'https://www.kynd.info',
   base: '/draw',
   output: 'static',
   build: {
