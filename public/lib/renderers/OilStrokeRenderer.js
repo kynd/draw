@@ -25,12 +25,12 @@ export class OilStrokeRenderer extends HeightFieldStrokeRenderer {
         color = '#803020',
         background = null,
         drag = 60,
-        paint = 0.85,
+        paint = 0.95,
         gloss = 0.4,
         shininess = 48,
-        noise = 0.45,
-        stretch = 2.0,
-        across = 4.0,
+        noise = 0.5,
+        stretch = 0.9,
+        across = 2.0,
         dome = 0.8,
         ...rest
     } = {}) {
@@ -87,7 +87,7 @@ export class OilStrokeRenderer extends HeightFieldStrokeRenderer {
 
                 // Paint dominates. The dragged background survives only in the
                 // crevices, where the layer is thinnest.
-                float coat = clamp(uPaint * (0.88 + 0.18 * lane) - 0.15 * (1.0 - clamp(height, 0.0, 1.0)), 0.0, 1.0);
+                float coat = clamp(uPaint * (0.94 + 0.08 * lane) - 0.10 * (1.0 - clamp(height, 0.0, 1.0)), 0.0, 1.0);
                 vec3 pigment = mix(dragged, uColor, coat);
 
                 vec3 light = normalize(vec3(-0.4, 0.75, 0.55));
