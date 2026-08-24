@@ -20,6 +20,7 @@ Each major class, or each group of closely related classes, gets its own page. B
 <ul>
 <li><a href="/draw/documentation/stroke-definition"><strong>Stroke Definition</strong></a> — <code>StrokeDef</code>: the points, the width model, and the renderer reference.<br /><span class="jp"><code>StrokeDef</code>。点の配列、幅のモデル、そしてレンダラへの参照。</span></li>
 <li><a href="/draw/documentation/renderers"><strong>Renderers</strong></a> — the contract every stroke renderer honours, and <code>RibbonStrokeRenderer</code>.<br /><span class="jp">すべてのストロークレンダラが従う契約と、<code>RibbonStrokeRenderer</code>。</span></li>
+<li><a href="/draw/documentation/path-effects"><strong>Path Effects</strong></a> — generators that derive new paths from a base path.<br /><span class="jp">元のパスから新しいパスを導く生成器。</span></li>
 <li><a href="/draw/documentation/palette"><strong>Palette</strong></a> — OKLCH palette generation and selection.<br /><span class="jp">OKLCHによるパレットの生成と選択。</span></li>
 <li><a href="/draw/documentation/writing-style"><strong>Writing Style</strong></a> — the conventions every explanation on this site follows.<br /><span class="jp">このサイトのすべての説明が従う規約。</span></li>
 </ul>

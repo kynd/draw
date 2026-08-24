@@ -40,7 +40,9 @@ const navItems: NavItem[] = [
   },
   { label: 'More strokes', href: `${base}/more-strokes`, slug: 'more-strokes',
     subLinks: [
-      { label: 'Pencil strokes', href: '#pencil-strokes' },
+      { label: 'Dry media strokes', href: '#dry-strokes' },
+      { label: 'Around strokes',    href: '#around-strokes' },
+      { label: 'Shadow strokes',    href: '#shadow-strokes' },
     ]
   },
   { label: 'Documentation', href: `${base}/documentation`, slug: 'documentation',
@@ -60,11 +62,20 @@ const navItems: NavItem[] = [
           { label: 'Square, rounded, ragged',  href: '#square-rounded-ragged' },
           { label: 'ShaderStrokeRenderer',     href: '#shaderstrokerenderer' },
           { label: 'BrushStrokeRenderer',      href: '#brushstrokerenderer' },
-          { label: 'PencilStrokeRenderer',     href: '#pencilstrokerenderer' },
+          { label: 'DryMediaStrokeRenderer',   href: '#drymediastrokerenderer' },
+          { label: 'HaloStrokeRenderer',       href: '#halostrokerenderer' },
+          { label: 'EmbossStrokeRenderer',     href: '#embossstrokerenderer' },
           { label: 'Background samplers',      href: '#background-samplers' },
           { label: 'Height field materials',   href: '#height-field-materials' },
           { label: 'OilStrokeRenderer',        href: '#oilstrokerenderer' },
           { label: 'Geometry renderers',       href: '#geometry-renderers' },
+        ]
+      },
+      { label: 'Path Effects', href: `${base}/documentation/path-effects`, slug: 'documentation/path-effects',
+        subLinks: [
+          { label: 'spiralPath',     href: '#spiralpath' },
+          { label: 'entangledPaths', href: '#entangledpaths' },
+          { label: 'scatteredPaths', href: '#scatteredpaths' },
         ]
       },
       { label: 'Palette', href: `${base}/documentation/palette`, slug: 'documentation/palette',

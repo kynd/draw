@@ -171,10 +171,23 @@ One noise field draws the bristles, pushes the edge, and decides which pigment s
 </ul>
 </div>
 
-## PencilStrokeRenderer
+## DryMediaStrokeRenderer
 
-A thin grainy line. Paper tooth is a screen-space noise, because it belongs to the paper rather than to the stroke, and coverage is the tooth thresholded, so a light line breaks into speckle instead of fading evenly. A low-frequency `pressure` noise along the stroke scales both the darkness and the drawn width. Takes `color`, `grain`, and `pressure`.
-<div class="jp">細く粒子の粗い線です。紙の目は画面空間のノイズです。それはストロークではなく紙に属するからです。被覆はその目をしきい値で切ったもので、薄い線は均一に薄れるのではなく、粒に割れて途切れます。線に沿った低周波の`pressure`ノイズが、濃さと描かれる幅の両方を変化させます。`color`、`grain`、`pressure`を受け取ります。</div>
+Pencil, charcoal, and pastel are one renderer at different settings. Paper tooth is a screen-space noise, because it belongs to the paper rather than to the stroke, and coverage is the tooth thresholded, so a light line breaks into speckle instead of fading evenly. A low-frequency `pressure` noise along the stroke scales both the darkness and the drawn width.
+<div class="jp">鉛筆、木炭、パステルは、ひとつのレンダラの設定違いです。紙の目は画面空間のノイズです。それはストロークではなく紙に属するからです。被覆はその目をしきい値で切ったもので、薄い線は均一に薄れるのではなく、粒に割れて途切れます。線に沿った低周波の`pressure`ノイズが、濃さと描かれる幅の両方を変化させます。</div>
+
+What separates the media is scale: `tooth` is in pixels, and `softness` and `edge` set the falloff and the wobble of the boundary. Takes `color`, `grain`, `tooth`, `pressure`, `softness`, `edge`, and `opacity`.
+<div class="jp">画材を分けるのはスケールです。`tooth`はピクセル単位で、`softness`と`edge`が輪郭の減衰と揺らぎを決めます。`color`、`grain`、`tooth`、`pressure`、`softness`、`edge`、`opacity`を受け取ります。</div>
+
+## HaloStrokeRenderer
+
+A soft silhouette of the stroke: full color inside the mark, fading to nothing across a feather that reaches past it. Offset and dark beneath a stroke it is a drop shadow; wide and bright around one, a glow. Takes `color`, `feather`, `opacity`, and `additive`.
+<div class="jp">ストロークの柔らかいシルエットです。線の内側は完全な色で、外へ届く羽状の余白の中で消えていきます。ずらして暗くストロークの下に置けばドロップシャドウに、広く明るくまわりに置けばグローになります。`color`、`feather`、`opacity`、`additive`を受け取ります。</div>
+
+## EmbossStrokeRenderer
+
+A flat fill with an inner shadow. A band inside the boundary is shaded by how its outward direction faces a fixed light: the lit edge lightens toward white and the far edge darkens. The outward direction comes from the stroke frame, so the ends shade the same way the sides do. Takes `color`, `bevel`, `amount`, and `angle`.
+<div class="jp">内側に影を持つ平坦な塗りです。輪郭の内側の帯が、外向きの方向と固定光源の関係によって陰影付けされます。光の側の縁は白へ向かって明るくなり、反対側の縁は暗くなります。外向きの方向はストロークの座標系から求めるため、終端も側面と同じように陰影付けされます。`color`、`bevel`、`amount`、`angle`を受け取ります。</div>
 
 ## Background samplers
 
