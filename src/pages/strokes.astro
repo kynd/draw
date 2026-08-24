@@ -17,8 +17,8 @@ const demos = [
   </div>
 
   <div class="prose">
-    <p>Every demo below draws the same path at the same three positions, so what changes between them is the renderer and nothing else. Each row is rounded, square and ragged from top to bottom.</p>
-    <div class="jp">以下のデモはすべて、同じパスを同じ3つの位置に描いています。デモ間で変わるのはレンダラだけです。各行は上から順にrounded、square、raggedです。</div>
+    <p>Every demo below draws the same path at the same three positions, so the only change between them is the renderer. Each row is rounded, square, and ragged from top to bottom.</p>
+    <div class="jp">以下のデモはすべて、同じパスを同じ3つの位置に描いており、デモ間で変わるのはレンダラだけです。各行は上から順にrounded、square、raggedです。</div>
 
     <p>The classes are documented on <a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a> and <a href={`${base}/documentation/renderers`}>Renderers</a>.</p>
     <div class="jp">各クラスについては<a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a>と<a href={`${base}/documentation/renderers`}>Renderers</a>に記載しています。</div>
@@ -54,18 +54,14 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Cap styles.</strong> The three strokes share one renderer class and one ribbon build. Only the ending differs, which is why the cap is an option rather than three separate renderers. Square adds no geometry and the ribbon stops at its last sample. Rounded sweeps a triangle fan from the left edge, round through the outward tangent, to the right edge. Ragged pushes a strip of spikes past the end at varying depths.</p>
-        <div class="jp"><strong>端点のスタイル。</strong>3本のストロークは、ひとつのレンダラクラスとひとつのリボン生成処理を共有しています。異なるのは終端だけであり、だからこそ端の処理は3つの別々のレンダラではなくオプションになっています。squareはジオメトリを追加せず、リボンは最後のサンプルで終わります。roundedは左端から外向きの接線を通って右端まで、トライアングルファンを掃引します。raggedは終端の先へ、深さの異なるスパイクの帯を押し出します。</div>
+        <p><strong>Cap styles:</strong> All three strokes share one renderer class, with the cap as an option. Square adds no geometry: the ribbon stops at its last sample. Rounded sweeps a triangle fan from the left edge, through the outward tangent, to the right edge. Ragged pushes a strip of spikes past the end at varying depths.</p>
+        <div class="jp"><strong>端点のスタイル：</strong>3本のストロークはひとつのレンダラクラスを共有し、端点はそのオプションです。squareはジオメトリを追加せず、リボンは最後のサンプルで終わります。roundedは左端から外向きの接線を通って右端までトライアングルファンを掃引します。raggedは終端の先へ、深さの異なるスパイクの帯を押し出します。</div>
 
-        <p>The rounded cap interpolates its radius across the sweep instead of drawing a circle. A circle sized to either side would overshoot one edge and cut into the other. The interpolated half-ellipse meets both.</p>
-        <div class="jp">roundedの端点は円を描かず、掃引に沿って半径を補間します。どちらか一方に合わせた円は、片方の端をはみ出し、もう片方を削ってしまいます。補間された半楕円は、その両方に接します。</div>
+        <p><strong>Rounded cap:</strong> Radius interpolates from the left width to the right width across the sweep, so an asymmetric stroke ends in a half-ellipse that meets both edges. Resolution scales with radius.</p>
+        <div class="jp"><strong>roundedの端点：</strong>半径は掃引に沿って左の幅から右の幅へ補間されるため、左右非対称なストロークは両方の端に接する半楕円で終わります。分割数は半径に応じて決まります。</div>
 
-        <p>Cap resolution scales with radius, so a hairline does not pay for triangles it cannot show and a broad mark does not end in a visible polygon. Open Geometry and raise Width: the square stroke keeps its triangle count while the rounded stroke gains triangles.</p>
-        <div class="jp">端点の分割数は半径に応じて増減するため、細い線が見えもしない三角形の代償を払うことはなく、太い線が目に見える多角形で終わることもありません。Geometryを開いてWidthを上げると、squareのストロークは三角形の数が変わらず、roundedは増えます。</div>
-
-        <p>Turn Density down and the wireframe coarsens evenly along the whole mark, and turn on Spine to see the resampled centre line hold its even spacing through the turns.</p>
-        <div class="jp">Densityを下げると、ワイヤーフレームは線全体にわたって一様に粗くなります。Spineを表示すると、再サンプリングされた中心線が曲がりの中でも等間隔を保っているのが分かります。</div>
-
+        <p><strong>Ragged cap:</strong> Spike depths come from two sine samples offset by the stroke's seed, so the same seed always tears the same way.</p>
+        <div class="jp"><strong>raggedの端点：</strong>スパイクの深さはストロークのシードでずらした2つの正弦波のサンプルから求められるため、同じシードからは常に同じ裂け方になります。</div>
       </details>
     </div>
   </section>
@@ -84,14 +80,14 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Shading instead of filling.</strong> The basic renderer fills the ribbon with a color. This one hands the ribbon to a fragment shader and computes a color per pixel, which is what lets the texture follow the mark rather than sit on top of it as a repeating image.</p>
-        <div class="jp"><strong>塗りつぶしではなく陰影付け。</strong>基本のレンダラはリボンを単色で塗りつぶします。こちらはリボンをフラグメントシェーダに渡し、ピクセルごとに色を計算します。そのため、テクスチャは繰り返し画像として上に載るのではなく、線そのものに沿って走ります。</div>
+        <p><strong>Shading:</strong> The ribbon is handed to a fragment shader that computes a color per pixel, so the texture follows the mark instead of repeating on top of it.</p>
+        <div class="jp"><strong>陰影付け：</strong>リボンはフラグメントシェーダに渡され、ピクセルごとに色が計算されます。そのためテクスチャは、上で繰り返されるのではなく、線に沿って走ります。</div>
 
-        <p>One noise field does three jobs. It draws the bristle lanes, it pushes the edge in and out so the mark does not end on a clean curve, and it decides which of the two pigments shows at each point. Using separate fields for each would let the streaks, the edge and the color disagree, and the mark would stop reading as one gesture.</p>
-        <div class="jp">ひとつのノイズが3つの役割を果たします。毛の筋を描き、輪郭を内外に押して線がきれいな曲線で終わらないようにし、各点でどちらの顔料が表に出るかを決めます。それぞれに別のノイズを使うと、筋と輪郭と色が食い違い、線はひとつの身振りとして読めなくなります。</div>
+        <p><strong>Bristle noise:</strong> One noise field draws the bristle lanes, erodes the edge, and decides which pigment shows at each point.</p>
+        <div class="jp"><strong>毛のノイズ：</strong>ひとつのノイズが、毛の筋を描き、輪郭を削り、各点でどちらの顔料が表に出るかを決めます。</div>
 
-        <p><strong>Two colors on one brush.</strong> A loaded brush carries more than one pigment and puts them down unevenly. The stroke mixes its two colors along the bristle noise, with a slow drift along the mark so one end is not a copy of the other. The two come from different hues of one generated palette, which keeps them related without making them the same.</p>
-        <div class="jp"><strong>ひとつの筆に2色。</strong>絵の具を含んだ筆は複数の顔料を抱え、それらを不均一に置いていきます。このストロークは2色を毛の筋のノイズに沿って混ぜ、さらに線に沿ってゆっくりと変化させて、片方の端がもう一方の複製にならないようにしています。2色はひとつのパレットの異なる色相から選ばれ、同じ色にならずに互いの関係が保たれます。</div>
+        <p><strong>Two pigments:</strong> The stroke mixes two colors along the bristle noise, with a slow drift along the mark. The two come from different hues of one palette.</p>
+        <div class="jp"><strong>2つの顔料：</strong>ストロークは2色を毛のノイズに沿って混ぜ、線に沿ってゆっくりと変化させます。2色はひとつのパレットの異なる色相から選ばれます。</div>
       </details>
     </div>
   </section>
@@ -110,26 +106,23 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>The test pattern.</strong> A stroke that reads the background can only be judged against something with edges and contrast in it. Flat paper would hide every one of these effects. The left quarter is white and the next quarter black, which shows how far an effect reaches and which way it drags. The right half is a grid of palette colors, which shows what the effect does to hue rather than only to value.</p>
-        <div class="jp"><strong>テストパターン。</strong>背景を読むストロークは、輪郭とコントラストのあるものの上でしか評価できません。無地の紙では、これらの効果はどれも見えなくなります。左4分の1は白、次の4分の1は黒で、効果がどこまで届き、どちらへ引きずられるかが分かります。右半分はパレットの色のグリッドで、効果が明度だけでなく色相に何をするかを示します。</div>
+        <p><strong>Inflated geometry:</strong> Geometry is built wider than the visible mark, and the shader receives the position of the visual edge inside that margin, so effects that reach past the stroke have fragments to land on.</p>
+        <div class="jp"><strong>広げたジオメトリ：</strong>ジオメトリは見える線より広く作られ、シェーダはその余白の中での視覚的な輪郭の位置を受け取ります。そのため、ストロークの外へ届く効果にもフラグメントの受け皿があります。</div>
 
-        <p><strong>Geometry wider than the mark.</strong> A fragment can only be shaded where a triangle covers it. An effect that reaches past the stroke, a bleed or a smear, needs somewhere to land, so the geometry is built wider than the mark it draws and the shader is told where the visual edge sits inside that margin. The background is sampled by screen position rather than by the stroke's own coordinates, because a stroke does not know what is under it and asking in pixels is the only question that has an answer.</p>
-        <div class="jp"><strong>線より広いジオメトリ。</strong>フラグメントは、三角形が覆っている場所でしか陰影を計算できません。にじみや引きずりのようにストロークの外へ届く効果には、その受け皿が必要です。そのため、ジオメトリは描かれる線より広く作られ、シェーダにはその余白のどこに視覚的な輪郭があるかが伝えられます。背景はストローク自身の座標ではなく画面上の位置で参照されます。ストロークは自分の下に何があるかを知らないので、ピクセルで問うことだけが答えを持つからです。</div>
+        <p><strong>Background sampling:</strong> The background is sampled by screen position, not by the stroke's own coordinates.</p>
+        <div class="jp"><strong>背景のサンプリング：</strong>背景はストローク自身の座標ではなく、画面上の位置で参照されます。</div>
 
-        <p>That margin is also where the cap lives. The end is carved in the shader rather than built as geometry, so the same quad past the end serves a rounded cap, a flat one and a torn one.</p>
-        <div class="jp">この余白は端点の居場所でもあります。終端はジオメトリとして作るのではなくシェーダで削り出すため、終端の先にある同じ四角形が、丸い端点にも、平らな端点にも、裂けた端点にも使えます。</div>
+        <p><strong>Caps:</strong> Ends are carved in the shader inside the same margin, so one quad past the end serves rounded, square, and ragged caps.</p>
+        <div class="jp"><strong>端点：</strong>終端は同じ余白の中でシェーダによって削り出されるため、終端の先のひとつの四角形が、rounded、square、raggedのすべてに使えます。</div>
 
-        <p><strong>Watercolor.</strong> The wash reads a pre-blurred copy of the background rather than gathering a neighbourhood per fragment. A wide gather is the obvious implementation and the wrong one: a thirty pixel radius costs hundreds of taps on every covered fragment, while the same result is one texel read against a copy blurred once for the whole frame.</p>
-        <div class="jp"><strong>水彩。</strong>このにじみは、フラグメントごとに周辺を集めるのではなく、あらかじめぼかした背景のコピーを読みます。広い範囲を集めるのは分かりやすい実装ですが、正しくはありません。半径30ピクセルなら、覆われた全フラグメントで数百回のサンプリングが必要になります。同じ結果は、フレーム全体で一度ぼかしたコピーを1テクセル読むだけで得られます。</div>
+        <p><strong>Watercolor:</strong> The wash reads a pre-blurred copy of the background, one texel per fragment, instead of gathering a neighborhood. Pigment collects just inside the boundary, leaving a darker rim.</p>
+        <div class="jp"><strong>水彩：</strong>にじみは、周辺を集める代わりに、あらかじめぼかした背景のコピーをフラグメントごとに1テクセル読みます。顔料は輪郭のすぐ内側に集まり、濃い縁を残します。</div>
 
-        <p>Pigment collects just inside the boundary, where water dries back and leaves a darker rim. Without it the wash reads as a translucent shape rather than as something wet that dried.</p>
-        <div class="jp">顔料は輪郭のすぐ内側に集まります。水が引きながら乾き、そこに濃い縁を残すからです。これがないと、にじみは「乾いた水気のあるもの」ではなく、ただの半透明な図形に見えます。</div>
+        <p><strong>Smear:</strong> Each fragment samples backward along the stroke's direction in screen space and averages the result, so the background streaks the way the mark traveled. The sampling distance varies with noise across and along the mark.</p>
+        <div class="jp"><strong>引きずり：</strong>各フラグメントは、画面上でストロークの向きに沿って後方をサンプリングして平均するため、背景は線が進んだ方向に筋を引きます。サンプリングの距離は、幅方向と長さ方向のノイズによって変わります。</div>
 
-        <p><strong>Smear.</strong> Each fragment walks backward along the stroke's own direction in screen space and averages what it finds, so the background is streaked the way the mark travelled rather than blurred evenly. The walk length varies with noise across and along the mark. That variation is what stops the result reading as motion blur: a real brush drags hard under some bristles and barely at all under others.</p>
-        <div class="jp"><strong>引きずり。</strong>各フラグメントは、画面上でストローク自身の向きに沿って後方へ歩き、そこで見つけたものを平均します。そのため背景は一様にぼけるのではなく、線が進んだ方向に筋を引きます。歩く距離は、線の幅方向と長さ方向のノイズによって変わります。この変化があるからこそ、結果がモーションブラーに見えません。実際の筆は、ある毛の下では強く引きずり、別の毛の下ではほとんど引きずらないからです。</div>
-
-        <p><strong>Wet brush.</strong> The two effects are not added. The drag runs first, over a mix of the sharp and softened background, and the wash then tints what the drag produced. Blending two finished results would wash out the streaks, because an even blur and a directional smear cancel each other where they disagree.</p>
-        <div class="jp"><strong>濡れた筆。</strong>2つの効果は足し合わされているのではありません。まず引きずりが、鮮明な背景とぼかした背景を混ぜたものの上で走り、そのあとで水彩がその結果を染めます。仕上がった2つの結果を混ぜると筋は消えてしまいます。一様なぼかしと方向を持つ引きずりは、食い違う場所で互いを打ち消すからです。</div>
+        <p><strong>Wet brush:</strong> The drag runs first, over a mix of the sharp and blurred background, and the wash then tints the result.</p>
+        <div class="jp"><strong>濡れた筆：</strong>まず引きずりが、鮮明な背景とぼかした背景を混ぜたものの上で走り、そのあとで水彩がその結果を染めます。</div>
       </details>
     </div>
   </section>
@@ -148,23 +141,20 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>The height field.</strong> The mark is given a height built from how far the fragment sits from the edge, which rounds the cross-section into a bead, and noise stretched along the path, which reads as liquid dragged by the brush. The surface normal comes from finite differences of that height in the stroke's own frame.</p>
-        <div class="jp"><strong>高さフィールド。</strong>線には高さが与えられます。輪郭からの距離が断面を丸い盛り上がりにし、パスに沿って引き伸ばされたノイズが、筆で引きずられた液体のように見えます。表面の法線は、その高さをストローク自身の座標系で差分することで求めます。</div>
+        <p><strong>Height field:</strong> Height is built from distance to the edge, which rounds the cross-section into a bead, plus noise stretched along the path, which reads as liquid dragged along the stroke. The surface normal comes from finite differences in the stroke's own frame.</p>
+        <div class="jp"><strong>高さフィールド：</strong>高さは、断面を丸い盛り上がりにする輪郭からの距離と、線に沿って引きずられた液体に見える、パス方向に引き伸ばされたノイズから作られます。表面の法線は、ストローク自身の座標系での差分から求めます。</div>
 
-        <p>The bead is parabolic rather than a hemisphere. A hemisphere is the obvious choice and its slope runs to infinity at the rim, which turns every fragment near the edge into noise once a finite difference is taken across it. The first build did exactly that and the strokes came out as fine hair.</p>
-        <div class="jp">盛り上がりは半球ではなく放物線です。半球は分かりやすい選択ですが、縁で傾きが無限大に発散します。そこで差分を取ると、輪郭付近のフラグメントはすべてノイズになります。最初の実装がまさにそうで、ストロークは細い毛のようになってしまいました。</div>
+        <p>The bead is parabolic, not a hemisphere: a hemisphere's slope is infinite at the rim, which breaks the finite differences there. Height and the across coordinate are both measured in half-widths, so the gradient is dimensionless at any width.</p>
+        <div class="jp">盛り上がりは半球ではなく放物線です。半球は縁で傾きが無限大になり、そこでの差分が破綻します。高さと幅方向の座標はどちらも半幅を単位とするため、勾配はどの太さでも無次元になります。</div>
 
-        <p>Height is measured in units of the stroke's half-width, and so is the across coordinate, so the gradient comes out dimensionless and needs no correction factor to look right at any width.</p>
-        <div class="jp">高さはストロークの半幅を単位として測られ、幅方向の座標も同じ単位です。そのため勾配は無次元となり、どの太さでも正しく見せるための補正係数が不要になります。</div>
+        <p><strong>Chrome:</strong> The environment is two tones split at a horizon; the boundary sweeping across the curved surface reads as metal.</p>
+        <div class="jp"><strong>クローム：</strong>環境は地平線で分かれた2つの色調です。曲面を横切るその境界が、金属として読み取られます。</div>
 
-        <p><strong>Chrome.</strong> The environment is two tones split at a horizon. That is the whole trick behind a chrome look: a mirror shows mostly a bright sky and a dark ground, and the eye reads the boundary sweeping across a curved surface as metal. A full environment map would add cost and detail the shape does not need.</p>
-        <div class="jp"><strong>クローム。</strong>環境は、地平線で分かれた2つの色調です。クロームらしさの仕掛けはそれだけです。鏡に映るのはおおむね明るい空と暗い地面であり、曲面をその境界が走っていくのを、目は金属として読み取ります。完全な環境マップは、この形状に必要のない負荷と情報を足すだけです。</div>
+        <p><strong>Mirror:</strong> The reflected direction is used as a screen-space offset into the background, so the reflection costs one texture read but cannot show anything outside the frame. Contrast is pushed after sampling.</p>
+        <div class="jp"><strong>鏡面：</strong>反射方向は背景への画面空間のオフセットとして使われるため、反射はテクスチャ1回の読み取りで済みますが、フレームの外は映せません。コントラストはサンプリングの後に強められます。</div>
 
-        <p><strong>Mirror.</strong> The reflected direction is used as a screen-space offset into the background rather than as a ray into a cube map. It is not a correct reflection and it cannot show anything outside the frame, but for a flat mark lying on a surface the difference is invisible, and it costs one texture read. Contrast is pushed after sampling, since a mirror does not return a muted copy of what is in front of it.</p>
-        <div class="jp"><strong>鏡面。</strong>反射方向は、キューブマップへのレイではなく、背景への画面空間のオフセットとして使われます。これは正しい反射ではなく、フレームの外にあるものは映せません。しかし面の上に横たわる平らな線にとって、その違いは見えず、コストはテクスチャ1回の読み取りで済みます。サンプリングの後にコントラストを強めています。鏡は、前にあるものを彩度を落として返すわけではないからです。</div>
-
-        <p><strong>Glass.</strong> Refraction offsets the background lookup along the surface normal, so the bead acts as a lens and the displacement is largest where the surface tilts hardest, at the edges. Reflection is mixed in by a Fresnel term, which is what stops the result reading as a smudge: a transparent surface turns mirror-like at glancing angles, and without that the edges look no different from the middle.</p>
-        <div class="jp"><strong>ガラス。</strong>屈折は、背景の参照位置を表面の法線方向にずらします。そのため盛り上がりはレンズとして働き、ずれは表面が最も傾く縁で最大になります。反射はフレネル項によって混ぜられ、これがあるからこそ結果が汚れに見えずに済みます。透明な面は浅い角度で鏡のように振る舞い、それがないと縁は中央と同じに見えてしまいます。</div>
+        <p><strong>Glass:</strong> Refraction offsets the background lookup along the surface normal, largest where the surface tilts most. Reflection is mixed in by a Fresnel term (mirror-like at glancing angles).</p>
+        <div class="jp"><strong>ガラス：</strong>屈折は背景の参照位置を表面の法線方向にずらし、表面が最も傾く場所でずれが最大になります。反射はフレネル項（浅い角度で鏡のようになる性質）によって混ぜられます。</div>
       </details>
     </div>
   </section>
@@ -178,25 +168,28 @@ const demos = [
       <iframe src={`${base}/demos/${demos[4].dir}/index.html?embedded`} title="Graphic strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Strokes that keep the path, the width and the resampling and throw away the ribbon. Top to bottom: grid cells, large flat facets, and parallel lanes.</p>
+      <p>Strokes that keep the path, the width, and the resampling and throw away the ribbon. Top to bottom: grid cells, large flat facets, and parallel lanes.</p>
       <div class="jp">パス、幅、再サンプリングを保ったまま、リボンだけを捨てたストロークです。上から順に、グリッドのセル、大きな単色の面、平行なレーンです。</div>
 
       <details>
         <summary>Details</summary>
-        <p>The same StrokeDef drives all three, and swapping the renderer is the only change. These renderers have no fragment shader to carve a cap out of, so they close their ends by extending vertices along the tangent by a cap profile. For a rounded cap that profile is a circle, which means the outer lanes and facets stop short of the middle ones. The rounded end is built from the stroke's own parts.</p>
-        <div class="jp">3つとも同じStrokeDefが駆動し、変わるのはレンダラだけです。これらのレンダラには端点を削り出すフラグメントシェーダがないため、接線方向に頂点を伸ばす端点プロファイルで終端を閉じます。roundedではそのプロファイルが円になるので、外側のレーンや面は中央のものより手前で止まります。丸い終端が、ストローク自身の部品から組み立てられます。</div>
+        <p>The same StrokeDef drives all three; swapping the renderer is the only change.</p>
+        <div class="jp">3つとも同じStrokeDefが駆動し、変わるのはレンダラだけです。</div>
 
-        <p><strong>Pixels.</strong> Cells are stamped from the spine outward rather than tested from a grid inward. A grid over the bounding box would test far more empty cells than filled ones for a thin diagonal mark. A Set keyed by grid coordinate keeps overlapping stamps from emitting a cell twice. The inside test uses the signed distance across the spine, so a stroke with different left and right widths keeps that asymmetry in its cells.</p>
-        <div class="jp"><strong>ピクセル。</strong>セルは、グリッド側から内向きに判定するのではなく、スパインから外向きにスタンプされます。細い斜めの線では、バウンディングボックス全体を走査すると、埋まるセルよりも空のセルのほうがはるかに多くなります。グリッド座標をキーにしたSetが、重なったスタンプが同じセルを二度出力するのを防ぎます。内外の判定にはスパインを挟んだ符号付きの距離を使うため、左右の幅が異なるストロークは、その非対称さをセルにも保ちます。</div>
+        <p><strong>Caps:</strong> Ends are closed by extending vertices along the tangent by a cap profile. For a rounded cap the profile is a circle, so outer lanes and facets stop short of the middle ones.</p>
+        <div class="jp"><strong>端点：</strong>終端は、接線方向に頂点を端点プロファイルの分だけ伸ばして閉じます。roundedではプロファイルが円になるため、外側のレーンや面は中央のものより手前で止まります。</div>
 
-        <p><strong>Facets.</strong> The spine is resampled far more coarsely than a smooth ribbon would need, and each triangle takes one flat color, so the facets stay legible as facets. Vertices are jittered across the width. That is what stops the result reading as a low-resolution ribbon: the silhouette has to break, not just the shading.</p>
-        <div class="jp"><strong>面。</strong>スパインは、滑らかなリボンに必要な密度よりもはるかに粗く再サンプリングされ、各三角形は単色を取ります。そのため面は面として読めるまま残ります。頂点は幅方向にばらつかされます。これがあるからこそ、結果が低解像度のリボンに見えずに済みます。崩れる必要があるのは陰影だけでなく、輪郭のほうです。</div>
+        <p><strong>Pixels:</strong> Cells are stamped from the spine outward, deduplicated by grid coordinate. The inside test uses signed distance across the spine, so the left and right widths stay independent.</p>
+        <div class="jp"><strong>ピクセル：</strong>セルはスパインから外向きにスタンプされ、グリッド座標で重複が除かれます。内外の判定にはスパインを挟んだ符号付きの距離を使うため、左右の幅は独立したままです。</div>
 
-        <p><strong>Lanes.</strong> Each lane is its own thin ribbon offset across the width, so the lanes follow the curve. Clipping gaps out of a solid mark would leave them running straight while the stroke turned.</p>
-        <div class="jp"><strong>レーン。</strong>各レーンは幅方向にずらされた独自の細いリボンなので、レーンは曲線に沿って進みます。塗りつぶした線から隙間を切り抜く方式では、ストロークが曲がっても隙間はまっすぐ走ったままになります。</div>
+        <p><strong>Facets:</strong> The spine is resampled coarsely and each triangle takes one flat color. Vertices are jittered across the width, so the silhouette breaks along with the shading.</p>
+        <div class="jp"><strong>面：</strong>スパインは粗く再サンプリングされ、各三角形は単色を取ります。頂点は幅方向にばらつかされるため、陰影だけでなく輪郭も崩れます。</div>
 
-        <p><strong>Repeatable randomness.</strong> All three place colors and drop cells with a seeded generator rather than <code>Math.random</code>. A drawing that looks random has to redraw identically, or a change to one control could never be compared against the frame before it.</p>
-        <div class="jp"><strong>再現できるランダム。</strong>3つとも、色の配置やセルの間引きに <code>Math.random</code> ではなくシード付きの生成器を使います。ランダムに見える絵は、同じ結果で描き直せなければなりません。そうでなければ、あるコントロールを変えた結果を直前のフレームと比べることができません。</div>
+        <p><strong>Lanes:</strong> Each lane is its own thin ribbon offset across the width, so the lanes follow the curve.</p>
+        <div class="jp"><strong>レーン：</strong>各レーンは幅方向にずらされた独自の細いリボンなので、レーンは曲線に沿って進みます。</div>
+
+        <p><strong>Seeded randomness:</strong> Colors and dropped cells come from a seeded generator, not <code>Math.random</code>, so the same settings redraw identically.</p>
+        <div class="jp"><strong>シード付きランダム：</strong>色の配置とセルの間引きは<code>Math.random</code>ではなくシード付きの生成器から得られるため、同じ設定からは同じ絵が描き直されます。</div>
       </details>
     </div>
   </section>
