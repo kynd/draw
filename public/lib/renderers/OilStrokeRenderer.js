@@ -24,13 +24,13 @@ export class OilStrokeRenderer extends HeightFieldStrokeRenderer {
     constructor({
         color = '#803020',
         background = null,
-        drag = 60,
-        paint = 0.95,
+        drag = 25,
+        paint = 1.0,
         gloss = 0.4,
         shininess = 48,
         noise = 0.5,
-        stretch = 0.9,
-        across = 2.0,
+        stretch = 0.3,
+        across = 0.8,
         dome = 0.8,
         ...rest
     } = {}) {

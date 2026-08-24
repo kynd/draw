@@ -17,8 +17,8 @@ export class HeightFieldStrokeRenderer extends ShaderStrokeRenderer {
     constructor({
         dome = 1.0,
         noise = 0.22,
-        stretch = 1.4,
-        across = 3.0,
+        stretch = 0.9,
+        across = 2.0,
         edge = 0.10,
         samplesPerUnit = 90,
         inflate = 1.25,
