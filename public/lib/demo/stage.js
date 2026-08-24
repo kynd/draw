@@ -29,6 +29,7 @@ export class StrokeStage {
 
         this._pending = false;
         this._resizeHandlers = [];
+        this._preRenders = [];
 
         this.viewport.onResize((width, height) => {
             this.renderer.setSize(width, height, false);
@@ -43,6 +44,9 @@ export class StrokeStage {
     get extentX() { return this.buffer.extentX; }
 
     onResize(fn) { this._resizeHandlers.push(fn); return this; }
+
+    /** Runs before each frame render: fn(renderer, camera, pixelWidth, pixelHeight). */
+    addPreRender(fn) { this._preRenders.push(fn); return this; }
 
     add(object) { return this.buffer.add(object); }
     remove(object) { return this.buffer.remove(object); }
@@ -63,6 +67,10 @@ export class StrokeStage {
                 if (u?.uScreen) u.uScreen.value.copy(screen);
                 if (u?.uWorldToUv) u.uWorldToUv.value.copy(worldToUv);
             });
+            this._preRenders.forEach(fn => fn(
+                this.renderer, this.buffer.camera,
+                this.viewport.pixelWidth, this.viewport.pixelHeight
+            ));
             this.buffer.render(this.renderer);
             this.buffer.present(this.renderer);
         });

@@ -179,15 +179,18 @@ Pencil, charcoal, and pastel are one renderer at different settings. Paper tooth
 What separates the media is scale: `tooth` is in pixels, and `softness` and `edge` set the falloff and the wobble of the boundary. Takes `color`, `grain`, `tooth`, `pressure`, `softness`, `edge`, and `opacity`.
 <div class="jp">画材を分けるのはスケールです。`tooth`はピクセル単位で、`softness`と`edge`が輪郭の減衰と揺らぎを決めます。`color`、`grain`、`tooth`、`pressure`、`softness`、`edge`、`opacity`を受け取ります。</div>
 
-## HaloStrokeRenderer
+## StrokeHalo
 
-A soft silhouette of the stroke: full color inside the mark, fading to nothing across a feather that reaches past it. Offset and dark beneath a stroke it is a drop shadow; wide and bright around one, a glow. Takes `color`, `feather`, `opacity`, and `additive`.
-<div class="jp">ストロークの柔らかいシルエットです。線の内側は完全な色で、外へ届く羽状の余白の中で消えていきます。ずらして暗くストロークの下に置けばドロップシャドウに、広く明るくまわりに置けばグローになります。`color`、`feather`、`opacity`、`additive`を受け取ります。</div>
+A blurred silhouette of one or more strokes, presented as a tinted plane. Not a renderer: it takes finished meshes, renders them into a private low-resolution target, blurs there, and hands back a plane to place in the scene. Offset and dark beneath a stroke the plane is a drop shadow; wide and bright around one, a glow.
+<div class="jp">1本以上のストロークをぼかしたシルエットを、色付きの平面として提供します。レンダラではありません。完成したメッシュを受け取り、専用の低解像度ターゲットに描画してそこでぼかし、シーンに置くための平面を返します。ずらして暗くストロークの下に置けばドロップシャドウに、広く明るくまわりに置けばグローになります。</div>
 
-## EmbossStrokeRenderer
+Blurring a silhouette is the second design. Expanding the stroke's own geometry outward was the first, and it folds wherever the reach exceeds the curvature radius, which every soft shadow on a wavy path does. Takes `color`, `opacity`, `blur`, `downsample`, and `additive`; `update()` runs before the frame, from the stage's pre-render hook.
+<div class="jp">シルエットをぼかすのは2番目の設計です。最初はストローク自身のジオメトリを外へ広げる方式でしたが、届く距離が曲率半径を超える場所で必ず折り重なります。うねるパスの上の柔らかい影では、それが必ず起こります。`color`、`opacity`、`blur`、`downsample`、`additive`を受け取り、`update()`はステージのpre-renderフックからフレームの前に実行されます。</div>
 
-A flat fill with an inner shadow. A band inside the boundary is shaded by how its outward direction faces a fixed light: the lit edge lightens toward white and the far edge darkens. The outward direction comes from the stroke frame, so the ends shade the same way the sides do. Takes `color`, `bevel`, `amount`, and `angle`.
-<div class="jp">内側に影を持つ平坦な塗りです。輪郭の内側の帯が、外向きの方向と固定光源の関係によって陰影付けされます。光の側の縁は白へ向かって明るくなり、反対側の縁は暗くなります。外向きの方向はストロークの座標系から求めるため、終端も側面と同じように陰影付けされます。`color`、`bevel`、`amount`、`angle`を受け取ります。</div>
+## DebossStrokeRenderer
+
+A flat fill with an inner shadow, so the stroke reads as pressed into the surface. A band inside the boundary is shaded by how its outward direction faces a fixed light: the mark is a depression, so the wall on the lit side falls away from the light and darkens, and the far wall catches it and lightens. The outward direction comes from the stroke frame, so the ends shade the same way the sides do. Takes `color`, `bevel`, `amount`, and `angle`.
+<div class="jp">内側に影を持つ平坦な塗りで、ストロークは面に押し込まれたように見えます。輪郭の内側の帯が、外向きの方向と固定光源の関係によって陰影付けされます。線はくぼみなので、光の側の壁は光から離れる向きに傾いて暗くなり、反対側の壁が光を受けて明るくなります。外向きの方向はストロークの座標系から求めるため、終端も側面と同じように陰影付けされます。`color`、`bevel`、`amount`、`angle`を受け取ります。</div>
 
 ## Background samplers
 

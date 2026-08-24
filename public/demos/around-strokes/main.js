@@ -1,5 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
-import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
+import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { spiralPath, entangledPaths, scatteredPaths } from '../../lib/pathEffects.js';
 import { Palette } from '../../lib/Palette.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
@@ -8,13 +8,10 @@ import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strok
 
 const ROWS = 3;
 const SEEDS = [3.0, 7.0, 11.0];
-const REACH = 0.16;   // how far each effect spreads from the base path
 
 const readout = document.getElementById('readout');
 const ctrl = {
     turns: document.getElementById('turns'),
-    paths: document.getElementById('paths'),
-    scatter: document.getElementById('scatter'),
     width: document.getElementById('width'),
 };
 
@@ -43,21 +40,27 @@ function randomizeColors() {
         groups[i % groups.length].map(e => e.hex));
 }
 
-/** Derived paths for row `i`, from that row's base path. */
-function derive(i, base) {
+/**
+ * Derived paths for row `i`. The count of sub-strokes and their offset from the base
+ * both follow the width, so a heavier stroke spreads further and splits into more
+ * parts rather than only thickening.
+ */
+function derive(i, base, width) {
+    const reach = width * 7;
     if (i === 0) {
-        return [spiralPath(base, { turns: parseInt(ctrl.turns.value, 10), radius: REACH * 0.85 })];
+        return [spiralPath(base, { turns: parseInt(ctrl.turns.value, 10), radius: reach })];
     }
     if (i === 1) {
         return entangledPaths(base, {
-            count: parseInt(ctrl.paths.value, 10),
-            amplitude: REACH,
+            count: Math.round(3 + width * 260),
+            amplitude: reach,
             seed: SEEDS[i],
         });
     }
     return scatteredPaths(base, {
-        count: parseInt(ctrl.scatter.value, 10),
-        offset: REACH,
+        count: Math.round(25 + width * 3200),
+        offset: reach,
+        length: 0.04 + width * 1.2,
         seed: SEEDS[i],
     });
 }
@@ -70,16 +73,20 @@ function rebuild() {
     entries = [];
 
     const width = parseFloat(ctrl.width.value);
-    const { spread } = layout(stage.extentY, REACH + width);
+    const { spread } = layout(stage.extentY, width * 8);
     let samples = 0, vertices = 0, triangles = 0, strokes = 0;
 
     for (let i = 0; i < ROWS; i++) {
         const base = straightThenWiggle(centerY(i, ROWS, spread), { z0: 0.01 + i * 0.01 });
         const group = colorGroups[i];
-        derive(i, base).forEach((path, k) => {
-            const renderer = new RibbonStrokeRenderer({
+        derive(i, base, width).forEach((path, k) => {
+            const renderer = new BrushStrokeRenderer({
                 cap: 'rounded',
-                color: group[k % group.length],
+                colorA: group[k % group.length],
+                colorB: group[(k + 2) % group.length],
+                bristles: Math.max(4, Math.round(width * 700)),
+                rough: 0.45,
+                dry: 0.22,
                 samplesPerUnit: 90,
             });
             const def = new StrokeDef({

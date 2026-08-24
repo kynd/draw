@@ -54,8 +54,8 @@ const demos = [
       <iframe src={`${base}/demos/${demos[1].dir}/index.html?embedded`} title="Around strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Paths derived from the base path (spiral, entangled, and scattered from top to bottom), drawn with the plain ribbon.</p>
-      <div class="jp">元のパスから導いたパスです（上から順にspiral、entangled、scattered）。描画には基本のリボンを使います。</div>
+      <p>Paths derived from the base path (spiral, entangled, and scattered from top to bottom), drawn with the brush renderer. The count of sub-strokes and their offset from the base both follow the width.</p>
+      <div class="jp">元のパスから導いたパスです（上から順にspiral、entangled、scattered）。描画にはbrushレンダラを使います。サブストロークの本数と元のパスからのオフセットは、どちらも幅に従います。</div>
 
       <details>
         <summary>Details</summary>
@@ -83,22 +83,22 @@ const demos = [
       <iframe src={`${base}/demos/${demos[2].dir}/index.html?embedded`} title="Shadow strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Effects around the mark: a drop shadow, an embossed bevel, and a glow from top to bottom.</p>
-      <div class="jp">線のまわりの効果です。上から順にドロップシャドウ、エンボス、グローです。</div>
+      <p>Effects around the mark: a drop shadow, a debossed bevel, and a glow from top to bottom.</p>
+      <div class="jp">線のまわりの効果です。上から順にドロップシャドウ、デボス、グローです。</div>
 
       <details>
         <summary>Details</summary>
-        <p><strong>Drop shadow:</strong> A soft silhouette of the stroke, offset and drawn beneath, so the mark reads as floating.</p>
-        <div class="jp"><strong>ドロップシャドウ：</strong>ストロークの柔らかいシルエットをずらして下に描くため、線は浮いて見えます。</div>
+        <p><strong>Drop shadow:</strong> A blurred silhouette of the stroke, offset and drawn beneath, so the mark reads as floating.</p>
+        <div class="jp"><strong>ドロップシャドウ：</strong>ストロークのぼかしたシルエットをずらして下に描くため、線は浮いて見えます。</div>
 
-        <p><strong>Emboss:</strong> A band inside the boundary is shaded by how its outward direction faces a fixed light: the lit edge lightens toward white and the far edge darkens.</p>
-        <div class="jp"><strong>エンボス：</strong>輪郭の内側の帯が、外向きの方向と固定光源の関係によって陰影付けされます。光の側の縁は白へ向かって明るくなり、反対側の縁は暗くなります。</div>
+        <p><strong>Deboss:</strong> A band inside the boundary is shaded by how its outward direction faces a fixed light. The mark is a depression, so the wall on the lit side darkens and the far wall lightens.</p>
+        <div class="jp"><strong>デボス：</strong>輪郭の内側の帯が、外向きの方向と固定光源の関係によって陰影付けされます。線はくぼみなので、光の側の壁は暗くなり、反対側の壁は明るくなります。</div>
 
-        <p><strong>Glow:</strong> The same silhouette drawn wider, in the most saturated bright color of the palette.</p>
-        <div class="jp"><strong>グロー：</strong>同じシルエットをより広く、パレットの中で最も彩度の高い明るい色で描いたものです。</div>
+        <p><strong>Glow:</strong> The same silhouette blurred wider, in the most saturated bright color of the palette.</p>
+        <div class="jp"><strong>グロー：</strong>同じシルエットをより広くぼかし、パレットの中で最も彩度の高い明るい色で描いたものです。</div>
 
-        <p>The shadow and the glow are one renderer. Offset and dark beneath the stroke it is a shadow; wide and bright around it, a glow.</p>
-        <div class="jp">シャドウとグローはひとつのレンダラです。ずらして暗くストロークの下に置けばシャドウに、広く明るくまわりに置けばグローになります。</div>
+        <p>The shadow and the glow are one class, StrokeHalo. It renders the stroke into a private low-resolution target and blurs there, so the softness cannot fold with the path.</p>
+        <div class="jp">シャドウとグローはひとつのクラス、StrokeHaloです。ストロークを専用の低解像度ターゲットに描画してそこでぼかすため、柔らかさがパスに沿って折り重なることはありません。</div>
       </details>
     </div>
   </section>

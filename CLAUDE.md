@@ -94,6 +94,7 @@ src/pages/
   strokes.astro  more-strokes.astro                        every stroke demo, one section each
 public/lib/                            library code
   StrokeDef.js  Palette.js  color.js  CanvasBuffer.js  random.js  pathEffects.js
+  StrokeHalo.js
   renderers/    StrokeRenderer.js      base + shared resampling
                 RibbonStrokeRenderer.js
                 ShaderStrokeRenderer.js       base for shader-shaded ribbons
@@ -103,8 +104,7 @@ public/lib/                            library code
                 HeightFieldStrokeRenderer.js base for surface materials
                 ChromeStrokeRenderer.js  MirrorStrokeRenderer.js
                 GlassStrokeRenderer.js  OilStrokeRenderer.js
-                DryMediaStrokeRenderer.js  HaloStrokeRenderer.js
-                EmbossStrokeRenderer.js
+                DryMediaStrokeRenderer.js  DebossStrokeRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js
                 LineStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js

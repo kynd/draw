@@ -2,14 +2,16 @@ import * as THREE from 'three';
 import { ShaderStrokeRenderer } from './ShaderStrokeRenderer.js';
 
 /**
- * A flat fill with an inner shadow, so the stroke reads as embossed.
+ * A flat fill with an inner shadow, so the stroke reads as debossed, pressed into the
+ * surface rather than raised from it.
  *
  * A band inside the boundary is shaded by how its outward direction faces a fixed
- * light: the edge toward the light lightens and the edge away darkens. The outward
- * direction comes from the stroke frame (the lateral normal weighted by vCross, the
- * tangent weighted by vBeyond), so the ends shade the same way the sides do.
+ * light. The mark is a depression, so the wall on the lit side falls away from the
+ * light and darkens, and the far wall catches it and lightens. The outward direction
+ * comes from the stroke frame (the lateral normal weighted by vCross, the tangent
+ * weighted by vBeyond), so the ends shade the same way the sides do.
  */
-export class EmbossStrokeRenderer extends ShaderStrokeRenderer {
+export class DebossStrokeRenderer extends ShaderStrokeRenderer {
     /**
      * @param {object} opts
      * @param {string} [opts.color]
@@ -62,7 +64,8 @@ export class EmbossStrokeRenderer extends ShaderStrokeRenderer {
                 float band = smoothstep(1.0 - uBevel, 1.0, d);
                 float facing = dot(outward, uLightDir);
 
-                float shade = uAmount * band * facing;
+                // Pressed in: the wall toward the light is the shadowed one.
+                float shade = -uAmount * band * facing;
                 // Lightening mixes toward white instead of scaling, so a dark pigment
                 // still shows its lit edge.
                 vec3 color = shade >= 0.0

@@ -81,7 +81,10 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
 
                 // Paper tooth, in screen space. Pigment catches its tops, so light
                 // coverage breaks into speckle instead of fading evenly.
-                float tooth = valueNoise(screenUv() * uScreen / uTooth);
+                // fbm rather than one octave: a single octave at pastel scale shows
+                // its bilinear lattice, and the finer octaves read as grain dust.
+                float tooth = fbm(screenUv() * uScreen / uTooth);
+                tooth = (tooth - 0.5) * 1.6 + 0.5;
                 float catchLevel = press * body;
                 float cover = smoothstep(uGrain * (1.0 - catchLevel), 1.0, tooth * 0.6 + catchLevel * 0.55);
 
