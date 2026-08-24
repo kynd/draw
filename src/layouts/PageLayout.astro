@@ -38,6 +38,11 @@ const navItems: NavItem[] = [
       { label: 'Graphic strokes',  href: '#graphic-strokes' },
     ]
   },
+  { label: 'More strokes', href: `${base}/more-strokes`, slug: 'more-strokes',
+    subLinks: [
+      { label: 'Pencil strokes', href: '#pencil-strokes' },
+    ]
+  },
   { label: 'Documentation', href: `${base}/documentation`, slug: 'documentation',
     children: [
       { label: 'Stroke Definition', href: `${base}/documentation/stroke-definition`, slug: 'documentation/stroke-definition',
@@ -55,6 +60,7 @@ const navItems: NavItem[] = [
           { label: 'Square, rounded, ragged',  href: '#square-rounded-ragged' },
           { label: 'ShaderStrokeRenderer',     href: '#shaderstrokerenderer' },
           { label: 'BrushStrokeRenderer',      href: '#brushstrokerenderer' },
+          { label: 'PencilStrokeRenderer',     href: '#pencilstrokerenderer' },
           { label: 'Background samplers',      href: '#background-samplers' },
           { label: 'Height field materials',   href: '#height-field-materials' },
           { label: 'OilStrokeRenderer',        href: '#oilstrokerenderer' },

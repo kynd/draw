@@ -91,7 +91,7 @@ src/content/pages/
     writing-style.md                   how every explanation on this site is written
 src/pages/
   palette-maker.astro                  demo/log pages, written as .astro for embeds
-  strokes.astro                        every stroke demo, one section each
+  strokes.astro  more-strokes.astro                        every stroke demo, one section each
 public/lib/                            library code
   StrokeDef.js  Palette.js  color.js  CanvasBuffer.js  random.js
   renderers/    StrokeRenderer.js      base + shared resampling
@@ -103,6 +103,7 @@ public/lib/                            library code
                 HeightFieldStrokeRenderer.js base for surface materials
                 ChromeStrokeRenderer.js  MirrorStrokeRenderer.js
                 GlassStrokeRenderer.js  OilStrokeRenderer.js
+                PencilStrokeRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js
                 LineStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js

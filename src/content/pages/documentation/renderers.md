@@ -171,6 +171,11 @@ One noise field draws the bristles, pushes the edge, and decides which pigment s
 </ul>
 </div>
 
+## PencilStrokeRenderer
+
+A thin grainy line. Paper tooth is a screen-space noise, because it belongs to the paper rather than to the stroke, and coverage is the tooth thresholded, so a light line breaks into speckle instead of fading evenly. A low-frequency `pressure` noise along the stroke scales both the darkness and the drawn width. Takes `color`, `grain`, and `pressure`.
+<div class="jp">細く粒子の粗い線です。紙の目は画面空間のノイズです。それはストロークではなく紙に属するからです。被覆はその目をしきい値で切ったもので、薄い線は均一に薄れるのではなく、粒に割れて途切れます。線に沿った低周波の`pressure`ノイズが、濃さと描かれる幅の両方を変化させます。`color`、`grain`、`pressure`を受け取ります。</div>
+
 ## Background samplers
 
 Three renderers that read what is underneath and move it. All take a `background` texture and sample it by screen position, because a stroke does not know what is under it and asking in pixels is the only question that has an answer.

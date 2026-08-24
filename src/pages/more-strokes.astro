@@ -1,0 +1,42 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const demos = [
+  { id: 'pencil-strokes', title: 'Pencil strokes', dir: 'pencil-strokes' },
+];
+---
+
+<PageLayout title="More strokes" slug="more-strokes">
+  <div class="monologue">
+    A second set of stroke renderers, continuing from Strokes
+  </div>
+
+  <div class="prose">
+    <p>The path, the layout, and everything under Common to every demo on <a href={`${base}/strokes`}>Strokes</a> apply here unchanged. Each row is rounded, square, and ragged from top to bottom.</p>
+    <div class="jp">パス、レイアウト、そして<a href={`${base}/strokes`}>Strokes</a>のCommon to every demoにある内容は、ここでもそのまま当てはまります。各行は上から順にrounded、square、raggedです。</div>
+  </div>
+
+  <section class="demo-section" id="pencil-strokes">
+    <div class="demo-header">
+      <h2>Pencil strokes</h2>
+      <a href={`${base}/demos/${demos[0].dir}/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/${demos[0].dir}/index.html?embedded`} title="Pencil strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>A thin line broken by paper grain, with pressure wandering along the stroke.</p>
+      <div class="jp">紙の粒子で途切れる細い線です。筆圧は線に沿って揺らぎます。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Grain:</strong> Paper tooth is a screen-space noise, because it belongs to the paper rather than to the stroke. Coverage is the tooth thresholded, so a light line breaks into speckle instead of fading evenly.</p>
+        <div class="jp"><strong>粒子：</strong>紙の目は画面空間のノイズです。それはストロークではなく紙に属するからです。被覆はその目をしきい値で切ったもので、薄い線は均一に薄れるのではなく、粒に割れて途切れます。</div>
+
+        <p><strong>Pressure:</strong> A low-frequency noise along the stroke scales both the darkness and the drawn width.</p>
+        <div class="jp"><strong>筆圧：</strong>線に沿った低周波のノイズが、濃さと描かれる幅の両方を変化させます。</div>
+      </details>
+    </div>
+  </section>
+</PageLayout>
