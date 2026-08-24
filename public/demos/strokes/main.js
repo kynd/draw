@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
 import { CanvasBuffer } from '../../lib/CanvasBuffer.js';
@@ -12,11 +13,7 @@ const Z_BASE = 0.002;
 const Z_STEP = 0.010;
 const Z_RISE = 0.004;
 
-const CONTROL_POINTS = 64;
-const STRAIGHT_UNTIL = 0.30;   // fraction of the path that stays flat
-const WIGGLE_END = 0.62;       // where the wiggle reaches full amplitude
 
-const AMPLITUDE = 0.34;
 
 const STROKES = [
     { cap: 'rounded', seed: 1.0 },
@@ -24,21 +21,7 @@ const STROKES = [
     { cap: 'ragged',  seed: 5.1 },
 ];
 
-/**
- * Half the distance between adjacent stroke centers, chosen so the margin above the
- * top stroke is twice the gap between two strokes.
- *
- * The strokes run in phase, so the gap between neighbours is constant along their whole
- * length and depends only on the spacing and the width. Solving
- * `H - (s + A + w) = 2(s - 2w)` for the spacing gives the expression below. It is
- * recomputed from the live frame height, so the ratio survives a resize.
- */
-function spacing(halfHeight, width) {
-    return (halfHeight - AMPLITUDE + 3 * width) / 3;
-}
 
-const centerY = (i, spread) =>
-    STROKES.length === 1 ? 0 : THREE.MathUtils.lerp(spread, -spread, i / (STROKES.length - 1));
 
 const canvas = document.getElementById('canvas');
 const readout = document.getElementById('readout');
@@ -61,7 +44,7 @@ const buffer = new CanvasBuffer({
     width: viewport.pixelWidth,
     height: viewport.pixelHeight,
     background: '#ffffff',
-    fit: { width: 1.70, height: 1.47 },
+    fit: { width: 1.70, height: 1.60 },
 });
 
 viewport.onResize((width, height) => {
@@ -70,31 +53,6 @@ viewport.onResize((width, height) => {
     // The layout is derived from the frame height, so a resize has to rebuild.
     rebuild(colors);
 });
-
-/**
- * A path that runs straight, then wiggles.
- *
- * The amplitude is held at zero until STRAIGHT_UNTIL and eased in with a smoothstep,
- * so the straight run and the curve belong to one continuous path rather than meeting
- * at a corner.
- */
-function straightThenWiggle(yBase, index) {
-    const points = [];
-    for (let i = 0; i < CONTROL_POINTS; i++) {
-        const t = i / (CONTROL_POINTS - 1);
-        const ramp = THREE.MathUtils.smoothstep(t, STRAIGHT_UNTIL, WIGGLE_END);
-        const phase = (t - STRAIGHT_UNTIL) * Math.PI * 4.4;
-        const x = THREE.MathUtils.lerp(-1.52, 1.52, t);
-        const y = yBase + ramp * AMPLITUDE * Math.sin(phase);
-        const z = Z_BASE + index * Z_STEP + Z_RISE * t;
-        points.push(new THREE.Vector3(x, y, z));
-    }
-    return points;
-}
-
-// A slight taper: widest across the middle, three quarters of that at either end,
-// which leaves each cap wide enough to read as a shape.
-const taper = width => t => width * (0.75 + 0.25 * Math.sin(Math.PI * t));
 
 const capLabel = { rounded: 'rounded', square: 'square', ragged: 'ragged' };
 
@@ -137,7 +95,7 @@ function rebuild(colors) {
 
     const density = parseInt(densityInput.value, 10);
     const width = parseFloat(widthInput.value);
-    const spread = spacing(buffer.extentY, width);
+    const { spread } = layout(buffer.extentY, width);
     let samples = 0, vertices = 0, triangles = 0;
     const perStroke = [];
 
@@ -148,7 +106,7 @@ function rebuild(colors) {
             samplesPerUnit: density,
         });
         const def = new StrokeDef({
-            points: straightThenWiggle(centerY(i, spread), i),
+            points: straightThenWiggle(centerY(i, STROKES.length, spread), { z0: 0.002 + i * 0.01 }),
             widthLeft: taper(width),
             renderer: strokeRenderer,
             seed: spec.seed,

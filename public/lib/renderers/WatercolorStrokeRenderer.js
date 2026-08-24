@@ -23,8 +23,9 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
         granulation = 0.35,
         edge = 0.30,
         samplesPerUnit = 90,
+        cap = 'rounded',
     } = {}) {
-        super({ inflate: 1.4, samplesPerUnit });
+        super({ cap, inflate: 1.4, samplesPerUnit });
         this.color = color;
         this.background = background;
         this.blurred = blurred;
@@ -58,7 +59,7 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
 
             void main() {
                 vec2 suv = screenUv();
-                float across = abs(vCross);
+                float across = capDistance();
 
                 // Paper grain, in screen space so it stays a paper property rather than
                 // stretching with the stroke.

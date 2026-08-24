@@ -55,6 +55,30 @@ export class StrokeRenderer {
 }
 
 /**
+ * How far past the end of the mark a point at lateral position `lateral` may reach,
+ * as a fraction of the half-width.
+ *
+ * The geometry renderers have no fragment shader to carve a cap out of, so they close
+ * their ends by extending vertices along the tangent by this profile. A rounded cap
+ * becomes a circle, which for a stroke made of lanes or facets means the outer ones stop
+ * short of the middle ones. That reads as a rounded end built from the stroke's own
+ * parts, which is the point.
+ *
+ * @param {'square'|'rounded'|'ragged'} cap
+ * @param {number} lateral  Signed position across the width, 1 at the edge.
+ */
+export function capExtent(cap, lateral, seed = 1) {
+    if (cap === 'square') return 0;
+    const c = Math.min(1, Math.abs(lateral));
+    if (cap === 'ragged') {
+        const n = Math.abs(Math.sin(lateral * 9.7 + seed * 4.3))
+                * 0.65 + Math.abs(Math.sin(lateral * 23.1 + seed * 1.7)) * 0.35;
+        return 0.12 + 0.88 * n;
+    }
+    return Math.sqrt(Math.max(0, 1 - c * c));
+}
+
+/**
  * Resamples a stroke's control points into an evenly spaced spine, at a density
  * proportional to arc length. Shared by every renderer so tessellation behaves
  * identically across the group.

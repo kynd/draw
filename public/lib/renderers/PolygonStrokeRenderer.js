@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
+import { StrokeRenderer, resampleSpine, capExtent } from './StrokeRenderer.js';
 import { seededRandom } from '../random.js';
 
 /**
@@ -17,8 +17,9 @@ export class PolygonStrokeRenderer extends StrokeRenderer {
      * @param {string[]} [opts.colors]
      * @param {number} [opts.jitter]   Lateral vertex displacement, as a fraction of width.
      */
-    constructor({ facets = 14, colors = ['#111111'], jitter = 0.45 } = {}) {
+    constructor({ facets = 14, colors = ['#111111'], jitter = 0.45, cap = 'rounded' } = {}) {
         super();
+        this.cap = cap;
         this.facets = facets;
         this.colors = colors;
         this.jitter = jitter;
@@ -28,7 +29,7 @@ export class PolygonStrokeRenderer extends StrokeRenderer {
         // Density chosen so the resample lands on roughly `facets` points, whatever the
         // stroke's length.
         const rough = { ...def, seed: def.seed };
-        const { samples, normals, length } = resampleSpine(
+        const { samples, normals, tangents, length } = resampleSpine(
             def, Math.max(1, this.facets / Math.max(def.polylineLength, 0.001)), this.facets + 1, 512
         );
         const n = samples.length;
@@ -47,10 +48,15 @@ export class PolygonStrokeRenderer extends StrokeRenderer {
             const t = n === 1 ? 0 : i / (n - 1);
             const wL = def.widthLeftAt(t) * (1 + (rand() - 0.5) * 2 * this.jitter);
             const wR = def.widthRightAt(t) * (1 + (rand() - 0.5) * 2 * this.jitter);
-            const p = samples[i], nrm = normals[i];
+            const p = samples[i], nrm = normals[i], tan = tangents[i];
+            // Only the two end rows are pushed outward, by the cap profile at their own
+            // lateral position, so a rounded cap comes out of the facets themselves.
+            const endSign = i === 0 ? -1 : (i === n - 1 ? 1 : 0);
+            const outL = endSign * capExtent(this.cap, 1, def.seed) * wL;
+            const outR = endSign * capExtent(this.cap, -1, def.seed + 0.5) * wR;
             edge.push({
-                l: new THREE.Vector3(p.x + nrm.x * wL, p.y + nrm.y * wL, p.z),
-                r: new THREE.Vector3(p.x - nrm.x * wR, p.y - nrm.y * wR, p.z),
+                l: new THREE.Vector3(p.x + nrm.x * wL + tan.x * outL, p.y + nrm.y * wL + tan.y * outL, p.z),
+                r: new THREE.Vector3(p.x - nrm.x * wR + tan.x * outR, p.y - nrm.y * wR + tan.y * outR, p.z),
             });
         }
 

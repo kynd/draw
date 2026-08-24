@@ -33,15 +33,27 @@ export function straightThenWiggle(yBase, { z0 = 0.002, zRise = 0.004, halfWidth
 }
 
 /**
- * Half the distance between adjacent stroke centers, chosen so the margin above the top
- * stroke is twice the gap between two strokes.
+ * Vertical layout for a row of strokes.
  *
- * The strokes run in phase, so the gap between neighbours is constant along their whole
- * length and depends only on the spacing and the width. Solving
- * `H - (s + A + w) = 2(s - 2w)` for the spacing gives this.
+ * Each stroke is treated as a box of height `X`, the full extent it can reach including
+ * the wiggle. The boxes are laid out so the margin above the first and below the last is
+ * twice the margin between neighbours:
+ *
+ *   m = (canvasHeight - count * X) / (count + 3)
+ *
+ * For three strokes that is `(canvasH - 3X) / 6`, with `2m` at each end and `m` between,
+ * which sums back to the canvas height exactly.
+ *
+ * @returns {{ spread: number, margin: number, boxHeight: number }} `spread` is the
+ *          distance from the centre to the outermost stroke's centre line.
  */
-export function spacing(halfHeight, width) {
-    return (halfHeight - AMPLITUDE + 3 * width) / 3;
+export function layout(halfHeight, width, count = 3) {
+    const boxHeight = 2 * (AMPLITUDE + width);
+    const margin = Math.max(0, (2 * halfHeight - count * boxHeight) / (count + 3));
+    // Adjacent centres sit one box plus one margin apart.
+    const step = boxHeight + margin;
+    const spread = (step * (count - 1)) / 2;
+    return { spread, margin, boxHeight };
 }
 
 /** Center line for stroke `i` of `count`, spread evenly across `spread`. */

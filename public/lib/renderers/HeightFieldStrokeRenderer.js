@@ -21,9 +21,10 @@ export class HeightFieldStrokeRenderer extends ShaderStrokeRenderer {
         across = 3.0,
         edge = 0.10,
         samplesPerUnit = 90,
-        inflate = 1.05,
+        inflate = 1.25,
+        cap = 'rounded',
     } = {}) {
-        super({ inflate, samplesPerUnit });
+        super({ cap, inflate, samplesPerUnit });
         this.dome = dome;
         this.noise = noise;
         this.stretch = stretch;
@@ -95,7 +96,7 @@ const HEIGHT_FIELD_CHUNK = /* glsl */`
         vec2 slope = T * (-dAlongWorld) + N2 * (-dLateral);
         vec3 n = normalize(vec3(slope, 1.0));
 
-        body = smoothstep(1.0, 1.0 - uEdge, abs(lateral));
+        body = smoothstep(1.0, 1.0 - uEdge, capDistance());
         return n;
     }
 `;

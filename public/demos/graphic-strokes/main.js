@@ -5,10 +5,11 @@ import { LineStrokeRenderer } from '../../lib/renderers/LineStrokeRenderer.js';
 import { Palette } from '../../lib/Palette.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
-import { straightThenWiggle, spacing, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
 
 const COUNT = 3;
 const SEEDS = [1.0, 2.7, 4.9];
+const CAPS = ['rounded', 'square', 'ragged'];
 
 const readout = document.getElementById('readout');
 const ctrl = {
@@ -22,7 +23,7 @@ const ctrl = {
 };
 
 const stage = new StrokeStage(document.getElementById('canvas'), {
-    fit: { width: 1.70, height: 1.47 },
+    fit: { width: 1.70, height: 1.60 },
 });
 
 let entries = [];
@@ -44,6 +45,7 @@ function randomizeColors() {
 function makeRenderer(index) {
     if (index === 0) {
         return new PixelStrokeRenderer({
+            cap: CAPS[index],
             cell: parseFloat(ctrl.cell.value),
             jitter: parseFloat(ctrl.jitter.value),
             colors,
@@ -51,12 +53,14 @@ function makeRenderer(index) {
     }
     if (index === 1) {
         return new PolygonStrokeRenderer({
+            cap: CAPS[index],
             facets: parseInt(ctrl.facets.value, 10),
             jitter: parseFloat(ctrl.facetJitter.value),
             colors,
         });
     }
     return new LineStrokeRenderer({
+        cap: CAPS[index],
         lanes: parseInt(ctrl.lanes.value, 10),
         duty: parseFloat(ctrl.duty.value),
         colors,
@@ -71,7 +75,7 @@ function rebuild() {
     entries = [];
 
     const width = parseFloat(ctrl.width.value);
-    const spread = spacing(stage.extentY, width);
+    const { spread } = layout(stage.extentY, width);
     let samples = 0, vertices = 0, triangles = 0;
 
     for (let i = 0; i < COUNT; i++) {

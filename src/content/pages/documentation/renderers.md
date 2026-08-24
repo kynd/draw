@@ -137,6 +137,9 @@ Base for renderers that shade the ribbon with their own fragment shader. Two thi
 Effects that reach past the stroke, a watercolor bleed or a dragged smear, need somewhere to land, and a fragment can only be shaded where a triangle covers it.
 <div class="jp">にじみや引きずりのようにストロークの外へ届く効果には受け皿が必要で、フラグメントは三角形が覆う場所でしか陰影を計算できないからです。</div>
 
+The cap is carved in the shader rather than built as geometry. Each end gets a plain quad running past the last sample, and `aBeyond` tells the shader how far past the end a fragment sits, in the same half-width units as `aCross`. `capDistance()` then returns the distance from the mark's centre line where 1.0 is the boundary, closing the shape at the ends the same way it closes at the sides. A square cap needs no room past the end, so it gets no quad at all.
+<div class="jp">端点はジオメトリとして作るのではなく、シェーダで削り出します。各終端には最後のサンプルより先へ伸びる単純な四角形が置かれ、`aBeyond` が、そのフラグメントが終端からどれだけ先にあるかを `aCross` と同じ半幅の単位で伝えます。`capDistance()` は線の中心からの距離を、1.0を境界として返し、側面と同じやり方で終端の形を閉じます。squareは終端の先に余地を必要としないため、四角形自体が作られません。</div>
+
 <div class="page-note">
 <p>Every subclass shader receives:</p>
 <ul>
@@ -145,6 +148,7 @@ Effects that reach past the stroke, a watercolor bleed or a dragged smear, need 
 <li><code>vTangent</code>, <code>vWorld</code> — unit tangent and world position.<br /><span class="jp">単位接線とワールド座標。</span></li>
 <li><code>screenUv()</code> — the fragment's position in the frame, for reading the background.<br /><span class="jp">背景を読むための、フレーム内でのフラグメントの位置。</span></li>
 <li><code>tangentUv()</code> — the stroke's own direction as a unit step in screen UV space.<br /><span class="jp">画面UV空間での、ストローク自身の向きの単位ステップ。</span></li>
+<li><code>capDistance()</code> — distance from the centre line where 1.0 is the boundary, with the cap style already applied. Effects measure against this rather than <code>abs(vCross)</code>.<br /><span class="jp">端点のスタイルを反映した、中心からの距離。1.0が境界です。各効果は <code>abs(vCross)</code> ではなくこれを基準に測ります。</span></li>
 <li><code>uSeed</code>, <code>uLength</code>, <code>uWidth</code>, plus <code>fbm</code> and hash helpers.<br /><span class="jp">シード、弧長、幅に加え、<code>fbm</code> とハッシュの補助関数。</span></li>
 </ul>
 </div>
@@ -226,6 +230,9 @@ Refraction offsets the lookup along the normal, so the bead acts as a lens and d
 
 Three renderers that keep the path, the width and the resampling and throw away the ribbon. The same `StrokeDef` drives all of them.
 <div class="jp">パス、幅、再サンプリングを保ったまま、リボンだけを捨てる3つのレンダラです。同じ `StrokeDef` がそのすべてを駆動します。</div>
+
+These have no fragment shader to carve a cap out of, so they close their ends by extending vertices along the tangent by `capExtent(cap, lateral)`. For a rounded cap that profile is a circle, so the outer lanes and facets stop short of the middle ones and the rounded end is built from the stroke's own parts.
+<div class="jp">これらには端点を削り出すフラグメントシェーダがないため、`capExtent(cap, lateral)` の分だけ頂点を接線方向に伸ばして終端を閉じます。roundedではそのプロファイルが円になるので、外側のレーンや面は中央のものより手前で止まり、丸い終端がストローク自身の部品から組み立てられます。</div>
 
 All three place colors with a seeded generator rather than `Math.random`. A drawing that looks random has to redraw identically, or a change to one control could never be compared against the frame before it.
 <div class="jp">3つとも、色の配置に `Math.random` ではなくシード付きの生成器を使います。ランダムに見える絵は同じ結果で描き直せなければ、あるコントロールを変えた結果を直前のフレームと比べられません。</div>

@@ -22,8 +22,9 @@ export class WetBrushStrokeRenderer extends ShaderStrokeRenderer {
         rim = 0.35,
         edge = 0.28,
         samplesPerUnit = 90,
+        cap = 'rounded',
     } = {}) {
-        super({ inflate: 1.35, samplesPerUnit });
+        super({ cap, inflate: 1.35, samplesPerUnit });
         this.color = color;
         this.background = background;
         this.blurred = blurred;
@@ -60,7 +61,7 @@ export class WetBrushStrokeRenderer extends ShaderStrokeRenderer {
 
             void main() {
                 vec2 suv = screenUv();
-                float across = abs(vCross);
+                float across = capDistance();
 
                 float grain = fbm(suv * uScreen / 30.0 + uSeed * 11.0);
                 float wobble = (fbm(vec2(vUv.x * uLength * 2.4, vCross * 2.0 + uSeed * 6.0)) - 0.5);

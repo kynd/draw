@@ -91,7 +91,7 @@ src/content/pages/
     writing-style.md                   how every explanation on this site is written
 src/pages/
   palette-maker.astro                  demo/log pages, written as .astro for embeds
-  strokes.astro
+  strokes.astro                        every stroke demo, one section each
 public/lib/                            library code
   StrokeDef.js  Palette.js  color.js  CanvasBuffer.js  random.js
   renderers/    StrokeRenderer.js      base + shared resampling
@@ -145,6 +145,9 @@ add it to the writing-style page, and apply it from then on.
 ## Demos
 
 - Three.js via the import map in each demo's `index.html`, pinned to one version.
+- **One page per topic, not per demo.** Related demos live as sections on one page, each
+  with a short visible description and the rest inside a `<details>` collapsible. Do not
+  give a demo its own page just because it has its own renderer.
 - **Demos are never a fixed size.** Full size, a demo fills the browser window and keeps
   filling it as the window changes. Only the embedded view is fixed, at 960×540, because
   the page's iframe reserves exactly that. Use `Viewport` from `public/lib/demo/viewport.js`;

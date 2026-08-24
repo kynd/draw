@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
+import { StrokeRenderer, resampleSpine, capExtent } from './StrokeRenderer.js';
 import { seededRandom } from '../random.js';
 
 /**
@@ -17,8 +17,9 @@ export class PixelStrokeRenderer extends StrokeRenderer {
      * @param {string[]} [opts.colors] Palette to draw cell colors from.
      * @param {number} [opts.jitter]   Chance a reachable cell is dropped, for a ragged edge.
      */
-    constructor({ cell = 0.045, colors = ['#111111'], jitter = 0.12, samplesPerUnit = 160 } = {}) {
+    constructor({ cell = 0.045, colors = ['#111111'], jitter = 0.12, cap = 'rounded', samplesPerUnit = 160 } = {}) {
         super();
+        this.cap = cap;
         this.cell = cell;
         this.colors = colors;
         this.jitter = jitter;
@@ -26,7 +27,7 @@ export class PixelStrokeRenderer extends StrokeRenderer {
     }
 
     build(def) {
-        const { samples, normals, length } = resampleSpine(def, this.samplesPerUnit, 8, 4096);
+        const { samples, normals, tangents, length } = resampleSpine(def, this.samplesPerUnit, 8, 4096);
         const n = samples.length;
         const cell = this.cell;
         const rand = seededRandom(def.seed);
@@ -52,8 +53,21 @@ export class PixelStrokeRenderer extends StrokeRenderer {
                     const dx = wx - p.x, dy = wy - p.y;
                     const side = dx * nrm.x + dy * nrm.y;
                     const limit = side >= 0 ? wL : wR;
-                    if (dx * dx + dy * dy <= limit * limit) {
-                        filled.set(key, { gx, gy, z: p.z });
+
+                    // At the two end samples the cap decides how far past the end a
+                    // cell may sit. Interior samples cannot reach past the mark, so
+                    // they need no test.
+                    if (i === 0 || i === n - 1) {
+                        const tan = tangents[i];
+                        const along = (dx * tan.x + dy * tan.y) * (i === 0 ? -1 : 1);
+                        if (along > 0) {
+                            const reach = capExtent(this.cap, side / limit, def.seed) * limit;
+                            if (along > reach) continue;
+                        }
+                    }
+                    if (dx * dx + dy * dy <= limit * limit + 1e-9 || (i === 0 || i === n - 1)) {
+                        const lateral = Math.abs(side);
+                        if (lateral <= limit) filled.set(key, { gx, gy, z: p.z });
                     }
                 }
             }

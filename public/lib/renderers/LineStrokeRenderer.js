@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
+import { StrokeRenderer, resampleSpine, capExtent } from './StrokeRenderer.js';
 import { seededRandom } from '../random.js';
 
 /**
@@ -17,8 +17,9 @@ export class LineStrokeRenderer extends StrokeRenderer {
      * @param {string[]} [opts.colors]
      * @param {number} [opts.samplesPerUnit]
      */
-    constructor({ lanes = 7, duty = 0.45, colors = ['#111111'], samplesPerUnit = 120 } = {}) {
+    constructor({ lanes = 7, duty = 0.45, colors = ['#111111'], cap = 'rounded', samplesPerUnit = 120 } = {}) {
         super();
+        this.cap = cap;
         this.lanes = lanes;
         this.duty = duty;
         this.colors = colors;
@@ -26,7 +27,7 @@ export class LineStrokeRenderer extends StrokeRenderer {
     }
 
     build(def) {
-        const { samples, normals, length } = resampleSpine(def, this.samplesPerUnit, 8, 2048);
+        const { samples, normals, tangents, length } = resampleSpine(def, this.samplesPerUnit, 8, 2048);
         const n = samples.length;
         const rand = seededRandom(def.seed);
 
@@ -50,15 +51,23 @@ export class LineStrokeRenderer extends StrokeRenderer {
                 const t = n === 1 ? 0 : i / (n - 1);
                 const wL = def.widthLeftAt(t);
                 const wR = def.widthRightAt(t);
-                const p = samples[i], nrm = normals[i];
+                const p = samples[i], nrm = normals[i], tan = tangents[i];
 
                 // Map the lane bounds through the asymmetric widths.
                 const at = f => (f >= 0 ? f * wL : f * wR);
                 const outer = at(centre + halfLane);
                 const inner = at(centre - halfLane);
 
-                positions.push(p.x + nrm.x * outer, p.y + nrm.y * outer, p.z);
-                positions.push(p.x + nrm.x * inner, p.y + nrm.y * inner, p.z);
+                // The lane runs past the end by the cap profile at its own position, so
+                // the outer lanes of a rounded cap stop short of the middle ones.
+                const endSign = i === 0 ? -1 : (i === n - 1 ? 1 : 0);
+                const reach = endSign * capExtent(this.cap, centre, def.seed + lane * 0.37)
+                            * Math.max(wL, wR);
+
+                positions.push(p.x + nrm.x * outer + tan.x * reach,
+                               p.y + nrm.y * outer + tan.y * reach, p.z);
+                positions.push(p.x + nrm.x * inner + tan.x * reach,
+                               p.y + nrm.y * inner + tan.y * reach, p.z);
                 for (let k = 0; k < 2; k++) colors.push(color.r, color.g, color.b);
                 vertexCount += 2;
             }

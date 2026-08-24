@@ -21,8 +21,9 @@ export class SmearStrokeRenderer extends ShaderStrokeRenderer {
         tint = 0.35,
         edge = 0.25,
         samplesPerUnit = 90,
+        cap = 'rounded',
     } = {}) {
-        super({ inflate: 1.3, samplesPerUnit });
+        super({ cap, inflate: 1.3, samplesPerUnit });
         this.color = color;
         this.background = background;
         this.drag = drag;
@@ -53,7 +54,7 @@ export class SmearStrokeRenderer extends ShaderStrokeRenderer {
 
             void main() {
                 vec2 suv = screenUv();
-                float across = abs(vCross);
+                float across = capDistance();
 
                 float wobble = (fbm(vec2(vUv.x * uLength * 2.6, vCross * 2.2 + uSeed * 9.0)) - 0.5);
                 float boundary = 1.0 + wobble * uEdge;

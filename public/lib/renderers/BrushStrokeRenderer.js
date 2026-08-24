@@ -28,8 +28,9 @@ export class BrushStrokeRenderer extends ShaderStrokeRenderer {
         rough = 0.35,
         dry = 0.30,
         samplesPerUnit = 120,
+        cap = 'rounded',
     } = {}) {
-        super({ inflate: 1.25, samplesPerUnit });
+        super({ cap, inflate: 1.25, samplesPerUnit });
         this.colorA = colorA;
         this.colorB = colorB;
         this.bristles = bristles;
@@ -59,7 +60,7 @@ export class BrushStrokeRenderer extends ShaderStrokeRenderer {
             uniform float uDry;
 
             void main() {
-                float across = abs(vCross);
+                float across = capDistance();
 
                 // Bristles: noise stretched hard along the mark and packed across it.
                 float along = vUv.x * uLength * uStreak;
