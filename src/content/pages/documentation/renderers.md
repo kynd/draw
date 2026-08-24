@@ -226,6 +226,14 @@ The reflected direction is used as a screen-space offset into the background rat
 Refraction offsets the lookup along the normal, so the bead acts as a lens and displaces most where it tilts hardest. Reflection is mixed in by a Fresnel term, which is what stops the result reading as a smudge.
 <div class="jp">屈折は参照位置を法線方向にずらすため、盛り上がりはレンズとして働き、最も傾く場所でずれが最大になります。反射はフレネル項で混ぜられ、これがあるからこそ結果が汚れに見えずに済みます。</div>
 
+### OilStrokeRenderer
+
+Thick paint: the smear's drag under a dominant paint color, lit through the height field. The dragged background is mixed under `color` at the `paint` ratio, thinner where the height field dips, and the relief is lit with diffuse and specular terms from a fixed light.
+<div class="jp">厚塗りの絵の具です。smearの引きずりを支配的な絵の具の色の下で行い、高さフィールドを通してライティングします。引きずられた背景は`paint`の比率で`color`の下に混ぜられ、高さフィールドが低い場所では層が薄くなります。起伏は固定光源からの拡散反射と鏡面反射で照らされます。</div>
+
+The drag and the ridges share one lane noise, so the paint that moved furthest also sits highest. Takes `background`, `drag`, `paint`, `gloss`, and `shininess`, plus the height field options.
+<div class="jp">引きずりと畝はひとつのレーンノイズを共有するため、最も動いた絵の具が最も高く盛り上がります。`background`、`drag`、`paint`、`gloss`、`shininess`に加え、高さフィールドのオプションを受け取ります。</div>
+
 ## Geometry renderers
 
 Three renderers that keep the path, the width and the resampling and throw away the ribbon. The same `StrokeDef` drives all of them.

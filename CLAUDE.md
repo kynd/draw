@@ -102,7 +102,7 @@ public/lib/                            library code
                 WetBrushStrokeRenderer.js
                 HeightFieldStrokeRenderer.js base for surface materials
                 ChromeStrokeRenderer.js  MirrorStrokeRenderer.js
-                GlassStrokeRenderer.js
+                GlassStrokeRenderer.js  OilStrokeRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js
                 LineStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js

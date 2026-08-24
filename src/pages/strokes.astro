@@ -6,6 +6,7 @@ const demos = [
   { id: 'basic-strokes',    title: 'Basic strokes',    dir: 'strokes' },
   { id: 'brush-strokes',    title: 'Brush strokes',    dir: 'brush-strokes' },
   { id: 'wet-strokes',      title: 'Wet strokes',      dir: 'wet-strokes' },
+  { id: 'oil-strokes',      title: 'Oil strokes',      dir: 'oil-strokes' },
   { id: 'material-strokes', title: 'Material strokes', dir: 'material-strokes' },
   { id: 'graphic-strokes',  title: 'Graphic strokes',  dir: 'graphic-strokes' },
 ];
@@ -127,13 +128,39 @@ const demos = [
     </div>
   </section>
 
-  <section class="demo-section" id="material-strokes">
+  <section class="demo-section" id="oil-strokes">
     <div class="demo-header">
-      <h2>Material strokes</h2>
+      <h2>Oil strokes</h2>
       <a href={`${base}/demos/${demos[3].dir}/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
     <div class="demo-embed">
-      <iframe src={`${base}/demos/${demos[3].dir}/index.html?embedded`} title="Material strokes" scrolling="no"></iframe>
+      <iframe src={`${base}/demos/${demos[3].dir}/index.html?embedded`} title="Oil strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Thick paint: the wet stroke's drag under a dominant paint color, lit through a height field.</p>
+      <div class="jp">厚塗りの絵の具です。wetストロークの引きずりを、支配的な絵の具の色の下で行い、高さフィールドを通してライティングします。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Drag:</strong> Each fragment samples backward along the stroke's direction, the same walk as the smear, with the reach varied by lane noise.</p>
+        <div class="jp"><strong>引きずり：</strong>各フラグメントは、smearと同じ方法でストロークの向きに沿って後方をサンプリングします。届く距離はレーンのノイズによって変わります。</div>
+
+        <p><strong>Paint:</strong> The dragged background is mixed under the stroke's color at a high ratio, thinner where the height field dips, so the background survives only as streaks in the crevices.</p>
+        <div class="jp"><strong>絵の具：</strong>引きずられた背景は、高い比率でストロークの色の下に混ぜられます。高さフィールドが低い場所では層が薄くなるため、背景は溝の中の筋としてだけ残ります。</div>
+
+        <p><strong>Lighting:</strong> Ridges stretched along the path supply a surface normal, and diffuse and specular lighting from a fixed light make the relief read as thickness. The drag and the ridges share one lane noise, so the paint that moved furthest also sits highest.</p>
+        <div class="jp"><strong>ライティング：</strong>パスに沿って引き伸ばされた畝が表面の法線を与え、固定光源からの拡散反射と鏡面反射によって、起伏が厚みとして読み取れます。引きずりと畝はひとつのレーンノイズを共有するため、最も動いた絵の具が最も高く盛り上がります。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="material-strokes">
+    <div class="demo-header">
+      <h2>Material strokes</h2>
+      <a href={`${base}/demos/${demos[4].dir}/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/${demos[4].dir}/index.html?embedded`} title="Material strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
       <p>Strokes shaded as a surface rather than a fill, using a height field over the mark. Top to bottom: metal against an assumed environment, metal reflecting the real background, and glass.</p>
@@ -162,10 +189,10 @@ const demos = [
   <section class="demo-section" id="graphic-strokes">
     <div class="demo-header">
       <h2>Graphic strokes</h2>
-      <a href={`${base}/demos/${demos[4].dir}/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+      <a href={`${base}/demos/${demos[5].dir}/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
     <div class="demo-embed">
-      <iframe src={`${base}/demos/${demos[4].dir}/index.html?embedded`} title="Graphic strokes" scrolling="no"></iframe>
+      <iframe src={`${base}/demos/${demos[5].dir}/index.html?embedded`} title="Graphic strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
       <p>Strokes that keep the path, the width, and the resampling and throw away the ribbon. Top to bottom: grid cells, large flat facets, and parallel lanes.</p>
