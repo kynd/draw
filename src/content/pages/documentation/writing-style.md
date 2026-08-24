@@ -59,6 +59,20 @@ Name the noun instead of using an adjective as one: "at that hue’s most satura
 Contractions are fine. "That’s the only place" reads better than "that is where".
 <div class="jp">短縮形を使って構いません。"that is where" よりも "that's the only place" のほうが読みやすくなります。</div>
 
+## Scope
+
+Describe features of the library. Do not describe the arbitrary decisions of a demo: the shape of its test path, its taper constants, how its colors happen to be picked, or plumbing the reader does not act on. A demo decision is worth a sentence only when the demo would mislead without it.
+<div class="jp">ライブラリの機能を記述してください。デモの恣意的な決定は記述しません。テスト用パスの形、先細りの係数、色のたまたまの選び方、読者が関与しない内部の配管などです。デモの決定に一文を割く価値があるのは、それがないとデモが誤解を招く場合だけです。</div>
+
+<div class="page-note">
+<p><strong>Cut:</strong> Each path runs straight for its first third, then wiggles. The amplitude is held at zero and eased in with a smoothstep…<br />
+<strong>Cut:</strong> …the background from the light end, the strokes from the dark end, grouped by hue so two strokes never come back as near-identical shades.<br />
+<strong>Kept:</strong> The sample count is derived from measured arc length, not from how many control points the path was authored with.</p>
+</div>
+
+The kept example survives because it states what the library does with any path. The cut examples describe one demo's inputs, which the reader can neither reuse nor act on.
+<div class="jp">残した例は、ライブラリがどんなパスに対しても行うことを述べているため生き残ります。削った例はひとつのデモへの入力の説明であり、読者はそれを再利用することも、それに基づいて行動することもできません。</div>
+
 ## Endings
 
 Stop when the fact is stated. Do not append a clause explaining why the fact matters, or restating it in other words.

@@ -133,6 +133,8 @@ The rules in brief, none of which replace reading the page:
 - No em-dash asides. Parentheses for a gloss or example, a comma for a trailing clause,
   a full stop to start a new sentence.
 - Stop when the fact is stated. No clause explaining why it matters, no restatement.
+- Describe library features only. Never narrate a demo's arbitrary decisions (its test
+  path's shape, its constants, how its colors happen to be picked).
 - Open a page with a plain description of what the thing is, not an aphorism or a hook.
 - Headings are short noun phrases naming the topic.
 - American spelling. Plain verbs, no intensifiers, contractions are fine.
