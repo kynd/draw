@@ -22,6 +22,34 @@ const demos = [
 
     <p>The classes are documented on <a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a> and <a href={`${base}/documentation/renderers`}>Renderers</a>.</p>
     <div class="jp">各クラスについては<a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a>と<a href={`${base}/documentation/renderers`}>Renderers</a>に記載しています。</div>
+
+    <h2>Common to every demo</h2>
+    <p>The path, the surface the strokes are drawn into, the depth ordering and the sampling are shared by every demo on this page. Each demo's own section covers only what its renderer adds.</p>
+    <div class="jp">パス、ストロークが描かれる面、深度による順序付け、そしてサンプリングは、このページのすべてのデモに共通です。各デモのセクションでは、そのレンダラが加えるものだけを扱います。</div>
+
+    <details>
+      <summary>Details</summary>
+      <p><strong>The path.</strong> Each path runs straight for its first third, then wiggles. The amplitude is held at zero and eased in with a smoothstep, so the straight run and the curve belong to one continuous path instead of meeting at a corner. The width tapers slightly, widest across the middle and three quarters of that at either end.</p>
+      <div class="jp"><strong>パス。</strong>それぞれのパスは、前半3分の1を直線で進み、そこからうねりはじめます。振幅はゼロに保たれたあとsmoothstepで滑らかに立ち上がるため、直線部分と曲線部分は角で接するのではなく、ひとつの連続したパスになります。幅はわずかに先細りし、中央が最も太く、両端はその4分の3になります。</div>
+
+      <p><strong>The buffer is the canvas.</strong> The strokes are not drawn to the screen. They are drawn into a <code>CanvasBuffer</code>, an offscreen render target with its own scene and orthographic camera, which is then blitted to the visible canvas in one pass. The drawing exists as a texture, so later stages can read what has been drawn rather than only what is being drawn.</p>
+      <div class="jp"><strong>バッファがキャンバス。</strong>ストロークは画面に直接描かれるのではありません。<code>CanvasBuffer</code>、つまり独自のシーンと正射影カメラを持つオフスクリーンのレンダーターゲットに描かれ、それが1パスで可視のキャンバスに転送されます。描画結果はテクスチャとして存在するため、後段の処理は「今描いているもの」だけでなく「すでに描かれたもの」を読めます。</div>
+
+      <p>Antialiasing comes from the target's sample count, not from the renderer's own <code>antialias</code> flag. That flag covers the default framebuffer, which never receives geometry here.</p>
+      <div class="jp">アンチエイリアスは、レンダラ自身の<code>antialias</code>フラグではなく、レンダーターゲットのサンプル数によって得られます。このフラグが対象とするのは既定のフレームバッファであり、ここではそこにジオメトリが描かれることはありません。</div>
+
+      <p><strong>Depth.</strong> The strokes are 2D. They move in X and Y, and their Z sits just above the paper. Z is not constant: each stroke starts at a base depth stepped by its index and rises slightly along its own length. Two surfaces at the same depth have no defined winner, and the depth test picks one per fragment. The step and the rise remove that question before it can be asked.</p>
+      <div class="jp"><strong>深度。</strong>ストロークは2Dです。XとYの中で動き、Zは紙のすぐ上にあります。ただしZは一定ではありません。各ストロークはインデックスに応じて段階的にずらした基準の深度から始まり、自身の長さに沿ってわずかに上昇します。同じ深度にある2つの面には定まった勝者がなく、深度テストはフラグメントごとにどちらかを選びます。段差と上昇は、その問いが生じる前に答えを確定させます。</div>
+
+      <p>The renderer must not mistake this for shape. If the ramped Z were fed into the tangent used to build the ribbon's frame, the mark would twist out of the plane by exactly the amount the ordering needed, so framing drops the tangent's Z.</p>
+      <div class="jp">レンダラはこれを形状と取り違えてはなりません。傾斜のついたZをリボンのフレームを作る接線に渡してしまうと、線は順序付けに必要だった分だけ平面から捻れてしまいます。そのため、フレームの構築では接線のZ成分を捨てます。</div>
+
+      <p><strong>Sampling.</strong> The sample count is derived from measured arc length, not from how many control points the path was authored with. Sampling is spaced by arc length rather than by curve parameter, so density stays uniform where control points bunch up.</p>
+      <div class="jp"><strong>サンプリング。</strong>サンプル数は、パスが何個の制御点で書かれたかではなく、実測した弧長から導かれます。サンプリングは曲線パラメータではなく弧長で等間隔に行うため、制御点が密集する箇所でも密度は一様に保たれます。</div>
+
+      <p><strong>Color.</strong> Every demo draws its colors from one generated <a href={`${base}/documentation/palette`}>Palette</a>: the background from the light end, the strokes from the dark end, grouped by hue so two strokes never come back as near-identical shades.</p>
+      <div class="jp"><strong>色。</strong>すべてのデモは、生成されたひとつの<a href={`${base}/documentation/palette`}>Palette</a>から色を取ります。背景は明るい側から、ストロークは暗い側から、色相ごとにまとめて選ぶため、2本のストロークがほぼ同じ濃淡になることはありません。</div>
+    </details>
   </div>
 
   <section class="demo-section" id="basic-strokes">
@@ -47,23 +75,9 @@ const demos = [
         <p>Cap resolution scales with radius, so a hairline does not pay for triangles it cannot show and a broad mark does not end in a visible polygon. Open Geometry and raise Width: the square stroke keeps its triangle count while the rounded stroke gains triangles.</p>
         <div class="jp">端点の分割数は半径に応じて増減するため、細い線が見えもしない三角形の代償を払うことはなく、太い線が目に見える多角形で終わることもありません。Geometryを開いてWidthを上げると、squareのストロークは三角形の数が変わらず、roundedは増えます。</div>
 
-        <p><strong>The buffer is the canvas.</strong> The strokes are not drawn to the screen. They are drawn into a <code>CanvasBuffer</code>, an offscreen render target with its own scene and orthographic camera, which is then blitted to the visible canvas in one pass. The drawing exists as a texture, so later stages can read what has been drawn rather than only what is being drawn.</p>
-        <div class="jp"><strong>バッファがキャンバス。</strong>ストロークは画面に直接描かれるのではありません。<code>CanvasBuffer</code>、つまり独自のシーンと正射影カメラを持つオフスクリーンのレンダーターゲットに描かれ、それが1パスで可視のキャンバスに転送されます。描画結果はテクスチャとして存在するため、後段の処理は「今描いているもの」だけでなく「すでに描かれたもの」を読めます。</div>
+        <p>Turn Density down and the wireframe coarsens evenly along the whole mark, and turn on Spine to see the resampled centre line hold its even spacing through the turns.</p>
+        <div class="jp">Densityを下げると、ワイヤーフレームは線全体にわたって一様に粗くなります。Spineを表示すると、再サンプリングされた中心線が曲がりの中でも等間隔を保っているのが分かります。</div>
 
-        <p>Antialiasing comes from the target's sample count, not from the renderer's own <code>antialias</code> flag. That flag covers the default framebuffer, which never receives geometry here.</p>
-        <div class="jp">アンチエイリアスは、レンダラ自身の<code>antialias</code>フラグではなく、レンダーターゲットのサンプル数によって得られます。このフラグが対象とするのは既定のフレームバッファであり、ここではそこにジオメトリが描かれることはありません。</div>
-
-        <p><strong>Depth.</strong> The strokes are 2D. They move in X and Y, and their Z sits just above the paper. Z is not constant: each stroke starts at a base depth stepped by its index and rises slightly along its own length. Two surfaces at the same depth have no defined winner, and the depth test picks one per fragment. The step and the rise remove that question before it can be asked.</p>
-        <div class="jp"><strong>深度。</strong>ストロークは2Dです。XとYの中で動き、Zは紙のすぐ上にあります。ただしZは一定ではありません。各ストロークはインデックスに応じて段階的にずらした基準の深度から始まり、自身の長さに沿ってわずかに上昇します。同じ深度にある2つの面には定まった勝者がなく、深度テストはフラグメントごとにどちらかを選びます。段差と上昇は、その問いが生じる前に答えを確定させます。</div>
-
-        <p>The renderer must not mistake this for shape. If the ramped Z were fed into the tangent used to build the ribbon's frame, the mark would twist out of the plane by exactly the amount the ordering needed, so framing drops the tangent's Z.</p>
-        <div class="jp">レンダラはこれを形状と取り違えてはなりません。傾斜のついたZをリボンのフレームを作る接線に渡してしまうと、線は順序付けに必要だった分だけ平面から捻れてしまいます。そのため、フレームの構築では接線のZ成分を捨てます。</div>
-
-        <p><strong>Sampling.</strong> Turn Density down and the wireframe coarsens evenly along the whole mark. The sample count is derived from measured arc length, not from how many control points the path was authored with. Sampling is spaced by arc length rather than by curve parameter, so density stays uniform where control points bunch up.</p>
-        <div class="jp"><strong>サンプリング。</strong>Densityを下げると、ワイヤーフレームは線全体にわたって一様に粗くなります。サンプル数は、パスが何個の制御点で書かれたかではなく、実測した弧長から導かれます。サンプリングは曲線パラメータではなく弧長で等間隔に行うため、制御点が密集する箇所でも密度は一様に保たれます。</div>
-
-        <p><strong>The path.</strong> Each path runs straight for its first third, then wiggles. The amplitude is held at zero and eased in with a smoothstep, so the straight run and the curve belong to one continuous path instead of meeting at a corner. The width tapers slightly, widest across the middle and three quarters of that at either end.</p>
-        <div class="jp"><strong>パス。</strong>それぞれのパスは、前半3分の1を直線で進み、そこからうねりはじめます。振幅はゼロに保たれたあとsmoothstepで滑らかに立ち上がるため、直線部分と曲線部分は角で接するのではなく、ひとつの連続したパスになります。幅はわずかに先細りし、中央が最も太く、両端はその4分の3になります。</div>
       </details>
     </div>
   </section>
