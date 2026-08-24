@@ -24,6 +24,12 @@ Do not use em-dashes for asides. Use parentheses for a gloss or an example, a co
 A colon introduces an example or a list. When an aside would make a sentence run long, end the sentence and start another.
 <div class="jp">コロンは例や列挙を導きます。補足によって文が長くなる場合は、そこで文を終えて次の文を始めます。</div>
 
+A bold label ends with a colon, not a period: `**Depth:**`, not `**Depth.**`. In Japanese the colon is full width: 「**深度：**」.
+<div class="jp">太字のラベルはピリオドではなくコロンで終えます。`**Depth.**` ではなく `**Depth:**`。日本語では全角のコロンを使います（「**深度：**」）。</div>
+
+Use the serial comma: "depth ordering, sampling, and color selection".
+<div class="jp">列挙の最後の項目の前にもカンマを置きます。"depth ordering, sampling, and color selection"。</div>
+
 ## Sentences
 
 Keep the relative pronoun. Write "colors that sRGB cannot display", not "colors sRGB cannot display".
@@ -39,6 +45,14 @@ Lead with the action rather than the condition around it.
 
 Hedge a claim that only holds sometimes. "Can produce" where the outcome depends on which hues are involved; "produces" only where it always does.
 <div class="jp">条件によっては成り立たない主張には、断定を避けた表現を使います。結果が色相に依存する場合は "can produce"、常にそうなる場合にのみ "produces" を使います。</div>
+
+A labeled item in a list carries one fact. A second sentence adding a secondary fact gets cut, not appended.
+<div class="jp">ラベル付きの項目が担う事実はひとつです。二次的な事実を加える2文目は、付け足すのではなく削ります。</div>
+
+<div class="page-note">
+<p><strong>Cut:</strong> Sampling is spaced by arc length rather than by curve parameter, so density stays uniform where control points bunch up.<br />
+<strong>Kept:</strong> Sample count (number of vertices) is derived from measured arc length, not from how many control points the path was authored with.</p>
+</div>
 
 ## Words
 
@@ -58,6 +72,20 @@ Name the noun instead of using an adjective as one: "at that hue’s most satura
 
 Contractions are fine. "That’s the only place" reads better than "that is where".
 <div class="jp">短縮形を使って構いません。"that is where" よりも "that's the only place" のほうが読みやすくなります。</div>
+
+Name the standard term instead of deriving it. If a phenomenon has an accepted name, use it and stop; do not reconstruct the mechanism from first principles.
+<div class="jp">標準的な用語は、導出せずにそのまま使います。現象に定着した名前があるなら、それを使って終わりにします。仕組みを一から組み立て直さないでください。</div>
+
+<div class="page-note">
+<p><strong>Not:</strong> Two surfaces at the same depth have no defined winner, and the depth test picks one per fragment. The step and the rise remove that question before it can be asked.<br />
+<strong>But:</strong> Z slightly elevates along the stroke to avoid z-fighting.</p>
+</div>
+
+Drop the article on a noun that names the topic: "Strokes are 2D", "Sample count is derived", not "The strokes are 2D", "The sample count is derived".
+<div class="jp">主題を名指しする名詞には冠詞を付けません。"The strokes are 2D" や "The sample count is derived" ではなく、"Strokes are 2D"、"Sample count is derived" と書きます。</div>
+
+Gloss a term with a parenthetical on first use, in English as in Japanese: "sample count (number of vertices)".
+<div class="jp">日本語と同様、英語でも初出の用語には丸括弧で補足を添えます。"sample count (number of vertices)"。</div>
 
 ## Scope
 

@@ -24,19 +24,19 @@ const demos = [
     <div class="jp">各クラスについては<a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a>と<a href={`${base}/documentation/renderers`}>Renderers</a>に記載しています。</div>
 
     <h2>Common to every demo</h2>
-    <p>The depth ordering, the sampling and the color selection are shared by every demo on this page. Each demo's own section covers only what its renderer adds.</p>
-    <div class="jp">深度による順序付け、サンプリング、そして色の選択は、このページのすべてのデモに共通です。各デモのセクションでは、そのレンダラが加えるものだけを扱います。</div>
+    <p>Depth ordering, sampling, and color selection are shared across every demo on this page. Each demo section covers only what its renderer adds.</p>
+    <div class="jp">深度順序付け、サンプリング、色の選択は、このページのすべてのデモで共通しています。各デモのセクションでは、そのレンダラが追加する要素のみを説明します。</div>
 
     <details>
       <summary>Details</summary>
-      <p><strong>Depth.</strong> The strokes are 2D. They move in X and Y, and their Z sits just above the paper. Z is not constant: each stroke starts at a base depth stepped by its index and rises slightly along its own length. Two surfaces at the same depth have no defined winner, and the depth test picks one per fragment. The step and the rise remove that question before it can be asked.</p>
-      <div class="jp"><strong>深度。</strong>ストロークは2Dです。XとYの中で動き、Zは紙のすぐ上にあります。ただしZは一定ではありません。各ストロークはインデックスに応じて段階的にずらした基準の深度から始まり、自身の長さに沿ってわずかに上昇します。同じ深度にある2つの面には定まった勝者がなく、深度テストはフラグメントごとにどちらかを選びます。段差と上昇は、その問いが生じる前に答えを確定させます。</div>
+      <p><strong>Depth:</strong> Strokes are 2D: they move in X and Y, and their Z sits just above the paper. Z slightly elevates along the stroke to avoid z-fighting.</p>
+      <div class="jp"><strong>深度：</strong>ストロークは2Dです。XとY方向にだけ動き、Zは紙のすぐ上に配置されます。zファイティングを避けるため、Zはストロークに沿って少しずつ上がっていきます。</div>
 
-      <p><strong>Sampling.</strong> The sample count is derived from measured arc length, not from how many control points the path was authored with. Sampling is spaced by arc length rather than by curve parameter, so density stays uniform where control points bunch up.</p>
-      <div class="jp"><strong>サンプリング。</strong>サンプル数は、パスが何個の制御点で書かれたかではなく、実測した弧長から導かれます。サンプリングは曲線パラメータではなく弧長で等間隔に行うため、制御点が密集する箇所でも密度は一様に保たれます。</div>
+      <p><strong>Sampling:</strong> Sample count (number of vertices) is derived from measured arc length, not from how many control points the path was authored with.</p>
+      <div class="jp"><strong>サンプリング：</strong>サンプル数（頂点数）は、パスを描いた際の制御点の数ではなく、測定した弧長から導かれます。</div>
 
-      <p><strong>Color.</strong> Every demo draws its colors from one generated <a href={`${base}/documentation/palette`}>Palette</a>.</p>
-      <div class="jp"><strong>色。</strong>すべてのデモは、生成されたひとつの<a href={`${base}/documentation/palette`}>Palette</a>から色を取ります。</div>
+      <p><strong>Color:</strong> Every demo draws its colors from one generated <a href={`${base}/documentation/palette`}>Palette</a>.</p>
+      <div class="jp"><strong>色：</strong>すべてのデモは、生成された<a href={`${base}/documentation/palette`}>パレット</a>から色を取得します。</div>
     </details>
   </div>
 

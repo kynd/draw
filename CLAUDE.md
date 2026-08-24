@@ -138,6 +138,8 @@ The rules in brief, none of which replace reading the page:
 - Open a page with a plain description of what the thing is, not an aphorism or a hook.
 - Headings are short noun phrases naming the topic.
 - American spelling. Plain verbs, no intensifiers, contractions are fine.
+- Name the standard term (z-fighting) instead of deriving the mechanism. Bold labels
+  end with a colon. One fact per labeled item.
 - English paragraph first, then its Japanese counterpart in a `<div class="jp">`,
   mirroring the English structure including its parentheses.
 
