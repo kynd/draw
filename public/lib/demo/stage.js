@@ -53,20 +53,30 @@ export class StrokeStage {
 
     setBackground(color) { this.buffer.background.set(color); }
 
+    /**
+     * Writes the screen-dependent uniforms every shader stroke declares. The stage
+     * does this for its own scene on each draw; anything rendering stroke meshes
+     * outside the scene, such as a bake pass, must call it itself, or the mesh
+     * samples the background through a 1×1 screen.
+     */
+    syncScreenUniforms(root) {
+        const screen = new THREE.Vector2(this.viewport.pixelWidth, this.viewport.pixelHeight);
+        const worldToUv = new THREE.Vector2(
+            1 / (2 * this.buffer.extentX), 1 / (2 * this.buffer.extentY)
+        );
+        root.traverse(child => {
+            const u = child.material?.uniforms;
+            if (u?.uScreen) u.uScreen.value.copy(screen);
+            if (u?.uWorldToUv) u.uWorldToUv.value.copy(worldToUv);
+        });
+    }
+
     draw() {
         if (this._pending) return;
         this._pending = true;
         requestAnimationFrame(() => {
             this._pending = false;
-            const screen = new THREE.Vector2(this.viewport.pixelWidth, this.viewport.pixelHeight);
-            const worldToUv = new THREE.Vector2(
-                1 / (2 * this.buffer.extentX), 1 / (2 * this.buffer.extentY)
-            );
-            this.buffer.scene.traverse(child => {
-                const u = child.material?.uniforms;
-                if (u?.uScreen) u.uScreen.value.copy(screen);
-                if (u?.uWorldToUv) u.uWorldToUv.value.copy(worldToUv);
-            });
+            this.syncScreenUniforms(this.buffer.scene);
             this._preRenders.forEach(fn => fn(
                 this.renderer, this.buffer.camera,
                 this.viewport.pixelWidth, this.viewport.pixelHeight

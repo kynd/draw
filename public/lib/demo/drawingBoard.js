@@ -118,6 +118,9 @@ export class DrawingBoard {
         this._bakeScene.clear();
         this._bakeScene.add(this._copyPlane);
         meshes.forEach(mesh => {
+            // A mesh baked straight from input may never have been through a stage
+            // draw, so its screen uniforms are still the defaults.
+            this.stage.syncScreenUniforms(mesh);
             mesh.traverse(child => {
                 const materials = Array.isArray(child.material) ? child.material : [child.material];
                 materials.forEach(m => {
