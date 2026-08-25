@@ -7,9 +7,16 @@ import { wireCollapsibles } from '../../lib/demo/panel.js';
 const COLORS = { drawn: '#8a8a8a', natural: '#2563c4', hobby: '#c43a2f', knots: '#1a1a1a' };
 const MIN_POINT_DISTANCE = 0.008;
 
+const DEFAULT_SPAN = 0.4;
+
 const readout = document.getElementById('readout');
 const spanInput = document.getElementById('span');
 const knotsBtn = document.getElementById('knots-btn');
+
+// Set from script, not only from the markup: browsers restore a slider's previous
+// value across reloads, which silently overrides a changed default.
+spanInput.value = String(DEFAULT_SPAN);
+document.getElementById('span-val').textContent = DEFAULT_SPAN.toFixed(2);
 
 const stage = new StrokeStage(document.getElementById('canvas'), {
     fit: { width: 1.70, height: 1.0 },
