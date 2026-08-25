@@ -36,6 +36,10 @@ export class DrawingBoard {
             new THREE.MeshBasicMaterial({ depthTest: false, depthWrite: false })
         );
         this._copyPlane.renderOrder = -1;
+        this._clearPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(1, 1),
+            new THREE.MeshBasicMaterial({ depthTest: false, depthWrite: false })
+        );
         this._bakeScene = new THREE.Scene();
 
         this._fit();
@@ -63,20 +67,37 @@ export class DrawingBoard {
         const w = camera.right - camera.left, h = camera.top - camera.bottom;
         this.plane.scale.set(w, h, 1);
         this._copyPlane.scale.set(w, h, 1);
+        this._clearPlane.scale.set(w, h, 1);
     }
 
     /** The current accumulation, for strokes that sample the background. */
     get texture() { return this._targets[this._front].texture; }
 
-    /** Fills the whole canvas with one opaque color. */
+    /**
+     * Fills the whole canvas with one opaque color.
+     *
+     * The fill is a rendered quad rather than a plain clear: the targets are
+     * multisampled, and only a render resolves the multisample buffer into the
+     * texture. A bare clear leaves the texture untouched, and it shows black.
+     */
     clear(color) {
         this._clearColor.set(color);
+        this._clearPlane.material.color.set(color);
         const renderer = this.stage.renderer;
         const previous = renderer.getRenderTarget();
+        const previousAuto = renderer.autoClear;
+        renderer.autoClear = false;
+
+        this._bakeScene.clear();
+        this._bakeScene.add(this._clearPlane);
         renderer.setRenderTarget(this._targets[this._front]);
         renderer.setClearColor(this._clearColor, 1);
         renderer.clear(true, true, false);
+        renderer.render(this._bakeScene, this.stage.buffer.camera);
+        this._bakeScene.clear();
+
         renderer.setRenderTarget(previous);
+        renderer.autoClear = previousAuto;
         this.plane.material.map = this.texture;
         this.plane.material.needsUpdate = true;
     }
