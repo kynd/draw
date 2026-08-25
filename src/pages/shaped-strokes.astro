@@ -1,0 +1,50 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Shaped strokes" slug="shaped-strokes">
+  <div class="monologue">
+    Strokes whose outline is a shape of its own, not a thickened path
+  </div>
+
+  <section class="demo-section" id="shapes">
+    <div class="demo-header">
+      <h2>Cloud, squares, spikes</h2>
+      <a href={`${base}/demos/shaped-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/shaped-strokes/index.html?embedded`} title="Cloud, squares, spikes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Three outlines built from the same path: a cloud of large discs, a run of rounded squares, and a broad stroke with sharp spikes.</p>
+      <div class="jp">同じパスから作られた3つの輪郭です。大きな円のかたまりによる雲、丸みを帯びた正方形の連なり、そして鋭いトゲを持つ太いストロークです。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Cloud:</strong> Discs are seeded offsets from the spine with large radii, and the fragment shader draws their union. A union has one well-defined outline whatever the placement, so the boundary never crosses itself, however far the blobs are thrown.</p>
+        <div class="jp"><strong>雲：</strong>円はスパインからシード付きでずらされた大きな半径のもので、フラグメントシェーダはその和集合を描きます。和集合の輪郭は配置によらずひとつに定まるため、円をどれだけ遠くへ飛ばしても境界が自分と交差することはありません。</div>
+
+        <p><strong>Rounded squares:</strong> Cells are stamped on a fixed grid like the pixel stroke, but drawn as a smooth-minimum over every cell's rounded-box distance. Adding a square reshapes the outline around it instead of overlapping it: the boundary is recomputed as a whole each time.</p>
+        <div class="jp"><strong>角丸の正方形：</strong>セルはピクセルのストロークと同じく固定グリッドに置かれますが、全セルの角丸ボックス距離のsmooth minimumとして描かれます。正方形を加えると、重なるのではなくその周りの輪郭が作り直されます。境界は毎回、全体として再計算されます。</div>
+
+        <p><strong>Spikes:</strong> The boundary is pushed outward by a power of a triangle wave. The corner at each tip survives any power, while the valley's derivative goes to zero, so the tips stay sharp and the valleys stay rounded.</p>
+        <div class="jp"><strong>トゲ：</strong>境界は三角波の累乗によって外へ押し出されます。先端の角はどんな累乗でも残り、谷の微分はゼロに向かうため、先端は鋭いまま、谷は丸いままになります。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-shaped-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/try-shaped-strokes/index.html?embedded`} title="Try drawing" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw with the strokes on this page. The dropdown selects a stroke and shows its parameters, adjusted values are remembered per stroke, and each released stroke bakes into the canvas. Clear fills the canvas with a random color.</p>
+      <div class="jp">このページのストロークで描いてみてください。ドロップダウンでストロークを選ぶと、そのパラメータが表示されます。調整した値はストロークごとに記憶され、描き終えたストロークはキャンバスに焼き込まれます。Clearはキャンバス全体をランダムな色で塗りつぶします。</div>
+    </div>
+  </section>
+</PageLayout>

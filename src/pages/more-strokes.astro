@@ -102,4 +102,18 @@ const demos = [
       </details>
     </div>
   </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-more-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/try-more-strokes/index.html?embedded`} title="Try drawing" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw with the strokes on this page. The dropdown selects a stroke and shows its parameters, adjusted values are remembered per stroke, and each released stroke bakes into the canvas. Strokes that read the background read the canvas itself, so they drag and bend what is already painted. Clear fills the canvas with a random color.</p>
+      <div class="jp">このページのストロークで描いてみてください。ドロップダウンでストロークを選ぶと、そのパラメータが表示されます。調整した値はストロークごとに記憶され、描き終えたストロークはキャンバスに焼き込まれます。背景を読むストロークはキャンバスそのものを読むため、すでに描かれたものを引きずり、ゆがめます。Clearはキャンバス全体をランダムな色で塗りつぶします。</div>
+    </div>
+  </section>
 </PageLayout>

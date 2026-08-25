@@ -255,6 +255,26 @@ Thick paint: the smear's drag under a dominant paint color, lit through the heig
 The drag and the ridges share one lane noise, so the paint that moved furthest also sits highest. Takes `background`, `drag`, `paint`, `gloss`, and `shininess`, plus the height field options.
 <div class="jp">引きずりと畝はひとつのレーンノイズを共有するため、最も動いた絵の具が最も高く盛り上がります。`background`、`drag`、`paint`、`gloss`、`shininess`に加え、高さフィールドのオプションを受け取ります。</div>
 
+## Shaped strokes
+
+Three renderers whose outline is a signed-distance field evaluated per fragment, rather than a thickened path. The geometry is only a canvas wide enough to cover the shape.
+<div class="jp">3つのレンダラの輪郭は、太らせたパスではなく、フラグメントごとに評価される符号付き距離場です。ジオメトリは、形を覆うのに足りる広さのキャンバスに過ぎません。</div>
+
+### CloudStrokeRenderer
+
+Large discs scattered along the stroke with seeded offsets, drawn as one union. A union has one well-defined outline whatever the placement, so the boundary never crosses itself. Every third disc stays near the spine, so the chain cannot break. Takes `color`, `blob`, and `offset`, both in half-widths.
+<div class="jp">シード付きのオフセットでストロークに沿って散らされた大きな円を、ひとつの和集合として描きます。和集合の輪郭は配置によらずひとつに定まるため、境界が自分と交差することはありません。3つごとの円はスパインの近くに留まり、連なりが途切れないようにします。`color`、`blob`、`offset`（どちらも半幅単位）を受け取ります。</div>
+
+### RoundedSquareStrokeRenderer
+
+Rounded squares on a fixed grid, stamped from the spine like the pixel stroke and drawn as a smooth minimum over every cell's rounded-box distance. Adding a square reshapes the outline around it instead of overlapping it. Takes `color`, `cell`, `corner`, and `blend`.
+<div class="jp">固定グリッド上の角丸の正方形です。ピクセルのストロークと同じくスパインからスタンプされ、全セルの角丸ボックス距離のsmooth minimumとして描かれます。正方形を加えると、重なるのではなくその周りの輪郭が作り直されます。`color`、`cell`、`corner`、`blend`を受け取ります。</div>
+
+### SpikeStrokeRenderer
+
+The boundary pushed outward by a power of a triangle wave. The corner at each tip survives any power while the valley's derivative goes to zero, so the tips stay sharp and the valleys stay rounded. Takes `color`, `spikes`, `amp`, and `sharp`.
+<div class="jp">境界を三角波の累乗で外へ押し出したものです。先端の角はどんな累乗でも残り、谷の微分はゼロに向かうため、先端は鋭いまま、谷は丸いままになります。`color`、`spikes`、`amp`、`sharp`を受け取ります。</div>
+
 ## Geometry renderers
 
 Three renderers that keep the path, the width and the resampling and throw away the ribbon. The same `StrokeDef` drives all of them.

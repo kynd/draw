@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Try drawing — dry media and deboss</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+  <style>
+    .canvas-wrap { cursor: crosshair; touch-action: none; }
+  </style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Stroke</span></div>
+      <select id="stroke-select" class="dp-select"></select>
+      <div class="dp-sub-label">Parameters</div>
+      <div id="params"></div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Canvas</span></div>
+      <div class="dp-btn-row">
+        <button id="color-btn" class="dp-btn secondary">Next colors</button>
+      </div>
+      <div class="dp-btn-row">
+        <button id="clear-btn" class="dp-btn secondary">Clear</button>
+      </div>
+      <div class="dp-note">Clear fills the canvas with a random color. Strokes bake into the canvas on release.</div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
