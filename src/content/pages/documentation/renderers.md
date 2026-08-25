@@ -31,8 +31,11 @@ These hold for all renderers in `public/lib/renderers/`. A new renderer is check
 The number of spine samples is proportional to arc length, not to the control point count: `clamp(round(length × samplesPerUnit), 8, 2048)`. A short stroke costs few triangles; a long one keeps the same visual smoothness instead of stretching a fixed budget over more distance. `samplesPerUnit` is exposed on each renderer so a demo can trade quality against cost at runtime.
 <div class="jp">スパインのサンプル数は、制御点の数ではなく弧長に比例します。`clamp(round(length × samplesPerUnit), 8, 2048)`。短いストロークは少ない三角形で済み、長いストロークは固定の予算を引き伸ばすのではなく、同じ滑らかさを保ちます。`samplesPerUnit` は各レンダラで公開されており、デモは実行時に品質とコストを調整できます。</div>
 
-Sampling is by arc length (`getSpacedPoints`), so vertex density is uniform along the mark. Clustered control points do not produce clustered geometry.
-<div class="jp">サンプリングは弧長基準（`getSpacedPoints`）で行うため、頂点の密度は線に沿って一様になります。制御点が密集していても、ジオメトリが密集することはありません。</div>
+Sampling is by arc length, so vertex density is uniform along the mark. Clustered control points do not produce clustered geometry.
+<div class="jp">サンプリングは弧長基準で行うため、頂点の密度は線に沿って一様になります。制御点が密集していても、ジオメトリが密集することはありません。</div>
+
+Samples sit at fixed arc-length steps from the start, not at even fractions of the whole. The difference only matters while a path is growing: with fractions, every added point moves every sample, and near a sharp corner a small sample shift swings the tangent, so the drawn vertices crawl. With fixed steps the settled part of the path keeps its samples, and only the tip changes.
+<div class="jp">サンプルは、全長の等分割ではなく、始点から一定の弧長間隔に置かれます。この違いが問題になるのは、パスが伸びている最中だけです。等分割では、点を1つ加えるたびにすべてのサンプルが動き、急な角の近くではサンプル位置のわずかなずれが接線を大きく振るため、描かれた頂点が這うように動きます。固定間隔なら、すでに描かれた部分のサンプルはそのまま保たれ、変わるのは先端だけです。</div>
 
 ### 2D framing
 

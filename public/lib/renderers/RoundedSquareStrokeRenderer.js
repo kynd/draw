@@ -29,13 +29,13 @@ export class RoundedSquareStrokeRenderer extends ShaderStrokeRenderer {
     }
 
     build(def) {
-        const { samples, normals } = resampleSpine(def, this.samplesPerUnit, 8, 4096);
+        const { samples, normals, ts } = resampleSpine(def, this.samplesPerUnit, 8, 4096);
         const n = samples.length;
         const cell = this.cell;
 
         const filled = new Map();
         for (let i = 0; i < n && filled.size < MAX_CELLS; i++) {
-            const t = n === 1 ? 0 : i / (n - 1);
+            const t = ts[i];
             const wL = def.widthLeftAt(t);
             const wR = def.widthRightAt(t);
             const p = samples[i], nrm = normals[i];

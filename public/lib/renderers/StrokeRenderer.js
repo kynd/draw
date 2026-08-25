@@ -88,12 +88,28 @@ export function capExtent(cap, lateral, seed = 1) {
  */
 export function resampleSpine(def, samplesPerUnit, minSamples = 8, maxSamples = 2048) {
     const curve = new THREE.CatmullRomCurve3(def.points.map(p => p.clone()), false, 'centripetal');
+    // The default 200 divisions make the arc-length mapping coarse on long paths,
+    // and a coarse mapping jitters every sample when the curve changes.
+    curve.arcLengthDivisions = Math.max(200, def.points.length * 6);
     const length = curve.getLength();
 
-    const count = THREE.MathUtils.clamp(
-        Math.round(length * samplesPerUnit), minSamples, maxSamples
-    );
-    const samples = curve.getSpacedPoints(count - 1);
+    // Samples sit at fixed arc-length steps from the START, not at even fractions of
+    // the whole. The difference only matters while a path is growing: with fractions,
+    // every added point moves every sample, and near a sharp corner a small sample
+    // shift swings the tangent, so the drawn vertices crawl. With fixed steps the
+    // settled part of the path keeps its samples, and only the tip changes.
+    let step = 1 / samplesPerUnit;
+    if (length / step > maxSamples - 2) step = length / (maxSamples - 2);
+    if (length / step < minSamples - 1) step = length / (minSamples - 1);
+
+    const ts = [];
+    for (let s = 0; s < length; s += step) ts.push(s / length);
+    ts.push(1);
+    // Drop a second-to-last sample that landed almost on the end.
+    if (ts.length > 2 && (1 - ts[ts.length - 2]) * length < step * 0.25) {
+        ts.splice(ts.length - 2, 1);
+    }
+    const samples = ts.map(t => curve.getPointAt(t));
 
     const tangents = [];
     const normals  = [];
@@ -117,5 +133,5 @@ export function resampleSpine(def, samplesPerUnit, minSamples = 8, maxSamples = 
         lastNormal = normal;
     }
 
-    return { samples, normals, tangents, length };
+    return { samples, normals, tangents, length, ts };
 }

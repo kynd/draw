@@ -52,7 +52,7 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
     uniforms(def) { return {}; }
 
     build(def) {
-        const { samples, normals, tangents, length } = resampleSpine(
+        const { samples, normals, tangents, length, ts } = resampleSpine(
             def, this.samplesPerUnit, MIN_SAMPLES, MAX_SAMPLES
         );
         const n = samples.length;
@@ -75,7 +75,7 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
 
         // ── Ribbon, inflated ─────────────────────────────────────────────────
         for (let i = 0; i < n; i++) {
-            const t = n === 1 ? 0 : i / (n - 1);
+            const t = ts[i];
             const wL = def.widthLeftAt(t);
             const wR = def.widthRightAt(t);
             maxWidth = Math.max(maxWidth, wL, wR);

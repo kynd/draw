@@ -43,6 +43,8 @@ html, body {
   width: 100vw; height: 100vh;
 }
 .demo-layout.embedded { width: 960px; height: 620px; }
+/* Try-drawing demos: a square canvas when embedded; full size still fills the window. */
+.demo-layout.embedded.square { width: 860px; }
 
 .canvas-wrap {
   flex: 1 1 auto;

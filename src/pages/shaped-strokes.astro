@@ -39,8 +39,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <h2>Try drawing</h2>
       <a href={`${base}/demos/try-shaped-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
-    <div class="demo-embed">
-      <iframe src={`${base}/demos/try-shaped-strokes/index.html?embedded`} title="Try drawing" scrolling="no"></iframe>
+    <div class="demo-embed" data-w="860" data-h="620" style="width:860px;height:620px">
+      <iframe src={`${base}/demos/try-shaped-strokes/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
     </div>
     <div class="prose">
       <p>Draw with the strokes on this page. The dropdown selects a stroke and shows its parameters, adjusted values are remembered per stroke, and each released stroke bakes into the canvas. Clear fills the canvas with a random color.</p>

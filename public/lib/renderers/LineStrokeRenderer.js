@@ -27,7 +27,7 @@ export class LineStrokeRenderer extends StrokeRenderer {
     }
 
     build(def) {
-        const { samples, normals, tangents, length } = resampleSpine(def, this.samplesPerUnit, 8, 2048);
+        const { samples, normals, tangents, length, ts } = resampleSpine(def, this.samplesPerUnit, 8, 2048);
         const n = samples.length;
         const rand = seededRandom(def.seed);
 
@@ -48,7 +48,7 @@ export class LineStrokeRenderer extends StrokeRenderer {
             const start = vertexCount;
 
             for (let i = 0; i < n; i++) {
-                const t = n === 1 ? 0 : i / (n - 1);
+                const t = ts[i];
                 const wL = def.widthLeftAt(t);
                 const wR = def.widthRightAt(t);
                 const p = samples[i], nrm = normals[i], tan = tangents[i];

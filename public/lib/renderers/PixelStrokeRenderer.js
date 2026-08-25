@@ -27,14 +27,14 @@ export class PixelStrokeRenderer extends StrokeRenderer {
     }
 
     build(def) {
-        const { samples, normals, tangents, length } = resampleSpine(def, this.samplesPerUnit, 8, 4096);
+        const { samples, normals, tangents, length, ts } = resampleSpine(def, this.samplesPerUnit, 8, 4096);
         const n = samples.length;
         const cell = this.cell;
         const rand = seededRandom(def.seed);
 
         const filled = new Map();
         for (let i = 0; i < n; i++) {
-            const t = n === 1 ? 0 : i / (n - 1);
+            const t = ts[i];
             const wL = def.widthLeftAt(t);
             const wR = def.widthRightAt(t);
             const w = Math.max(wL, wR);

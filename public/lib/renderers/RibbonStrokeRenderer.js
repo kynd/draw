@@ -46,7 +46,7 @@ export class RibbonStrokeRenderer extends StrokeRenderer {
     }
 
     build(def) {
-        const { samples, normals, tangents, length } = resampleSpine(
+        const { samples, normals, tangents, length, ts } = resampleSpine(
             def, this.samplesPerUnit, MIN_SAMPLES, MAX_SAMPLES
         );
         const n = samples.length;
@@ -57,7 +57,7 @@ export class RibbonStrokeRenderer extends StrokeRenderer {
 
         // ── Ribbon ───────────────────────────────────────────────────────────
         for (let i = 0; i < n; i++) {
-            const t = n === 1 ? 0 : i / (n - 1);
+            const t = ts[i];
             const p = samples[i];
             const nrm = normals[i];
             const wL = def.widthLeftAt(t);
