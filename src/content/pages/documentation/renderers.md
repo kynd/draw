@@ -189,8 +189,8 @@ Blurring a silhouette is the second design. Expanding the stroke's own geometry 
 
 ## DebossStrokeRenderer
 
-A flat fill with an inner shadow, so the stroke reads as pressed into the surface. A band inside the boundary is shaded by how its outward direction faces a fixed light: the mark is a depression, so the wall on the lit side falls away from the light and darkens, and the far wall catches it and lightens. The outward direction comes from the stroke frame, so the ends shade the same way the sides do. Takes `color`, `bevel`, `amount`, and `angle`.
-<div class="jp">内側に影を持つ平坦な塗りで、ストロークは面に押し込まれたように見えます。輪郭の内側の帯が、外向きの方向と固定光源の関係によって陰影付けされます。線はくぼみなので、光の側の壁は光から離れる向きに傾いて暗くなり、反対側の壁が光を受けて明るくなります。外向きの方向はストロークの座標系から求めるため、終端も側面と同じように陰影付けされます。`color`、`bevel`、`amount`、`angle`を受け取ります。</div>
+A flat fill with an inner shadow, so the stroke reads as cut out of the paper. A band inside the boundary darkens where its outward direction faces a fixed light, the shadow the lit rim of a cutout casts onto its floor. There is no highlight: a hole has nothing to catch the light with. The outward direction comes from the stroke frame, so the ends shade the same way the sides do. Takes `color`, `bevel`, `amount`, and `angle`.
+<div class="jp">内側に影を持つ平坦な塗りで、ストロークは紙から切り抜かれたように見えます。輪郭の内側の帯は、外向きの方向が固定光源を向く場所で暗くなります。切り抜きの光の当たる縁が底に落とす影です。ハイライトはありません。穴には光を受け止めるものがないからです。外向きの方向はストロークの座標系から求めるため、終端も側面と同じように陰影付けされます。`color`、`bevel`、`amount`、`angle`を受け取ります。</div>
 
 ## Background samplers
 

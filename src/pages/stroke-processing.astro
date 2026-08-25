@@ -1,0 +1,39 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Stroke processing" slug="stroke-processing">
+  <div class="monologue">
+    Methods that turn a drawn path into a better one
+  </div>
+
+  <section class="demo-section" id="smoothing">
+    <div class="demo-header">
+      <h2>Curve smoothing</h2>
+      <a href={`${base}/demos/stroke-processing/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/stroke-processing/index.html?embedded`} title="Curve smoothing" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw on the canvas with the mouse. The gray line is the drawn path shown exactly, one pixel wide; the blue and red lines are its natural and Hobby smoothings. <strong>Span</strong> sets the resampling length.</p>
+      <div class="jp">キャンバスにマウスで描いてください。グレーの線は描いたパスをそのまま1ピクセル幅で表示したものです。青と赤の線は、それをnatural曲線とHobby曲線で滑らかにしたものです。<strong>Span</strong>は再サンプリングの間隔を決めます。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Resampling:</strong> The drawn path is walked by arc length and one knot is taken per span. Everything the hand wobbled between the knots is discarded there, so the span is the smoothing strength.</p>
+        <div class="jp"><strong>再サンプリング：</strong>描かれたパスを弧長に沿ってたどり、スパンごとに1つのノットを取ります。ノットの間で手が揺れた分はそこで捨てられるため、スパンがそのまま平滑化の強さになります。</div>
+
+        <p><strong>Natural curve:</strong> A cubic spline through the knots with zero second derivative at the ends, parameterized by chord length so uneven knot spacing does not distort the shape.</p>
+        <div class="jp"><strong>natural曲線：</strong>ノットを通る3次スプラインで、両端の2階微分はゼロです。弦長でパラメータ化するため、ノットの間隔が不均一でも形は歪みません。</div>
+
+        <p><strong>Hobby curve:</strong> The interpolation METAFONT draws paths with: tangent directions come from a mock-curvature system and control handles from Hobby's velocity function. It swings wider through corners than the natural spline, which is the visible difference between the two.</p>
+        <div class="jp"><strong>Hobby曲線：</strong>METAFONTがパスを描くのに使う補間です。接線方向は擬似曲率の連立方程式から、制御ハンドルはHobbyの速度関数から求まります。角ではnaturalスプラインより大きく膨らみ、それが2つの見た目の違いになります。</div>
+
+        <p>Both take the same knots, so moving the span slider trades fidelity against smoothness for both at once. The curves are documented on <a href={`${base}/documentation/curves`}>Curves</a>.</p>
+        <div class="jp">どちらも同じノットを受け取るため、スパンのスライダーを動かすと、両方の忠実さと滑らかさが同時に入れ替わります。曲線については<a href={`${base}/documentation/curves`}>Curves</a>に記載しています。</div>
+      </details>
+    </div>
+  </section>
+</PageLayout>

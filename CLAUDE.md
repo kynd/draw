@@ -87,14 +87,14 @@ src/content/pages/
   documentation/
     stroke-definition.md               one page per class or class group
     renderers.md
-    palette.md  path-effects.md
+    palette.md  path-effects.md  curves.md
     writing-style.md                   how every explanation on this site is written
 src/pages/
   palette-maker.astro                  demo/log pages, written as .astro for embeds
-  strokes.astro  more-strokes.astro                        every stroke demo, one section each
+  strokes.astro  more-strokes.astro  stroke-processing.astro                        every stroke demo, one section each
 public/lib/                            library code
   StrokeDef.js  Palette.js  color.js  CanvasBuffer.js  random.js  pathEffects.js
-  StrokeHalo.js
+  StrokeHalo.js  curves.js
   renderers/    StrokeRenderer.js      base + shared resampling
                 RibbonStrokeRenderer.js
                 ShaderStrokeRenderer.js       base for shader-shaded ribbons

@@ -2,14 +2,13 @@ import * as THREE from 'three';
 import { ShaderStrokeRenderer } from './ShaderStrokeRenderer.js';
 
 /**
- * A flat fill with an inner shadow, so the stroke reads as debossed, pressed into the
- * surface rather than raised from it.
+ * A flat fill with an inner shadow, so the stroke reads as cut out of the paper.
  *
- * A band inside the boundary is shaded by how its outward direction faces a fixed
- * light. The mark is a depression, so the wall on the lit side falls away from the
- * light and darkens, and the far wall catches it and lightens. The outward direction
- * comes from the stroke frame (the lateral normal weighted by vCross, the tangent
- * weighted by vBeyond), so the ends shade the same way the sides do.
+ * A band inside the boundary darkens where its outward direction faces a fixed light,
+ * the shadow the lit rim of a cutout casts onto its floor. There is no highlight: a
+ * hole has nothing to catch the light with. The outward direction comes from the
+ * stroke frame (the lateral normal weighted by vCross, the tangent weighted by
+ * vBeyond), so the ends shade the same way the sides do.
  */
 export class DebossStrokeRenderer extends ShaderStrokeRenderer {
     /**
@@ -64,13 +63,9 @@ export class DebossStrokeRenderer extends ShaderStrokeRenderer {
                 float band = smoothstep(1.0 - uBevel, 1.0, d);
                 float facing = dot(outward, uLightDir);
 
-                // Pressed in: the wall toward the light is the shadowed one.
-                float shade = -uAmount * band * facing;
-                // Lightening mixes toward white instead of scaling, so a dark pigment
-                // still shows its lit edge.
-                vec3 color = shade >= 0.0
-                    ? mix(uColor, vec3(1.0), shade * 0.7)
-                    : uColor * (1.0 + shade);
+                // Cut out: only the shadow the lit rim casts inward. No highlight.
+                float shade = uAmount * band * max(facing, 0.0);
+                vec3 color = uColor * (1.0 - shade);
                 gl_FragColor = vec4(clamp(color, 0.0, 1.0), body);
             }
         `;

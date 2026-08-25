@@ -45,6 +45,11 @@ const navItems: NavItem[] = [
       { label: 'Shadow strokes',    href: '#shadow-strokes' },
     ]
   },
+  { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
+    subLinks: [
+      { label: 'Curve smoothing', href: '#smoothing' },
+    ]
+  },
   { label: 'Documentation', href: `${base}/documentation`, slug: 'documentation',
     children: [
       { label: 'Stroke Definition', href: `${base}/documentation/stroke-definition`, slug: 'documentation/stroke-definition',
@@ -69,6 +74,13 @@ const navItems: NavItem[] = [
           { label: 'Height field materials',   href: '#height-field-materials' },
           { label: 'OilStrokeRenderer',        href: '#oilstrokerenderer' },
           { label: 'Geometry renderers',       href: '#geometry-renderers' },
+        ]
+      },
+      { label: 'Curves', href: `${base}/documentation/curves`, slug: 'documentation/curves',
+        subLinks: [
+          { label: 'resampleEvery', href: '#resampleevery' },
+          { label: 'naturalSpline', href: '#naturalspline' },
+          { label: 'hobbyCurve',    href: '#hobbycurve' },
         ]
       },
       { label: 'Path Effects', href: `${base}/documentation/path-effects`, slug: 'documentation/path-effects',
