@@ -30,8 +30,12 @@ export function resampleEvery(points, span) {
         }
         carried += segment;
     }
+    // The endpoint is always a knot, however close the previous one is. A threshold
+    // here made a growing path's curve lag the pen and then jump a step at a time;
+    // with the endpoint pinned, a new interior knot is born exactly at the pen's
+    // position, so the knot list, and the curve through it, evolve continuously.
     const last = points[points.length - 1];
-    if (out[out.length - 1].distanceTo(last) > span * 0.25) out.push(last.clone());
+    if (out[out.length - 1].distanceTo(last) > 1e-6) out.push(last.clone());
     return out;
 }
 
