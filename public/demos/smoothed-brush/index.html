@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stroke processing — smoothing a drawn path</title>
+  <title>Smoothed brush — a processed path drawn as a stroke</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
@@ -29,18 +29,21 @@
         <input id="span" class="dp-range" type="range" min="0" max="1" step="0.01" value="0.50" />
         <span class="dp-val" id="span-val">0.50</span>
       </div>
-      <div class="dp-note">The drawn path is resampled to one knot per span, and the curves connect the knots.</div>
       <div class="dp-btn-row">
-        <button id="knots-btn" class="dp-toggle active">Knots</button>
+        <button id="natural-btn" class="dp-toggle active">Natural</button>
+        <button id="hobby-btn" class="dp-toggle">Hobby</button>
       </div>
 
       <hr class="dp-divider" />
 
-      <div class="dp-hd"><span class="dp-title">Lines</span></div>
-      <div class="dp-stats">
-        <span>drawn<strong style="color:#8a8a8a">gray</strong></span>
-        <span>natural<strong style="color:#2563c4">blue</strong></span>
-        <span>Hobby<strong style="color:#c43a2f">red</strong></span>
+      <div class="dp-hd"><span class="dp-title">Stroke</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Width</span>
+        <input id="width" class="dp-range" type="range" min="0.02" max="0.16" step="0.005" value="0.090" />
+        <span class="dp-val" id="width-val">0.090</span>
+      </div>
+      <div class="dp-btn-row">
+        <button id="random-btn" class="dp-btn secondary">Randomize colors</button>
       </div>
 
       <hr class="dp-divider" />

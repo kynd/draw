@@ -13,8 +13,8 @@ Curve constructions over a list of knots. Each takes points and returns a dense 
 
 ## resampleEvery
 
-Points spaced `span` apart along the polyline, walked by arc length. The first and last points are always kept, so the curve starts and ends where the path did.
-<div class="jp">ポリラインに沿って弧長基準で`span`間隔に置かれた点です。最初と最後の点は常に保持されるため、曲線はパスと同じ場所で始まり、終わります。</div>
+Points spaced `span` apart along the polyline, walked by arc length. The first and last points are always kept, so the curve starts and ends where the path did. A span of zero returns every point unchanged.
+<div class="jp">ポリラインに沿って弧長基準で`span`間隔に置かれた点です。最初と最後の点は常に保持されるため、曲線はパスと同じ場所で始まり、終わります。スパンがゼロのときは、すべての点をそのまま返します。</div>
 
 ## naturalSpline
 

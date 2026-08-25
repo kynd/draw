@@ -36,4 +36,27 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       </details>
     </div>
   </section>
+
+  <section class="demo-section" id="smoothed-brush">
+    <div class="demo-header">
+      <h2>Smoothed brush</h2>
+      <a href={`${base}/demos/smoothed-brush/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/smoothed-brush/index.html?embedded`} title="Smoothed brush" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The same smoothing, drawn as a stroke instead of a line: the smoothed path feeds the brush renderer with ragged ends. <strong>Natural</strong> and <strong>Hobby</strong> select the curve.</p>
+      <div class="jp">同じ平滑化を、線ではなくストロークとして描いたものです。滑らかにしたパスをbrushレンダラに渡し、端はraggedにしています。<strong>Natural</strong>と<strong>Hobby</strong>で曲線を選べます。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Rendering:</strong> The smoothed polyline becomes the stroke's control points, so a processed path draws with any renderer unchanged.</p>
+        <div class="jp"><strong>描画：</strong>滑らかにしたポリラインがそのままストロークの制御点になるため、処理したパスはどのレンダラでも変更なしで描けます。</div>
+
+        <p><strong>Span:</strong> A span of zero disables the resampling: every drawn point is a knot, and the stroke follows the hand exactly.</p>
+        <div class="jp"><strong>スパン：</strong>スパンがゼロのときは再サンプリングが無効になります。描いたすべての点がノットになり、ストロークは手の動きをそのままたどります。</div>
+      </details>
+    </div>
+  </section>
 </PageLayout>

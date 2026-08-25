@@ -2,12 +2,13 @@ import * as THREE from 'three';
 import { resampleEvery, naturalSpline, hobbyCurve } from '../../lib/curves.js';
 import { seededRandom } from '../../lib/random.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
+import { DrawInput } from '../../lib/demo/drawInput.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 
 const COLORS = { drawn: '#8a8a8a', natural: '#2563c4', hobby: '#c43a2f', knots: '#1a1a1a' };
 const MIN_POINT_DISTANCE = 0.008;
 
-const DEFAULT_SPAN = 0.4;
+const DEFAULT_SPAN = 0.5;
 
 const readout = document.getElementById('readout');
 const spanInput = document.getElementById('span');
@@ -106,33 +107,10 @@ function randomLine() {
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
-const canvas = document.getElementById('canvas');
-let drawing = false;
-
-function toWorld(event) {
-    const rect = canvas.getBoundingClientRect();
-    const nx = (event.clientX - rect.left) / rect.width * 2 - 1;
-    const ny = 1 - (event.clientY - rect.top) / rect.height * 2;
-    return new THREE.Vector3(nx * stage.extentX, ny * stage.extentY, 0);
-}
-
-canvas.addEventListener('pointerdown', event => {
-    drawing = true;
-    canvas.setPointerCapture(event.pointerId);
-    drawn = [toWorld(event)];
-    refresh();
+const input = new DrawInput(document.getElementById('canvas'), stage, {
+    minDistance: MIN_POINT_DISTANCE,
+    onChange: points => { drawn = points; refresh(); },
 });
-canvas.addEventListener('pointermove', event => {
-    if (!drawing) return;
-    const p = toWorld(event);
-    if (drawn.length === 0 || p.distanceTo(drawn[drawn.length - 1]) >= MIN_POINT_DISTANCE) {
-        drawn.push(p);
-        refresh();
-    }
-});
-const stop = () => { drawing = false; };
-canvas.addEventListener('pointerup', stop);
-canvas.addEventListener('pointercancel', stop);
 
 // ── Controls ─────────────────────────────────────────────────────────────────
 
@@ -150,4 +128,5 @@ knotsBtn.addEventListener('click', () => {
 stage.onResize(() => refresh());
 wireCollapsibles();
 drawn = randomLine();
+input.set(drawn);
 refresh();

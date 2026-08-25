@@ -14,6 +14,8 @@ import * as THREE from 'three';
  */
 export function resampleEvery(points, span) {
     if (points.length < 2) return points.map(p => p.clone());
+    // A span of zero means no resampling: every drawn point is a knot.
+    if (span <= 1e-4) return points.map(p => p.clone());
     const out = [points[0].clone()];
     let carried = 0;
     for (let i = 1; i < points.length; i++) {

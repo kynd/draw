@@ -107,7 +107,7 @@ public/lib/                            library code
                 DryMediaStrokeRenderer.js  DebossStrokeRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js
                 LineStrokeRenderer.js
-  demo/         viewport.js  stage.js  panel.js  strokePaths.js
+  demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js
                 testBackground.js      shared demo support, still library code
 public/demos/<name>/                   index.html + main.js per demo
 ```
