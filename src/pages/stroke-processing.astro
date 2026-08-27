@@ -95,19 +95,19 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/blob-drawing/index.html?embedded`} title="Blob drawing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Draw an open line and it becomes a filled blob: the stroke is smoothed, closed into a loop, and the enclosed area painted.</p>
-      <div class="jp">開いた線を描くと、塗りつぶされたブロブになります。ストロークは滑らかにされ、ループとして閉じられ、囲まれた領域が塗られます。</div>
+      <p>Draw a line and it becomes a filled blob that contains the whole gesture: the smallest convex region around every drawn point, smoothed and painted.</p>
+      <div class="jp">線を描くと、その身振り全体を含む塗りつぶされたブロブになります。描いたすべての点を囲む最小の凸領域を、滑らかにして塗ったものです。</div>
 
       <details>
         <summary>Details</summary>
-        <p><strong>Closing:</strong> The knots feed the closed form of the Catmull-Rom or B-spline, whose neighbors wrap around the ends. The segment that joins last to first is built the same way as every other segment, which is what makes the closure smooth instead of a straight seam.</p>
-        <div class="jp"><strong>閉じ方：</strong>ノットはCatmull-RomまたはB-スプラインの閉じた形に渡され、隣接関係が両端で循環します。最後と最初をつなぐセグメントも他のセグメントとまったく同じ方法で作られるため、閉じ目はまっすぐな継ぎ目ではなく滑らかになります。</div>
+        <p><strong>The hull:</strong> The convex hull of the drawn points is the smallest convex region containing all of them. Its perimeter is resampled at the span for even knots, and the closed Catmull-Rom or B-spline rounds it into a blob.</p>
+        <div class="jp"><strong>ハル：</strong>描いた点の凸包は、そのすべてを含む最小の凸領域です。その外周をスパンで再サンプリングして等間隔のノットを取り、閉じたCatmull-RomまたはB-スプラインがブロブへと丸めます。</div>
 
-        <p><strong>The join knot:</strong> A drawn loop may end almost where it started, and a near-duplicate knot at the join would pinch the closure, so the last knot is dropped when it sits within half a span of the first.</p>
-        <div class="jp"><strong>継ぎ目のノット：</strong>描いたループは始点のすぐ近くで終わることがあります。継ぎ目にほぼ重複したノットがあると閉じ目がつまむように歪むため、最後のノットが最初のノットの半スパン以内にあるときは取り除かれます。</div>
+        <p><strong>Containment:</strong> Smoothing cuts inside the hull, so each knot is pushed outward along its edge normal by a fraction of the span. The curve then still contains every drawn point.</p>
+        <div class="jp"><strong>包含：</strong>平滑化はハルの内側を通るため、各ノットは辺の法線方向へスパンの一部だけ外へ押し出されます。これにより、曲線は描いたすべての点を含んだままになります。</div>
 
-        <p><strong>Filling:</strong> The closed polyline becomes a THREE.Shape and its triangulation fills the area, concave curves included.</p>
-        <div class="jp"><strong>塗り：</strong>閉じたポリラインはTHREE.Shapeになり、その三角形分割が領域を塗りつぶします。凹んだ曲線もそのまま扱えます。</div>
+        <p><strong>Filling:</strong> The closed polyline becomes a THREE.Shape and its triangulation fills the area.</p>
+        <div class="jp"><strong>塗り：</strong>閉じたポリラインはTHREE.Shapeになり、その三角形分割が領域を塗りつぶします。</div>
       </details>
     </div>
   </section>

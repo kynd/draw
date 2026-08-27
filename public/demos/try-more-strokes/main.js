@@ -1,6 +1,7 @@
 import { DryMediaStrokeRenderer } from '../../lib/renderers/DryMediaStrokeRenderer.js';
 import { DebossStrokeRenderer } from '../../lib/renderers/DebossStrokeRenderer.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
+import { wireWireframeToggle } from '../../lib/demo/panel.js';
 import { DrawingBoard } from '../../lib/demo/drawingBoard.js';
 import { setupTryDrawing } from '../../lib/demo/tryPanel.js';
 
@@ -47,3 +48,4 @@ setupTryDrawing({
     clearBtn: document.getElementById('clear-btn'),
     colorBtn: document.getElementById('color-btn'),
 });
+wireWireframeToggle(document.getElementById('wire-btn'), stage);

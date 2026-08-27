@@ -30,6 +30,9 @@ export class StrokeStage {
         this._pending = false;
         this._resizeHandlers = [];
         this._preRenders = [];
+        // Applied to every stroke mesh on each draw, so rebuilt and live meshes
+        // pick the state up without per-demo bookkeeping.
+        this.wireframe = false;
 
         this.viewport.onResize((width, height) => {
             this.renderer.setSize(width, height, false);
@@ -77,6 +80,11 @@ export class StrokeStage {
         requestAnimationFrame(() => {
             this._pending = false;
             this.syncScreenUniforms(this.buffer.scene);
+            this.buffer.scene.traverse(child => {
+                if (!child.isMesh || !(child.userData.stats || child.userData.wire)) return;
+                const materials = Array.isArray(child.material) ? child.material : [child.material];
+                materials.forEach(m => { if (m) m.wireframe = this.wireframe; });
+            });
             this._preRenders.forEach(fn => fn(
                 this.renderer, this.buffer.camera,
                 this.viewport.pixelWidth, this.viewport.pixelHeight

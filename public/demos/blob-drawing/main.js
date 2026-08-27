@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import { resampleEvery, catmullRomSpline, bSpline } from '../../lib/curves.js';
+import { convexHull } from '../../lib/pathEffects.js';
 import { seededRandom } from '../../lib/random.js';
 import { Palette } from '../../lib/Palette.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
+import { wireWireframeToggle } from '../../lib/demo/panel.js';
 import { DrawInput } from '../../lib/demo/drawInput.js';
 
 const DEFAULT_SPAN = 0.4;
@@ -69,14 +71,34 @@ function refresh(done = false) {
     setLine(pointerLine, done ? [] : drawn);
     if (drawn.length < 3) { stage.draw(); return; }
 
-    const span = parseFloat(spanInput.value);
-    const knots = resampleEvery(drawn, span);
-    // A drawn loop may end almost where it started; a near-duplicate knot at the
-    // join would pinch the closure.
-    if (knots.length > 3 && knots[knots.length - 1].distanceTo(knots[0]) < Math.max(span, 0.02) * 0.5) {
-        knots.pop();
+    const span = Math.max(parseFloat(spanInput.value), 0.05);
+
+    // The blob encloses the whole gesture: the hull is the smallest convex region
+    // containing every drawn point, resampled around its perimeter for even knots.
+    const hull = convexHull(drawn);
+    if (hull.length < 3) { stage.draw(); return; }
+    const perimeter = resampleEvery([...hull, hull[0]], span);
+    if (perimeter.length > 3
+        && perimeter[perimeter.length - 1].distanceTo(perimeter[0]) < span * 0.5) {
+        perimeter.pop();
     }
-    if (knots.length < 3) { stage.draw(); return; }
+    if (perimeter.length < 3) { stage.draw(); return; }
+
+    // Smoothing cuts inside the hull, so each knot is pushed out along its edge
+    // normal far enough that the curve still contains every point.
+    const m = perimeter.length;
+    const knots = perimeter.map((p, i) => {
+        const prev = perimeter[(i - 1 + m) % m];
+        const next = perimeter[(i + 1) % m];
+        const dx = next.x - prev.x, dy = next.y - prev.y;
+        const len = Math.hypot(dx, dy) || 1;
+        // The hull is counterclockwise, so the outward normal is the right-hand one.
+        return new THREE.Vector3(
+            p.x + (dy / len) * span * 0.3,
+            p.y - (dx / len) * span * 0.3,
+            0
+        );
+    });
 
     const smoother = curve === 'catmull' ? catmullRomSpline : bSpline;
     const loop = smoother(knots, 12, true);
@@ -91,6 +113,7 @@ function refresh(done = false) {
         new THREE.MeshBasicMaterial({ color: colors.fill, side: THREE.DoubleSide })
     );
     fill.position.z = 0.02;
+    fill.userData.wire = true;
     stage.add(fill);
 
     stage.draw();
@@ -130,3 +153,4 @@ randomizeColors();
 drawn = startingLine();
 input.set(drawn);
 refresh(true);
+wireWireframeToggle(document.getElementById('wire-btn'), stage);

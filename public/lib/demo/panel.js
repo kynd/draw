@@ -11,3 +11,15 @@ export function wireCollapsibles(root = document) {
         });
     });
 }
+
+/**
+ * Wires a wireframe toggle button to a stage. The stage applies the state to every
+ * stroke mesh on each draw, so rebuilt and live meshes follow it automatically.
+ */
+export function wireWireframeToggle(button, stage) {
+    button.addEventListener('click', () => {
+        stage.wireframe = !stage.wireframe;
+        button.classList.toggle('active', stage.wireframe);
+        stage.draw();
+    });
+}

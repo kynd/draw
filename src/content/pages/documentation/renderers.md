@@ -34,6 +34,9 @@ The number of spine samples is proportional to arc length, not to the control po
 Sampling is by arc length, so vertex density is uniform along the mark. Clustered control points do not produce clustered geometry.
 <div class="jp">サンプリングは弧長基準で行うため、頂点の密度は線に沿って一様になります。制御点が密集していても、ジオメトリが密集することはありません。</div>
 
+Spacing is curvature-weighted: samples step uniformly in a measure that accumulates with turning as well as with arc length, so a corner earns extra vertices in proportion to how hard it turns, while straight runs keep the base spacing. Density is clamped to five times the base, so a cusp cannot demand unbounded vertices.
+<div class="jp">間隔は曲率で重み付けされます。サンプルは、弧長だけでなく曲がりとともに増える測度の中を等間隔に進むため、角はその曲がりの強さに比例して多くの頂点を得ます。直線部分は基本の間隔を保ちます。密度は基本の5倍までに制限され、カスプが無制限に頂点を要求することはありません。</div>
+
 Samples sit at fixed arc-length steps from the start, not at even fractions of the whole. The difference only matters while a path is growing: with fractions, every added point moves every sample, and near a sharp corner a small sample shift swings the tangent, so the drawn vertices crawl. With fixed steps the settled part of the path keeps its samples, and only the tip changes.
 <div class="jp">サンプルは、全長の等分割ではなく、始点から一定の弧長間隔に置かれます。この違いが問題になるのは、パスが伸びている最中だけです。等分割では、点を1つ加えるたびにすべてのサンプルが動き、急な角の近くではサンプル位置のわずかなずれが接線を大きく振るため、描かれた頂点が這うように動きます。固定間隔なら、すでに描かれた部分のサンプルはそのまま保たれ、変わるのは先端だけです。</div>
 

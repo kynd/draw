@@ -29,4 +29,9 @@ Copies of the path, each offset by its own seeded low-frequency waves. Endpoints
 Short strokes that copy small segments of the base and move sideways by a seeded offset. Takes `count`, `length`, `offset`, and `seed`.
 <div class="jp">元のパスの一部を写し取り、シード付きのオフセットで横へ移動する短いストロークです。`count`、`length`、`offset`、`seed`を受け取ります。</div>
 
+## convexHull
+
+The convex hull of a set of points, counterclockwise, by Andrew's monotone chain. The hull is the smallest convex region containing every point.
+<div class="jp">点の集合の凸包を、Andrewのmonotone chainで反時計回りに求めます。凸包は、すべての点を含む最小の凸領域です。</div>
+
 </div>

@@ -2,6 +2,7 @@ import { CloudStrokeRenderer } from '../../lib/renderers/CloudStrokeRenderer.js'
 import { RoundedSquareStrokeRenderer } from '../../lib/renderers/RoundedSquareStrokeRenderer.js';
 import { SpikeStrokeRenderer } from '../../lib/renderers/SpikeStrokeRenderer.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
+import { wireWireframeToggle } from '../../lib/demo/panel.js';
 import { DrawingBoard } from '../../lib/demo/drawingBoard.js';
 import { setupTryDrawing } from '../../lib/demo/tryPanel.js';
 
@@ -48,3 +49,4 @@ setupTryDrawing({
     clearBtn: document.getElementById('clear-btn'),
     colorBtn: document.getElementById('color-btn'),
 });
+wireWireframeToggle(document.getElementById('wire-btn'), stage);

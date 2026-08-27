@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 
+// Extra samples a corner earns per radian of turning.
+const CURVATURE_BIAS = 6;
+
 /**
  * Base class for stroke renderers.
  *
@@ -99,16 +102,58 @@ export function resampleSpine(def, samplesPerUnit, minSamples = 8, maxSamples = 
     // shift swings the tangent, so the drawn vertices crawl. With fixed steps the
     // settled part of the path keeps its samples, and only the tip changes.
     let step = 1 / samplesPerUnit;
-    if (length / step > maxSamples - 2) step = length / (maxSamples - 2);
     if (length / step < minSamples - 1) step = length / (minSamples - 1);
 
-    const ts = [];
-    for (let s = 0; s < length; s += step) ts.push(s / length);
-    ts.push(1);
-    // Drop a second-to-last sample that landed almost on the end.
-    if (ts.length > 2 && (1 - ts[ts.length - 2]) * length < step * 0.25) {
-        ts.splice(ts.length - 2, 1);
+    // ── Curvature-weighted spacing ────────────────────────────────────────────
+    //
+    // Instead of stepping uniformly in arc length, samples step uniformly in a
+    // measure that also accumulates with turning: dm = ds + bias·step·dθ. On a
+    // straight run the measure is plain arc length, so spacing matches the step;
+    // through a corner each radian of turning adds `bias` extra samples, so the
+    // corner gets vertices in proportion to how hard it turns. The probes are at
+    // fixed arc steps from the start, so a growing path keeps its settled measure
+    // and the anchoring above survives.
+    const probeStep = step * 0.25;
+    const probes = [];
+    for (let s = 0; s < length; s += probeStep) probes.push(curve.getPointAt(s / length));
+    probes.push(curve.getPointAt(1));
+
+    const turns = new Array(probes.length).fill(0);
+    for (let j = 1; j < probes.length - 1; j++) {
+        const ax = probes[j].x - probes[j - 1].x, ay = probes[j].y - probes[j - 1].y;
+        const bx = probes[j + 1].x - probes[j].x, by = probes[j + 1].y - probes[j].y;
+        turns[j] = Math.abs(Math.atan2(ax * by - ay * bx, ax * bx + ay * by));
     }
+
+    const biasLen = CURVATURE_BIAS * step;
+    const dm = [];
+    let totalMeasure = 0;
+    for (let j = 0; j < probes.length - 1; j++) {
+        const m = probeStep + biasLen * turns[j];
+        dm.push(m);
+        totalMeasure += m;
+    }
+    if (totalMeasure / step > maxSamples - 2) step = totalMeasure / (maxSamples - 2);
+    const minGap = step * 0.2;
+
+    const positions = [0];
+    let acc = 0, lastS = 0;
+    for (let j = 0; j < dm.length; j++) {
+        acc += dm[j];
+        while (acc >= step) {
+            const frac = 1 - (acc - step) / dm[j];
+            const sPos = Math.min((j + frac) * probeStep, length);
+            if (sPos - lastS >= minGap) {
+                positions.push(sPos);
+                lastS = sPos;
+            }
+            acc -= step;
+        }
+    }
+    if (length - lastS < minGap && positions.length > 1) positions.pop();
+    positions.push(length);
+
+    const ts = positions.map(s => s / length);
     const samples = ts.map(t => curve.getPointAt(t));
 
     const tangents = [];

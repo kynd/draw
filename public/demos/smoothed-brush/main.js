@@ -6,7 +6,7 @@ import { seededRandom } from '../../lib/random.js';
 import { Palette } from '../../lib/Palette.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawInput } from '../../lib/demo/drawInput.js';
-import { wireCollapsibles } from '../../lib/demo/panel.js';
+import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { taper } from '../../lib/demo/strokePaths.js';
 
 const DEFAULT_SPAN = 0.5;
@@ -134,3 +134,4 @@ colors = randomizeColors();
 drawn = randomLine();
 input.set(drawn);
 refresh();
+wireWireframeToggle(document.getElementById('wire-btn'), stage);

@@ -2,7 +2,7 @@ import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { Palette } from '../../lib/Palette.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
-import { wireCollapsibles } from '../../lib/demo/panel.js';
+import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
 
 const COUNT = 3;
@@ -112,3 +112,4 @@ stage.onResize(() => rebuild());
 wireCollapsibles();
 colors = randomizeColors();
 rebuild();
+wireWireframeToggle(document.getElementById('wire-btn'), stage);

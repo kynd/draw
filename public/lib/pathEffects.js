@@ -103,3 +103,24 @@ export function scatteredPaths(points, { count = 60, length = 0.05, offset = 0.1
     }
     return paths;
 }
+
+/**
+ * The convex hull of a set of points, counterclockwise, by Andrew's monotone chain.
+ * The hull is the smallest convex region containing every point, which makes it the
+ * natural outline for a shape that must enclose a whole gesture.
+ */
+export function convexHull(points) {
+    const pts = points.map(p => p.clone()).sort((a, b) => a.x - b.x || a.y - b.y);
+    if (pts.length < 3) return pts;
+    const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    const half = start => {
+        const out = [];
+        for (const p of start) {
+            while (out.length >= 2 && cross(out[out.length - 2], out[out.length - 1], p) <= 0) out.pop();
+            out.push(p);
+        }
+        out.pop();
+        return out;
+    };
+    return [...half(pts), ...half([...pts].reverse())];
+}
