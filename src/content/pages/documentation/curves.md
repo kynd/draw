@@ -21,6 +21,16 @@ Points spaced `span` apart along the polyline, walked by arc length. The first a
 A natural cubic spline through the knots: C2 continuous, with zero second derivative at the ends. Parameterized by chord length, so uneven knot spacing does not distort the shape. Takes `samplesPerSegment`.
 <div class="jp">ノットを通るnatural 3次スプラインです。C2連続で、両端の2階微分はゼロです。弦長でパラメータ化するため、ノットの間隔が不均一でも形は歪みません。`samplesPerSegment`を受け取ります。</div>
 
+## catmullRomSpline
+
+A centripetal Catmull-Rom spline through the knots, evaluated segment by segment. Each segment depends only on its four surrounding knots, so appending a knot changes the last two segments and nothing before them: a growing path keeps its settled shape exactly. The cost is C1 continuity instead of C2. Takes `samplesPerSegment`.
+<div class="jp">ノットを通るcentripetal Catmull-Romスプラインで、セグメントごとに評価されます。各セグメントは周囲の4つのノットにだけ依存するため、ノットを追加しても変わるのは末尾の2セグメントだけです。伸びていくパスの確定した部分は正確に形を保ちます。その代わり、連続性はC2ではなくC1です。`samplesPerSegment`を受け取ります。</div>
+
+## bSpline
+
+A uniform cubic B-spline over the knots, with the ends clamped by repetition. Each span depends on four consecutive knots, so like the Catmull-Rom it cannot move the settled part of a growing path. It is C2 continuous, and pays for it by approximating the knots instead of passing through them. Takes `samplesPerSegment`.
+<div class="jp">ノットの上の一様3次B-スプラインで、両端は繰り返しによって固定されます。各スパンは連続する4つのノットに依存するため、Catmull-Romと同じく、伸びていくパスの確定した部分を動かせません。C2連続であり、その代わりノットを通らず近似します。`samplesPerSegment`を受け取ります。</div>
+
 ## hobbyCurve
 
 John Hobby's curve through the knots, the interpolation METAFONT draws paths with. Tangent directions come from a mock-curvature linear system solved with the Thomas algorithm, and control handles from Hobby's velocity function. Adapted from Jake Low's implementation (ISC license). Takes `samplesPerSegment` and `omega`, the curl at the endpoints.

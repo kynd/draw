@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local smoothing — curves that keep their settled shape</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+  <style>
+    .canvas-wrap { cursor: crosshair; touch-action: none; }
+  </style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Draw</span></div>
+      <div class="dp-note">Draw on the canvas with the mouse. The drawn line replaces the previous one.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Smoothing</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Span</span>
+        <input id="span" class="dp-range" type="range" min="0" max="1" step="0.01" value="0.50" />
+        <span class="dp-val" id="span-val">0.50</span>
+      </div>
+      <div class="dp-btn-row">
+        <button id="knots-btn" class="dp-toggle active">Knots</button>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Lines</span></div>
+      <div class="dp-stats">
+        <span>drawn<strong style="color:#8a8a8a">gray</strong></span>
+        <span>Catmull-Rom<strong style="color:#2563c4">blue</strong></span>
+        <span>B-spline<strong style="color:#0e8a5f">green</strong></span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Stability</span></div>
+      <div class="dp-note">The largest movement of the settled part per added point, over the current stroke.</div>
+      <div class="dp-stats" id="stability"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -37,6 +37,32 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
+  <section class="demo-section" id="local-smoothing">
+    <div class="demo-header">
+      <h2>Local smoothing</h2>
+      <a href={`${base}/demos/local-smoothing/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/local-smoothing/index.html?embedded`} title="Local smoothing" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Two curves that cannot move the settled part of a growing stroke: a Catmull-Rom spline (blue) and a cubic B-spline (green). The stability readout shows the largest movement of the settled part per added point; for both it is exactly zero.</p>
+      <div class="jp">伸びていくストロークの、すでに描かれた部分を動かせない2つの曲線です。Catmull-Romスプライン（青）と3次B-スプライン（緑）。Stabilityの表示は、点を1つ加えるごとの、確定した部分の最大移動量です。どちらも正確にゼロになります。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Why the others jump:</strong> The natural spline and Hobby's curve each solve one system over every knot, so a new knot re-solves the whole curve. The influence decays with distance, but it never reaches zero.</p>
+        <div class="jp"><strong>他の曲線が跳ねる理由：</strong>naturalスプラインとHobby曲線は、すべてのノットにまたがるひとつの連立方程式を解くため、新しいノットは曲線全体を解き直します。影響は距離とともに減衰しますが、ゼロにはなりません。</div>
+
+        <p><strong>Local support:</strong> Each segment of these two depends only on its four surrounding knots. Appending a knot changes the last segments and nothing before them, which the readout measures as exactly zero.</p>
+        <div class="jp"><strong>局所性：</strong>この2つの曲線の各セグメントは、周囲の4つのノットにだけ依存します。ノットを追加しても変わるのは末尾のセグメントだけで、それより前は変わりません。表示される値が正確にゼロなのはそのためです。</div>
+
+        <p><strong>The trade:</strong> The Catmull-Rom passes through every knot but is only C1, so its curvature can kink at knots. The B-spline is C2 and smoother, and pays for it by approximating the knots instead of passing through them, visibly cutting the corners.</p>
+        <div class="jp"><strong>引き換え：</strong>Catmull-Romはすべてのノットを通りますが、C1連続に留まるため、ノットで曲率が折れることがあります。B-スプラインはC2連続でより滑らかですが、その代わりノットを通らず近似するため、角を目に見えて内側に切り落とします。</div>
+      </details>
+    </div>
+  </section>
+
   <section class="demo-section" id="smoothed-brush">
     <div class="demo-header">
       <h2>Smoothed brush</h2>

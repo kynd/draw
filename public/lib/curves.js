@@ -171,6 +171,81 @@ export function hobbyCurve(knots, samplesPerSegment = 16, omega = 0) {
     return out;
 }
 
+/**
+ * A centripetal Catmull-Rom spline through the knots, evaluated segment by segment.
+ *
+ * Unlike the natural spline and Hobby's curve, which solve one system over every
+ * knot, each segment here depends only on its four surrounding knots. Appending a
+ * knot therefore changes the last two segments and nothing before them, so a growing
+ * path keeps its settled shape exactly. The cost is C1 continuity instead of C2.
+ */
+export function catmullRomSpline(knots, samplesPerSegment = 16) {
+    const n = knots.length;
+    if (n < 2) return knots.map(p => p.clone());
+    if (n === 2) return sampleLine(knots[0], knots[1], samplesPerSegment);
+
+    const alpha = 0.5;
+    const out = [];
+    for (let i = 0; i < n - 1; i++) {
+        const p0 = knots[Math.max(0, i - 1)];
+        const p1 = knots[i];
+        const p2 = knots[i + 1];
+        const p3 = knots[Math.min(n - 1, i + 2)];
+
+        // Centripetal knot intervals, so tight spacing does not create loops.
+        const t0 = 0;
+        const t1 = t0 + Math.max(Math.pow(p0.distanceTo(p1), alpha), 1e-4);
+        const t2 = t1 + Math.max(Math.pow(p1.distanceTo(p2), alpha), 1e-4);
+        const t3 = t2 + Math.max(Math.pow(p2.distanceTo(p3), alpha), 1e-4);
+
+        const steps = i === n - 2 ? samplesPerSegment + 1 : samplesPerSegment;
+        for (let k = 0; k < steps; k++) {
+            const t = THREE.MathUtils.lerp(t1, t2, k / samplesPerSegment);
+            const A1 = p0.clone().multiplyScalar((t1 - t) / (t1 - t0)).add(p1.clone().multiplyScalar((t - t0) / (t1 - t0)));
+            const A2 = p1.clone().multiplyScalar((t2 - t) / (t2 - t1)).add(p2.clone().multiplyScalar((t - t1) / (t2 - t1)));
+            const A3 = p2.clone().multiplyScalar((t3 - t) / (t3 - t2)).add(p3.clone().multiplyScalar((t - t2) / (t3 - t2)));
+            const B1 = A1.multiplyScalar((t2 - t) / (t2 - t0)).add(A2.clone().multiplyScalar((t - t0) / (t2 - t0)));
+            const B2 = A2.multiplyScalar((t3 - t) / (t3 - t1)).add(A3.multiplyScalar((t - t1) / (t3 - t1)));
+            out.push(B1.multiplyScalar((t2 - t) / (t2 - t1)).add(B2.multiplyScalar((t - t1) / (t2 - t1))));
+        }
+    }
+    return out;
+}
+
+/**
+ * A uniform cubic B-spline over the knots, with the ends clamped by repetition.
+ *
+ * Each span depends on four consecutive knots, so like the Catmull-Rom it cannot move
+ * the settled part of a growing path. It is C2 continuous, smoother than the knots
+ * deserve, and pays for it by approximating them instead of passing through.
+ */
+export function bSpline(knots, samplesPerSegment = 16) {
+    const n = knots.length;
+    if (n < 2) return knots.map(p => p.clone());
+    // Repeating the endpoints pins the curve to them.
+    const pts = [knots[0], knots[0], ...knots, knots[n - 1], knots[n - 1]];
+    const spans = pts.length - 3;
+    const out = [];
+    for (let j = 0; j < spans; j++) {
+        const p0 = pts[j], p1 = pts[j + 1], p2 = pts[j + 2], p3 = pts[j + 3];
+        const steps = j === spans - 1 ? samplesPerSegment + 1 : samplesPerSegment;
+        for (let k = 0; k < steps; k++) {
+            const t = k / samplesPerSegment;
+            const t2 = t * t, t3 = t2 * t;
+            const b0 = (1 - 3 * t + 3 * t2 - t3) / 6;
+            const b1 = (4 - 6 * t2 + 3 * t3) / 6;
+            const b2 = (1 + 3 * t + 3 * t2 - 3 * t3) / 6;
+            const b3 = t3 / 6;
+            out.push(new THREE.Vector3(
+                b0 * p0.x + b1 * p1.x + b2 * p2.x + b3 * p3.x,
+                b0 * p0.y + b1 * p1.y + b2 * p2.y + b3 * p3.y,
+                b0 * p0.z + b1 * p1.z + b2 * p2.z + b3 * p3.z
+            ));
+        }
+    }
+    return out;
+}
+
 function sampleLine(a, b, samples) {
     return Array.from({ length: samples + 1 }, (_, k) => a.clone().lerp(b, k / samples));
 }
