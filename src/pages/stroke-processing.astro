@@ -72,8 +72,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/smoothed-brush/index.html?embedded`} title="Smoothed brush" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The same smoothing, drawn as a stroke instead of a line: the smoothed path feeds the brush renderer with ragged ends. <strong>Natural</strong> and <strong>Hobby</strong> select the curve.</p>
-      <div class="jp">同じ平滑化を、線ではなくストロークとして描いたものです。滑らかにしたパスをbrushレンダラに渡し、端はraggedにしています。<strong>Natural</strong>と<strong>Hobby</strong>で曲線を選べます。</div>
+      <p>The same smoothing, drawn as a stroke instead of a line: the smoothed path feeds the brush renderer with ragged ends. The dropdown selects among all four curves.</p>
+      <div class="jp">同じ平滑化を、線ではなくストロークとして描いたものです。滑らかにしたパスをbrushレンダラに渡し、端はraggedにしています。ドロップダウンで4つの曲線をすべて選べます。</div>
 
       <details>
         <summary>Details</summary>
@@ -82,6 +82,32 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
         <p><strong>Span:</strong> A span of zero disables the resampling: every drawn point is a knot, and the stroke follows the hand exactly.</p>
         <div class="jp"><strong>スパン：</strong>スパンがゼロのときは再サンプリングが無効になります。描いたすべての点がノットになり、ストロークは手の動きをそのままたどります。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="blobs">
+    <div class="demo-header">
+      <h2>Blob drawing</h2>
+      <a href={`${base}/demos/blob-drawing/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-drawing/index.html?embedded`} title="Blob drawing" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw an open line and it becomes a filled blob: the stroke is smoothed, closed into a loop, and the enclosed area painted.</p>
+      <div class="jp">開いた線を描くと、塗りつぶされたブロブになります。ストロークは滑らかにされ、ループとして閉じられ、囲まれた領域が塗られます。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Closing:</strong> The knots feed the closed form of the Catmull-Rom or B-spline, whose neighbors wrap around the ends. The segment that joins last to first is built the same way as every other segment, which is what makes the closure smooth instead of a straight seam.</p>
+        <div class="jp"><strong>閉じ方：</strong>ノットはCatmull-RomまたはB-スプラインの閉じた形に渡され、隣接関係が両端で循環します。最後と最初をつなぐセグメントも他のセグメントとまったく同じ方法で作られるため、閉じ目はまっすぐな継ぎ目ではなく滑らかになります。</div>
+
+        <p><strong>The join knot:</strong> A drawn loop may end almost where it started, and a near-duplicate knot at the join would pinch the closure, so the last knot is dropped when it sits within half a span of the first.</p>
+        <div class="jp"><strong>継ぎ目のノット：</strong>描いたループは始点のすぐ近くで終わることがあります。継ぎ目にほぼ重複したノットがあると閉じ目がつまむように歪むため、最後のノットが最初のノットの半スパン以内にあるときは取り除かれます。</div>
+
+        <p><strong>Filling:</strong> The closed polyline becomes a THREE.Shape and its triangulation fills the area, concave curves included.</p>
+        <div class="jp"><strong>塗り：</strong>閉じたポリラインはTHREE.Shapeになり、その三角形分割が領域を塗りつぶします。凹んだ曲線もそのまま扱えます。</div>
       </details>
     </div>
   </section>

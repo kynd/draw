@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
-import { resampleEvery, naturalSpline, hobbyCurve } from '../../lib/curves.js';
+import { resampleEvery, naturalSpline, hobbyCurve, catmullRomSpline, bSpline } from '../../lib/curves.js';
 import { seededRandom } from '../../lib/random.js';
 import { Palette } from '../../lib/Palette.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
@@ -14,8 +14,7 @@ const DEFAULT_SPAN = 0.5;
 const readout = document.getElementById('readout');
 const spanInput = document.getElementById('span');
 const widthInput = document.getElementById('width');
-const naturalBtn = document.getElementById('natural-btn');
-const hobbyBtn = document.getElementById('hobby-btn');
+const curveSelect = document.getElementById('curve-select');
 
 spanInput.value = String(DEFAULT_SPAN);
 document.getElementById('span-val').textContent = DEFAULT_SPAN.toFixed(2);
@@ -56,7 +55,11 @@ function refresh() {
 
     const span = parseFloat(spanInput.value);
     const knots = resampleEvery(drawn, span);
-    const smoothed = curve === 'natural' ? naturalSpline(knots) : hobbyCurve(knots);
+    const smoothers = {
+        natural: naturalSpline, hobby: hobbyCurve,
+        catmull: catmullRomSpline, bspline: bSpline,
+    };
+    const smoothed = smoothers[curve](knots);
     if (smoothed.length < 2) { stage.draw(); return; }
 
     const renderer = new BrushStrokeRenderer({
@@ -107,14 +110,10 @@ const input = new DrawInput(document.getElementById('canvas'), stage, {
     onChange: points => { drawn = points; refresh(); },
 });
 
-function setCurve(name) {
-    curve = name;
-    naturalBtn.classList.toggle('active', name === 'natural');
-    hobbyBtn.classList.toggle('active', name === 'hobby');
+curveSelect.addEventListener('change', () => {
+    curve = curveSelect.value;
     refresh();
-}
-naturalBtn.addEventListener('click', () => setCurve('natural'));
-hobbyBtn.addEventListener('click', () => setCurve('hobby'));
+});
 
 spanInput.addEventListener('input', () => {
     document.getElementById('span-val').textContent = parseFloat(spanInput.value).toFixed(2);

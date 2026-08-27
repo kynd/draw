@@ -23,13 +23,13 @@ A natural cubic spline through the knots: C2 continuous, with zero second deriva
 
 ## catmullRomSpline
 
-A centripetal Catmull-Rom spline through the knots, evaluated segment by segment. Each segment depends only on its four surrounding knots, so appending a knot changes the last two segments and nothing before them: a growing path keeps its settled shape exactly. The cost is C1 continuity instead of C2. Takes `samplesPerSegment`.
-<div class="jp">ノットを通るcentripetal Catmull-Romスプラインで、セグメントごとに評価されます。各セグメントは周囲の4つのノットにだけ依存するため、ノットを追加しても変わるのは末尾の2セグメントだけです。伸びていくパスの確定した部分は正確に形を保ちます。その代わり、連続性はC2ではなくC1です。`samplesPerSegment`を受け取ります。</div>
+A centripetal Catmull-Rom spline through the knots, evaluated segment by segment. Each segment depends only on its four surrounding knots, so appending a knot changes the last two segments and nothing before them: a growing path keeps its settled shape exactly. The cost is C1 continuity instead of C2. Takes `samplesPerSegment` and `closed`; when closed, the neighbors wrap and the joining segment is built like every other, so the loop closes smoothly.
+<div class="jp">ノットを通るcentripetal Catmull-Romスプラインで、セグメントごとに評価されます。各セグメントは周囲の4つのノットにだけ依存するため、ノットを追加しても変わるのは末尾の2セグメントだけです。伸びていくパスの確定した部分は正確に形を保ちます。その代わり、連続性はC2ではなくC1です。`samplesPerSegment`と`closed`を受け取ります。閉じた場合は隣接関係が循環し、継ぎ目のセグメントも他と同じ方法で作られるため、ループは滑らかに閉じます。</div>
 
 ## bSpline
 
-A uniform cubic B-spline over the knots, with the ends clamped by repetition. Each span depends on four consecutive knots, so like the Catmull-Rom it cannot move the settled part of a growing path. It is C2 continuous, and pays for it by approximating the knots instead of passing through them. Takes `samplesPerSegment`.
-<div class="jp">ノットの上の一様3次B-スプラインで、両端は繰り返しによって固定されます。各スパンは連続する4つのノットに依存するため、Catmull-Romと同じく、伸びていくパスの確定した部分を動かせません。C2連続であり、その代わりノットを通らず近似します。`samplesPerSegment`を受け取ります。</div>
+A uniform cubic B-spline over the knots, with the ends clamped by repetition. Each span depends on four consecutive knots, so like the Catmull-Rom it cannot move the settled part of a growing path. It is C2 continuous, and pays for it by approximating the knots instead of passing through them. Takes `samplesPerSegment` and `closed`; when closed, the spans wrap instead of clamping and the loop closes with C2 continuity.
+<div class="jp">ノットの上の一様3次B-スプラインで、両端は繰り返しによって固定されます。各スパンは連続する4つのノットに依存するため、Catmull-Romと同じく、伸びていくパスの確定した部分を動かせません。C2連続であり、その代わりノットを通らず近似します。`samplesPerSegment`と`closed`を受け取ります。閉じた場合はスパンが固定ではなく循環し、ループはC2連続のまま閉じます。</div>
 
 ## hobbyCurve
 

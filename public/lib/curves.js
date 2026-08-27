@@ -179,18 +179,21 @@ export function hobbyCurve(knots, samplesPerSegment = 16, omega = 0) {
  * knot therefore changes the last two segments and nothing before them, so a growing
  * path keeps its settled shape exactly. The cost is C1 continuity instead of C2.
  */
-export function catmullRomSpline(knots, samplesPerSegment = 16) {
+export function catmullRomSpline(knots, samplesPerSegment = 16, closed = false) {
     const n = knots.length;
     if (n < 2) return knots.map(p => p.clone());
     if (n === 2) return sampleLine(knots[0], knots[1], samplesPerSegment);
 
     const alpha = 0.5;
     const out = [];
-    for (let i = 0; i < n - 1; i++) {
-        const p0 = knots[Math.max(0, i - 1)];
+    const segments = closed ? n : n - 1;
+    for (let i = 0; i < segments; i++) {
+        // Closed: neighbors wrap around, and the extra segment joins the ends with
+        // the same construction as everywhere else, which is what closes it smoothly.
+        const p0 = closed ? knots[(i - 1 + n) % n] : knots[Math.max(0, i - 1)];
         const p1 = knots[i];
-        const p2 = knots[i + 1];
-        const p3 = knots[Math.min(n - 1, i + 2)];
+        const p2 = knots[(i + 1) % n];
+        const p3 = closed ? knots[(i + 2) % n] : knots[Math.min(n - 1, i + 2)];
 
         // Centripetal knot intervals, so tight spacing does not create loops.
         const t0 = 0;
@@ -198,7 +201,7 @@ export function catmullRomSpline(knots, samplesPerSegment = 16) {
         const t2 = t1 + Math.max(Math.pow(p1.distanceTo(p2), alpha), 1e-4);
         const t3 = t2 + Math.max(Math.pow(p2.distanceTo(p3), alpha), 1e-4);
 
-        const steps = i === n - 2 ? samplesPerSegment + 1 : samplesPerSegment;
+        const steps = !closed && i === n - 2 ? samplesPerSegment + 1 : samplesPerSegment;
         for (let k = 0; k < steps; k++) {
             const t = THREE.MathUtils.lerp(t1, t2, k / samplesPerSegment);
             const A1 = p0.clone().multiplyScalar((t1 - t) / (t1 - t0)).add(p1.clone().multiplyScalar((t - t0) / (t1 - t0)));
@@ -219,16 +222,19 @@ export function catmullRomSpline(knots, samplesPerSegment = 16) {
  * the settled part of a growing path. It is C2 continuous, smoother than the knots
  * deserve, and pays for it by approximating them instead of passing through.
  */
-export function bSpline(knots, samplesPerSegment = 16) {
+export function bSpline(knots, samplesPerSegment = 16, closed = false) {
     const n = knots.length;
     if (n < 2) return knots.map(p => p.clone());
-    // Repeating the endpoints pins the curve to them.
-    const pts = [knots[0], knots[0], ...knots, knots[n - 1], knots[n - 1]];
-    const spans = pts.length - 3;
+    // Open: repeating the endpoints pins the curve to them. Closed: the spans wrap
+    // instead, and the same basis that smooths the middle smooths the join.
+    const pts = closed
+        ? [...knots, knots[0], knots[1], knots[2 % n]]
+        : [knots[0], knots[0], ...knots, knots[n - 1], knots[n - 1]];
+    const spans = closed ? n : pts.length - 3;
     const out = [];
     for (let j = 0; j < spans; j++) {
         const p0 = pts[j], p1 = pts[j + 1], p2 = pts[j + 2], p3 = pts[j + 3];
-        const steps = j === spans - 1 ? samplesPerSegment + 1 : samplesPerSegment;
+        const steps = !closed && j === spans - 1 ? samplesPerSegment + 1 : samplesPerSegment;
         for (let k = 0; k < steps; k++) {
             const t = k / samplesPerSegment;
             const t2 = t * t, t3 = t2 * t;
