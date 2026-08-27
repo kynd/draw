@@ -52,7 +52,7 @@ const registry = [
         { key: 'gloss', label: 'Gloss', min: 0, max: 1.2, step: 0.05, value: 0.6 },
     ], (v, ctx) => new PaintBlobRenderer({
         color: ctx.colorA, colorB: ctx.colorB, fade: 0.05, relief: v.relief, swell: 0.7, ridged: true,
-        gloss: v.gloss, edgeSoft: 0.025, noiseFreq: 3.5,
+        split: 1, gloss: v.gloss, edgeSoft: 0.025, noiseFreq: 3.5,
     })),
     blob('watery', 'Watery wash', [], (v, ctx) => new WashBlobRenderer({
         color: ctx.colorA, background: ctx.texture, pigment: 0.35, feather: 0.1, rim: 0.18, flow: 0.03, wet: 0.85,

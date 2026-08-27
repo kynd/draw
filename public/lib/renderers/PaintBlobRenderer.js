@@ -13,6 +13,9 @@ import { BlobRenderer } from './BlobRenderer.js';
  * `dry` breaks the fill the way a dry brush does: a streak noise stretched along a
  * seeded direction erodes both the edge and the interior, leaving rough transparent
  * scratches where the paint ran out.
+ *
+ * `split` sharpens the two-pigment mix: at 1 the colors meet on a hard boundary
+ * shaped by low-frequency noise instead of mixing in smooth patches.
  */
 export class PaintBlobRenderer extends BlobRenderer {
     constructor({
@@ -25,6 +28,7 @@ export class PaintBlobRenderer extends BlobRenderer {
         gloss = 0.3,
         edgeSoft = 0.03,   // alpha feather width
         dry = 0,           // dry-brush erosion
+        split = 0,         // sharpness of the two-pigment boundary
         noiseFreq = 5,
         ...rest
     } = {}) {
@@ -38,6 +42,7 @@ export class PaintBlobRenderer extends BlobRenderer {
         this.gloss = gloss;
         this.edgeSoft = edgeSoft;
         this.dry = dry;
+        this.split = split;
         this.noiseFreq = noiseFreq;
     }
 
@@ -52,6 +57,7 @@ export class PaintBlobRenderer extends BlobRenderer {
             uGloss: { value: this.gloss },
             uEdgeSoft: { value: this.edgeSoft },
             uDry: { value: this.dry },
+            uSplit: { value: this.split },
             uFreq: { value: this.noiseFreq },
         };
     }
@@ -67,6 +73,7 @@ export class PaintBlobRenderer extends BlobRenderer {
             uniform float uGloss;
             uniform float uEdgeSoft;
             uniform float uDry;
+            uniform float uSplit;
             uniform float uFreq;
 
             float reliefAt(vec2 p) {
@@ -130,8 +137,12 @@ export class PaintBlobRenderer extends BlobRenderer {
                 vec3 halfVec = normalize(light + view);
                 float spec = pow(max(dot(normal, halfVec), 0.0), 40.0) * uGloss;
 
-                float blend = fbm(vWorld * uFreq * 0.45 + uSeed * 3.0);
-                vec3 base = mix(uColor, uColorB, smoothstep(0.3, 0.7, blend));
+                // Split pulls the pigment boundary to a low frequency and narrows
+                // its width, so the two colors meet on a sharp wandering line
+                // instead of mixing in patches.
+                float blend = fbm(vWorld * mix(uFreq * 0.45, 1.4, uSplit) + uSeed * 3.0);
+                float blendW = mix(0.2, 0.008, uSplit);
+                vec3 base = mix(uColor, uColorB, smoothstep(0.5 - blendW, 0.5 + blendW, blend));
                 vec3 pigment = base * (1.0 - uFade * (fbm(vWorld * uFreq * 0.6 + uSeed * 5.0) - 0.25));
                 vec3 color = pigment * (0.6 + 0.4 * diff) + vec3(spec);
                 gl_FragColor = vec4(clamp(color, 0.0, 1.0), alpha);
