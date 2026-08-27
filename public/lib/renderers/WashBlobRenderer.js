@@ -21,6 +21,7 @@ export class WashBlobRenderer extends BlobRenderer {
         feather = 0.06,     // edge softness in world units
         rim = 0.4,          // pigment collecting inside the boundary
         flow = 0.04,        // drag length of the background sampling, in uv
+        wet = 0.5,          // how much the paint multiplies into the background
         ...rest
     } = {}) {
         super({ margin: 0.15 + feather, ...rest });
@@ -30,6 +31,7 @@ export class WashBlobRenderer extends BlobRenderer {
         this.feather = feather;
         this.rim = rim;
         this.flow = flow;
+        this.wet = wet;
     }
 
     uniforms() {
@@ -40,6 +42,7 @@ export class WashBlobRenderer extends BlobRenderer {
             uFeather: { value: this.feather },
             uRim: { value: this.rim },
             uFlow: { value: this.flow },
+            uWet: { value: this.wet },
         };
     }
 
@@ -51,6 +54,7 @@ export class WashBlobRenderer extends BlobRenderer {
             uniform float uFeather;
             uniform float uRim;
             uniform float uFlow;
+            uniform float uWet;
 
             void main() {
                 float arc;
@@ -78,7 +82,12 @@ export class WashBlobRenderer extends BlobRenderer {
 
                 float grain = fbm(screenUv() * uScreen / 26.0 + uSeed * 13.0);
                 float strength = uPigment * (0.75 + 0.4 * grain);
-                vec3 wash = mix(soft, uColor, clamp(strength, 0.0, 1.0));
+                // Two ways paint can meet the background: the min darkens like
+                // pigment layered over it, the mix covers like body. Water decides
+                // the balance, and the more of it, the more the paint darkens.
+                vec3 layered = min(uColor, soft);
+                vec3 covered = mix(soft, uColor, clamp(strength, 0.0, 1.0));
+                vec3 wash = mix(covered, layered, uWet);
 
                 // Pigment collects just inside the boundary as the water dries back.
                 float rimBand = smoothstep(-uFeather * 4.0, -uFeather, d)

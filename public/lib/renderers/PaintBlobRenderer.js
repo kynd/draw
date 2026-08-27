@@ -17,6 +17,7 @@ import { BlobRenderer } from './BlobRenderer.js';
 export class PaintBlobRenderer extends BlobRenderer {
     constructor({
         color = '#7a4a2f',
+        colorB = null,
         fade = 0.1,        // pigment mottling
         relief = 0.3,      // noise height
         swell = 0.5,       // low-frequency share of the height
@@ -29,6 +30,7 @@ export class PaintBlobRenderer extends BlobRenderer {
     } = {}) {
         super({ margin: 0.15, ...rest });
         this.color = color;
+        this.colorB = colorB ?? color;
         this.fade = fade;
         this.relief = relief;
         this.swell = swell;
@@ -42,6 +44,7 @@ export class PaintBlobRenderer extends BlobRenderer {
     uniforms() {
         return {
             uColor: { value: new THREE.Color(this.color) },
+            uColorB: { value: new THREE.Color(this.colorB) },
             uFade: { value: this.fade },
             uRelief: { value: this.relief },
             uSwell: { value: this.swell },
@@ -56,6 +59,7 @@ export class PaintBlobRenderer extends BlobRenderer {
     fragmentShader() {
         return /* glsl */`
             uniform vec3 uColor;
+            uniform vec3 uColorB;
             uniform float uFade;
             uniform float uRelief;
             uniform float uSwell;
@@ -85,24 +89,26 @@ export class PaintBlobRenderer extends BlobRenderer {
                 // Dry brush: streaks stretched along a seeded direction erode the
                 // edge and scratch the interior open.
                 if (uDry > 0.0) {
+                    // A tooth like the dry media's, only denser: mostly isotropic
+                    // grain with a gentle stretch, thresholded so the fill breaks
+                    // into speckle rather than fading.
                     float angle = hash11(uSeed * 3.7) * 6.2832;
                     vec2 dir = vec2(cos(angle), sin(angle));
                     vec2 perp = vec2(-dir.y, dir.x);
-                    float streak = fbm(vec2(dot(vWorld, dir) * 2.2, dot(vWorld, perp) * 16.0) + uSeed * 7.0);
-                    float cover = smoothstep(uDry * 0.75 - 0.2, uDry * 0.75 + 0.18, streak + 0.28);
-                    // The same streaks chew the boundary, so the edge is scratched
-                    // rather than feathered.
+                    float tooth = fbm(vec2(dot(vWorld, dir) * 7.0, dot(vWorld, perp) * 10.0) + uSeed * 7.0);
+                    float cover = smoothstep(uDry * 0.6 - 0.22, uDry * 0.6 + 0.2, tooth + 0.24);
                     float bite = smoothstep(-uEdgeSoft - 0.05, -0.05 * uDry, d);
-                    alpha *= mix(1.0, cover, max(uDry * 0.85, bite * uDry));
+                    alpha *= mix(1.0, cover, max(uDry * 0.8, bite * uDry));
                     if (alpha <= 0.004) discard;
                 }
 
-                // Height: a smoothstep dome whose slope is analytic, so the rise
-                // eases into the interior with no crease, plus interior noise.
-                float domeW = 0.12;
+                // Height: a wide quintic dome. The quintic's second derivative is
+                // also zero at both ends, so neither the rim nor the junction with
+                // the flat interior shows a corner in the shading.
+                float domeW = 0.3;
                 float t = clamp(-d / domeW, 0.0, 1.0);
-                float dome = t * t * (3.0 - 2.0 * t);
-                float domeSlope = (6.0 * t - 6.0 * t * t) / domeW;
+                float dome = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+                float domeSlope = 30.0 * t * t * (t - 1.0) * (t - 1.0) / domeW;
                 float n = reliefAt(vWorld);
 
                 float e = 0.01;
@@ -120,7 +126,9 @@ export class PaintBlobRenderer extends BlobRenderer {
                 vec3 halfVec = normalize(light + view);
                 float spec = pow(max(dot(normal, halfVec), 0.0), 40.0) * uGloss;
 
-                vec3 pigment = uColor * (1.0 - uFade * (fbm(vWorld * uFreq * 0.6 + uSeed * 5.0) - 0.25));
+                float blend = fbm(vWorld * uFreq * 0.45 + uSeed * 3.0);
+                vec3 base = mix(uColor, uColorB, smoothstep(0.3, 0.7, blend));
+                vec3 pigment = base * (1.0 - uFade * (fbm(vWorld * uFreq * 0.6 + uSeed * 5.0) - 0.25));
                 vec3 color = pigment * (0.6 + 0.4 * diff) + vec3(spec);
                 gl_FragColor = vec4(clamp(color, 0.0, 1.0), alpha);
             }

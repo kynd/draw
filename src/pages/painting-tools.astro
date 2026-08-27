@@ -60,8 +60,11 @@ const demos = [
         <p><strong>Height:</strong> An edge dome plus interior noise. The dome is a smoothstep of distance with an analytic slope, so the rise eases into the flat interior with no crease, and the noise mixes a low frequency for broad swell with a high one for detail.</p>
         <div class="jp"><strong>高さ：</strong>縁のドームと内部のノイズです。ドームは距離のsmoothstepで、傾きは解析的に求まるため、立ち上がりは折り目なく平坦な内部へとなだらかに続きます。ノイズは、大きなうねりのための低周波と、細部のための高周波を混ぜています。</div>
 
-        <p><strong>Dry brush:</strong> A streak noise stretched along a seeded direction erodes both the edge and the interior, leaving rough transparent scratches where the paint ran out.</p>
-        <div class="jp"><strong>ドライブラシ：</strong>シードで決まる方向に引き伸ばされた筋状のノイズが、縁と内部の両方を削り、絵の具が切れた場所に粗い透明のかすれを残します。</div>
+        <p><strong>Dry brush:</strong> A tooth like the dry media's, only denser, erodes both the edge and the interior, leaving rough transparent speckle where the paint ran out.</p>
+        <div class="jp"><strong>ドライブラシ：</strong>ドライメディアと同様の、ただし少し密な紙の目が、縁と内部の両方を削り、絵の具が切れた場所に粗い透明の粒を残します。</div>
+
+        <p><strong>Two pigments:</strong> Every paint mixes two colors in smooth patches, the way a loaded brush lays down more than one.</p>
+        <div class="jp"><strong>2つの顔料：</strong>すべての絵の具は2色をなだらかな斑で混ぜます。絵の具を含んだ筆が複数の色を置いていくのと同じです。</div>
 
         <p><strong>Ridges:</strong> The thick oil folds its high band as 1−|2n−1|, which has a corner at each crest. The fold is what keeps the ridges sharp under any smoothing of the noise beneath.</p>
         <div class="jp"><strong>畝：</strong>厚塗りの油絵の具は高周波の帯を1−|2n−1|として折り返します。これは各頂に角を持ちます。下のノイズをどれだけ滑らかにしても畝が鋭いままなのは、この折り返しのためです。</div>
@@ -83,8 +86,8 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Water:</strong> One renderer spans the three. More water widens the feather, thins the pigment, and lets the background bleed through; less sharpens the edge and covers, until the fill reads as gouache.</p>
-        <div class="jp"><strong>水：</strong>ひとつのレンダラが3つをまたぎます。水が多いほど縁のぼかしは広がり、顔料は薄まり、背景が透けてにじみます。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。</div>
+        <p><strong>Water:</strong> One renderer spans the three. The paint meets the background two ways: a min that darkens like pigment layered over it, and a mix that covers like body. Water decides the balance, and the more of it, the more the paint darkens instead of covering; less sharpens the edge and covers, until the fill reads as gouache.</p>
+        <div class="jp"><strong>水：</strong>ひとつのレンダラが3つをまたぎます。絵の具は2つの方法で背景と出会います。上に重ねた顔料のように暗くするminと、絵の具の身のように覆うmixです。水がその配分を決め、多いほど絵の具は覆うのではなく暗くなります。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。</div>
 
         <p><strong>Flow:</strong> The background is not read at one point but dragged along a direction that wanders with position, so the pigment looks carried by water. The gouache covers most and drags hardest, which is what implies the brush.</p>
         <div class="jp"><strong>流れ：</strong>背景は1点で読まれるのではなく、位置とともに揺らぐ方向に沿って引きずられます。そのため顔料は水に運ばれたように見えます。ガッシュは最も覆いが強く、最も強く引きずります。それが筆を思わせる理由です。</div>
@@ -109,8 +112,8 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Metal:</strong> A smooth dome with broad low-frequency waves, reflecting a two-tone environment: the light rolls over the swells, and the surface reads as mercury. The glass shares the same surface.</p>
-        <div class="jp"><strong>金属：</strong>滑らかなドームに低周波の大きなうねりを重ね、2色調の環境を反射します。光がうねりの上を転がり、面は水銀のように読めます。ガラスも同じ面を共有します。</div>
+        <p><strong>Metal:</strong> The metal shares the faceted surface: each triangular pane throws the two-tone horizon its own way, so the reflection breaks across the blob like cut metal. The smooth glass keeps a low-frequency wave surface instead.</p>
+        <div class="jp"><strong>金属：</strong>金属は面取りと同じ面を共有します。三角形の板がそれぞれ2色調の地平線を独自の方向へ投げるため、反射は切削された金属のようにブロブの上で割れます。滑らかなガラスは、低周波のうねりの面を保ちます。</div>
 
         <p><strong>Glass:</strong> The background is sampled through the normal, bent hardest where the surface tilts most, with a Fresnel lightening at grazing angles.</p>
         <div class="jp"><strong>ガラス：</strong>背景は法線を通して参照され、面が最も傾くところで最も曲げられます。浅い角度ではフレネルによって明るくなります。</div>

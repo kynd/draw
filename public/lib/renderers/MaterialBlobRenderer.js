@@ -2,14 +2,11 @@ import * as THREE from 'three';
 import { BlobRenderer } from './BlobRenderer.js';
 
 /**
- * A blob shaded as a material, from a smooth height field.
- *
- * The base is a smoothstep dome with an analytic slope, so the surface eases from
- * the rim into the interior with no crease, and a low-frequency noise rolls broad
- * waves over it: metal shaded this way reads as mercury. Smooth glass shares the
- * same surface and bends the background through its normal. Faceted glass replaces
- * the smooth normal with one random tilt per triangle of a warped triangular
- * lattice, so it breaks into irregular panes.
+ * A blob shaded as a material, from a quintic dome height field whose slope is
+ * analytic and second-derivative-free at both ends, so no corner shows in the
+ * shading. Metal and faceted glass share a surface of random triangular panes on a
+ * noise-warped lattice: each pane throws the reflection its own way. Smooth glass
+ * keeps a low-frequency wave surface and bends the background through its normal.
  */
 export class MaterialBlobRenderer extends BlobRenderer {
     /** @param {'metal'|'glass'|'facet'} [opts.mode] */
@@ -75,13 +72,15 @@ export class MaterialBlobRenderer extends BlobRenderer {
                 float alpha = 1.0 - smoothstep(-0.006, 0.0, d);
                 if (alpha <= 0.003) discard;
 
-                float domeW = 0.16;
+                float domeW = 0.3;
                 float t = clamp(-d / domeW, 0.0, 1.0);
-                float dome = t * t * (3.0 - 2.0 * t);
-                float domeSlope = (6.0 * t - 6.0 * t * t) / domeW;
+                float dome = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+                float domeSlope = 30.0 * t * t * (t - 1.0) * (t - 1.0) / domeW;
 
                 vec2 slope;
-                if (uMode == 2) {
+                if (uMode == 2 || uMode == 0) {
+                    // Metal shares the faceted surface: each pane throws the horizon
+                    // its own way, which is what makes the reflection interesting.
                     slope = (hash22(triangleId(vWorld) + uSeed * 3.0) - 0.5) * 2.0 * uRelief;
                 } else {
                     float e = 0.012;

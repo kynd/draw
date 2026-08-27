@@ -38,31 +38,31 @@ const registry = [
     blob('dry', 'Dry brush', [
         { key: 'dry', label: 'Dry', min: 0.2, max: 1, step: 0.05, value: 0.8 },
     ], (v, ctx) => new PaintBlobRenderer({
-        color: ctx.colorA, fade: 0.5, relief: 0.12, swell: 0.8,
+        color: ctx.colorA, colorB: ctx.colorB, fade: 0.5, relief: 0.12, swell: 0.8,
         gloss: 0.1, edgeSoft: 0.03, dry: v.dry, noiseFreq: 3.5,
     })),
     blob('paint', 'Flat paint', [
         { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.35 },
     ], (v, ctx) => new PaintBlobRenderer({
-        color: ctx.colorA, fade: 0.12, relief: v.relief, gloss: 0.4, edgeSoft: 0.02,
+        color: ctx.colorA, colorB: ctx.colorB, fade: 0.12, relief: v.relief, gloss: 0.4, edgeSoft: 0.02,
     })),
     blob('oil', 'Thick oil', [
         { key: 'relief', label: 'Relief', min: 0.2, max: 1.5, step: 0.05, value: 1 },
         { key: 'gloss', label: 'Gloss', min: 0, max: 1.2, step: 0.05, value: 0.6 },
     ], (v, ctx) => new PaintBlobRenderer({
-        color: ctx.colorA, fade: 0.05, relief: v.relief, ridged: true,
+        color: ctx.colorA, colorB: ctx.colorB, fade: 0.05, relief: v.relief, ridged: true,
         gloss: v.gloss, edgeSoft: 0.025, noiseFreq: 4.5,
     })),
     blob('watery', 'Watery wash', [], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.35, feather: 0.1, rim: 0.5, flow: 0.03,
+        color: ctx.colorA, background: ctx.texture, pigment: 0.35, feather: 0.1, rim: 0.5, flow: 0.03, wet: 0.85,
     })),
     blob('wash', 'Medium wash', [], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.6, feather: 0.045, rim: 0.4, flow: 0.05,
+        color: ctx.colorA, background: ctx.texture, pigment: 0.6, feather: 0.045, rim: 0.4, flow: 0.05, wet: 0.5,
     })),
     blob('gouache', 'Gouache', [
         { key: 'flow', label: 'Drag', min: 0, max: 0.15, step: 0.005, value: 0.09 },
     ], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.97, feather: 0.012, rim: 0.15, flow: v.flow,
+        color: ctx.colorA, background: ctx.texture, pigment: 0.97, feather: 0.012, rim: 0.15, flow: v.flow, wet: 0.12,
     })),
     blob('metal', 'Metal', [
         { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.3 },

@@ -45,8 +45,17 @@ export function setupBlobShowcase({ makeRow, background = false, controls = {} }
         if (testBg) testBg.paint(palette, stage.viewport.pixelWidth, stage.viewport.pixelHeight);
         else stage.setBackground(palette.entries.filter(e => e.L > 0.85)[0]?.hex ?? '#f0ede6');
         const mid = palette.entries.filter(e => e.L > 0.35 && e.L < 0.72);
-        const pick = () => mid[Math.floor(Math.random() * mid.length)].hex;
-        return SEEDS.map(() => pick());
+        const byHue = new Map();
+        mid.forEach(e => {
+            if (!byHue.has(e.H)) byHue.set(e.H, []);
+            byHue.get(e.H).push(e);
+        });
+        const groups = [...byHue.values()].sort(() => Math.random() - 0.5);
+        const pick = list => list[Math.floor(Math.random() * list.length)].hex;
+        return SEEDS.map((_, i) => [
+            pick(groups[i % groups.length]),
+            pick(groups[(i + 1) % groups.length]),
+        ]);
     }
 
     function values() {
@@ -63,15 +72,16 @@ export function setupBlobShowcase({ makeRow, background = false, controls = {} }
 
         const v = values();
         // A triangle, sized to nearly touch without overlapping.
-        const centers = [[-1.0, 0.74], [1.0, 0.74], [0, -0.8]];
+        const centers = [[-0.95, 0.8], [0.95, 0.8], [0, -0.77]];
         let samples = 0;
 
         SEEDS.forEach((seed, i) => {
-            const gesture = seededScribble(seed, { cx: centers[i][0], cy: centers[i][1], scale: 0.74 });
+            const gesture = seededScribble(seed, { cx: centers[i][0], cy: centers[i][1], scale: 0.82 });
             const contour = blobOutline(gesture, { span: 0.12, radius: 0.11 });
             if (!contour) return;
             const renderer = makeRow(i, {
-                color: colors[i],
+                color: colors[i][0],
+                color2: colors[i][1],
                 background: testBg?.texture ?? null,
                 blurred: testBg?.blurred ?? null,
                 seed,
