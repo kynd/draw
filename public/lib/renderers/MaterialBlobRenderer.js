@@ -55,6 +55,15 @@ export class MaterialBlobRenderer extends BlobRenderer {
             // Broad waves only: the surface stays smooth, and the light rolls.
             float reliefAt(vec2 p) { return fbm(p * 1.5 + uSeed * 13.0); }
 
+            // The thick oil's surface: a smooth swell carrying sharp ridges with
+            // wide smooth valleys. On metal the ridges streak the reflection.
+            float metalRelief(vec2 p) {
+                float low = fbm(p * 1.4 + uSeed * 13.0);
+                float high = 1.0 - abs(2.0 * fbm(p * 3.2 + uSeed * 29.0) - 1.0);
+                high = high * high * high;
+                return mix(high, low, 0.55);
+            }
+
             // A triangle id on a lattice warped by low-frequency noise, so the panes
             // are triangular but not regular.
             vec2 triangleId(vec2 p) {
@@ -78,12 +87,15 @@ export class MaterialBlobRenderer extends BlobRenderer {
                 float domeSlope = 30.0 * t * t * (t - 1.0) * (t - 1.0) / domeW;
 
                 vec2 slope;
-                if (uMode == 2 || uMode == 0) {
-                    // Metal shares the faceted surface: each pane throws the horizon
-                    // its own way, which is what makes the reflection interesting.
+                float e = 0.012;
+                if (uMode == 2) {
                     slope = (hash22(triangleId(vWorld) + uSeed * 3.0) - 0.5) * 2.0 * uRelief;
+                } else if (uMode == 0) {
+                    slope = vec2(
+                        metalRelief(vWorld + vec2(e, 0.0)) - metalRelief(vWorld - vec2(e, 0.0)),
+                        metalRelief(vWorld + vec2(0.0, e)) - metalRelief(vWorld - vec2(0.0, e))
+                    ) / (2.0 * e) * uRelief * 0.35;
                 } else {
-                    float e = 0.012;
                     slope = vec2(
                         reliefAt(vWorld + vec2(e, 0.0)) - reliefAt(vWorld - vec2(e, 0.0)),
                         reliefAt(vWorld + vec2(0.0, e)) - reliefAt(vWorld - vec2(0.0, e))

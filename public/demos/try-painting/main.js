@@ -2,6 +2,7 @@ import { ShapedBlobRenderer } from '../../lib/renderers/ShapedBlobRenderer.js';
 import { PaintBlobRenderer } from '../../lib/renderers/PaintBlobRenderer.js';
 import { WashBlobRenderer } from '../../lib/renderers/WashBlobRenderer.js';
 import { MaterialBlobRenderer } from '../../lib/renderers/MaterialBlobRenderer.js';
+import { StoneBlobRenderer } from '../../lib/renderers/StoneBlobRenderer.js';
 import { blobOutline } from '../../lib/pathEffects.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawingBoard } from '../../lib/demo/drawingBoard.js';
@@ -50,19 +51,19 @@ const registry = [
         { key: 'relief', label: 'Relief', min: 0.2, max: 1.5, step: 0.05, value: 1 },
         { key: 'gloss', label: 'Gloss', min: 0, max: 1.2, step: 0.05, value: 0.6 },
     ], (v, ctx) => new PaintBlobRenderer({
-        color: ctx.colorA, colorB: ctx.colorB, fade: 0.05, relief: v.relief, ridged: true,
-        gloss: v.gloss, edgeSoft: 0.025, noiseFreq: 4.5,
+        color: ctx.colorA, colorB: ctx.colorB, fade: 0.05, relief: v.relief, swell: 0.7, ridged: true,
+        gloss: v.gloss, edgeSoft: 0.025, noiseFreq: 3.5,
     })),
     blob('watery', 'Watery wash', [], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.35, feather: 0.1, rim: 0.5, flow: 0.03, wet: 0.85,
+        color: ctx.colorA, background: ctx.texture, pigment: 0.35, feather: 0.1, rim: 0.18, flow: 0.03, wet: 0.85,
     })),
     blob('wash', 'Medium wash', [], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.6, feather: 0.045, rim: 0.4, flow: 0.05, wet: 0.5,
+        color: ctx.colorA, background: ctx.texture, pigment: 0.6, feather: 0.045, rim: 0.22, flow: 0.05, wet: 0.5,
     })),
     blob('gouache', 'Gouache', [
         { key: 'flow', label: 'Drag', min: 0, max: 0.15, step: 0.005, value: 0.09 },
     ], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.97, feather: 0.012, rim: 0.15, flow: v.flow, wet: 0.12,
+        color: ctx.colorA, background: ctx.texture, pigment: 0.97, feather: 0.012, rim: 0.1, flow: v.flow, wet: 0.12,
     })),
     blob('metal', 'Metal', [
         { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.3 },
@@ -77,6 +78,21 @@ const registry = [
         { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.45 },
     ], (v, ctx) => new MaterialBlobRenderer({
         mode: 'facet', background: ctx.texture, bend: v.bend, relief: v.relief, tint: '#e5eef2',
+    })),
+    blob('rock', 'Rock', [
+        { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.3 },
+    ], (v, ctx) => new StoneBlobRenderer({
+        mode: 'rock', color: ctx.colorA, colorB: ctx.colorB, relief: v.relief,
+    })),
+    blob('marble', 'Marble', [
+        { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.3 },
+    ], (v, ctx) => new StoneBlobRenderer({
+        mode: 'marble', color: ctx.colorA, colorB: ctx.colorB, relief: v.relief,
+    })),
+    blob('sand', 'Sand', [
+        { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.3 },
+    ], (v, ctx) => new StoneBlobRenderer({
+        mode: 'sand', color: ctx.colorA, colorB: ctx.colorB, relief: v.relief,
     })),
 ];
 

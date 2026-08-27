@@ -109,7 +109,7 @@ public/lib/                            library code
                 CloudStrokeRenderer.js  RoundedSquareStrokeRenderer.js
                 SpikeStrokeRenderer.js
                 BlobRenderer.js  ShapedBlobRenderer.js  PaintBlobRenderer.js
-                WashBlobRenderer.js  MaterialBlobRenderer.js
+                WashBlobRenderer.js  MaterialBlobRenderer.js  StoneBlobRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js
                 LineStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js

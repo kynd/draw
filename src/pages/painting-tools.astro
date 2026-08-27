@@ -7,6 +7,7 @@ const demos = [
   { id: 'paints',    title: 'Textured paint', dir: 'blob-paints' },
   { id: 'washes',    title: 'Washes',         dir: 'blob-washes' },
   { id: 'materials', title: 'Materials',      dir: 'blob-materials' },
+  { id: 'stones',    title: 'Stones',         dir: 'blob-stones' },
 ];
 ---
 
@@ -86,8 +87,8 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Water:</strong> One renderer spans the three. The paint meets the background two ways: a min that darkens like pigment layered over it, and a mix that covers like body. Water decides the balance, and the more of it, the more the paint darkens instead of covering; less sharpens the edge and covers, until the fill reads as gouache.</p>
-        <div class="jp"><strong>水：</strong>ひとつのレンダラが3つをまたぎます。絵の具は2つの方法で背景と出会います。上に重ねた顔料のように暗くするminと、絵の具の身のように覆うmixです。水がその配分を決め、多いほど絵の具は覆うのではなく暗くなります。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。</div>
+        <p><strong>Water:</strong> One renderer spans the three. The paint meets the background two ways: a min that darkens like pigment layered over it, and a mix that covers like body. Water decides the balance, and the more of it, the more the paint darkens instead of covering; less sharpens the edge and covers, until the fill reads as gouache. Water also pools the opacity, leaving patches where the fill is nearly bare.</p>
+        <div class="jp"><strong>水：</strong>ひとつのレンダラが3つをまたぎます。絵の具は2つの方法で背景と出会います。上に重ねた顔料のように暗くするminと、絵の具の身のように覆うmixです。水がその配分を決め、多いほど絵の具は覆うのではなく暗くなります。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。水はまた不透明度をたまりに分け、塗りがほとんど無い斑を残します。</div>
 
         <p><strong>Flow:</strong> The background is not read at one point but dragged along a direction that wanders with position, so the pigment looks carried by water. The gouache covers most and drags hardest, which is what implies the brush.</p>
         <div class="jp"><strong>流れ：</strong>背景は1点で読まれるのではなく、位置とともに揺らぐ方向に沿って引きずられます。そのため顔料は水に運ばれたように見えます。ガッシュは最も覆いが強く、最も強く引きずります。それが筆を思わせる理由です。</div>
@@ -112,14 +113,40 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Metal:</strong> The metal shares the faceted surface: each triangular pane throws the two-tone horizon its own way, so the reflection breaks across the blob like cut metal. The smooth glass keeps a low-frequency wave surface instead.</p>
-        <div class="jp"><strong>金属：</strong>金属は面取りと同じ面を共有します。三角形の板がそれぞれ2色調の地平線を独自の方向へ投げるため、反射は切削された金属のようにブロブの上で割れます。滑らかなガラスは、低周波のうねりの面を保ちます。</div>
+        <p><strong>Metal:</strong> The metal shares the thick oil's relief, broad swell folded with sharp ridges, so the two-tone reflection creases along the ridge lines like beaten metal. The smooth glass keeps a low-frequency wave surface instead.</p>
+        <div class="jp"><strong>金属：</strong>金属は厚塗りの油絵の具と同じ起伏を共有します。大きなうねりに鋭い畝が折り重なるため、2色調の反射は打ち出した金属のように畝の線に沿って折れます。滑らかなガラスは、低周波のうねりの面を保ちます。</div>
 
         <p><strong>Glass:</strong> The background is sampled through the normal, bent hardest where the surface tilts most, with a Fresnel lightening at grazing angles.</p>
         <div class="jp"><strong>ガラス：</strong>背景は法線を通して参照され、面が最も傾くところで最も曲げられます。浅い角度ではフレネルによって明るくなります。</div>
 
         <p><strong>Facets:</strong> The faceted glass takes one random tilt per triangle of a lattice warped by low-frequency noise, so it breaks into irregular triangular panes that each displace the background their own way.</p>
         <div class="jp"><strong>面取り：</strong>面取りガラスは、低周波のノイズでゆがめた三角格子の三角形ごとにひとつのランダムな傾きを取ります。そのため不規則な三角形の板に割れ、それぞれが背景を独自の方向へずらします。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="stones">
+    <div class="demo-header">
+      <h2>Stones</h2>
+      <a href={`${base}/demos/blob-stones/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-stones/index.html?embedded`} title="Stones" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The blob shaded as stone: rock, marble, and sand.</p>
+      <div class="jp">石として陰影付けされたブロブです。岩、大理石、そして砂。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Rock:</strong> The relief folds its noise into creases, valley side down, so the surface reads as fractured rather than bumpy. Two colors mottle the face in patches, and the creases darken as crevices do.</p>
+        <div class="jp"><strong>岩：</strong>起伏はノイズを谷側へ折り返してひだにするため、面はでこぼこではなく割れたものとして読めます。2色が面を斑に染め、ひだは割れ目のように暗くなります。</div>
+
+        <p><strong>Marble:</strong> Veins are a sine band warped by noise and raised to a high power, so they run as thin wandering lines over a near-white ground. The surface stays smooth and glossy.</p>
+        <div class="jp"><strong>大理石：</strong>脈は、ノイズでゆがめた正弦の帯を高い累乗に上げたものです。そのため、白に近い地の上を細く曲がりくねって走ります。面は滑らかで光沢を保ちます。</div>
+
+        <p><strong>Sand:</strong> The normal jitters per pixel from a hashed grid, so every grain catches the light its own way, and the brightest few glint.</p>
+        <div class="jp"><strong>砂：</strong>法線はハッシュした格子からピクセルごとに揺らぎます。そのため一粒一粒が独自に光を受け、最も明るいわずかな粒がきらめきます。</div>
       </details>
     </div>
   </section>

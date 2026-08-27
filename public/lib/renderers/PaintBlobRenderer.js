@@ -73,8 +73,10 @@ export class PaintBlobRenderer extends BlobRenderer {
                 float low = fbm(p * 1.6 + uSeed * 13.0);
                 float high = fbm(p * uFreq + uSeed * 29.0);
                 if (uRidged == 1) {
+                    // The fold's crest keeps its corner; cubing widens the smooth
+                    // valleys around the sharp ridges.
                     high = 1.0 - abs(2.0 * high - 1.0);
-                    high = high * high;
+                    high = high * high * high;
                 }
                 return mix(high, low, uSwell);
             }
@@ -96,9 +98,11 @@ export class PaintBlobRenderer extends BlobRenderer {
                     vec2 dir = vec2(cos(angle), sin(angle));
                     vec2 perp = vec2(-dir.y, dir.x);
                     float tooth = fbm(vec2(dot(vWorld, dir) * 7.0, dot(vWorld, perp) * 10.0) + uSeed * 7.0);
+                    // The tooth also bites the boundary, so the edge tears instead
+                    // of tracing the contour.
+                    alpha = 1.0 - smoothstep(-0.015, 0.005, d + (0.5 - tooth) * 0.11 * uDry);
                     float cover = smoothstep(uDry * 0.6 - 0.22, uDry * 0.6 + 0.2, tooth + 0.24);
-                    float bite = smoothstep(-uEdgeSoft - 0.05, -0.05 * uDry, d);
-                    alpha *= mix(1.0, cover, max(uDry * 0.8, bite * uDry));
+                    alpha *= mix(1.0, cover, uDry * 0.8);
                     if (alpha <= 0.004) discard;
                 }
 

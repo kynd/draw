@@ -66,6 +66,12 @@ export class WashBlobRenderer extends BlobRenderer {
                 float alpha = 1.0 - smoothstep(-uFeather, uFeather * 0.4, d + wobble);
                 if (alpha <= 0.003) discard;
 
+                // Water thins the coverage unevenly: the wetter the fill, the more
+                // of it goes nearly transparent, edges included.
+                float pool = fbm(vWorld * 2.2 + uSeed * 19.0);
+                alpha *= mix(1.0, 0.2 + 0.8 * pool, uWet * 0.9);
+                if (alpha <= 0.003) discard;
+
                 // The flow direction wanders with position, so the drag reads as
                 // currents in the wash rather than one motion blur.
                 float theta = fbm(vWorld * 1.8 + uSeed * 11.0) * 6.2832;
