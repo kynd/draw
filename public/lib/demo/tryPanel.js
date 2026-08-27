@@ -84,6 +84,29 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
         live = null;
     }
 
+    // The pointer's own path, shown over the live stroke while drawing and gone on
+    // release. THREE.Line stays one pixel wide at any scale.
+    const pointerLine = new THREE.Line(
+        new THREE.BufferGeometry(),
+        new THREE.LineBasicMaterial({ color: '#000000' })
+    );
+    pointerLine.position.z = 0.06;
+    pointerLine.frustumCulled = false;
+    stage.add(pointerLine);
+
+    function setPointerLine(points) {
+        pointerLine.geometry.dispose();
+        const geometry = new THREE.BufferGeometry();
+        const array = new Float32Array(points.length * 3);
+        points.forEach((p, i) => {
+            array[i * 3] = p.x;
+            array[i * 3 + 1] = p.y;
+            array[i * 3 + 2] = 0;
+        });
+        geometry.setAttribute('position', new THREE.BufferAttribute(array, 3));
+        pointerLine.geometry = geometry;
+    }
+
     function buildStroke(points) {
         if (points.length < 2) return null;
         // Light smoothing, so the mark follows the hand without recording its jitter.
@@ -113,6 +136,7 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
             disposeLive();
             live = buildStroke(points);
             if (live) stage.add(live.mesh);
+            setPointerLine(done ? [] : points);
             if (done && live) {
                 board.bake([live.mesh]);
                 disposeLive();
