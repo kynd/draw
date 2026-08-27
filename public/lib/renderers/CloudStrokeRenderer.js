@@ -34,28 +34,32 @@ export class CloudStrokeRenderer extends ShaderStrokeRenderer {
         const rBase = w * this.blob;
         const offAmp = w * this.offset;
 
-        // One disc per spacing of arc length. Every third disc stays near the spine,
-        // so the chain cannot break however the others are thrown.
-        const spacing = Math.max(rBase * 0.7, length / MAX_BLOBS);
+        // Discs land at jittered arc-length intervals, thrown in any direction with
+        // seeded size. Every third disc stays near the spine with at least the base
+        // radius, so the chain cannot break however the others are scattered.
+        const spacing = Math.max(rBase * 0.65, length / MAX_BLOBS);
         const blobs = [];
         let due = 0, acc = 0, k = 0;
         for (let i = 0; i < samples.length; i++) {
             if (i > 0) acc += samples[i].distanceTo(samples[i - 1]);
             if (acc >= due && blobs.length < MAX_BLOBS) {
                 const anchored = k % 3 === 0;
-                const off = (rand() * 2 - 1) * (anchored ? offAmp * 0.25 : offAmp);
-                const r = rBase * (0.7 + 0.6 * rand());
+                const angle = rand() * Math.PI * 2;
+                const mag = rand() * (anchored ? offAmp * 0.25 : offAmp);
+                const r = anchored
+                    ? rBase * (1.0 + 0.4 * rand())
+                    : rBase * (0.45 + 1.15 * rand());
                 blobs.push(new THREE.Vector4(
-                    samples[i].x + normals[i].x * off,
-                    samples[i].y + normals[i].y * off,
+                    samples[i].x + Math.cos(angle) * mag,
+                    samples[i].y + Math.sin(angle) * mag,
                     r, 0
                 ));
-                due += spacing;
+                due += spacing * (0.55 + 0.9 * rand());
                 k++;
             }
         }
         this._blobs = blobs;
-        this.inflate = (offAmp + rBase * 1.35) / w + 0.5;
+        this.inflate = (offAmp + rBase * 1.65) / w + 0.5;
         return super.build(def);
     }
 

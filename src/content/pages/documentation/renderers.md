@@ -265,8 +265,8 @@ Three renderers whose outline is a signed-distance field evaluated per fragment,
 
 ### CloudStrokeRenderer
 
-Large discs scattered along the stroke with seeded offsets, drawn as one union. A union has one well-defined outline whatever the placement, so the boundary never crosses itself. Every third disc stays near the spine, so the chain cannot break. Takes `color`, `blob`, and `offset`, both in half-widths.
-<div class="jp">シード付きのオフセットでストロークに沿って散らされた大きな円を、ひとつの和集合として描きます。和集合の輪郭は配置によらずひとつに定まるため、境界が自分と交差することはありません。3つごとの円はスパインの近くに留まり、連なりが途切れないようにします。`color`、`blob`、`offset`（どちらも半幅単位）を受け取ります。</div>
+Large discs scattered along the stroke, drawn as one union. Size, spacing, and throw direction are all seeded per disc, and a union has one well-defined outline whatever the placement, so the boundary never crosses itself. Every third disc stays near the spine at full radius, so the chain cannot break. Takes `color`, `blob`, and `offset`, both in half-widths.
+<div class="jp">ストロークに沿って散らされた大きな円を、ひとつの和集合として描きます。大きさ、間隔、飛ばす方向はすべて円ごとにシードで決まり、和集合の輪郭は配置によらずひとつに定まるため、境界が自分と交差することはありません。3つごとの円は最大の半径でスパインの近くに留まり、連なりが途切れないようにします。`color`、`blob`、`offset`（どちらも半幅単位）を受け取ります。</div>
 
 ### RoundedSquareStrokeRenderer
 
@@ -275,8 +275,8 @@ Rounded squares on a fixed grid, stamped from the spine like the pixel stroke an
 
 ### SpikeStrokeRenderer
 
-The boundary pushed outward by a power of a triangle wave. The corner at each tip survives any power while the valley's derivative goes to zero, so the tips stay sharp and the valleys stay rounded. Takes `color`, `spikes`, `amp`, and `sharp`.
-<div class="jp">境界を三角波の累乗で外へ押し出したものです。先端の角はどんな累乗でも残り、谷の微分はゼロに向かうため、先端は鋭いまま、谷は丸いままになります。`color`、`spikes`、`amp`、`sharp`を受け取ります。</div>
+The boundary pushed outward by a power of a triangle wave. The corner at each tip survives any power while the valley's derivative goes to zero, so the tips stay sharp and the valleys stay rounded. Each spike hashes its own height and lean from its index, spacing is warped by a low-frequency noise, and the two sides hash independently, so the edges do not mirror. Takes `color`, `spikes`, `amp`, and `sharp`.
+<div class="jp">境界を三角波の累乗で外へ押し出したものです。先端の角はどんな累乗でも残り、谷の微分はゼロに向かうため、先端は鋭いまま、谷は丸いままになります。各トゲは高さと傾きを自身のインデックスのハッシュから決め、間隔は低周波のノイズでゆがめられ、両側は独立にハッシュされるため、左右の縁が鏡映しになることはありません。`color`、`spikes`、`amp`、`sharp`を受け取ります。</div>
 
 ## Geometry renderers
 
