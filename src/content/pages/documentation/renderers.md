@@ -281,6 +281,20 @@ Rounded squares on a fixed grid, stamped from the spine like the pixel stroke an
 The boundary pushed outward by a power of a triangle wave. The corner at each tip survives any power while the valley's derivative goes to zero, so the tips stay sharp and the valleys stay rounded. Each spike hashes its own height and lean from its index, spacing is warped by a low-frequency noise, and the two sides hash independently, so the edges do not mirror. Takes `color`, `spikes`, `amp`, and `sharp`.
 <div class="jp">境界を三角波の累乗で外へ押し出したものです。先端の角はどんな累乗でも残り、谷の微分はゼロに向かうため、先端は鋭いまま、谷は丸いままになります。各トゲは高さと傾きを自身のインデックスのハッシュから決め、間隔は低周波のノイズでゆがめられ、両側は独立にハッシュされるため、左右の縁が鏡映しになることはありません。`color`、`spikes`、`amp`、`sharp`を受け取ります。</div>
 
+## Blob renderers
+
+Renderers that fill a closed region rather than a stroke. The geometry is only a quad over the contour's bounds; the shape lives in the fragment shader as the signed distance to the contour polygon, so a renderer can push the boundary, texture the interior, or shade it as a surface without new geometry. `BlobRenderer` is the base; contours come from `blobOutline` on the Path Effects page.
+<div class="jp">ストロークではなく閉じた領域を塗るレンダラです。ジオメトリは輪郭の範囲を覆う四角形だけで、形はフラグメントシェーダの中の、輪郭ポリゴンへの符号付き距離として存在します。そのためレンダラは、新しいジオメトリなしに境界を押したり、内部にテクスチャを与えたり、面として陰影付けしたりできます。基底クラスは`BlobRenderer`で、輪郭はPath Effectsページの`blobOutline`から得られます。</div>
+
+<div class="page-note">
+<ul>
+<li><code>ShapedBlobRenderer</code> — a flat fill whose boundary grows spikes (an integer count around the loop, so the profile meets itself in a valley) and bumps (a noise of world position, so no seam).<br /><span class="jp">境界にトゲとうねりを持つ平坦な塗り。トゲは整数本で継ぎ目が谷になり、うねりはワールド座標のノイズなので継ぎ目がありません。</span></li>
+<li><code>PaintBlobRenderer</code> — opaque paint with relief from an edge dome plus interior noise, optionally folded into sharp ridges. Takes <code>fade</code>, <code>relief</code>, <code>ridged</code>, <code>gloss</code>, <code>edgeSoft</code>.<br /><span class="jp">縁のドームと内部ノイズによる起伏を持つ不透明な絵の具。折り返しで鋭い畝にできます。</span></li>
+<li><code>WashBlobRenderer</code> — a watercolor fill over the background; more water widens the feather, thins the pigment, and bleeds the background. Takes <code>pigment</code>, <code>feather</code>, <code>rim</code>.<br /><span class="jp">背景の上の水彩の塗り。水が多いほど縁は広がり、顔料は薄まり、背景がにじみます。</span></li>
+<li><code>MaterialBlobRenderer</code> — the region shaded as metal, smooth glass, or faceted glass, whose facets take one random tilt per grid cell. Takes <code>mode</code>, <code>relief</code>, <code>bend</code>, <code>facets</code>.<br /><span class="jp">金属、滑らかなガラス、面取りガラスとして陰影付けされた領域。面取りはセルごとにひとつのランダムな傾きを取ります。</span></li>
+</ul>
+</div>
+
 ## Geometry renderers
 
 Three renderers that keep the path, the width and the resampling and throw away the ribbon. The same `StrokeDef` drives all of them.

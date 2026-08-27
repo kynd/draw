@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blob materials — metal, glass, faceted</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Material</span></div>
+      <div class="dp-note">Top to bottom: metal, glass, faceted glass.</div>
+      <div class="dp-row">
+        <span class="dp-label">Bend</span>
+        <input id="bend" class="dp-range" type="range" min="0" max="0.15" step="0.005" value="0.050" />
+        <span class="dp-val" id="bend-val">0.050</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Relief</span>
+        <input id="relief" class="dp-range" type="range" min="0" max="1" step="0.05" value="0.30" />
+        <span class="dp-val" id="relief-val">0.30</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Color</span></div>
+      <div class="dp-btn-row">
+        <button id="random-btn" class="dp-btn secondary">Randomize colors</button>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Overlays</span></div>
+      <div class="dp-btn-row">
+        <button id="wire-btn" class="dp-toggle">Wireframe</button>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-section collapsed">
+        <div class="dp-section-hd">
+          <span class="dp-chevron"></span>
+          <span class="dp-title">Geometry</span>
+        </div>
+        <div class="dp-section-body"><div id="readout"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

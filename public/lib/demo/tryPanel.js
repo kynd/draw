@@ -116,6 +116,17 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
 
         const reg = registry.find(r => r.id === currentId);
         const v = values[currentId];
+        // An entry may build its own mesh from the path, for marks that are not
+        // strokes, such as blob fills.
+        if (reg.makeMesh) {
+            const made = reg.makeMesh(path, v, {
+                colorA: colors.a, colorB: colors.b, colors: colors.list,
+                texture: board.texture, seed,
+            });
+            if (!made) return null;
+            made.mesh.position.z = 0.05;
+            return made;
+        }
         const renderer = reg.make(v, {
             colorA: colors.a, colorB: colors.b, colors: colors.list,
             texture: board.texture, seed,

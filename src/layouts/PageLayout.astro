@@ -62,6 +62,15 @@ const navItems: NavItem[] = [
       { label: 'Try drawing',            href: '#try' },
     ]
   },
+  { label: 'Painting tools', href: `${base}/painting-tools`, slug: 'painting-tools',
+    subLinks: [
+      { label: 'Blob fills',     href: '#fills' },
+      { label: 'Textured paint', href: '#paints' },
+      { label: 'Washes',         href: '#washes' },
+      { label: 'Materials',      href: '#materials' },
+      { label: 'Try drawing',    href: '#try' },
+    ]
+  },
   { label: 'Documentation', href: `${base}/documentation`, slug: 'documentation',
     children: [
       { label: 'Stroke Definition', href: `${base}/documentation/stroke-definition`, slug: 'documentation/stroke-definition',
@@ -85,6 +94,7 @@ const navItems: NavItem[] = [
           { label: 'Background samplers',      href: '#background-samplers' },
           { label: 'Height field materials',   href: '#height-field-materials' },
           { label: 'Shaped strokes',           href: '#shaped-strokes' },
+          { label: 'Blob renderers',           href: '#blob-renderers' },
           { label: 'OilStrokeRenderer',        href: '#oilstrokerenderer' },
           { label: 'Geometry renderers',       href: '#geometry-renderers' },
         ]

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { seededRandom } from '../random.js';
 
 /**
  * Paths and layout shared by the stroke demos, so every demo draws the same shape and
@@ -63,3 +64,25 @@ export function centerY(i, count, spread) {
 
 /** Widest across the middle, three quarters of that at either end. */
 export const taper = width => t => width * (0.75 + 0.25 * Math.sin(Math.PI * t));
+
+/**
+ * A seeded curling scribble with a concavity, for blob demos: the same seed always
+ * curls the same way.
+ */
+export function seededScribble(seed, { cx = 0, cy = 0, scale = 1 } = {}) {
+    const rand = seededRandom(seed);
+    const turn = 1.3 + rand() * 0.6;
+    const phase = rand() * Math.PI * 2;
+    const points = [];
+    for (let i = 0; i < 90; i++) {
+        const t = i / 89;
+        const a = phase + t * Math.PI * turn;
+        const r = (0.9 - 0.4 * t) * (1 + 0.15 * Math.sin(a * 3 + seed));
+        points.push(new THREE.Vector3(
+            cx + Math.cos(a) * r * 1.15 * scale,
+            cy + Math.sin(a) * r * 0.8 * scale,
+            0
+        ));
+    }
+    return points;
+}

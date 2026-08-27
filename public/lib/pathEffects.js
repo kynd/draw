@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { seededRandom } from './random.js';
+import { resampleEvery, bSpline } from './curves.js';
 
 /**
  * Generators that derive new paths from a base path.
@@ -246,4 +247,30 @@ export function offsetOutline(points, radius, { cell = radius / 2.5 } = {}) {
     }
     if (area < 0) best.reverse();
     return best.map(p => new THREE.Vector3(p[0], p[1], 0));
+}
+
+/**
+ * The full blob pipeline: a gesture in, a smooth closed contour out.
+ *
+ * The path is resampled to knots, closed into a smooth loop, offset by `radius`, and
+ * the contour smoothed again. Closing first keeps the result a mass rather than a
+ * tube along the stroke, and the offset field does not care when the closure crosses
+ * the stroke, so any gesture closes safely.
+ */
+export function blobOutline(points, { span = 0.15, radius = 0.14 } = {}) {
+    if (points.length < 2) return null;
+    const knots = resampleEvery(points, span);
+    if (knots.length > 3 && knots[knots.length - 1].distanceTo(knots[0]) < span * 0.5) {
+        knots.pop();
+    }
+    const loop = knots.length >= 3 ? bSpline(knots, 8, true) : points;
+    const contour = offsetOutline(loop, radius);
+    if (contour.length < 3) return null;
+    const perimeter = resampleEvery([...contour, contour[0]], span * 0.6);
+    if (perimeter.length > 3
+        && perimeter[perimeter.length - 1].distanceTo(perimeter[0]) < span * 0.3) {
+        perimeter.pop();
+    }
+    if (perimeter.length < 3) return null;
+    return bSpline(perimeter, 6, true);
 }

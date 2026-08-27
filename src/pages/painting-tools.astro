@@ -1,0 +1,131 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const demos = [
+  { id: 'fills',     title: 'Blob fills',     dir: 'blob-fills' },
+  { id: 'paints',    title: 'Textured paint', dir: 'blob-paints' },
+  { id: 'washes',    title: 'Washes',         dir: 'blob-washes' },
+  { id: 'materials', title: 'Materials',      dir: 'blob-materials' },
+];
+---
+
+<PageLayout title="Painting tools" slug="painting-tools">
+  <div class="monologue">
+    Fills for the blob: a drawn gesture becomes a closed region, and these render it
+  </div>
+
+  <div class="prose">
+    <p>Every demo runs the tight blob pipeline from <a href={`${base}/stroke-processing`}>Stroke processing</a>: the gesture is closed into a loop, offset, and smoothed. The region is a signed distance field in the fragment shader, so a renderer can push the boundary, texture the interior, or shade it as a surface without new geometry.</p>
+    <div class="jp">すべてのデモは、<a href={`${base}/stroke-processing`}>Stroke processing</a>のタイトなブロブのパイプラインを使います。身振りはループとして閉じられ、オフセットされ、滑らかにされます。領域はフラグメントシェーダの中の符号付き距離場なので、レンダラは新しいジオメトリなしに、境界を押したり、内部にテクスチャを与えたり、面として陰影付けしたりできます。</div>
+  </div>
+
+  <section class="demo-section" id="fills">
+    <div class="demo-header">
+      <h2>Blob fills</h2>
+      <a href={`${base}/demos/blob-fills/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-fills/index.html?embedded`} title="Blob fills" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Three flat fills: the blob as it is, a spiky one, and a wobbly one.</p>
+      <div class="jp">3つの平坦な塗りです。そのままのブロブ、トゲのあるもの、うねりのあるもの。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Spikes:</strong> An integer count of spikes runs around the boundary's arc, so the profile meets itself at the seam in a valley. Each spike hashes its height and lean from its index, and the tips keep their corner under any sharpness while the valleys keep a zero derivative.</p>
+        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧に沿って並ぶため、プロファイルは継ぎ目で谷として出会います。各トゲは高さと傾きを自身のインデックスのハッシュから決め、先端の角はどんな鋭さでも残り、谷の微分はゼロのままです。</div>
+
+        <p><strong>Wobble:</strong> The bump offset is a noise of world position rather than arc, so it cannot show a seam at all.</p>
+        <div class="jp"><strong>うねり：</strong>ふくらみのオフセットは弧ではなくワールド座標のノイズなので、継ぎ目がそもそも現れません。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="paints">
+    <div class="demo-header">
+      <h2>Textured paint</h2>
+      <a href={`${base}/demos/blob-paints/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-paints/index.html?embedded`} title="Textured paint" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Opaque paint with relief: smudged and faded, flat with a gentle rise and fall, and thick oil with sharp ridges.</p>
+      <div class="jp">起伏を持つ不透明な絵の具です。かすれてぼやけたもの、ゆるやかな起伏を持つ平坦なもの、そして鋭い畝を持つ厚塗りの油絵の具。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Height:</strong> An edge dome falling off at the boundary plus noise over the interior. The dome's slope comes analytically from the outward direction, and the noise gradient from finite differences of the noise alone, so no extra distance evaluations are needed.</p>
+        <div class="jp"><strong>高さ：</strong>境界で落ちる縁のドームと、内部のノイズです。ドームの傾きは外向きの方向から解析的に求まり、ノイズの勾配はノイズだけの差分から求まるため、距離場の追加評価は不要です。</div>
+
+        <p><strong>Ridges:</strong> The thick oil folds its noise as 1−|2n−1|, which has a corner at each crest. The fold is what keeps the ridges sharp under any smoothing of the noise beneath.</p>
+        <div class="jp"><strong>畝：</strong>厚塗りの油絵の具はノイズを1−|2n−1|として折り返します。これは各頂に角を持ちます。下のノイズをどれだけ滑らかにしても畝が鋭いままなのは、この折り返しのためです。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="washes">
+    <div class="demo-header">
+      <h2>Washes</h2>
+      <a href={`${base}/demos/blob-washes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-washes/index.html?embedded`} title="Washes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Watercolor fills over the background: watery, medium, and gouache.</p>
+      <div class="jp">背景の上の水彩の塗りです。水の多いもの、中間、そしてガッシュ。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Water:</strong> One renderer spans the three. More water widens the feather, thins the pigment, and lets the background bleed through; less sharpens the edge and covers, until the fill reads as gouache.</p>
+        <div class="jp"><strong>水：</strong>ひとつのレンダラが3つをまたぎます。水が多いほど縁のぼかしは広がり、顔料は薄まり、背景が透けてにじみます。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。</div>
+
+        <p><strong>The edge:</strong> The boundary wanders by a noise of world position, as a wet edge does, and pigment collects just inside it.</p>
+        <div class="jp"><strong>縁：</strong>境界はワールド座標のノイズで揺らぎ、濡れた縁のように振る舞います。顔料はそのすぐ内側に集まります。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="materials">
+    <div class="demo-header">
+      <h2>Materials</h2>
+      <a href={`${base}/demos/blob-materials/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-materials/index.html?embedded`} title="Materials" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The blob shaded as a surface: metal, smooth glass, and faceted glass.</p>
+      <div class="jp">面として陰影付けされたブロブです。金属、滑らかなガラス、そして面取りされたガラス。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Metal:</strong> The normal reflects an assumed two-tone environment, tilted and wide so a flat face reads bright and the relief sweeps the horizon across it.</p>
+        <div class="jp"><strong>金属：</strong>法線は仮定された2色調の環境を反射します。境界は傾けて広く取られているため、平らな面は明るく読め、起伏が地平線を面の上で動かします。</div>
+
+        <p><strong>Glass:</strong> The background is sampled through the normal, bent hardest where the surface tilts most, with a Fresnel lightening at grazing angles.</p>
+        <div class="jp"><strong>ガラス：</strong>背景は法線を通して参照され、面が最も傾くところで最も曲げられます。浅い角度ではフレネルによって明るくなります。</div>
+
+        <p><strong>Facets:</strong> The faceted glass takes one random tilt per grid cell, so the surface breaks into flat panes that each displace the background their own way.</p>
+        <div class="jp"><strong>面取り：</strong>面取りガラスはグリッドのセルごとにひとつのランダムな傾きを取るため、面は平らな板に割れ、それぞれが背景を独自の方向へずらします。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-painting/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed" data-w="860" data-h="620" style="width:860px;height:620px">
+      <iframe src={`${base}/demos/try-painting/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
+    </div>
+    <div class="prose">
+      <p>Paint with every fill on this page. Each released gesture becomes a blob and bakes into the canvas, and the washes and glasses read the canvas itself, so they bleed and bend what is already painted.</p>
+      <div class="jp">このページのすべての塗りで描いてみてください。描き終えた身振りはブロブになり、キャンバスに焼き込まれます。washとガラスはキャンバスそのものを読むため、すでに描かれたものをにじませ、ゆがめます。</div>
+    </div>
+  </section>
+</PageLayout>

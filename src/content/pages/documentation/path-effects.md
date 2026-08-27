@@ -39,4 +39,9 @@ The convex hull of a set of points, counterclockwise, by Andrew's monotone chain
 The outline of everything within `radius` of the polyline: an offset of the path itself, so it follows the gesture into its concavities instead of spanning them. The distance field to the polyline is stamped onto a grid and the radius contour is extracted with marching squares. Returns the longest closed contour, counterclockwise. Takes `radius` and `cell`.
 <div class="jp">ポリラインから`radius`以内にあるすべての輪郭です。パスそのもののオフセットなので、身振りの凹みをまたがずに沿って進みます。ポリラインへの距離場をグリッドに書き込み、半径の等値線をmarching squaresで取り出します。最も長い閉じた輪郭を反時計回りで返します。`radius`と`cell`を受け取ります。</div>
 
+## blobOutline
+
+The full blob pipeline: a gesture in, a smooth closed contour out. The path is resampled to knots, closed into a smooth loop, offset by `radius`, and the contour smoothed again. Closing first keeps the result a mass rather than a tube, and the offset field does not care when the closure crosses the stroke. Takes `span` and `radius`.
+<div class="jp">ブロブのパイプライン全体です。身振りを入れると、滑らかな閉じた輪郭が出てきます。パスはノットに再サンプリングされ、滑らかなループとして閉じられ、`radius`でオフセットされ、輪郭が再び滑らかにされます。先に閉じることで結果はチューブではなくかたまりに保たれ、オフセットの距離場は閉じ目がストロークと交差しても気にしません。`span`と`radius`を受け取ります。</div>
+
 </div>
