@@ -111,4 +111,30 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       </details>
     </div>
   </section>
+
+  <section class="demo-section" id="tight-blobs">
+    <div class="demo-header">
+      <h2>Tight blob</h2>
+      <a href={`${base}/demos/tight-blob/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/tight-blob/index.html?embedded`} title="Tight blob" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>A blob that hugs the gesture instead of spanning it: everything within a radius of the drawn path, concavities included.</p>
+      <div class="jp">身振りをまたぐのではなく、ぴったりと沿うブロブです。描いたパスから一定の半径以内のすべてであり、凹んだ部分も保たれます。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>The outline:</strong> The shape is an offset of the path itself: the distance field to the polyline is stamped onto a grid, and the radius contour is extracted with marching squares. An offset follows the path into its concavities, where the convex hull above spans them.</p>
+        <div class="jp"><strong>輪郭：</strong>この形はパスそのもののオフセットです。ポリラインへの距離場をグリッドに書き込み、半径の等値線をmarching squaresで取り出します。オフセットはパスの凹みまで沿って進みます。上の凸包はそこをまたいでしまいます。</div>
+
+        <p><strong>Smoothing:</strong> The contour is resampled at the span and rounded by the closed Catmull-Rom or B-spline. The contour already sits the radius out from the path, so the smoothing has room to cut inward without excluding any drawn point.</p>
+        <div class="jp"><strong>平滑化：</strong>等値線はスパンで再サンプリングされ、閉じたCatmull-RomまたはB-スプラインで丸められます。等値線はパスから半径の分だけ外にあるため、平滑化が内側を通っても、描いた点が外に出ることはありません。</div>
+
+        <p><strong>Radius:</strong> Small, the blob reads as a tube around the line; large, the concavities fill in and it approaches the hull.</p>
+        <div class="jp"><strong>半径：</strong>小さいとブロブは線を包むチューブとして読め、大きいと凹みが埋まっていき、凸包に近づきます。</div>
+      </details>
+    </div>
+  </section>
 </PageLayout>

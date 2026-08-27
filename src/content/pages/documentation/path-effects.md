@@ -34,4 +34,9 @@ Short strokes that copy small segments of the base and move sideways by a seeded
 The convex hull of a set of points, counterclockwise, by Andrew's monotone chain. The hull is the smallest convex region containing every point.
 <div class="jp">点の集合の凸包を、Andrewのmonotone chainで反時計回りに求めます。凸包は、すべての点を含む最小の凸領域です。</div>
 
+## offsetOutline
+
+The outline of everything within `radius` of the polyline: an offset of the path itself, so it follows the gesture into its concavities instead of spanning them. The distance field to the polyline is stamped onto a grid and the radius contour is extracted with marching squares. Returns the longest closed contour, counterclockwise. Takes `radius` and `cell`.
+<div class="jp">ポリラインから`radius`以内にあるすべての輪郭です。パスそのもののオフセットなので、身振りの凹みをまたがずに沿って進みます。ポリラインへの距離場をグリッドに書き込み、半径の等値線をmarching squaresで取り出します。最も長い閉じた輪郭を反時計回りで返します。`radius`と`cell`を受け取ります。</div>
+
 </div>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tight blob — an offset outline around the gesture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+  <style>
+    .canvas-wrap { cursor: crosshair; touch-action: none; }
+  </style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Draw</span></div>
+      <div class="dp-note">Draw with the mouse. The blob hugs the gesture, concavities included.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Smoothing</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Radius</span>
+        <input id="radius" class="dp-range" type="range" min="0.05" max="0.40" step="0.01" value="0.14" />
+        <span class="dp-val" id="radius-val">0.14</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Span</span>
+        <input id="span" class="dp-range" type="range" min="0.05" max="0.5" step="0.01" value="0.15" />
+        <span class="dp-val" id="span-val">0.15</span>
+      </div>
+      <select id="curve-select" class="dp-select">
+        <option value="bspline">B-spline</option>
+        <option value="catmull">Catmull-Rom</option>
+      </select>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Color</span></div>
+      <div class="dp-btn-row">
+        <button id="random-btn" class="dp-btn secondary">Randomize color</button>
+      </div>
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Overlays</span></div>
+      <div class="dp-btn-row">
+        <button id="wire-btn" class="dp-toggle">Wireframe</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -27,6 +27,15 @@ const navItems: NavItem[] = [
       { label: 'Distribution of the steps',  href: '#distribution-of-the-steps' },
     ]
   },
+  { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
+    subLinks: [
+      { label: 'Curve smoothing', href: '#smoothing' },
+      { label: 'Local smoothing', href: '#local-smoothing' },
+      { label: 'Smoothed brush',  href: '#smoothed-brush' },
+      { label: 'Blob drawing',    href: '#blobs' },
+      { label: 'Tight blob',      href: '#tight-blobs' },
+    ]
+  },
   { label: 'Strokes', href: `${base}/strokes`, slug: 'strokes',
     subLinks: [
       { label: 'Common to every demo', href: '#common-to-every-demo' },
@@ -51,14 +60,6 @@ const navItems: NavItem[] = [
     subLinks: [
       { label: 'Cloud, squares, spikes', href: '#shapes' },
       { label: 'Try drawing',            href: '#try' },
-    ]
-  },
-  { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
-    subLinks: [
-      { label: 'Curve smoothing', href: '#smoothing' },
-      { label: 'Local smoothing', href: '#local-smoothing' },
-      { label: 'Smoothed brush',  href: '#smoothed-brush' },
-      { label: 'Blob drawing',    href: '#blobs' },
     ]
   },
   { label: 'Documentation', href: `${base}/documentation`, slug: 'documentation',
