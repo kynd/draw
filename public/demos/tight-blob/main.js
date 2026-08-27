@@ -65,7 +65,17 @@ function refresh(done = false) {
     const radius = parseFloat(radiusInput.value);
     const span = parseFloat(spanInput.value);
 
-    const contour = offsetOutline(drawn, radius);
+    // The path is first closed into a smooth loop, so the result is always an
+    // enclosed mass rather than a tube along the stroke. The offset field does not
+    // care if the closure crosses the stroke, so any gesture closes safely.
+    const knots = resampleEvery(drawn, span);
+    if (knots.length > 3 && knots[knots.length - 1].distanceTo(knots[0]) < span * 0.5) {
+        knots.pop();
+    }
+    const closer = curve === 'catmull' ? catmullRomSpline : bSpline;
+    const loop0 = knots.length >= 3 ? closer(knots, 8, true) : drawn;
+
+    const contour = offsetOutline(loop0, radius);
     if (contour.length < 3) { stage.draw(); return; }
 
     const perimeter = resampleEvery([...contour, contour[0]], span);

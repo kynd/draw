@@ -121,13 +121,16 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/tight-blob/index.html?embedded`} title="Tight blob" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A blob that hugs the gesture instead of spanning it: everything within a radius of the drawn path, concavities included.</p>
-      <div class="jp">身振りをまたぐのではなく、ぴったりと沿うブロブです。描いたパスから一定の半径以内のすべてであり、凹んだ部分も保たれます。</div>
+      <p>A blob that stays a blob and still keeps its concavities: the drawn path is closed into a smooth loop, and the shape is everything within a radius of that loop.</p>
+      <div class="jp">ブロブであり続けながら、凹みも保つブロブです。描いたパスは滑らかなループとして閉じられ、その形はループから一定の半径以内のすべてになります。</div>
 
       <details>
         <summary>Details</summary>
-        <p><strong>The outline:</strong> The shape is an offset of the path itself: the distance field to the polyline is stamped onto a grid, and the radius contour is extracted with marching squares. An offset follows the path into its concavities, where the convex hull above spans them.</p>
-        <div class="jp"><strong>輪郭：</strong>この形はパスそのもののオフセットです。ポリラインへの距離場をグリッドに書き込み、半径の等値線をmarching squaresで取り出します。オフセットはパスの凹みまで沿って進みます。上の凸包はそこをまたいでしまいます。</div>
+        <p><strong>Closing first:</strong> The path knots feed the closed spline, so the gesture becomes an enclosed loop before the offset. Without this, an open stroke offsets into a tube that follows the line; with it, the result is always a mass. The offset's distance field does not care if the closure crosses the stroke, so any gesture closes safely.</p>
+        <div class="jp"><strong>先に閉じる：</strong>パスのノットは閉じたスプラインに渡され、オフセットの前に身振りが閉じたループになります。これがないと、開いたストロークは線に沿ったチューブになってしまいます。閉じておけば、結果は常にひとつのかたまりです。オフセットの距離場は、閉じ目がストロークと交差しても気にしないため、どんな身振りでも安全に閉じられます。</div>
+
+        <p><strong>The outline:</strong> The distance field to the closed loop is stamped onto a grid, and the radius contour is extracted with marching squares. Its outer boundary keeps the loop's concavities, where the convex hull above spans them.</p>
+        <div class="jp"><strong>輪郭：</strong>閉じたループへの距離場をグリッドに書き込み、半径の等値線をmarching squaresで取り出します。その外側の境界はループの凹みを保ちます。上の凸包はそこをまたいでしまいます。</div>
 
         <p><strong>Smoothing:</strong> The contour is resampled at the span and rounded by the closed Catmull-Rom or B-spline. The contour already sits the radius out from the path, so the smoothing has room to cut inward without excluding any drawn point.</p>
         <div class="jp"><strong>平滑化：</strong>等値線はスパンで再サンプリングされ、閉じたCatmull-RomまたはB-スプラインで丸められます。等値線はパスから半径の分だけ外にあるため、平滑化が内側を通っても、描いた点が外に出ることはありません。</div>
