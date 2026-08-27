@@ -12,6 +12,6 @@ setupBlobShowcase({
         };
         if (i === 0) return new MaterialBlobRenderer({ ...shared, mode: 'metal' });
         if (i === 1) return new MaterialBlobRenderer({ ...shared, mode: 'glass', tint: '#dff0f5' });
-        return new MaterialBlobRenderer({ ...shared, mode: 'facet', tint: '#e5eef2', relief: ctx.values.relief * 1.4 });
+        return new MaterialBlobRenderer({ ...shared, mode: 'facet', tint: '#e5eef2', relief: ctx.values.relief * 1.2, facets: 4 });
     },
 });

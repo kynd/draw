@@ -8,18 +8,18 @@ setupBlobShowcase({
         if (i === 0) {
             return new WashBlobRenderer({
                 color: ctx.color, background: ctx.blurred,
-                pigment: 0.35, feather: 0.1, rim: 0.5,
+                pigment: 0.35, feather: 0.1, rim: 0.5, flow: 0.03,
             });
         }
         if (i === 1) {
             return new WashBlobRenderer({
                 color: ctx.color, background: ctx.blurred,
-                pigment: 0.6, feather: 0.045, rim: 0.4,
+                pigment: 0.6, feather: 0.045, rim: 0.4, flow: 0.05,
             });
         }
         return new WashBlobRenderer({
             color: ctx.color, background: ctx.background,
-            pigment: 0.94, feather: 0.012, rim: 0.15,
+            pigment: 0.97, feather: 0.012, rim: 0.15, flow: 0.09,
         });
     },
 });

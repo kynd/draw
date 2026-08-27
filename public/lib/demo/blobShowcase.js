@@ -62,11 +62,12 @@ export function setupBlobShowcase({ makeRow, background = false, controls = {} }
         entries = [];
 
         const v = values();
-        const ys = [1.02, 0, -1.02];
+        // A triangle, sized to nearly touch without overlapping.
+        const centers = [[-1.0, 0.74], [1.0, 0.74], [0, -0.8]];
         let samples = 0;
 
         SEEDS.forEach((seed, i) => {
-            const gesture = seededScribble(seed, { cx: 0.3, cy: ys[i], scale: 0.42 });
+            const gesture = seededScribble(seed, { cx: centers[i][0], cy: centers[i][1], scale: 0.74 });
             const contour = blobOutline(gesture, { span: 0.12, radius: 0.11 });
             if (!contour) return;
             const renderer = makeRow(i, {

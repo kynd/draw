@@ -35,8 +35,11 @@ const registry = [
     blob('wobbly', 'Wobbly blob', [
         { key: 'wobble', label: 'Wobble', min: 0.01, max: 0.15, step: 0.005, value: 0.045 },
     ], (v, ctx) => new ShapedBlobRenderer({ color: ctx.colorA, wobble: v.wobble })),
-    blob('smudged', 'Smudged paint', [], (v, ctx) => new PaintBlobRenderer({
-        color: ctx.colorA, fade: 0.6, relief: 0.15, gloss: 0.15, edgeSoft: 0.1, noiseFreq: 3.5,
+    blob('dry', 'Dry brush', [
+        { key: 'dry', label: 'Dry', min: 0.2, max: 1, step: 0.05, value: 0.8 },
+    ], (v, ctx) => new PaintBlobRenderer({
+        color: ctx.colorA, fade: 0.5, relief: 0.12, swell: 0.8,
+        gloss: 0.1, edgeSoft: 0.03, dry: v.dry, noiseFreq: 3.5,
     })),
     blob('paint', 'Flat paint', [
         { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.35 },
@@ -51,13 +54,15 @@ const registry = [
         gloss: v.gloss, edgeSoft: 0.025, noiseFreq: 4.5,
     })),
     blob('watery', 'Watery wash', [], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.35, feather: 0.1, rim: 0.5,
+        color: ctx.colorA, background: ctx.texture, pigment: 0.35, feather: 0.1, rim: 0.5, flow: 0.03,
     })),
     blob('wash', 'Medium wash', [], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.6, feather: 0.045, rim: 0.4,
+        color: ctx.colorA, background: ctx.texture, pigment: 0.6, feather: 0.045, rim: 0.4, flow: 0.05,
     })),
-    blob('gouache', 'Gouache', [], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.94, feather: 0.012, rim: 0.15,
+    blob('gouache', 'Gouache', [
+        { key: 'flow', label: 'Drag', min: 0, max: 0.15, step: 0.005, value: 0.09 },
+    ], (v, ctx) => new WashBlobRenderer({
+        color: ctx.colorA, background: ctx.texture, pigment: 0.97, feather: 0.012, rim: 0.15, flow: v.flow,
     })),
     blob('metal', 'Metal', [
         { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.3 },

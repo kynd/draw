@@ -8,19 +8,19 @@ setupBlobShowcase({
         const gloss = ctx.values.gloss;
         if (i === 0) {
             return new PaintBlobRenderer({
-                color: ctx.color, fade: 0.6, relief: relief * 0.15,
-                gloss: gloss * 0.25, edgeSoft: 0.1, noiseFreq: 3.5,
+                color: ctx.color, fade: 0.5, relief: relief * 0.15, swell: 0.8,
+                gloss: gloss * 0.2, edgeSoft: 0.03, dry: 0.8, noiseFreq: 3.5,
             });
         }
         if (i === 1) {
             return new PaintBlobRenderer({
-                color: ctx.color, fade: 0.12, relief: relief * 0.35,
+                color: ctx.color, fade: 0.12, relief: relief * 0.4, swell: 0.85,
                 gloss: gloss * 0.6, edgeSoft: 0.02, noiseFreq: 3,
             });
         }
         return new PaintBlobRenderer({
-            color: ctx.color, fade: 0.05, relief, ridged: true,
-            gloss, edgeSoft: 0.025, noiseFreq: 4.5,
+            color: ctx.color, fade: 0.05, relief, swell: 0.55, ridged: true,
+            gloss, edgeSoft: 0.025, noiseFreq: 6,
         });
     },
 });

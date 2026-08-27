@@ -52,16 +52,19 @@ const demos = [
       <iframe src={`${base}/demos/blob-paints/index.html?embedded`} title="Textured paint" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Opaque paint with relief: smudged and faded, flat with a gentle rise and fall, and thick oil with sharp ridges.</p>
-      <div class="jp">起伏を持つ不透明な絵の具です。かすれてぼやけたもの、ゆるやかな起伏を持つ平坦なもの、そして鋭い畝を持つ厚塗りの油絵の具。</div>
+      <p>Opaque paint with relief: dry and scratched, flat with a gentle rise and fall, and thick oil with sharp ridges.</p>
+      <div class="jp">起伏を持つ不透明な絵の具です。乾いてかすれたもの、ゆるやかな起伏を持つ平坦なもの、そして鋭い畝を持つ厚塗りの油絵の具。</div>
 
       <details>
         <summary>Details</summary>
-        <p><strong>Height:</strong> An edge dome falling off at the boundary plus noise over the interior. The dome's slope comes analytically from the outward direction, and the noise gradient from finite differences of the noise alone, so no extra distance evaluations are needed.</p>
-        <div class="jp"><strong>高さ：</strong>境界で落ちる縁のドームと、内部のノイズです。ドームの傾きは外向きの方向から解析的に求まり、ノイズの勾配はノイズだけの差分から求まるため、距離場の追加評価は不要です。</div>
+        <p><strong>Height:</strong> An edge dome plus interior noise. The dome is a smoothstep of distance with an analytic slope, so the rise eases into the flat interior with no crease, and the noise mixes a low frequency for broad swell with a high one for detail.</p>
+        <div class="jp"><strong>高さ：</strong>縁のドームと内部のノイズです。ドームは距離のsmoothstepで、傾きは解析的に求まるため、立ち上がりは折り目なく平坦な内部へとなだらかに続きます。ノイズは、大きなうねりのための低周波と、細部のための高周波を混ぜています。</div>
 
-        <p><strong>Ridges:</strong> The thick oil folds its noise as 1−|2n−1|, which has a corner at each crest. The fold is what keeps the ridges sharp under any smoothing of the noise beneath.</p>
-        <div class="jp"><strong>畝：</strong>厚塗りの油絵の具はノイズを1−|2n−1|として折り返します。これは各頂に角を持ちます。下のノイズをどれだけ滑らかにしても畝が鋭いままなのは、この折り返しのためです。</div>
+        <p><strong>Dry brush:</strong> A streak noise stretched along a seeded direction erodes both the edge and the interior, leaving rough transparent scratches where the paint ran out.</p>
+        <div class="jp"><strong>ドライブラシ：</strong>シードで決まる方向に引き伸ばされた筋状のノイズが、縁と内部の両方を削り、絵の具が切れた場所に粗い透明のかすれを残します。</div>
+
+        <p><strong>Ridges:</strong> The thick oil folds its high band as 1−|2n−1|, which has a corner at each crest. The fold is what keeps the ridges sharp under any smoothing of the noise beneath.</p>
+        <div class="jp"><strong>畝：</strong>厚塗りの油絵の具は高周波の帯を1−|2n−1|として折り返します。これは各頂に角を持ちます。下のノイズをどれだけ滑らかにしても畝が鋭いままなのは、この折り返しのためです。</div>
       </details>
     </div>
   </section>
@@ -83,6 +86,9 @@ const demos = [
         <p><strong>Water:</strong> One renderer spans the three. More water widens the feather, thins the pigment, and lets the background bleed through; less sharpens the edge and covers, until the fill reads as gouache.</p>
         <div class="jp"><strong>水：</strong>ひとつのレンダラが3つをまたぎます。水が多いほど縁のぼかしは広がり、顔料は薄まり、背景が透けてにじみます。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。</div>
 
+        <p><strong>Flow:</strong> The background is not read at one point but dragged along a direction that wanders with position, so the pigment looks carried by water. The gouache covers most and drags hardest, which is what implies the brush.</p>
+        <div class="jp"><strong>流れ：</strong>背景は1点で読まれるのではなく、位置とともに揺らぐ方向に沿って引きずられます。そのため顔料は水に運ばれたように見えます。ガッシュは最も覆いが強く、最も強く引きずります。それが筆を思わせる理由です。</div>
+
         <p><strong>The edge:</strong> The boundary wanders by a noise of world position, as a wet edge does, and pigment collects just inside it.</p>
         <div class="jp"><strong>縁：</strong>境界はワールド座標のノイズで揺らぎ、濡れた縁のように振る舞います。顔料はそのすぐ内側に集まります。</div>
       </details>
@@ -103,14 +109,14 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Metal:</strong> The normal reflects an assumed two-tone environment, tilted and wide so a flat face reads bright and the relief sweeps the horizon across it.</p>
-        <div class="jp"><strong>金属：</strong>法線は仮定された2色調の環境を反射します。境界は傾けて広く取られているため、平らな面は明るく読め、起伏が地平線を面の上で動かします。</div>
+        <p><strong>Metal:</strong> A smooth dome with broad low-frequency waves, reflecting a two-tone environment: the light rolls over the swells, and the surface reads as mercury. The glass shares the same surface.</p>
+        <div class="jp"><strong>金属：</strong>滑らかなドームに低周波の大きなうねりを重ね、2色調の環境を反射します。光がうねりの上を転がり、面は水銀のように読めます。ガラスも同じ面を共有します。</div>
 
         <p><strong>Glass:</strong> The background is sampled through the normal, bent hardest where the surface tilts most, with a Fresnel lightening at grazing angles.</p>
         <div class="jp"><strong>ガラス：</strong>背景は法線を通して参照され、面が最も傾くところで最も曲げられます。浅い角度ではフレネルによって明るくなります。</div>
 
-        <p><strong>Facets:</strong> The faceted glass takes one random tilt per grid cell, so the surface breaks into flat panes that each displace the background their own way.</p>
-        <div class="jp"><strong>面取り：</strong>面取りガラスはグリッドのセルごとにひとつのランダムな傾きを取るため、面は平らな板に割れ、それぞれが背景を独自の方向へずらします。</div>
+        <p><strong>Facets:</strong> The faceted glass takes one random tilt per triangle of a lattice warped by low-frequency noise, so it breaks into irregular triangular panes that each displace the background their own way.</p>
+        <div class="jp"><strong>面取り：</strong>面取りガラスは、低周波のノイズでゆがめた三角格子の三角形ごとにひとつのランダムな傾きを取ります。そのため不規則な三角形の板に割れ、それぞれが背景を独自の方向へずらします。</div>
       </details>
     </div>
   </section>

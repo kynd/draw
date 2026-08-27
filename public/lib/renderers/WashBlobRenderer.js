@@ -1,13 +1,17 @@
 import * as THREE from 'three';
 import { BlobRenderer } from './BlobRenderer.js';
 
+const FLOW_TAPS = 6;
+
 /**
  * A watercolor fill over the background, from watery to gouache by parameters.
  *
- * The wash reads a softened copy of the background by screen position and tints it
- * with the pigment. Water is the trade: more of it widens the feather, thins the
- * pigment, and lets the background bleed through; less of it sharpens the edge and
- * covers, until the fill reads as gouache.
+ * The background is not read at one point but dragged along a noise flow: each
+ * fragment averages a few samples along a direction that wanders with world position,
+ * so the pigment looks carried by water, or by a brush when the drag is long. Water
+ * is the trade: more of it widens the feather, thins the pigment, and lets the
+ * background bleed; less sharpens the edge and covers, until the fill reads as
+ * gouache, whose stronger drag is what implies the brush.
  */
 export class WashBlobRenderer extends BlobRenderer {
     constructor({
@@ -16,6 +20,7 @@ export class WashBlobRenderer extends BlobRenderer {
         pigment = 0.5,      // pigment strength over the background
         feather = 0.06,     // edge softness in world units
         rim = 0.4,          // pigment collecting inside the boundary
+        flow = 0.04,        // drag length of the background sampling, in uv
         ...rest
     } = {}) {
         super({ margin: 0.15 + feather, ...rest });
@@ -24,6 +29,7 @@ export class WashBlobRenderer extends BlobRenderer {
         this.pigment = pigment;
         this.feather = feather;
         this.rim = rim;
+        this.flow = flow;
     }
 
     uniforms() {
@@ -33,6 +39,7 @@ export class WashBlobRenderer extends BlobRenderer {
             uPigment: { value: this.pigment },
             uFeather: { value: this.feather },
             uRim: { value: this.rim },
+            uFlow: { value: this.flow },
         };
     }
 
@@ -43,6 +50,7 @@ export class WashBlobRenderer extends BlobRenderer {
             uniform float uPigment;
             uniform float uFeather;
             uniform float uRim;
+            uniform float uFlow;
 
             void main() {
                 float arc;
@@ -54,8 +62,21 @@ export class WashBlobRenderer extends BlobRenderer {
                 float alpha = 1.0 - smoothstep(-uFeather, uFeather * 0.4, d + wobble);
                 if (alpha <= 0.003) discard;
 
+                // The flow direction wanders with position, so the drag reads as
+                // currents in the wash rather than one motion blur.
+                float theta = fbm(vWorld * 1.8 + uSeed * 11.0) * 6.2832;
+                vec2 dir = vec2(cos(theta), sin(theta));
+                vec3 acc = vec3(0.0);
+                float wsum = 0.0;
+                for (int i = 0; i < ${FLOW_TAPS}; i++) {
+                    float f = float(i) / float(${FLOW_TAPS} - 1);
+                    float w = 1.0 - f * 0.6;
+                    acc += texture2D(uBg, screenUv() - dir * uFlow * f).rgb * w;
+                    wsum += w;
+                }
+                vec3 soft = acc / wsum;
+
                 float grain = fbm(screenUv() * uScreen / 26.0 + uSeed * 13.0);
-                vec3 soft = texture2D(uBg, screenUv()).rgb;
                 float strength = uPigment * (0.75 + 0.4 * grain);
                 vec3 wash = mix(soft, uColor, clamp(strength, 0.0, 1.0));
 
