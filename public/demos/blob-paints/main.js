@@ -19,8 +19,8 @@ setupBlobShowcase({
             });
         }
         return new PaintBlobRenderer({
-            color: ctx.color, colorB: ctx.color2, fade: 0.05, relief, swell: 0.7, ridged: true, split: 1, rag: 0.05,
-            gloss, edgeSoft: 0.025, noiseFreq: 3.5,
+            color: ctx.color, colorB: ctx.color2, fade: 0.05, relief, swell: 0.5, knife: true, split: 1,
+            gloss, edgeSoft: 0.008, noiseFreq: 3.5,
         });
     },
 });

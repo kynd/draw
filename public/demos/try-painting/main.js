@@ -51,8 +51,8 @@ const registry = [
         { key: 'relief', label: 'Relief', min: 0.2, max: 1.5, step: 0.05, value: 1 },
         { key: 'gloss', label: 'Gloss', min: 0, max: 1.2, step: 0.05, value: 0.6 },
     ], (v, ctx) => new PaintBlobRenderer({
-        color: ctx.colorA, colorB: ctx.colorB, fade: 0.05, relief: v.relief, swell: 0.7, ridged: true,
-        split: 1, rag: 0.05, gloss: v.gloss, edgeSoft: 0.025, noiseFreq: 3.5,
+        color: ctx.colorA, colorB: ctx.colorB, fade: 0.05, relief: v.relief, swell: 0.5, knife: true,
+        split: 1, gloss: v.gloss, edgeSoft: 0.008, noiseFreq: 3.5,
     })),
     blob('watery', 'Watery wash', [], (v, ctx) => new WashBlobRenderer({
         color: ctx.colorA, background: ctx.texture, pigment: 0.35, feather: 0.1, rim: 0.18, flow: 0.03, wet: 0.85,
@@ -63,7 +63,7 @@ const registry = [
     blob('gouache', 'Gouache', [
         { key: 'flow', label: 'Drag', min: 0, max: 0.15, step: 0.005, value: 0.09 },
     ], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.97, feather: 0.012, rim: 0.1, flow: v.flow, wet: 0.12, body: 0.7, bristle: 0.05,
+        color: ctx.colorA, background: ctx.texture, pigment: 1.1, feather: 0.012, rim: 0.1, flow: v.flow, wet: 0.08, bristle: 0.05,
     })),
     blob('metal', 'Metal', [
         { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.3 },

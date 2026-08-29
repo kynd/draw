@@ -19,7 +19,7 @@ setupBlobShowcase({
         }
         return new WashBlobRenderer({
             color: ctx.color, background: ctx.background,
-            pigment: 0.97, feather: 0.012, rim: 0.1, flow: 0.09, wet: 0.12, body: 0.7, bristle: 0.05,
+            pigment: 1.1, feather: 0.012, rim: 0.1, flow: 0.09, wet: 0.08, bristle: 0.05,
         });
     },
 });

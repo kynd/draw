@@ -53,8 +53,8 @@ const demos = [
       <iframe src={`${base}/demos/blob-paints/index.html?embedded`} title="Textured paint" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Opaque paint with relief: dry and scratched, flat with a gentle rise and fall, and thick oil with sharp ridges.</p>
-      <div class="jp">起伏を持つ不透明な絵の具です。乾いてかすれたもの、ゆるやかな起伏を持つ平坦なもの、そして鋭い畝を持つ厚塗りの油絵の具。</div>
+      <p>Opaque paint with relief: dry and scratched, flat with a gentle rise and fall, and thick oil laid with a knife.</p>
+      <div class="jp">起伏を持つ不透明な絵の具です。乾いてかすれたもの、ゆるやかな起伏を持つ平坦なもの、そしてナイフで置かれた厚塗りの油絵の具。</div>
 
       <details>
         <summary>Details</summary>
@@ -67,8 +67,8 @@ const demos = [
         <p><strong>Two pigments:</strong> Every paint mixes two colors in smooth patches, the way a loaded brush lays down more than one. The thick oil sharpens the mix instead: its colors meet on a hard boundary shaped by low-frequency noise, two paints laid side by side without blending.</p>
         <div class="jp"><strong>2つの顔料：</strong>すべての絵の具は2色をなだらかな斑で混ぜます。絵の具を含んだ筆が複数の色を置いていくのと同じです。厚塗りの油絵の具はかわりに混合を鋭くします。2色は低周波ノイズが形作る硬い境界で出会い、混ざらないまま並んで置かれた2つの絵の具になります。</div>
 
-        <p><strong>Ridges:</strong> The thick oil folds its high band as 1−|2n−1|, which has a corner at each crest. The fold is what keeps the ridges sharp under any smoothing of the noise beneath. Its edge tears on a fine noise instead of tracing the contour.</p>
-        <div class="jp"><strong>畝：</strong>厚塗りの油絵の具は高周波の帯を1−|2n−1|として折り返します。これは各頂に角を持ちます。下のノイズをどれだけ滑らかにしても畝が鋭いままなのは、この折り返しのためです。縁は輪郭をなぞらず、細かいノイズで破れます。</div>
+        <p><strong>The knife:</strong> The thick oil's height is flat patches, each with its own drag direction and striations along it, meeting at hard steps. The rim is narrow so the fill sits as a slab, and the edge is straight cut segments, offset piecewise-linearly along the boundary's arc.</p>
+        <div class="jp"><strong>ナイフ：</strong>厚塗りの油絵の具の高さは平らな斑からなり、それぞれが独自の引き方向とそれに沿った筋を持ち、硬い段差で出会います。縁は狭く、塗りは板のように置かれます。輪郭は、境界の弧に沿って区分線形にオフセットされた、まっすぐに切られた線分です。</div>
       </details>
     </div>
   </section>
@@ -96,8 +96,8 @@ const demos = [
         <p><strong>The edge:</strong> The boundary wanders by a noise of world position, as a wet edge does, and pigment collects just inside it.</p>
         <div class="jp"><strong>縁：</strong>境界はワールド座標のノイズで揺らぎ、濡れた縁のように振る舞います。顔料はそのすぐ内側に集まります。</div>
 
-        <p><strong>Body:</strong> The gouache is lit as a thin relief so it reads as having thickness, and its edge grows brush marks, streaks elongated along directions that wander with position.</p>
-        <div class="jp"><strong>身：</strong>ガッシュは薄い起伏として照らされ、厚みを持つものとして読めます。縁には筆の跡が生え、位置とともに揺らぐ方向に沿って引き伸ばされた筋になります。</div>
+        <p><strong>The gouache:</strong> It stays flat and covers nearly fully, and its edge grows brush marks, streaks elongated along directions that wander with position.</p>
+        <div class="jp"><strong>ガッシュ：</strong>平坦なまま、ほぼ完全に覆います。縁には筆の跡が生え、位置とともに揺らぐ方向に沿って引き伸ばされた筋になります。</div>
       </details>
     </div>
   </section>
