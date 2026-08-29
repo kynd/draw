@@ -31,7 +31,7 @@ const cycle = setupDrawCycle({
         const gamma = parseFloat(controls.curve.value);
         const limit = parseFloat(controls.limit.value);
         const pressureAt = pressureAlong(points);
-        const renderer = new RibbonStrokeRenderer({ cap: 'rounded', color: '#000000' });
+        const renderer = new RibbonStrokeRenderer({ cap: 'rounded', color: '#808080' });
         const def = new StrokeDef({
             points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
             widthLeft: limitWidthSlope(path,
