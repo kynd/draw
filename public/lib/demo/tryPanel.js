@@ -3,7 +3,7 @@ import { StrokeDef } from '../StrokeDef.js';
 import { Palette } from '../Palette.js';
 import { taper } from './strokePaths.js';
 import { setupDrawCycle } from './drawCycle.js';
-import { pressureAlong, averagePressure } from './pressure.js';
+import { pressureAlong, averagePressure, limitWidthSlope } from './pressure.js';
 
 /**
  * The try-drawing harness every stroke page shares.
@@ -128,7 +128,8 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
             const baseWidth = taper(v.width);
             const def = new StrokeDef({
                 points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
-                widthLeft: t => baseWidth(t) * (1 + pressureSens * pressureAt(t)),
+                widthLeft: limitWidthSlope(path,
+                    t => baseWidth(t) * (1 + pressureSens * pressureAt(t))),
                 renderer,
                 seed,
             });

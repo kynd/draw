@@ -34,7 +34,12 @@
         <input id="curve" class="dp-range" type="range" min="0.3" max="3" step="0.05" value="1" />
         <span class="dp-val">1.00</span>
       </div>
-      <div class="dp-note">Width runs from the base at zero pressure to base plus the added width at full pressure. Curve is the response exponent: above 1 spreads out light touches, below 1 compresses them.</div>
+      <div class="dp-row">
+        <span class="dp-label">Limit</span>
+        <input id="limit" class="dp-range" type="range" min="0.2" max="3" step="0.05" value="1" />
+        <span class="dp-val">1.00</span>
+      </div>
+      <div class="dp-note">Width runs from the base at zero pressure to base plus the added width at full pressure. Curve is the response exponent: above 1 spreads out light touches, below 1 compresses them. Limit caps how fast the width may rise or fall per unit of length.</div>
 
       <hr class="dp-divider" />
 
