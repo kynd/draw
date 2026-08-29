@@ -162,9 +162,17 @@ export class PaintBlobRenderer extends BlobRenderer {
 
                 // Height: a wide quintic dome. The quintic's second derivative is
                 // also zero at both ends, so neither the rim nor the junction with
-                // the flat interior shows a corner in the shading. Knife paint sits
-                // as a slab: a narrow rim, and the interior stays flat.
-                float domeW = uKnife == 1 ? 0.1 : 0.3;
+                // the flat interior shows a corner in the shading.
+                float domeW = 0.3;
+                float rimVar = 1.0;
+                if (uKnife == 1) {
+                    // Knife paint's rim does not trace the edge: a noise varies it
+                    // around the boundary, tall and steep in some stretches,
+                    // scraped nearly flat in others.
+                    float rimN = fbm(vWorld * 1.4 + uSeed * 61.0);
+                    domeW = mix(0.3, 0.06, rimN);
+                    rimVar = smoothstep(0.25, 0.65, rimN);
+                }
                 float t = clamp(-d / domeW, 0.0, 1.0);
                 float dome = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
                 float domeSlope = 30.0 * t * t * (t - 1.0) * (t - 1.0) / domeW;
@@ -175,7 +183,7 @@ export class PaintBlobRenderer extends BlobRenderer {
                     reliefAt(vWorld + vec2(e, 0.0)) - reliefAt(vWorld - vec2(e, 0.0)),
                     reliefAt(vWorld + vec2(0.0, e)) - reliefAt(vWorld - vec2(0.0, e))
                 ) / (2.0 * e);
-                vec2 slope = outward * domeSlope * (0.5 + uRelief * n) * 0.05
+                vec2 slope = outward * domeSlope * (0.5 + uRelief * n) * 0.05 * rimVar
                            + gradN * dome * uRelief * 0.05;
                 vec3 normal = normalize(vec3(-slope, 1.0));
 
