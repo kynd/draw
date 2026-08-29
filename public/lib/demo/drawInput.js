@@ -19,6 +19,9 @@ export class DrawInput {
     constructor(canvas, stage, { minDistance = 0.008, onChange }) {
         this.points = [];
         this._drawing = false;
+        // Mutable, so a demo can tune how far the pen must travel before a new
+        // point is recorded.
+        this.minDistance = minDistance;
 
         const toWorld = event => {
             const rect = canvas.getBoundingClientRect();
@@ -43,7 +46,7 @@ export class DrawInput {
             if (!this._drawing) return;
             const p = toWorld(event);
             if (this.points.length === 0
-                || p.distanceTo(this.points[this.points.length - 1]) >= minDistance) {
+                || p.distanceTo(this.points[this.points.length - 1]) >= this.minDistance) {
                 this.points.push(p);
                 onChange(this.points, false);
             }

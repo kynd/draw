@@ -7,10 +7,10 @@ import { setupDrawCycle } from '../../lib/demo/drawCycle.js';
 import { pressureAlong, pressureResponse, limitWidthSlope } from '../../lib/demo/pressure.js';
 
 const controls = {};
-['base', 'add', 'curve', 'limit'].forEach(id => {
+['base', 'add', 'curve', 'limit', 'minmove'].forEach(id => {
     const input = document.getElementById(id);
     const val = input.nextElementSibling;
-    const decimals = id === 'curve' ? 2 : (id === 'add' ? 2 : 3);
+    const decimals = id === 'minmove' ? 3 : (id === 'curve' ? 2 : (id === 'add' ? 2 : 3));
     const show = () => { val.textContent = parseFloat(input.value).toFixed(decimals); };
     show();
     input.addEventListener('input', show);
@@ -41,8 +41,15 @@ const cycle = setupDrawCycle({
         });
         const mesh = def.build();
         mesh.position.z = 0.05;
+        document.getElementById('stat-points').textContent = points.length;
+        document.getElementById('stat-width').textContent = def.widthLeft(1).toFixed(3);
         return { mesh, renderer };
     },
+    minDistance: parseFloat(document.getElementById('minmove').value),
+});
+
+controls.minmove.addEventListener('input', () => {
+    cycle.input.minDistance = parseFloat(controls.minmove.value);
 });
 
 document.getElementById('clear-btn').addEventListener('click', () => {

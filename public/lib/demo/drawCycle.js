@@ -14,7 +14,7 @@ import { DrawInput } from './drawInput.js';
  * `build(path, points, seed)` receives the smoothed path, the raw points (which
  * carry pressure), and the mark's seed, and returns `{ mesh, renderer }` or null.
  */
-export function setupDrawCycle({ stage, board, canvas, build }) {
+export function setupDrawCycle({ stage, board, canvas, build, minDistance }) {
     let seed = 1;
 
     let live = null;
@@ -84,7 +84,8 @@ export function setupDrawCycle({ stage, board, canvas, build }) {
         return build(path, points, seed);
     }
 
-    new DrawInput(canvas, stage, {
+    const input = new DrawInput(canvas, stage, {
+        minDistance,
         onChange: (points, done) => {
             disposeGhost();
             disposeLive();
@@ -104,5 +105,5 @@ export function setupDrawCycle({ stage, board, canvas, build }) {
         },
     });
 
-    return { disposeGhost };
+    return { disposeGhost, input };
 }
