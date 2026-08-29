@@ -35,7 +35,7 @@ const cycle = setupDrawCycle({
         const def = new StrokeDef({
             points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
             widthLeft: limitWidthSlope(path,
-                t => base * (1 + (scale - 1) * pressureResponse(pressureAt(t), gamma)), limit),
+                s => base * (1 + (scale - 1) * pressureResponse(pressureAt(s), gamma)), limit),
             renderer,
             seed,
         });

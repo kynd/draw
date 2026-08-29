@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { resampleEvery, naturalSpline } from '../curves.js';
+import { resampleEvery, catmullRomSpline } from '../curves.js';
 import { DrawInput } from './drawInput.js';
 
 /**
@@ -75,9 +75,11 @@ export function setupDrawCycle({ stage, board, canvas, build }) {
 
     function buildFromPoints(points) {
         if (points.length < 2) return null;
-        // Light smoothing, so the mark follows the hand without recording its jitter.
+        // Light smoothing, so the mark follows the hand without recording its
+        // jitter. The spline is local: a new point reshapes only the last few
+        // segments, so the drawn part holds still while the stroke grows.
         const knots = resampleEvery(points, 0.06);
-        const path = knots.length >= 3 ? naturalSpline(knots, 6) : points;
+        const path = knots.length >= 3 ? catmullRomSpline(knots, 6) : points;
         if (path.length < 2) return null;
         return build(path, points, seed);
     }

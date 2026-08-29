@@ -66,6 +66,19 @@ export function centerY(i, count, spread) {
 export const taper = width => t => width * (0.75 + 0.25 * Math.sin(Math.PI * t));
 
 /**
+ * The drawn-stroke taper: full width in the body, eased to three quarters within
+ * a fixed distance of either end. Distance-based rather than fractional, so the
+ * profile of the drawn part does not shift as the stroke grows; only the end
+ * inside `ease` of the tip reflows.
+ * @returns {function(number): number} arc length to width.
+ */
+export const taperByArc = (width, length, ease = 0.35) => s => {
+    const d = Math.max(Math.min(s, length - s), 0);
+    const k = Math.min(d / ease, 1);
+    return width * (0.75 + 0.25 * k * k * (3 - 2 * k));
+};
+
+/**
  * A seeded curling scribble with a concavity, for blob demos: the same seed always
  * curls the same way.
  */

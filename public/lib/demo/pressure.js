@@ -2,8 +2,21 @@
  * Pen pressure helpers.
  *
  * DrawInput records a pressure on every drawn point. These read it back: as a
- * function along the stroke, as one average, and through a response curve.
+ * profile over arc length, as one average, and through a response curve.
+ *
+ * Everything here is parameterized by absolute arc length from the start, not by
+ * a fraction of the whole, so a value at a settled position holds still while the
+ * stroke grows. Only a bounded zone near the tip changes.
  */
+
+/** Total arc length of a run of points. */
+export function pathArcLength(points) {
+    let length = 0;
+    for (let i = 1; i < points.length; i++) {
+        length += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+    }
+    return length;
+}
 
 /**
  * The response curve applied before pressure drives anything: pressure raised to
@@ -16,10 +29,10 @@ export function pressureResponse(pressure, gamma = 1) {
 }
 
 /**
- * Samples the pressures recorded on drawn points by normalized position, so a
- * value survives the resampling and smoothing of the path it came from. A short
- * moving average (`smooth` points to each side) removes sensor jitter first.
- * @returns {function(number): number} t in 0..1 to pressure.
+ * The pressures recorded on drawn points, as a function of arc length along them.
+ * A short moving average (`smooth` points to each side) removes sensor jitter
+ * first; it reaches back only that many points, so past values stay put.
+ * @returns {function(number): number} arc length to pressure.
  */
 export function pressureAlong(points, smooth = 2) {
     const raw = points.map(p => p.pressure ?? 0);
@@ -33,39 +46,23 @@ export function pressureAlong(points, smooth = 2) {
             return sum / count;
         });
     }
-    return t => {
-        if (values.length === 0) return 0;
-        const f = t * (values.length - 1);
-        const i = Math.floor(f);
-        const a = values[i] ?? 0;
-        const b = values[Math.min(i + 1, values.length - 1)] ?? 0;
-        return a + (b - a) * (f - i);
-    };
-}
-
-/**
- * Caps how fast a width profile can rise or fall per unit of arc length. The
- * profile is sampled along the path and clamped in a forward and a backward pass,
- * so a pressure spike becomes a swell and a quick release a tapered exit instead
- * of a cliff. At `limit` 1 the outline flares at most 45 degrees, which is also
- * about where the ribbon geometry would start to fold.
- * @returns {function(number): number} t in 0..1 to width.
- */
-export function limitWidthSlope(path, widthFn, limit = 1, samples = 128) {
-    let length = 0;
-    for (let i = 1; i < path.length; i++) {
-        length += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
+    const s = [0];
+    for (let i = 1; i < points.length; i++) {
+        s.push(s[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y));
     }
-    const ds = (length || 1) / (samples - 1);
-    const w = Array.from({ length: samples }, (_, j) => widthFn(j / (samples - 1)));
-    for (let j = 1; j < samples; j++) w[j] = Math.min(w[j], w[j - 1] + limit * ds);
-    for (let j = samples - 2; j >= 0; j--) w[j] = Math.min(w[j], w[j + 1] + limit * ds);
-    return t => {
-        const f = Math.min(Math.max(t, 0), 1) * (samples - 1);
-        const j = Math.floor(f);
-        const a = w[j];
-        const b = w[Math.min(j + 1, samples - 1)];
-        return a + (b - a) * (f - j);
+    const total = s[s.length - 1] || 0;
+    return arc => {
+        if (values.length === 0) return 0;
+        if (values.length === 1 || total === 0) return values[0];
+        const a = Math.min(Math.max(arc, 0), total);
+        let lo = 0, hi = s.length - 1;
+        while (lo < hi - 1) {
+            const mid = (lo + hi) >> 1;
+            if (s[mid] <= a) lo = mid; else hi = mid;
+        }
+        const span = s[hi] - s[lo] || 1;
+        const f = (a - s[lo]) / span;
+        return values[lo] + (values[hi] - values[lo]) * f;
     };
 }
 
@@ -73,4 +70,33 @@ export function limitWidthSlope(path, widthFn, limit = 1, samples = 128) {
 export function averagePressure(points) {
     if (points.length === 0) return 0;
     return points.reduce((s, p) => s + (p.pressure ?? 0), 0) / points.length;
+}
+
+/**
+ * Caps how fast a width profile can rise or fall per unit of arc length. The
+ * profile is a function of arc length; it is sampled at fixed steps anchored at
+ * the start (so the settled part of a growing stroke keeps its samples) and
+ * clamped in a forward and a backward pass. A pressure spike becomes a swell and
+ * a quick release a tapered exit instead of a cliff. At `limit` 1 the outline
+ * flares at most 45 degrees, which is also about where the ribbon geometry would
+ * start to fold.
+ * @param {function(number): number} widthFn  Arc length to width.
+ * @returns {function(number): number} t in 0..1 of the path, to width, the form
+ *          a renderer's `widthLeft` takes.
+ */
+export function limitWidthSlope(path, widthFn, limit = 1) {
+    const length = pathArcLength(path);
+    const STEP = 0.02;
+    const count = Math.max(2, Math.ceil((length || STEP) / STEP) + 1);
+    const pos = Array.from({ length: count }, (_, j) => Math.min(j * STEP, length));
+    const w = pos.map(s => widthFn(s));
+    for (let j = 1; j < count; j++) w[j] = Math.min(w[j], w[j - 1] + limit * (pos[j] - pos[j - 1]));
+    for (let j = count - 2; j >= 0; j--) w[j] = Math.min(w[j], w[j + 1] + limit * (pos[j + 1] - pos[j]));
+    return t => {
+        const s = Math.min(Math.max(t, 0), 1) * length;
+        const j = Math.min(Math.floor(s / STEP), count - 2);
+        const span = pos[j + 1] - pos[j] || 1;
+        const f = Math.min(Math.max((s - pos[j]) / span, 0), 1);
+        return w[j] + (w[j + 1] - w[j]) * f;
+    };
 }
