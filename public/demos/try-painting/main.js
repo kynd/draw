@@ -16,7 +16,7 @@ function blob(id, label, params, makeRenderer) {
         id, label,
         params: [radius, ...params],
         makeMesh: (path, v, ctx) => {
-            const contour = blobOutline(path, { span: 0.12, radius: v.radius });
+            const contour = blobOutline(path, { span: 0.12, radius: v.radius * (ctx.pressureScale ?? 1) });
             if (!contour) return null;
             const renderer = makeRenderer(v, ctx);
             return { mesh: renderer.build(contour, ctx.seed), renderer };
@@ -108,5 +108,6 @@ setupTryDrawing({
     clearBtn: document.getElementById('clear-btn'),
     colorBtn: document.getElementById('color-btn'),
     swatchesEl: document.getElementById('color-swatches'),
+    pressureEl: document.getElementById('pressure'),
 });
 wireWireframeToggle(document.getElementById('wire-btn'), stage);

@@ -24,14 +24,20 @@ export class DrawInput {
             const rect = canvas.getBoundingClientRect();
             const nx = (event.clientX - rect.left) / rect.width * 2 - 1;
             const ny = 1 - (event.clientY - rect.top) / rect.height * 2;
-            return new THREE.Vector3(nx * stage.extentX, ny * stage.extentY, 0);
+            const p = new THREE.Vector3(nx * stage.extentX, ny * stage.extentY, 0);
+            // Pen pressure rides on the point. A mouse reports a constant while
+            // pressed, so it records zero and pressure effects leave it alone.
+            p.pressure = event.pointerType === 'pen' ? event.pressure : 0;
+            return p;
         };
 
         canvas.addEventListener('pointerdown', event => {
             this._drawing = true;
-            canvas.setPointerCapture(event.pointerId);
             this.points = [toWorld(event)];
             onChange(this.points, false);
+            // Capturing an inactive pointer throws (a synthetic event's id is not
+            // an active pointer), and the reset above must not depend on it.
+            try { canvas.setPointerCapture(event.pointerId); } catch (e) {}
         });
         canvas.addEventListener('pointermove', event => {
             if (!this._drawing) return;

@@ -16,16 +16,34 @@ import { taper } from './strokePaths.js';
  * wireframe overlay is on, the last baked stroke keeps its wireframe, as plain black
  * lines, until the next stroke starts.
  *
+ * Pen pressure recorded by DrawInput modulates the width along the stroke, and
+ * reaches makeMesh entries as one `pressureScale` for the whole mark. Sensitivity
+ * comes from the panel's pressure slider: at 0 pressure does nothing, at 1 full
+ * pressure doubles the width.
+ *
  * Registry entry: { id, label, params: [{ key, label, min, max, step, value }],
  *   make(values, ctx) } where ctx carries colorA, colorB, colors (a shade list),
  *   texture (the accumulation, for strokes that sample the background), and seed.
  */
-export function setupTryDrawing({ stage, board, canvas, registry, select, paramsEl, clearBtn, colorBtn, swatchesEl }) {
+export function setupTryDrawing({ stage, board, canvas, registry, select, paramsEl, clearBtn, colorBtn, swatchesEl, pressureEl }) {
     const values = Object.fromEntries(registry.map(r =>
         [r.id, Object.fromEntries(r.params.map(p => [p.key, p.value]))]));
     let currentId = registry[0].id;
     let seed = 1;
     let palette, colors;
+
+    // Pen pressure sensitivity: at 0 pressure does nothing, at 1 full pressure
+    // doubles the width. A mouse records zero pressure, so it is unaffected.
+    let pressureSens = pressureEl ? parseFloat(pressureEl.value) : 0;
+    if (pressureEl) {
+        const val = pressureEl.nextElementSibling;
+        const show = () => { if (val) val.textContent = pressureSens.toFixed(2); };
+        show();
+        pressureEl.addEventListener('input', () => {
+            pressureSens = parseFloat(pressureEl.value);
+            show();
+        });
+    }
 
     function newPalette() {
         palette = Palette.fromHues(
@@ -151,12 +169,26 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
 
         const reg = registry.find(r => r.id === currentId);
         const v = values[currentId];
+
+        // Pen pressure along the raw input, read back by normalized position so
+        // it survives the resampling and smoothing of the drawn path.
+        const pressureAt = t => {
+            const f = t * (points.length - 1);
+            const i = Math.floor(f);
+            const a = points[i]?.pressure ?? 0;
+            const b = points[Math.min(i + 1, points.length - 1)]?.pressure ?? 0;
+            return a + (b - a) * (f - i);
+        };
+        const avgPressure = points.reduce((s, p) => s + (p.pressure ?? 0), 0) / points.length;
+
         // An entry may build its own mesh from the path, for marks that are not
-        // strokes, such as blob fills.
+        // strokes, such as blob fills. Those have no width; pressure reaches them
+        // as one scale for the whole mark.
         if (reg.makeMesh) {
             const made = reg.makeMesh(path, v, {
                 colorA: colors.a, colorB: colors.b, colors: colors.list,
                 texture: board.texture, seed,
+                pressureScale: 1 + pressureSens * avgPressure,
             });
             if (!made) return null;
             made.mesh.position.z = 0.05;
@@ -166,9 +198,10 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
             colorA: colors.a, colorB: colors.b, colors: colors.list,
             texture: board.texture, seed,
         });
+        const baseWidth = taper(v.width);
         const def = new StrokeDef({
             points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
-            widthLeft: taper(v.width),
+            widthLeft: t => baseWidth(t) * (1 + pressureSens * pressureAt(t)),
             renderer,
             seed,
         });

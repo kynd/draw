@@ -48,5 +48,6 @@ setupTryDrawing({
     clearBtn: document.getElementById('clear-btn'),
     colorBtn: document.getElementById('color-btn'),
     swatchesEl: document.getElementById('color-swatches'),
+    pressureEl: document.getElementById('pressure'),
 });
 wireWireframeToggle(document.getElementById('wire-btn'), stage);
