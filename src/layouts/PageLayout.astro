@@ -62,7 +62,7 @@ const navItems: NavItem[] = [
       { label: 'Try drawing',            href: '#try' },
     ]
   },
-  { label: 'Painting tools', href: `${base}/painting-tools`, slug: 'painting-tools',
+  { label: 'Fills', href: `${base}/fills`, slug: 'fills',
     subLinks: [
       { label: 'Blob fills',     href: '#fills' },
       { label: 'Textured paint', href: '#paints' },
@@ -138,6 +138,11 @@ const navItems: NavItem[] = [
       },
     ]
   },
+  // Experimental pages: visible only in the dev server. The deploy workflow also
+  // removes their built pages and demos, so they never reach the published site.
+  ...(import.meta.env.DEV ? [
+    { label: '[Experimental] MIDI control', href: `${base}/experimental/midi-control`, slug: 'experimental/midi-control', sketch: true },
+  ] : []),
 ];
 
 // Flattened depth-first, so "next page" walks the tree in reading order.

@@ -1,0 +1,32 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="MIDI control" slug="experimental/midi-control">
+  <div class="monologue">
+    Reading MIDI input, before deciding what it should control
+  </div>
+
+  <div class="prose">
+    <p>This page is experimental and only exists in the local build.</p>
+    <div class="jp">このページは実験的なもので、ローカルのビルドにのみ存在します。</div>
+
+    <p>The library's <code>MidiInput</code> requests Web MIDI access and subscribes to every input port, including ports that appear after the page loads. Each message arrives raw and parsed: the type, the channel, and a reading of the data bytes (note name and velocity, controller and value, bend amount).</p>
+    <div class="jp">ライブラリの<code>MidiInput</code>はWeb MIDIへのアクセスを要求し、ページの読み込み後に現れたものを含む、すべての入力ポートを購読します。各メッセージは生のまま、そして解析された形で届きます。種類、チャンネル、そしてデータバイトの読み（音名とベロシティ、コントローラと値、ベンド量）です。</div>
+  </div>
+
+  <section class="demo-section" id="dump">
+    <div class="demo-header">
+      <h2>MIDI dump</h2>
+      <a href={`${base}/demos/experimental/midi-dump/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/experimental/midi-dump/index.html?embedded`} title="MIDI dump" scrolling="no" allow="midi"></iframe>
+    </div>
+    <div class="prose">
+      <p>Every incoming message is listed with its raw bytes and a reading. Connect a controller and move something.</p>
+      <div class="jp">受信したすべてのメッセージが、生のバイト列と読みとともに並びます。コントローラを接続して、何かを動かしてみてください。</div>
+    </div>
+  </section>
+</PageLayout>

@@ -92,7 +92,7 @@ src/content/pages/
 src/pages/
   palette-maker.astro                  demo/log pages, written as .astro for embeds
   strokes.astro  more-strokes.astro  shaped-strokes.astro
-  painting-tools.astro  stroke-processing.astro                        every stroke demo, one section each
+  fills.astro  stroke-processing.astro                                 every stroke demo, one section each
 public/lib/                            library code
   StrokeDef.js  Palette.js  color.js  CanvasBuffer.js  random.js  pathEffects.js
   StrokeHalo.js  curves.js
@@ -114,9 +114,19 @@ public/lib/                            library code
                 LineStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js
                 drawingBoard.js  tryPanel.js  blobShowcase.js
-                testBackground.js      shared demo support, still library code
+                testBackground.js  midi.js    shared demo support, still library code
 public/demos/<name>/                   index.html + main.js per demo
+src/pages/experimental/<name>.astro    experimental pages, local only
+public/demos/experimental/<name>/      demos for experimental pages, local only
 ```
+
+## Experimental Pages
+
+Experimental pages live under `src/pages/experimental/` with their demos under
+`public/demos/experimental/`. Their nav entries in `PageLayout.astro` go inside the
+`import.meta.env.DEV` spread with `sketch: true`, so they appear only in the dev
+server. The deploy workflow removes `dist/experimental` and `dist/demos/experimental`
+after the build, so the published site carries neither the pages nor the demos.
 
 - **Documentation pages** describe the library: contracts, parameters, defaults, and the
   reasoning behind them. No demo narrative.

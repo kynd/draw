@@ -91,6 +91,11 @@ export class MaterialBlobRenderer extends BlobRenderer {
                 float arc;
                 vec2 outward;
                 float d = sdBlob(vWorld, arc, outward);
+                if (uMode == 0) {
+                    // The outline swells on the relief's low band, so the
+                    // silhouette waves where the surface does.
+                    d -= (fbm(vWorld * 0.8 + uSeed * 13.0) - 0.5) * uRelief * 0.5;
+                }
                 float alpha = 1.0 - smoothstep(-0.006, 0.0, d);
                 if (alpha <= 0.003) discard;
 
