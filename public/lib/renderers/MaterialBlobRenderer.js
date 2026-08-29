@@ -4,9 +4,11 @@ import { BlobRenderer } from './BlobRenderer.js';
 /**
  * A blob shaded as a material, from a quintic dome height field whose slope is
  * analytic and second-derivative-free at both ends, so no corner shows in the
- * shading. Metal and faceted glass share a surface of random triangular panes on a
- * noise-warped lattice: each pane throws the reflection its own way. Smooth glass
- * keeps a low-frequency wave surface and bends the background through its normal.
+ * shading. Metal takes the thick oil's ridged relief and reflects a chrome
+ * environment of hard-edged light bands, which the ridges streak into liquid
+ * highlights. Smooth glass keeps a low-frequency wave surface and bends the
+ * background through its normal. Faceted glass takes one random tilt per triangle
+ * of a noise-warped lattice.
  */
 export class MaterialBlobRenderer extends BlobRenderer {
     /** @param {'metal'|'glass'|'facet'} [opts.mode] */
@@ -58,10 +60,21 @@ export class MaterialBlobRenderer extends BlobRenderer {
             // The thick oil's surface: a smooth swell carrying sharp ridges with
             // wide smooth valleys. On metal the ridges streak the reflection.
             float metalRelief(vec2 p) {
-                float low = fbm(p * 1.4 + uSeed * 13.0);
-                float high = 1.0 - abs(2.0 * fbm(p * 3.2 + uSeed * 29.0) - 1.0);
+                float low = fbm(p * 0.8 + uSeed * 13.0);
+                float high = 1.0 - abs(2.0 * fbm(p * 1.6 + uSeed * 29.0) - 1.0);
                 high = high * high * high;
-                return mix(high, low, 0.55);
+                return mix(high, low, 0.65);
+            }
+
+            // A chrome environment: dark ground, mid sky, and narrow bright bands
+            // with hard edges. Sharp features in the reflection are what read as
+            // metal; a plain gradient shades like matte paint.
+            vec3 metalEnv(vec3 r) {
+                vec3 env = mix(vec3(0.04), vec3(0.38), smoothstep(-0.1, 0.15, r.y));
+                env = mix(env, vec3(1.0), smoothstep(0.16, 0.2, r.y) - smoothstep(0.42, 0.52, r.y));
+                env = mix(env, vec3(0.85), smoothstep(-0.5, -0.46, r.y) - smoothstep(-0.3, -0.26, r.y));
+                env = mix(env, vec3(0.9), (smoothstep(0.3, 0.36, r.x) - smoothstep(0.55, 0.62, r.x)) * 0.7);
+                return env;
             }
 
             // A triangle id on a lattice warped by low-frequency noise, so the panes
@@ -94,7 +107,7 @@ export class MaterialBlobRenderer extends BlobRenderer {
                     slope = vec2(
                         metalRelief(vWorld + vec2(e, 0.0)) - metalRelief(vWorld - vec2(e, 0.0)),
                         metalRelief(vWorld + vec2(0.0, e)) - metalRelief(vWorld - vec2(0.0, e))
-                    ) / (2.0 * e) * uRelief * 0.35;
+                    ) / (2.0 * e) * uRelief * 0.25;
                 } else {
                     slope = vec2(
                         reliefAt(vWorld + vec2(e, 0.0)) - reliefAt(vWorld - vec2(e, 0.0)),
@@ -112,10 +125,7 @@ export class MaterialBlobRenderer extends BlobRenderer {
                 vec3 color;
                 if (uMode == 0) {
                     vec3 r = reflect(-view, normal);
-                    // A tilted, wide horizon: a flat face reads bright, and the waves
-                    // sweep the boundary across it.
-                    float horizon = smoothstep(-0.35, 0.35, r.y + 0.25);
-                    color = mix(vec3(0.08), vec3(0.95), horizon) * uTint;
+                    color = metalEnv(r) * uTint;
                 } else {
                     vec2 suv = clamp(screenUv() + normal.xy * uBend * 2.0, 0.001, 0.999);
                     color = texture2D(uBg, suv).rgb * uTint;

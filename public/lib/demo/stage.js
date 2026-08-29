@@ -81,8 +81,16 @@ export class StrokeStage {
             this._pending = false;
             this.syncScreenUniforms(this.buffer.scene);
             this.buffer.scene.traverse(child => {
-                if (!child.isMesh || !(child.userData.stats || child.userData.wire)) return;
+                if (!child.isMesh) return;
                 const materials = Array.isArray(child.material) ? child.material : [child.material];
+                // A wire-only mesh is an overlay: always wireframe, visible only
+                // while the flag is on.
+                if (child.userData.wireOnly) {
+                    child.visible = this.wireframe;
+                    materials.forEach(m => { if (m) m.wireframe = true; });
+                    return;
+                }
+                if (!(child.userData.stats || child.userData.wire)) return;
                 materials.forEach(m => { if (m) m.wireframe = this.wireframe; });
             });
             this._preRenders.forEach(fn => fn(

@@ -11,13 +11,16 @@ import { taper } from './strokePaths.js';
  * A registry entry describes one stroke: its parameter specs and a factory from the
  * current values to a renderer. The harness owns everything else: the dropdown, the
  * parameter rows it rebuilds on selection, the per-stroke memory of adjusted values,
- * the color state, and the draw-then-bake cycle against a DrawingBoard.
+ * the color state (shown in the panel's swatches; the randomize button draws a fresh
+ * palette each time), and the draw-then-bake cycle against a DrawingBoard. While the
+ * wireframe overlay is on, the last baked stroke keeps its wireframe, as plain black
+ * lines, until the next stroke starts.
  *
  * Registry entry: { id, label, params: [{ key, label, min, max, step, value }],
  *   make(values, ctx) } where ctx carries colorA, colorB, colors (a shade list),
  *   texture (the accumulation, for strokes that sample the background), and seed.
  */
-export function setupTryDrawing({ stage, board, canvas, registry, select, paramsEl, clearBtn, colorBtn }) {
+export function setupTryDrawing({ stage, board, canvas, registry, select, paramsEl, clearBtn, colorBtn, swatchesEl }) {
     const values = Object.fromEntries(registry.map(r =>
         [r.id, Object.fromEntries(r.params.map(p => [p.key, p.value]))]));
     let currentId = registry[0].id;
@@ -34,8 +37,14 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
         const dark = palette.entries.filter(e => e.L < 0.68);
         const pick = () => dark[Math.floor(Math.random() * dark.length)].hex;
         colors = { a: pick(), b: pick(), list: dark.map(e => e.hex) };
+        if (swatchesEl) {
+            const swatches = swatchesEl.querySelectorAll('.dp-swatch');
+            if (swatches[0]) swatches[0].style.background = colors.a;
+            if (swatches[1]) swatches[1].style.background = colors.b;
+        }
     }
     function clearCanvas() {
+        disposeGhost();
         const e = palette.entries[Math.floor(Math.random() * palette.entries.length)];
         board.clear(e.hex);
         stage.draw();
@@ -82,6 +91,32 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
         stage.remove(live.mesh);
         live.renderer.dispose(live.mesh);
         live = null;
+    }
+
+    // The last baked stroke, kept as a wire-only overlay so the wireframe stays
+    // readable over the bake until the next stroke starts. The stroke's own shader
+    // would redraw the baked pixels in place, so the overlay swaps in plain black
+    // lines, the same ink as the pointer path.
+    let ghost = null;
+    function makeWireOnly(mesh) {
+        mesh.userData.wireOnly = true;
+        mesh.traverse(child => {
+            if (!child.isMesh) return;
+            child.userData.origMaterial = child.material;
+            child.material = new THREE.MeshBasicMaterial({ color: '#000000', wireframe: true });
+        });
+    }
+    function disposeGhost() {
+        if (!ghost) return;
+        stage.remove(ghost.mesh);
+        ghost.mesh.traverse(child => {
+            if (!child.isMesh || !child.userData.origMaterial) return;
+            child.material.dispose();
+            child.material = child.userData.origMaterial;
+            delete child.userData.origMaterial;
+        });
+        ghost.renderer.dispose(ghost.mesh);
+        ghost = null;
     }
 
     // The pointer's own path, shown over the live stroke while drawing and gone on
@@ -144,13 +179,18 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
 
     new DrawInput(canvas, stage, {
         onChange: (points, done) => {
+            disposeGhost();
             disposeLive();
             live = buildStroke(points);
             if (live) stage.add(live.mesh);
             setPointerLine(done ? [] : points);
             if (done && live) {
                 board.bake([live.mesh]);
-                disposeLive();
+                ghost = live;
+                makeWireOnly(ghost.mesh);
+                // The bake scene borrowed the mesh; the overlay needs it back.
+                stage.add(ghost.mesh);
+                live = null;
                 seed++;
             }
             stage.draw();
@@ -162,7 +202,8 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
         buildParams();
     });
     clearBtn.addEventListener('click', clearCanvas);
-    colorBtn.addEventListener('click', nextColors);
+    // A fresh palette each time, so the colors are not draws from the same deck.
+    colorBtn.addEventListener('click', () => { newPalette(); nextColors(); });
 
     newPalette();
     nextColors();

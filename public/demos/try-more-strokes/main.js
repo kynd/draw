@@ -47,5 +47,6 @@ setupTryDrawing({
     paramsEl: document.getElementById('params'),
     clearBtn: document.getElementById('clear-btn'),
     colorBtn: document.getElementById('color-btn'),
+    swatchesEl: document.getElementById('color-swatches'),
 });
 wireWireframeToggle(document.getElementById('wire-btn'), stage);

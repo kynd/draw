@@ -155,6 +155,14 @@ html, body {
 .dp-btn-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .dp-btn-row:last-child { margin-bottom: 0; }
 
+/* Color swatches — current selections, filled from script */
+.dp-swatch-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.dp-swatch {
+  flex: 1; height: 20px;
+  border: 1px solid var(--demo-line);
+  background: transparent;
+}
+
 /* Toggle button — ghost until on */
 .dp-toggle {
   flex: 1;
