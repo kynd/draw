@@ -1,0 +1,46 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Pen pressure" slug="pen-pressure">
+  <div class="monologue">
+    One stroke, one color, and only the pressure to shape it
+  </div>
+
+  <div class="prose">
+    <p>Both demos draw the basic rounded stroke in black on white, so the only thing to look at is how pen pressure becomes width. DrawInput records a pressure on every drawn point (a mouse records zero), and a mapping turns it into the width along the stroke.</p>
+    <div class="jp">どちらのデモも、基本の丸いストロークを白地に黒で描きます。見るものは、筆圧がどのように幅になるかだけです。DrawInputは描かれたすべての点に筆圧を記録し（マウスはゼロを記録します）、マッピングがそれをストロークに沿った幅へと変えます。</div>
+
+    <p>Before the mapping, the pressure passes through a response curve: pressure raised to an exponent. Raw tablet pressure feels front-loaded (a light touch already reports a substantial value), so an exponent above 1 spreads the low end out and makes light strokes easier to hold; below 1 compresses it. Both demos expose the exponent as Curve.</p>
+    <div class="jp">マッピングの前に、筆圧は応答カーブを通ります。筆圧を指数で累乗したものです。タブレットの生の筆圧は前寄りに感じられるため（軽いタッチでもかなりの値を報告します）、1より大きい指数は低域を広げ、軽いストロークを保ちやすくします。1より小さい指数はそれを圧縮します。どちらのデモも、この指数をCurveとして公開しています。</div>
+  </div>
+
+  <section class="demo-section" id="scale">
+    <div class="demo-header">
+      <h2>Scaled width</h2>
+      <a href={`${base}/demos/pressure-scale/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/pressure-scale/index.html?embedded`} title="Scaled width" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Pressure multiplies the base width: from the base at zero pressure to base times the scale, up to five, at full pressure.</p>
+      <div class="jp">筆圧が基本の幅に掛かります。筆圧ゼロで基本の幅、最大の筆圧で基本の幅の最大5倍までです。</div>
+    </div>
+  </section>
+
+  <section class="demo-section" id="additive">
+    <div class="demo-header">
+      <h2>Added width</h2>
+      <a href={`${base}/demos/pressure-add/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/pressure-add/index.html?embedded`} title="Added width" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Pressure adds to the base width instead: a base of 0.1 with an added 0.3 runs between 0.1 and 0.4. A thin base stays thin under a light touch however large the addition, where a scaled width grows everything in proportion.</p>
+      <div class="jp">こちらでは筆圧が基本の幅に足されます。基本0.1に追加0.3なら、0.1から0.4の間で変化します。加算では、細い基本の幅は追加がどれほど大きくても軽いタッチでは細いままです。倍率ではすべてが比例して太ります。</div>
+    </div>
+  </section>
+</PageLayout>

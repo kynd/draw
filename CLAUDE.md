@@ -92,7 +92,7 @@ src/content/pages/
 src/pages/
   palette-maker.astro                  demo/log pages, written as .astro for embeds
   strokes.astro  more-strokes.astro  shaped-strokes.astro
-  fills.astro  stroke-processing.astro                                 every stroke demo, one section each
+  fills.astro  stroke-processing.astro  pen-pressure.astro             every stroke demo, one section each
 public/lib/                            library code
   StrokeDef.js  Palette.js  color.js  CanvasBuffer.js  random.js  pathEffects.js
   StrokeHalo.js  curves.js
@@ -113,8 +113,9 @@ public/lib/                            library code
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js
                 LineStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js
-                drawingBoard.js  tryPanel.js  blobShowcase.js
-                testBackground.js  midi.js    shared demo support, still library code
+                drawingBoard.js  drawCycle.js  tryPanel.js  blobShowcase.js
+                pressure.js  testBackground.js  midi.js
+                                       shared demo support, still library code
 public/demos/<name>/                   index.html + main.js per demo
 src/pages/experimental/<name>.astro    experimental pages, local only
 public/demos/experimental/<name>/      demos for experimental pages, local only

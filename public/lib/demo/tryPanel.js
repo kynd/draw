@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../StrokeDef.js';
 import { Palette } from '../Palette.js';
-import { resampleEvery, naturalSpline } from '../curves.js';
-import { DrawInput } from './drawInput.js';
 import { taper } from './strokePaths.js';
+import { setupDrawCycle } from './drawCycle.js';
+import { pressureAlong, averagePressure } from './pressure.js';
 
 /**
  * The try-drawing harness every stroke page shares.
@@ -12,9 +12,8 @@ import { taper } from './strokePaths.js';
  * current values to a renderer. The harness owns everything else: the dropdown, the
  * parameter rows it rebuilds on selection, the per-stroke memory of adjusted values,
  * the color state (shown in the panel's swatches; the randomize button draws a fresh
- * palette each time), and the draw-then-bake cycle against a DrawingBoard. While the
- * wireframe overlay is on, the last baked stroke keeps its wireframe, as plain black
- * lines, until the next stroke starts.
+ * palette each time). The drawing itself runs on the shared draw cycle, which also
+ * keeps the last baked stroke's wireframe while the overlay is on.
  *
  * Pen pressure recorded by DrawInput modulates the width along the stroke, and
  * reaches makeMesh entries as one `pressureScale` for the whole mark. Sensitivity
@@ -29,7 +28,6 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
     const values = Object.fromEntries(registry.map(r =>
         [r.id, Object.fromEntries(r.params.map(p => [p.key, p.value]))]));
     let currentId = registry[0].id;
-    let seed = 1;
     let palette, colors;
 
     // Pen pressure sensitivity: at 0 pressure does nothing, at 1 full pressure
@@ -62,7 +60,7 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
         }
     }
     function clearCanvas() {
-        disposeGhost();
+        cycle.disposeGhost();
         const e = palette.entries[Math.floor(Math.random() * palette.entries.length)];
         board.clear(e.hex);
         stage.draw();
@@ -103,130 +101,40 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
         });
     }
 
-    let live = null;
-    function disposeLive() {
-        if (!live) return;
-        stage.remove(live.mesh);
-        live.renderer.dispose(live.mesh);
-        live = null;
-    }
+    const cycle = setupDrawCycle({
+        stage, board, canvas,
+        build: (path, points, seed) => {
+            const reg = registry.find(r => r.id === currentId);
+            const v = values[currentId];
+            const pressureAt = pressureAlong(points);
 
-    // The last baked stroke, kept as a wire-only overlay so the wireframe stays
-    // readable over the bake until the next stroke starts. The stroke's own shader
-    // would redraw the baked pixels in place, so the overlay swaps in plain black
-    // lines, the same ink as the pointer path.
-    let ghost = null;
-    function makeWireOnly(mesh) {
-        mesh.userData.wireOnly = true;
-        mesh.traverse(child => {
-            if (!child.isMesh) return;
-            child.userData.origMaterial = child.material;
-            child.material = new THREE.MeshBasicMaterial({ color: '#000000', wireframe: true });
-        });
-    }
-    function disposeGhost() {
-        if (!ghost) return;
-        stage.remove(ghost.mesh);
-        ghost.mesh.traverse(child => {
-            if (!child.isMesh || !child.userData.origMaterial) return;
-            child.material.dispose();
-            child.material = child.userData.origMaterial;
-            delete child.userData.origMaterial;
-        });
-        ghost.renderer.dispose(ghost.mesh);
-        ghost = null;
-    }
-
-    // The pointer's own path, shown over the live stroke while drawing and gone on
-    // release. THREE.Line stays one pixel wide at any scale.
-    const pointerLine = new THREE.Line(
-        new THREE.BufferGeometry(),
-        new THREE.LineBasicMaterial({ color: '#000000' })
-    );
-    pointerLine.position.z = 0.06;
-    pointerLine.frustumCulled = false;
-    stage.add(pointerLine);
-
-    function setPointerLine(points) {
-        pointerLine.geometry.dispose();
-        const geometry = new THREE.BufferGeometry();
-        const array = new Float32Array(points.length * 3);
-        points.forEach((p, i) => {
-            array[i * 3] = p.x;
-            array[i * 3 + 1] = p.y;
-            array[i * 3 + 2] = 0;
-        });
-        geometry.setAttribute('position', new THREE.BufferAttribute(array, 3));
-        pointerLine.geometry = geometry;
-    }
-
-    function buildStroke(points) {
-        if (points.length < 2) return null;
-        // Light smoothing, so the mark follows the hand without recording its jitter.
-        const knots = resampleEvery(points, 0.06);
-        const path = knots.length >= 3 ? naturalSpline(knots, 6) : points;
-        if (path.length < 2) return null;
-
-        const reg = registry.find(r => r.id === currentId);
-        const v = values[currentId];
-
-        // Pen pressure along the raw input, read back by normalized position so
-        // it survives the resampling and smoothing of the drawn path.
-        const pressureAt = t => {
-            const f = t * (points.length - 1);
-            const i = Math.floor(f);
-            const a = points[i]?.pressure ?? 0;
-            const b = points[Math.min(i + 1, points.length - 1)]?.pressure ?? 0;
-            return a + (b - a) * (f - i);
-        };
-        const avgPressure = points.reduce((s, p) => s + (p.pressure ?? 0), 0) / points.length;
-
-        // An entry may build its own mesh from the path, for marks that are not
-        // strokes, such as blob fills. Those have no width; pressure reaches them
-        // as one scale for the whole mark.
-        if (reg.makeMesh) {
-            const made = reg.makeMesh(path, v, {
+            // An entry may build its own mesh from the path, for marks that are
+            // not strokes, such as blob fills. Those have no width; pressure
+            // reaches them as one scale for the whole mark.
+            if (reg.makeMesh) {
+                const made = reg.makeMesh(path, v, {
+                    colorA: colors.a, colorB: colors.b, colors: colors.list,
+                    texture: board.texture, seed,
+                    pressureScale: 1 + pressureSens * averagePressure(points),
+                });
+                if (!made) return null;
+                made.mesh.position.z = 0.05;
+                return made;
+            }
+            const renderer = reg.make(v, {
                 colorA: colors.a, colorB: colors.b, colors: colors.list,
                 texture: board.texture, seed,
-                pressureScale: 1 + pressureSens * avgPressure,
             });
-            if (!made) return null;
-            made.mesh.position.z = 0.05;
-            return made;
-        }
-        const renderer = reg.make(v, {
-            colorA: colors.a, colorB: colors.b, colors: colors.list,
-            texture: board.texture, seed,
-        });
-        const baseWidth = taper(v.width);
-        const def = new StrokeDef({
-            points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
-            widthLeft: t => baseWidth(t) * (1 + pressureSens * pressureAt(t)),
-            renderer,
-            seed,
-        });
-        const mesh = def.build();
-        mesh.position.z = 0.05;
-        return { mesh, renderer };
-    }
-
-    new DrawInput(canvas, stage, {
-        onChange: (points, done) => {
-            disposeGhost();
-            disposeLive();
-            live = buildStroke(points);
-            if (live) stage.add(live.mesh);
-            setPointerLine(done ? [] : points);
-            if (done && live) {
-                board.bake([live.mesh]);
-                ghost = live;
-                makeWireOnly(ghost.mesh);
-                // The bake scene borrowed the mesh; the overlay needs it back.
-                stage.add(ghost.mesh);
-                live = null;
-                seed++;
-            }
-            stage.draw();
+            const baseWidth = taper(v.width);
+            const def = new StrokeDef({
+                points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
+                widthLeft: t => baseWidth(t) * (1 + pressureSens * pressureAt(t)),
+                renderer,
+                seed,
+            });
+            const mesh = def.build();
+            mesh.position.z = 0.05;
+            return { mesh, renderer };
         },
     });
 

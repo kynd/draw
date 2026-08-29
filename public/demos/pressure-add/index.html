@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pressure — added width</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+  <style>
+    .canvas-wrap { cursor: crosshair; touch-action: none; }
+  </style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Pressure</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Base width</span>
+        <input id="base" class="dp-range" type="range" min="0.01" max="0.2" step="0.005" value="0.06" />
+        <span class="dp-val">0.060</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Add</span>
+        <input id="add" class="dp-range" type="range" min="0" max="0.5" step="0.01" value="0.3" />
+        <span class="dp-val">0.30</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Curve</span>
+        <input id="curve" class="dp-range" type="range" min="0.3" max="3" step="0.05" value="1" />
+        <span class="dp-val">1.00</span>
+      </div>
+      <div class="dp-note">Width runs from the base at zero pressure to base plus the added width at full pressure. Curve is the response exponent: above 1 spreads out light touches, below 1 compresses them.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Canvas</span></div>
+      <div class="dp-btn-row">
+        <button id="clear-btn" class="dp-btn secondary">Clear</button>
+      </div>
+      <div class="dp-note">Strokes bake into the canvas on release. A mouse draws at the base width.</div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
