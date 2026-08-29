@@ -72,7 +72,7 @@ export class GlassStrokeRenderer extends HeightFieldStrokeRenderer {
                 float f = pow(1.0 - clamp(dot(n, view), 0.0, 1.0), uFresnel);
                 vec3 color = mix(through, back, clamp(f * 2.2, 0.0, 0.85));
 
-                vec3 light = normalize(vec3(-0.35, 0.8, 0.5));
+                vec3 light = normalize(vec3(-0.35, -0.8, 0.5));
                 vec3 halfVec = normalize(light + view);
                 float spec = pow(max(dot(n, halfVec), 0.0), uShininess) * uSpecular;
 

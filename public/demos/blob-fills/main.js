@@ -7,7 +7,7 @@ setupBlobShowcase({
         if (i === 0) return new ShapedBlobRenderer({ color: ctx.color });
         if (i === 1) {
             return new ShapedBlobRenderer({
-                color: ctx.color, spikes: 26,
+                color: ctx.color, spikes: 14,
                 spikeAmp: ctx.values.spikeAmp, sharp: ctx.values.sharp,
             });
         }

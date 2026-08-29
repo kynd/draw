@@ -52,6 +52,16 @@ export class StoneBlobRenderer extends BlobRenderer {
                 float arc;
                 vec2 outward;
                 float d = sdBlob(vWorld, arc, outward);
+                if (uMode == 0) {
+                    // The boundary breaks on the same crags as the surface.
+                    d += (rockRelief(vWorld) - 0.5) * 0.14;
+                } else if (uMode == 2) {
+                    // The edge dissolves into loose grains: a per-pixel jitter over
+                    // a low wander, so the boundary scatters instead of cutting.
+                    vec2 cellE = floor(vWorld * 900.0);
+                    d += (hash21(cellE * 2.3 + uSeed * 7.0) - 0.5) * 0.02
+                       + (fbm(vWorld * 7.0 + uSeed * 43.0) - 0.5) * 0.04;
+                }
                 float alpha = 1.0 - smoothstep(-0.006, 0.0, d);
                 if (alpha <= 0.003) discard;
 
@@ -69,7 +79,7 @@ export class StoneBlobRenderer extends BlobRenderer {
                     slope += vec2(
                         rockRelief(vWorld + vec2(e, 0.0)) - rockRelief(vWorld - vec2(e, 0.0)),
                         rockRelief(vWorld + vec2(0.0, e)) - rockRelief(vWorld - vec2(0.0, e))
-                    ) / (2.0 * e) * uRelief * 0.3;
+                    ) / (2.0 * e) * uRelief * 0.6;
                     float mottle = fbm(vWorld * 2.4 + uSeed * 5.0);
                     color = mix(uColorB, uColor, smoothstep(0.3, 0.7, mottle));
                     // Crevices darken with the fold.
@@ -97,7 +107,7 @@ export class StoneBlobRenderer extends BlobRenderer {
                 }
                 vec3 normal = normalize(vec3(-slope, 1.0));
 
-                vec3 light = normalize(vec3(-0.4, 0.7, 0.6));
+                vec3 light = normalize(vec3(-0.4, -0.7, 0.6));
                 vec3 view = vec3(0.0, 0.0, 1.0);
                 float diff = max(dot(normal, light), 0.0);
                 vec3 halfVec = normalize(light + view);

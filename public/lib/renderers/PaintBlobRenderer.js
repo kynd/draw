@@ -16,6 +16,8 @@ import { BlobRenderer } from './BlobRenderer.js';
  *
  * `split` sharpens the two-pigment mix: at 1 the colors meet on a hard boundary
  * shaped by low-frequency noise instead of mixing in smooth patches.
+ *
+ * `rag` tears the edge on a fine noise, by its amplitude in world units.
  */
 export class PaintBlobRenderer extends BlobRenderer {
     constructor({
@@ -29,6 +31,7 @@ export class PaintBlobRenderer extends BlobRenderer {
         edgeSoft = 0.03,   // alpha feather width
         dry = 0,           // dry-brush erosion
         split = 0,         // sharpness of the two-pigment boundary
+        rag = 0,           // edge tear amplitude in world units
         noiseFreq = 5,
         ...rest
     } = {}) {
@@ -43,6 +46,7 @@ export class PaintBlobRenderer extends BlobRenderer {
         this.edgeSoft = edgeSoft;
         this.dry = dry;
         this.split = split;
+        this.rag = rag;
         this.noiseFreq = noiseFreq;
     }
 
@@ -58,6 +62,7 @@ export class PaintBlobRenderer extends BlobRenderer {
             uEdgeSoft: { value: this.edgeSoft },
             uDry: { value: this.dry },
             uSplit: { value: this.split },
+            uRag: { value: this.rag },
             uFreq: { value: this.noiseFreq },
         };
     }
@@ -74,6 +79,7 @@ export class PaintBlobRenderer extends BlobRenderer {
             uniform float uEdgeSoft;
             uniform float uDry;
             uniform float uSplit;
+            uniform float uRag;
             uniform float uFreq;
 
             float reliefAt(vec2 p) {
@@ -92,6 +98,10 @@ export class PaintBlobRenderer extends BlobRenderer {
                 float arc;
                 vec2 outward;
                 float d = sdBlob(vWorld, arc, outward);
+                if (uRag > 0.0) {
+                    // The edge tears on a fine noise instead of tracing the contour.
+                    d += (fbm(vWorld * 8.0 + uSeed * 37.0) - 0.5) * uRag;
+                }
                 float alpha = 1.0 - smoothstep(-uEdgeSoft, 0.0, d);
                 if (alpha <= 0.003) discard;
 
@@ -131,7 +141,7 @@ export class PaintBlobRenderer extends BlobRenderer {
                            + gradN * dome * uRelief * 0.05;
                 vec3 normal = normalize(vec3(-slope, 1.0));
 
-                vec3 light = normalize(vec3(-0.4, 0.7, 0.6));
+                vec3 light = normalize(vec3(-0.4, -0.7, 0.6));
                 vec3 view = vec3(0.0, 0.0, 1.0);
                 float diff = max(dot(normal, light), 0.0);
                 vec3 halfVec = normalize(light + view);

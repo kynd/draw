@@ -70,9 +70,11 @@ export class MaterialBlobRenderer extends BlobRenderer {
             // with hard edges. Sharp features in the reflection are what read as
             // metal; a plain gradient shades like matte paint.
             vec3 metalEnv(vec3 r) {
-                vec3 env = mix(vec3(0.04), vec3(0.38), smoothstep(-0.1, 0.15, r.y));
-                env = mix(env, vec3(1.0), smoothstep(0.16, 0.2, r.y) - smoothstep(0.42, 0.52, r.y));
-                env = mix(env, vec3(0.85), smoothstep(-0.5, -0.46, r.y) - smoothstep(-0.3, -0.26, r.y));
+                // The presented frame flips world y, so the sky side is -r.y.
+                float ry = -r.y;
+                vec3 env = mix(vec3(0.04), vec3(0.38), smoothstep(-0.1, 0.15, ry));
+                env = mix(env, vec3(1.0), smoothstep(0.16, 0.2, ry) - smoothstep(0.42, 0.52, ry));
+                env = mix(env, vec3(0.85), smoothstep(-0.5, -0.46, ry) - smoothstep(-0.3, -0.26, ry));
                 env = mix(env, vec3(0.9), (smoothstep(0.3, 0.36, r.x) - smoothstep(0.55, 0.62, r.x)) * 0.7);
                 return env;
             }
@@ -123,7 +125,7 @@ export class MaterialBlobRenderer extends BlobRenderer {
                 vec3 normal = normalize(vec3(-slope, 1.0));
 
                 vec3 view = vec3(0.0, 0.0, 1.0);
-                vec3 light = normalize(vec3(-0.4, 0.75, 0.55));
+                vec3 light = normalize(vec3(-0.4, -0.75, 0.55));
                 vec3 halfVec = normalize(light + view);
                 float spec = pow(max(dot(normal, halfVec), 0.0), 60.0) * uSpecular;
 

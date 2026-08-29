@@ -63,7 +63,7 @@ export class MirrorStrokeRenderer extends HeightFieldStrokeRenderer {
                 // Metal pushes contrast: a mirror does not return a muted copy.
                 env = clamp((env - 0.5) * uContrast + 0.5, 0.0, 1.0);
 
-                vec3 light = normalize(vec3(-0.4, 0.8, 0.45));
+                vec3 light = normalize(vec3(-0.4, -0.8, 0.45));
                 vec3 halfVec = normalize(light + view);
                 float spec = pow(max(dot(n, halfVec), 0.0), uShininess) * uSpecular;
 

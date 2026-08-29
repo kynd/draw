@@ -90,7 +90,7 @@ export class OilStrokeRenderer extends HeightFieldStrokeRenderer {
                 float coat = clamp(uPaint * (0.94 + 0.08 * lane) - 0.10 * (1.0 - clamp(height, 0.0, 1.0)), 0.0, 1.0);
                 vec3 pigment = mix(dragged, uColor, coat);
 
-                vec3 light = normalize(vec3(-0.4, 0.75, 0.55));
+                vec3 light = normalize(vec3(-0.4, -0.75, 0.55));
                 vec3 view = vec3(0.0, 0.0, 1.0);
                 float diff = max(dot(n, light), 0.0);
                 vec3 halfVec = normalize(light + view);

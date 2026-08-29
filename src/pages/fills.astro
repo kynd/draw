@@ -35,8 +35,8 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Spikes:</strong> An integer count of spikes runs around the boundary's arc, so the profile meets itself at the seam in a valley. Each spike hashes its height and lean from its index, and the tips keep their corner under any sharpness while the valleys keep a zero derivative.</p>
-        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧に沿って並ぶため、プロファイルは継ぎ目で谷として出会います。各トゲは高さと傾きを自身のインデックスのハッシュから決め、先端の角はどんな鋭さでも残り、谷の微分はゼロのままです。</div>
+        <p><strong>Spikes:</strong> An integer count of spikes runs around the boundary's arc, so the profile meets itself at the seam in a valley. Each spike hashes its height and lean from its index, and each valley hashes its depth from the boundary its two neighbors share, dipping inside the shape.</p>
+        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧に沿って並ぶため、プロファイルは継ぎ目で谷として出会います。各トゲは高さと傾きを自身のインデックスのハッシュから決め、各谷は隣り合う2本が共有する境界のハッシュから深さを決めて、形の内側に食い込みます。</div>
 
         <p><strong>Wobble:</strong> The bump offset is a noise of world position rather than arc, so it cannot show a seam at all.</p>
         <div class="jp"><strong>うねり：</strong>ふくらみのオフセットは弧ではなくワールド座標のノイズなので、継ぎ目がそもそも現れません。</div>
@@ -67,8 +67,8 @@ const demos = [
         <p><strong>Two pigments:</strong> Every paint mixes two colors in smooth patches, the way a loaded brush lays down more than one. The thick oil sharpens the mix instead: its colors meet on a hard boundary shaped by low-frequency noise, two paints laid side by side without blending.</p>
         <div class="jp"><strong>2つの顔料：</strong>すべての絵の具は2色をなだらかな斑で混ぜます。絵の具を含んだ筆が複数の色を置いていくのと同じです。厚塗りの油絵の具はかわりに混合を鋭くします。2色は低周波ノイズが形作る硬い境界で出会い、混ざらないまま並んで置かれた2つの絵の具になります。</div>
 
-        <p><strong>Ridges:</strong> The thick oil folds its high band as 1−|2n−1|, which has a corner at each crest. The fold is what keeps the ridges sharp under any smoothing of the noise beneath.</p>
-        <div class="jp"><strong>畝：</strong>厚塗りの油絵の具は高周波の帯を1−|2n−1|として折り返します。これは各頂に角を持ちます。下のノイズをどれだけ滑らかにしても畝が鋭いままなのは、この折り返しのためです。</div>
+        <p><strong>Ridges:</strong> The thick oil folds its high band as 1−|2n−1|, which has a corner at each crest. The fold is what keeps the ridges sharp under any smoothing of the noise beneath. Its edge tears on a fine noise instead of tracing the contour.</p>
+        <div class="jp"><strong>畝：</strong>厚塗りの油絵の具は高周波の帯を1−|2n−1|として折り返します。これは各頂に角を持ちます。下のノイズをどれだけ滑らかにしても畝が鋭いままなのは、この折り返しのためです。縁は輪郭をなぞらず、細かいノイズで破れます。</div>
       </details>
     </div>
   </section>
@@ -95,6 +95,9 @@ const demos = [
 
         <p><strong>The edge:</strong> The boundary wanders by a noise of world position, as a wet edge does, and pigment collects just inside it.</p>
         <div class="jp"><strong>縁：</strong>境界はワールド座標のノイズで揺らぎ、濡れた縁のように振る舞います。顔料はそのすぐ内側に集まります。</div>
+
+        <p><strong>Body:</strong> The gouache is lit as a thin relief so it reads as having thickness, and its edge grows brush marks, streaks elongated along directions that wander with position.</p>
+        <div class="jp"><strong>身：</strong>ガッシュは薄い起伏として照らされ、厚みを持つものとして読めます。縁には筆の跡が生え、位置とともに揺らぐ方向に沿って引き伸ばされた筋になります。</div>
       </details>
     </div>
   </section>
@@ -139,14 +142,14 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Rock:</strong> The relief folds its noise into creases, valley side down, so the surface reads as fractured rather than bumpy. Two colors mottle the face in patches, and the creases darken as crevices do.</p>
-        <div class="jp"><strong>岩：</strong>起伏はノイズを谷側へ折り返してひだにするため、面はでこぼこではなく割れたものとして読めます。2色が面を斑に染め、ひだは割れ目のように暗くなります。</div>
+        <p><strong>Rock:</strong> The relief folds its noise into creases, valley side down, so the surface reads as fractured rather than bumpy. Two colors mottle the face in patches, the creases darken as crevices do, and the boundary breaks on the same crags.</p>
+        <div class="jp"><strong>岩：</strong>起伏はノイズを谷側へ折り返してひだにするため、面はでこぼこではなく割れたものとして読めます。2色が面を斑に染め、ひだは割れ目のように暗くなり、境界も同じ岩肌で割れます。</div>
 
         <p><strong>Marble:</strong> Veins are a sine band warped by noise and raised to a high power, so they run as thin wandering lines over a near-white ground. The surface stays smooth and glossy.</p>
         <div class="jp"><strong>大理石：</strong>脈は、ノイズでゆがめた正弦の帯を高い累乗に上げたものです。そのため、白に近い地の上を細く曲がりくねって走ります。面は滑らかで光沢を保ちます。</div>
 
-        <p><strong>Sand:</strong> The normal jitters per pixel from a hashed grid, so every grain catches the light its own way, and the brightest few glint.</p>
-        <div class="jp"><strong>砂：</strong>法線はハッシュした格子からピクセルごとに揺らぎます。そのため一粒一粒が独自に光を受け、最も明るいわずかな粒がきらめきます。</div>
+        <p><strong>Sand:</strong> The normal jitters per pixel from a hashed grid, so every grain catches the light its own way, and the brightest few glint. The edge dissolves into loose grains instead of cutting.</p>
+        <div class="jp"><strong>砂：</strong>法線はハッシュした格子からピクセルごとに揺らぎます。そのため一粒一粒が独自に光を受け、最も明るいわずかな粒がきらめきます。縁は切れずに、ばらけた粒に崩れます。</div>
       </details>
     </div>
   </section>

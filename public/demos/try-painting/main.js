@@ -28,10 +28,10 @@ const registry = [
     blob('flat', 'Blob', [], (v, ctx) =>
         new ShapedBlobRenderer({ color: ctx.colorA })),
     blob('spiky', 'Spiky blob', [
-        { key: 'spikeAmp', label: 'Spikes', min: 0.02, max: 0.25, step: 0.01, value: 0.1 },
+        { key: 'spikeAmp', label: 'Spikes', min: 0.02, max: 0.35, step: 0.01, value: 0.18 },
         { key: 'sharp', label: 'Sharp', min: 1, max: 12, step: 0.5, value: 5 },
     ], (v, ctx) => new ShapedBlobRenderer({
-        color: ctx.colorA, spikes: 26, spikeAmp: v.spikeAmp, sharp: v.sharp,
+        color: ctx.colorA, spikes: 14, spikeAmp: v.spikeAmp, sharp: v.sharp,
     })),
     blob('wobbly', 'Wobbly blob', [
         { key: 'wobble', label: 'Wobble', min: 0.01, max: 0.15, step: 0.005, value: 0.045 },
@@ -52,7 +52,7 @@ const registry = [
         { key: 'gloss', label: 'Gloss', min: 0, max: 1.2, step: 0.05, value: 0.6 },
     ], (v, ctx) => new PaintBlobRenderer({
         color: ctx.colorA, colorB: ctx.colorB, fade: 0.05, relief: v.relief, swell: 0.7, ridged: true,
-        split: 1, gloss: v.gloss, edgeSoft: 0.025, noiseFreq: 3.5,
+        split: 1, rag: 0.05, gloss: v.gloss, edgeSoft: 0.025, noiseFreq: 3.5,
     })),
     blob('watery', 'Watery wash', [], (v, ctx) => new WashBlobRenderer({
         color: ctx.colorA, background: ctx.texture, pigment: 0.35, feather: 0.1, rim: 0.18, flow: 0.03, wet: 0.85,
@@ -63,7 +63,7 @@ const registry = [
     blob('gouache', 'Gouache', [
         { key: 'flow', label: 'Drag', min: 0, max: 0.15, step: 0.005, value: 0.09 },
     ], (v, ctx) => new WashBlobRenderer({
-        color: ctx.colorA, background: ctx.texture, pigment: 0.97, feather: 0.012, rim: 0.1, flow: v.flow, wet: 0.12,
+        color: ctx.colorA, background: ctx.texture, pigment: 0.97, feather: 0.012, rim: 0.1, flow: v.flow, wet: 0.12, body: 0.7, bristle: 0.05,
     })),
     blob('metal', 'Metal', [
         { key: 'relief', label: 'Relief', min: 0, max: 1, step: 0.05, value: 0.3 },

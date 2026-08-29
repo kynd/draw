@@ -6,9 +6,10 @@ import { BlobRenderer } from './BlobRenderer.js';
  *
  * Spikes follow the boundary's arc position with an integer count around the loop, so
  * the profile meets itself at the seam in a valley. Each spike hashes its height and
- * lean from its own index, and the tips keep their corner under any sharpness while
- * the valleys keep a zero derivative. The wobble is a noise of world position rather
- * than arc, so it cannot show a seam at all.
+ * lean from its own index, and each valley hashes its depth from the boundary the two
+ * neighboring spikes share, dipping inside the shape. The tips keep their corner under
+ * any sharpness. The wobble is a noise of world position rather than arc, so it cannot
+ * show a seam at all.
  */
 export class ShapedBlobRenderer extends BlobRenderer {
     constructor({
@@ -20,7 +21,7 @@ export class ShapedBlobRenderer extends BlobRenderer {
         wobbleFreq = 4,
         ...rest
     } = {}) {
-        super({ margin: 0.2 + spikeAmp + wobble, ...rest });
+        super({ margin: 0.2 + spikeAmp * 1.6 + wobble, ...rest });
         this.color = color;
         this.spikes = spikes;
         this.spikeAmp = spikeAmp;
@@ -59,10 +60,16 @@ export class ShapedBlobRenderer extends BlobRenderer {
                     float phase = arc / uPerimeter * floor(uSpikes + 0.5);
                     float cell = floor(phase);
                     float f = fract(phase);
-                    float h = mix(0.35, 1.2, hash11(cell * 13.7 + uSeed * 91.0));
-                    float tip = mix(0.3, 0.7, hash11(cell * 7.3 + uSeed * 17.0));
+                    float h = mix(0.2, 1.6, hash11(cell * 13.7 + uSeed * 91.0));
+                    float tip = mix(0.25, 0.75, hash11(cell * 7.3 + uSeed * 17.0));
                     float tri = f < tip ? f / tip : (1.0 - f) / (1.0 - tip);
-                    offset += uSpikeAmp * h * pow(max(tri, 0.0), uSharp);
+                    float profile = pow(max(tri, 0.0), uSharp);
+                    // Valleys dip inside the shape. Each depth is hashed from the
+                    // boundary the two neighboring spikes share, so the profile
+                    // stays continuous across cells.
+                    float vd = mix(hash11(cell * 5.1 + uSeed * 37.0),
+                                   hash11((cell + 1.0) * 5.1 + uSeed * 37.0), f);
+                    offset += uSpikeAmp * (h * profile - mix(0.3, 1.0, vd) * (1.0 - profile));
                 }
                 if (uWobble > 0.0) {
                     offset += (fbm(vWorld * uWobbleFreq + uSeed * 11.0) - 0.5) * 2.0 * uWobble;

@@ -182,6 +182,13 @@ add it to the writing-style page, and apply it from then on.
 - Prefer deterministic geometry and color over random — the same settings produce the
   same drawing, so two runs can be compared. Where a copied class offers a random helper,
   call the deterministic overload instead of removing the helper.
+- Every renderer takes a random seed. Anything random in a mark must derive from that
+  seed (through hash functions in shaders), so the same seed with the same parameters
+  reproduces the exact same result. This is a global design rule, documented in the
+  renderers page's common section.
+- The presented frame flips world y, so a light that should read as shining from the
+  top of the screen has negative world y. Every lit shader follows this; reflection
+  horizons sample -r.y for the sky side.
 
 ## Git
 

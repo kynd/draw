@@ -111,7 +111,7 @@ function rebuild() {
     )]);
 
     shadowHalo.blur = Math.round(softness * 3);
-    shadowHalo.mesh.position.set(offset, -offset, 0.005);
+    shadowHalo.mesh.position.set(offset, offset, 0.005);
     glowHalo.blur = Math.round(softness * 5);
     glowHalo.setColor(glowColor);
     glowHalo.setOpacity(parseFloat(ctrl.glow.value));

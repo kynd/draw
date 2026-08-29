@@ -12,6 +12,10 @@ const FLOW_TAPS = 6;
  * is the trade: more of it widens the feather, thins the pigment, and lets the
  * background bleed; less sharpens the edge and covers, until the fill reads as
  * gouache, whose stronger drag is what implies the brush.
+ *
+ * `body` lights the fill as a thin relief so it reads as having thickness, and
+ * `bristle` grows brush marks at the edge, streaks elongated along a direction that
+ * wanders with position.
  */
 export class WashBlobRenderer extends BlobRenderer {
     constructor({
@@ -22,6 +26,8 @@ export class WashBlobRenderer extends BlobRenderer {
         rim = 0.4,          // pigment collecting inside the boundary
         flow = 0.04,        // drag length of the background sampling, in uv
         wet = 0.5,          // how much the paint multiplies into the background
+        body = 0,           // paint thickness, lit as a thin relief
+        bristle = 0,        // edge brush-mark amplitude in world units
         ...rest
     } = {}) {
         super({ margin: 0.15 + feather, ...rest });
@@ -32,6 +38,8 @@ export class WashBlobRenderer extends BlobRenderer {
         this.rim = rim;
         this.flow = flow;
         this.wet = wet;
+        this.body = body;
+        this.bristle = bristle;
     }
 
     uniforms() {
@@ -43,6 +51,8 @@ export class WashBlobRenderer extends BlobRenderer {
             uRim: { value: this.rim },
             uFlow: { value: this.flow },
             uWet: { value: this.wet },
+            uBody: { value: this.body },
+            uBristle: { value: this.bristle },
         };
     }
 
@@ -55,11 +65,24 @@ export class WashBlobRenderer extends BlobRenderer {
             uniform float uRim;
             uniform float uFlow;
             uniform float uWet;
+            uniform float uBody;
+            uniform float uBristle;
 
             void main() {
                 float arc;
                 vec2 outward;
                 float d = sdBlob(vWorld, arc, outward);
+
+                if (uBristle > 0.0) {
+                    // Brush marks at the edge: streaks elongated along a direction
+                    // that wanders with position, so the boundary grows short
+                    // finger-like marks rather than one combed fringe.
+                    float thetaB = fbm(vWorld * 1.2 + uSeed * 29.0) * 6.2832;
+                    vec2 dirB = vec2(cos(thetaB), sin(thetaB));
+                    vec2 perpB = vec2(-dirB.y, dirB.x);
+                    float streak = fbm(vec2(dot(vWorld, dirB) * 2.5, dot(vWorld, perpB) * 28.0) + uSeed * 41.0);
+                    d += (streak - 0.5) * uBristle;
+                }
 
                 // The boundary itself wanders a little, as a wet edge does.
                 float wobble = (fbm(vWorld * 5.0 + uSeed * 7.0) - 0.5) * uFeather * 1.5;
@@ -99,6 +122,27 @@ export class WashBlobRenderer extends BlobRenderer {
                 float rimBand = smoothstep(-uFeather * 4.0, -uFeather, d)
                               * smoothstep(uFeather * 0.4, -uFeather * 0.5, d);
                 wash = mix(wash, uColor * 0.6, rimBand * uRim);
+
+                if (uBody > 0.0) {
+                    // A thin body of paint: an edge dome plus pigment bumps, lit
+                    // faintly so the fill reads as having thickness.
+                    float domeW = 0.1;
+                    float tB = clamp(-d / domeW, 0.0, 1.0);
+                    float domeB = tB * tB * tB * (tB * (tB * 6.0 - 15.0) + 10.0);
+                    float domeSlopeB = 30.0 * tB * tB * (tB - 1.0) * (tB - 1.0) / domeW;
+                    float e = 0.01;
+                    vec2 gradB = vec2(
+                        fbm((vWorld + vec2(e, 0.0)) * 5.0 + uSeed * 31.0) - fbm((vWorld - vec2(e, 0.0)) * 5.0 + uSeed * 31.0),
+                        fbm((vWorld + vec2(0.0, e)) * 5.0 + uSeed * 31.0) - fbm((vWorld - vec2(0.0, e)) * 5.0 + uSeed * 31.0)
+                    ) / (2.0 * e);
+                    vec2 slopeB = (outward * domeSlopeB * 0.03 + gradB * domeB * 0.03) * uBody;
+                    vec3 nB = normalize(vec3(-slopeB, 1.0));
+                    vec3 lightB = normalize(vec3(-0.4, -0.7, 0.6));
+                    float diffB = max(dot(nB, lightB), 0.0);
+                    vec3 halfB = normalize(lightB + vec3(0.0, 0.0, 1.0));
+                    float specB = pow(max(dot(nB, halfB), 0.0), 35.0);
+                    wash = wash * mix(1.0, 0.62 + 0.38 * diffB, uBody) + vec3(specB * 0.18 * uBody);
+                }
 
                 gl_FragColor = vec4(wash, alpha);
             }

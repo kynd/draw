@@ -22,7 +22,7 @@ export class DebossStrokeRenderer extends ShaderStrokeRenderer {
         color = '#606068',
         bevel = 0.55,
         amount = 0.9,
-        angle = 2.2,
+        angle = -2.2,
         samplesPerUnit = 90,
         ...rest
     } = {}) {
