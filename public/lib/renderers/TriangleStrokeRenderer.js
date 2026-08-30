@@ -13,7 +13,9 @@ import { Stroke3DRenderer, STROKE3D_GLSL } from './Stroke3DRenderer.js';
  *           the reflection per triangle.
  *
  * Placement, size, and tilt all derive from the stroke's seed, so the same seed
- * scatters the same triangles.
+ * scatters the same triangles. Sizes range from far below the stroke width to
+ * well past it, and the spacing follows the size: small triangles crowd
+ * together, big ones stand apart.
  */
 export class TriangleStrokeRenderer extends Stroke3DRenderer {
     /** @param {'facets'|'grain'|'metal'} [opts.mode] */
@@ -65,12 +67,14 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
 
         const e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), fn = new THREE.Vector3();
         const p1 = new THREE.Vector3(), p2 = new THREE.Vector3(), q = new THREE.Vector3();
-        const width = Math.max(def.widthLeftAt(0.5), 0.02);
-        const step = Math.max(width * this.spacing, 0.03);
-        let face = 0;
-        for (let s = 0; s <= length; s += step, face++) {
+        let s = 0, face = 0;
+        while (s <= length) {
             const { t, center, normal, tangent } = atArc(s);
-            const size = Math.max(def.widthLeftAt(t), 0.01) * (0.7 + rand() * 0.9);
+            // Sizes range from far below the width to well past it, skewed small,
+            // and the step to the next triangle follows the size: small triangles
+            // crowd, big ones stand apart.
+            const roll = rand();
+            const size = Math.max(def.widthLeftAt(t), 0.01) * (0.3 + roll * roll * 2.6);
             // The face's plane: one axis perpendicular to the spine, rotated
             // around it by the phase (so the chain turns as the stroke grows),
             // the other mostly along the spine with a random tilt out of it.
@@ -102,6 +106,8 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
                 colors.push(faceColor.r, faceColor.g, faceColor.b);
                 along.push(t);
             }
+            s += Math.max(size * this.spacing * 1.6, 0.02);
+            face++;
         }
 
         const geometry = new THREE.BufferGeometry();

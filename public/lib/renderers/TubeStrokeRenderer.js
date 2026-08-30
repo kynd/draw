@@ -24,7 +24,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         tint = '#e8d8c8',
         background = null,
         stripes = 5,       // stripe bands per unit of arc length
-        wobbleFreq = 5,
+        wobbleFreq = 12,
         bend = 0.4,        // how far the reflection displaces the canvas lookup
         ...rest
     } = {}) {
@@ -43,9 +43,10 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
     _radiusAt(def, t, s, seed) {
         const base = def.widthLeftAt(t);
         if (this.mode !== 'wobble') return { r: Math.max(base, 1e-4), wob: 0.5 };
-        const wob = 0.5 + 0.5 * Math.sin(s * this.wobbleFreq + seed * 7.7)
-            * Math.cos(s * this.wobbleFreq * 0.63 + seed * 3.1);
-        return { r: Math.max(base * (0.55 + 0.75 * wob), 1e-4), wob };
+        // Two bands, the second faster, so the width changes often and by a lot.
+        const wob = 0.5 + 0.32 * Math.sin(s * this.wobbleFreq + seed * 7.7)
+                        + 0.18 * Math.sin(s * this.wobbleFreq * 2.33 + seed * 3.1);
+        return { r: Math.max(base * (0.3 + 1.1 * wob), 1e-4), wob };
     }
 
     build(def) {

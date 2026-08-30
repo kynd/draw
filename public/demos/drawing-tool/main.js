@@ -108,7 +108,7 @@ const registry = [
             twist: v.twist, stripes: v.stripes, depth: v.depth,
         }) },
     { id: 'tube-wobble', kind: 'stroke',
-        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'wobbleFreq', min: 3, max: 9 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'wobbleFreq', min: 8, max: 20 }, { key: 'depth', min: 0.04, max: 0.24 }],
         make: (v, ctx) => new TubeStrokeRenderer({
             mode: 'wobble', colorA: ctx.colorA, colorB: ctx.colorB,
             twist: v.twist, wobbleFreq: v.wobbleFreq, depth: v.depth,
