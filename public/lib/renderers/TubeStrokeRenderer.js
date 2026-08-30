@@ -162,7 +162,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         for (let i = 0; i < n; i++) {
             const s = ts[i] * length;
             const { r } = this._radiusAt(def, ts[i], s, seed);
-            const cx = centers[i].x, cy = centers[i].y - centers[i].z;
+            const cx = centers[i].x, cy = centers[i].y - centers[i].z * 0.577;
             const nx = normals[i].x, ny = normals[i].y;
             sPos.push(cx + nx * r, cy + ny * r, 0.001);
             sPos.push(cx - nx * r, cy - ny * r, 0.001);

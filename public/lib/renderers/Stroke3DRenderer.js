@@ -51,12 +51,15 @@ export class Stroke3DRenderer extends StrokeRenderer {
 /**
  * The drop shadow's material: flat black at low opacity. The shadow geometry is
  * the mark flattened onto the canvas, each vertex pushed down the screen (world
- * -y) by its own height, which is where the 45-degree top light throws it.
+ * -y) by tan(30) of its own height, which is where the light throws it.
  */
 export function shadowMaterial() {
+    // Writing depth with a strict less-than test makes overlapping shadow
+    // triangles draw once: the fill stays one flat tenth of black however many
+    // parts of the mark cover the same spot.
     return new THREE.MeshBasicMaterial({
         color: '#000000', transparent: true, opacity: 0.1,
-        depthWrite: false, side: THREE.DoubleSide,
+        depthWrite: true, depthFunc: THREE.LessDepth, side: THREE.DoubleSide,
     });
 }
 
@@ -65,9 +68,11 @@ export const STROKE3D_GLSL = /* glsl */`
     uniform vec2 uScreen;
     vec2 screenUv() { return gl_FragCoord.xy / uScreen; }
 
-    // From the top of the screen (the presented frame flips world y), at 45
-    // degrees toward the camera.
-    vec3 lightDir() { return normalize(vec3(0.0, -1.0, 1.0)); }
+    // From the top of the screen, 30 degrees above the camera. The 3D strokes
+    // carry true normals, and on screen +y is up, so the light's y is positive;
+    // the 2D shaders' negative-y convention compensates for their inverted
+    // dome normals and does not apply here.
+    vec3 lightDir() { return normalize(vec3(0.0, 0.5, 0.866)); }
 
     float diffuseAt(vec3 n) { return max(dot(n, lightDir()), 0.0); }
 

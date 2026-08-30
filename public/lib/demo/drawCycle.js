@@ -35,9 +35,11 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     // in place, so the overlay swaps in plain black lines.
     let ghost = null;
     function makeWireOnly(mesh) {
-        mesh.userData.wireOnly = true;
+        // Flag the meshes themselves: the stage's wireframe pass walks meshes,
+        // and a mark may be a group, which it would skip.
         mesh.traverse(child => {
             if (!child.isMesh) return;
+            child.userData.wireOnly = true;
             child.userData.origMaterial = child.material;
             child.material = new THREE.MeshBasicMaterial({ color: '#000000', wireframe: true });
         });

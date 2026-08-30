@@ -125,7 +125,7 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
         const sPos = new Float32Array(positions.length);
         for (let i = 0; i < positions.length; i += 3) {
             sPos[i] = positions[i];
-            sPos[i + 1] = positions[i + 1] - positions[i + 2];
+            sPos[i + 1] = positions[i + 1] - positions[i + 2] * 0.577;
             sPos[i + 2] = 0.001;
         }
         const sGeometry = new THREE.BufferGeometry();
