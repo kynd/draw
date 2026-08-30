@@ -180,6 +180,14 @@ html, body {
   width: auto; padding: 0 12px;
   font-family: var(--font-ui); font-size: 0.6rem; color: var(--demo-fg);
 }
+.dp-icon-btn.active { background: var(--demo-fg); color: #ffffff; }
+.dp-overlay-panel {
+  position: absolute; top: 50px; right: 10px;
+  display: flex; align-items: center; gap: 6px;
+  width: 200px; padding: 6px 8px;
+  background: rgba(255,255,255,0.88); border: 1px solid var(--demo-line);
+  z-index: 5;
+}
 
 /* Rotary dial — a circle and a line, dragged vertically */
 .dp-dials {

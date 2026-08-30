@@ -176,6 +176,7 @@ const board = new DrawingBoard(stage);
 const recorder = new StrokeRecorder();
 
 function buildMark(path, points, seed) {
+    maybeAutoReroll(points);
     const useSeed = state.seedOverride ?? seed;
     const ctx = {
         colorA: state.colorA, colorB: state.colorB, colors: state.colors,
@@ -209,11 +210,39 @@ function buildMark(path, points, seed) {
     return { mesh, renderer };
 }
 
+// Auto randomize: with the toggle on, the colors and the whole tool (width,
+// parameters, pressure sensitivity) reroll on every release, and again each
+// time the pen travels the set number of pixels within a stroke.
+let autoRandom = false;
+let autoPx = 200;
+let strokeRerollLen = 0;
+
+function autoReroll() {
+    const hueValue = Math.floor(Math.random() * 128);
+    const toolValue = Math.floor(Math.random() * 128);
+    dialHue.set(hueValue, false);
+    dialTool.set(toolValue, false);
+    newPalette(hueValue / 127 * 360);
+    rerollTool(toolValue);
+    refreshPreview();
+}
+
+function maybeAutoReroll(points) {
+    if (!autoRandom || replaying) return;
+    const lengthPx = pathArcLength(points) * PIXELS_PER_UNIT;
+    if (lengthPx - strokeRerollLen >= autoPx) {
+        strokeRerollLen = lengthPx;
+        autoReroll();
+    }
+}
+
 const cycle = setupDrawCycle({
     stage, board,
     canvas: document.getElementById('canvas'),
     build: buildMark,
     onCommit: (points, seed) => {
+        strokeRerollLen = 0;
+        if (autoRandom && !replaying) autoReroll();
         if (replaying) return;
         recorder.add({
             toolId: state.tool.id, values: { ...state.values },
@@ -410,6 +439,8 @@ replayBtn.addEventListener('click', () => {
     cycle.input.enabled = false;
     replayBtn.textContent = 'Stop';
     clearBtn.style.display = 'none';
+    autoBtn.style.display = 'none';
+    autoPanel.style.display = 'none';
     const saved = {
         tool: state.tool, values: { ...state.values }, widthPx: state.widthPx,
         sens: state.sens, colorA: state.colorA, colorB: state.colorB, colors: [...state.colors],
@@ -428,6 +459,8 @@ replayBtn.addEventListener('click', () => {
             cycle.input.enabled = true;
             replayBtn.textContent = 'Replay';
             clearBtn.style.display = '';
+            autoBtn.style.display = '';
+            autoPanel.style.display = autoRandom ? '' : 'none';
             refreshPreview();
         },
     });
@@ -436,6 +469,18 @@ replayBtn.addEventListener('click', () => {
 clearBtn.addEventListener('click', () => {
     if (replaying) return;
     clearAll();
+});
+
+const autoBtn = document.getElementById('auto-btn');
+const autoPanel = document.getElementById('auto-panel');
+autoBtn.addEventListener('click', () => {
+    autoRandom = !autoRandom;
+    autoBtn.classList.toggle('active', autoRandom);
+    autoPanel.style.display = autoRandom ? '' : 'none';
+});
+document.getElementById('auto-px').addEventListener('input', e => {
+    autoPx = parseFloat(e.target.value);
+    document.getElementById('auto-px-val').textContent = autoPx;
 });
 
 document.getElementById('fullscreen-btn').addEventListener('click', () => {
