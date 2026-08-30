@@ -105,6 +105,9 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                 const phi = (k / CAP_LAT) * Math.PI * 0.5;
                 const ringR = r * Math.cos(phi);
                 const lift = r * Math.sin(phi);
+                // The along parameter keeps accumulating over the cap's arc, so a
+                // pattern on u flows over the end instead of freezing at it.
+                const tCap = ts[i] + (end === 0 ? -lift : lift) / Math.max(length, 1e-6);
                 const base = positions.length / 3;
                 for (let j = 0; j <= RADIAL; j++) {
                     const a = j / RADIAL;
@@ -120,15 +123,22 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                         centers[i].z + dir.z * ringR + T.z * lift
                     );
                     normalsA.push(nx, ny, nz);
-                    along.push(ts[i]);
+                    along.push(tCap);
                     around.push(a);
                     wobs.push(wob);
                 }
                 const from = prev >= 0 ? prev
                     : (end === 0 ? 0 : (n - 1) * (RADIAL + 1));
                 for (let j = 0; j < RADIAL; j++) {
-                    indices.push(from + j, base + j, base + j + 1);
-                    indices.push(from + j, base + j + 1, from + j + 1);
+                    // The start cap's rings run against the spine direction, so
+                    // its winding flips to keep the faces outward.
+                    if (end === 0) {
+                        indices.push(from + j, base + j + 1, base + j);
+                        indices.push(from + j, from + j + 1, base + j + 1);
+                    } else {
+                        indices.push(from + j, base + j, base + j + 1);
+                        indices.push(from + j, base + j + 1, from + j + 1);
+                    }
                 }
                 prev = base;
             }

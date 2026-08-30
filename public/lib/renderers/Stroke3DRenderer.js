@@ -51,8 +51,9 @@ export const STROKE3D_GLSL = /* glsl */`
     uniform vec2 uScreen;
     vec2 screenUv() { return gl_FragCoord.xy / uScreen; }
 
-    // The presented frame flips world y; -0.7 reads as light from the top.
-    vec3 lightDir() { return normalize(vec3(-0.4, -0.7, 0.6)); }
+    // From the top of the screen (the presented frame flips world y), at 45
+    // degrees toward the camera.
+    vec3 lightDir() { return normalize(vec3(0.0, -1.0, 1.0)); }
 
     float diffuseAt(vec3 n) { return max(dot(n, lightDir()), 0.0); }
 
