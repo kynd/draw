@@ -489,7 +489,19 @@ document.getElementById('fullscreen-btn').addEventListener('click', () => {
     else layout.requestFullscreen();
 });
 
-stage.onResize(() => { positionPreview(); refreshPreview(); });
+// Toggling full screen restarts the canvas: the clear waits for the resize,
+// so the fresh gradient and scatter land on the new size.
+let clearOnResize = false;
+document.addEventListener('fullscreenchange', () => { clearOnResize = true; });
+
+stage.onResize(() => {
+    positionPreview();
+    refreshPreview();
+    if (clearOnResize && !replaying) {
+        clearOnResize = false;
+        clearAll();
+    }
+});
 
 // ---------------------------------------------------------------------------
 newPalette(dialHue.value / 127 * 360);
