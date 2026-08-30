@@ -1,0 +1,35 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Drawing Tool Demo" slug="drawing-tool">
+  <div class="monologue">
+    Everything so far, wired into one instrument
+  </div>
+
+  <div class="prose">
+    <p>One canvas that mixes the strokes, the fills, the palette, the pen pressure, and the MIDI input. There is no parameter panel: two dials and three buttons are the whole interface.</p>
+    <div class="jp">ストローク、塗り、パレット、筆圧、MIDI入力を混ぜ合わせた、ひとつのキャンバスです。パラメータのパネルはありません。2つのダイヤルと3つのボタンがインターフェースのすべてです。</div>
+
+    <p>The hue dial rotates the palette: the first key color follows the dial, the rest reroll, and the current stroke takes its colors from the result. The tool dial maps to the width and rerolls the tool, every parameter but the width, and the pressure sensitivity, up to three times the width at full pressure. Both dials also listen to MIDI controls 16 and 17, and either source is latched to one update per frame. The box at the bottom right previews the current tool on a wiggle.</p>
+    <div class="jp">色相ダイヤルはパレットを回します。最初のキーカラーはダイヤルに従い、残りは引き直され、現在のストロークはその結果から色を取ります。ツールダイヤルは幅に対応し、ツール、幅以外のすべてのパラメータ、そして筆圧の感度（最大の筆圧で幅の3倍まで）を引き直します。どちらのダイヤルもMIDIコントロール16と17を聞いており、どちらの入力も1フレームにつき1回の更新にラッチされます。右下の箱は、現在のツールをうねりの上でプレビューします。</div>
+
+    <p>Clear fills the canvas with a palette color and scatters a few random marks. Replay redraws everything since the last clear through the same drawing cycle: each mark stores its tool, parameters, colors, seed, and drawn points, not the resulting raster, and only drawn points are stored, so idle time is skipped by construction.</p>
+    <div class="jp">Clearはキャンバスをパレットの色で塗りつぶし、いくつかのランダムな印を散らします。Replayは、最後のClear以降のすべてを同じ描画サイクルを通して描き直します。各印はツール、パラメータ、色、シード、描かれた点を保存し、結果のラスタは保存しません。保存されるのは描かれた点だけなので、何もしていない時間は構造上スキップされます。</div>
+  </div>
+
+  <section class="demo-section" id="demo">
+    <div class="demo-header">
+      <h2>Drawing tool</h2>
+      <a href={`${base}/demos/drawing-tool/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/drawing-tool/index.html?embedded`} title="Drawing tool" scrolling="no" allow="midi; fullscreen" allowfullscreen></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw on the canvas, turn the dials, and use the buttons at the top right: full screen, clear, replay.</p>
+      <div class="jp">キャンバスに描き、ダイヤルを回し、右上のボタン（全画面、クリア、リプレイ）を使ってみてください。</div>
+    </div>
+  </section>
+</PageLayout>

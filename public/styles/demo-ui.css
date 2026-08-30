@@ -163,6 +163,33 @@ html, body {
   background: transparent;
 }
 
+/* Canvas overlays — for demos whose stage is the whole window */
+.dp-overlay-tr {
+  position: absolute; top: 10px; right: 10px;
+  display: flex; gap: 6px; z-index: 5;
+}
+.dp-icon-btn {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.88); border: 1px solid var(--demo-line);
+  cursor: pointer; padding: 0;
+}
+.dp-icon-btn:hover { background: #ffffff; }
+.dp-icon-btn svg { width: 20px; height: 20px; fill: var(--demo-fg); }
+
+/* Rotary dial — a circle and a line, dragged vertically */
+.dp-dials {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 14px; z-index: 5;
+}
+.dp-dial { width: 56px; text-align: center; cursor: ns-resize; user-select: none; touch-action: none; }
+.dp-dial svg { width: 56px; height: 56px; display: block; }
+.dp-dial-label {
+  font-family: var(--font-ui);
+  font-size: 0.54rem; color: var(--demo-fg); margin-top: 2px;
+  background: rgba(255,255,255,0.75);
+}
+
 /* Toggle button — ghost until on */
 .dp-toggle {
   flex: 1;

@@ -22,6 +22,8 @@ export class DrawInput {
         // Mutable, so a demo can tune how far the pen must travel before a new
         // point is recorded.
         this.minDistance = minDistance;
+        // Off while something else drives the drawing, such as a replay.
+        this.enabled = true;
 
         const toWorld = event => {
             const rect = canvas.getBoundingClientRect();
@@ -35,6 +37,7 @@ export class DrawInput {
         };
 
         canvas.addEventListener('pointerdown', event => {
+            if (!this.enabled) return;
             this._drawing = true;
             this.points = [toWorld(event)];
             onChange(this.points, false);

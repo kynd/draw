@@ -13,8 +13,13 @@ import { DrawInput } from './drawInput.js';
  *
  * `build(path, points, seed)` receives the smoothed path, the raw points (which
  * carry pressure), and the mark's seed, and returns `{ mesh, renderer }` or null.
+ *
+ * The pointer is one source of strokes, not the only one: the returned `feed`
+ * takes (points, done) exactly as the pointer produces them, so a replay or a
+ * generated stroke runs through the same cycle. `onCommit(points, seed)` fires
+ * after a mark bakes, with the raw points that made it.
  */
-export function setupDrawCycle({ stage, board, canvas, build, minDistance }) {
+export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCommit }) {
     let seed = 1;
 
     let live = null;
@@ -84,26 +89,26 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance }) {
         return build(path, points, seed);
     }
 
-    const input = new DrawInput(canvas, stage, {
-        minDistance,
-        onChange: (points, done) => {
-            disposeGhost();
-            disposeLive();
-            live = buildFromPoints(points);
-            if (live) stage.add(live.mesh);
-            setPointerLine(done ? [] : points);
-            if (done && live) {
-                board.bake([live.mesh]);
-                ghost = live;
-                makeWireOnly(ghost.mesh);
-                // The bake scene borrowed the mesh; the overlay needs it back.
-                stage.add(ghost.mesh);
-                live = null;
-                seed++;
-            }
-            stage.draw();
-        },
-    });
+    function feed(points, done) {
+        disposeGhost();
+        disposeLive();
+        live = buildFromPoints(points);
+        if (live) stage.add(live.mesh);
+        setPointerLine(done ? [] : points);
+        if (done && live) {
+            board.bake([live.mesh]);
+            ghost = live;
+            makeWireOnly(ghost.mesh);
+            // The bake scene borrowed the mesh; the overlay needs it back.
+            stage.add(ghost.mesh);
+            live = null;
+            onCommit?.(points, seed);
+            seed++;
+        }
+        stage.draw();
+    }
 
-    return { disposeGhost, input };
+    const input = new DrawInput(canvas, stage, { minDistance, onChange: feed });
+
+    return { disposeGhost, input, feed };
 }
