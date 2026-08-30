@@ -42,6 +42,42 @@ export class DrawingBoard {
         );
         // Under the copy when both are in one pass, as the resize blit needs.
         this._clearPlane.renderOrder = -2;
+        // A two-color gradient fill, for clears that take a spec instead of a color.
+        this._gradPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(1, 1),
+            new THREE.ShaderMaterial({
+                depthTest: false, depthWrite: false,
+                uniforms: {
+                    uA: { value: new THREE.Color('#ffffff') },
+                    uB: { value: new THREE.Color('#000000') },
+                    uDir: { value: new THREE.Vector2(1, 0) },
+                    uCenter: { value: new THREE.Vector2(0.5, 0.5) },
+                    uRadial: { value: 0 },
+                },
+                vertexShader: /* glsl */`
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: /* glsl */`
+                    varying vec2 vUv;
+                    uniform vec3 uA;
+                    uniform vec3 uB;
+                    uniform vec2 uDir;
+                    uniform vec2 uCenter;
+                    uniform float uRadial;
+                    void main() {
+                        float t = uRadial > 0.5
+                            ? length(vUv - uCenter) * 1.3
+                            : dot(vUv - 0.5, uDir) + 0.5;
+                        gl_FragColor = vec4(mix(uA, uB, clamp(t, 0.0, 1.0)), 1.0);
+                    }
+                `,
+            })
+        );
+        this._gradPlane.renderOrder = -2;
         this._bakeScene = new THREE.Scene();
 
         this._fit();
@@ -61,12 +97,11 @@ export class DrawingBoard {
             const previous = renderer.getRenderTarget();
             const previousAuto = renderer.autoClear;
             renderer.autoClear = false;
-            this._clearPlane.material.color.set(this._clearColor);
             this._copyPlane.material.map = oldTexture;
             this._copyPlane.material.needsUpdate = true;
             this._copyPlane.scale.set(covered.x * 2, covered.y * 2, 1);
             this._bakeScene.clear();
-            this._bakeScene.add(this._clearPlane);
+            this._bakeScene.add(this._backgroundPlane());
             this._bakeScene.add(this._copyPlane);
             renderer.setRenderTarget(this._targets[this._front]);
             renderer.clear(true, true, false);
@@ -98,6 +133,7 @@ export class DrawingBoard {
         this.plane.scale.set(w, h, 1);
         this._copyPlane.scale.set(w, h, 1);
         this._clearPlane.scale.set(w, h, 1);
+        this._gradPlane.scale.set(w, h, 1);
         this._covered = { x: this.stage.extentX, y: this.stage.extentY };
     }
 
@@ -105,22 +141,46 @@ export class DrawingBoard {
     get texture() { return this._targets[this._front].texture; }
 
     /**
-     * Fills the whole canvas with one opaque color.
+     * The quad that paints the current background: the flat plane for a color,
+     * the gradient plane for a spec `{ type: 'linear'|'radial', colorA, colorB,
+     * angle, center: [x, y] }`. The spec is plain data, so a recorder can store
+     * it and a replay reproduce the same fill.
+     */
+    _backgroundPlane() {
+        const spec = this._clearSpec;
+        if (typeof spec === 'string' || spec.isColor) {
+            this._clearPlane.material.color.set(spec);
+            return this._clearPlane;
+        }
+        const u = this._gradPlane.material.uniforms;
+        u.uA.value.set(spec.colorA);
+        u.uB.value.set(spec.colorB);
+        const angle = spec.angle ?? 0;
+        u.uDir.value.set(Math.cos(angle), Math.sin(angle));
+        u.uCenter.value.set(spec.center?.[0] ?? 0.5, spec.center?.[1] ?? 0.5);
+        u.uRadial.value = spec.type === 'radial' ? 1 : 0;
+        return this._gradPlane;
+    }
+
+    /**
+     * Fills the whole canvas: with one opaque color, or with a two-color gradient
+     * when given a spec (see `_backgroundPlane`).
      *
      * The fill is a rendered quad rather than a plain clear: the targets are
      * multisampled, and only a render resolves the multisample buffer into the
      * texture. A bare clear leaves the texture untouched, and it shows black.
      */
-    clear(color) {
-        this._clearColor.set(color);
-        this._clearPlane.material.color.set(color);
+    clear(background) {
+        this._clearSpec = background;
+        this._clearColor.set(typeof background === 'string' || background.isColor
+            ? background : background.colorA);
         const renderer = this.stage.renderer;
         const previous = renderer.getRenderTarget();
         const previousAuto = renderer.autoClear;
         renderer.autoClear = false;
 
         this._bakeScene.clear();
-        this._bakeScene.add(this._clearPlane);
+        this._bakeScene.add(this._backgroundPlane());
         renderer.setRenderTarget(this._targets[this._front]);
         renderer.setClearColor(this._clearColor, 1);
         renderer.clear(true, true, false);

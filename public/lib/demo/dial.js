@@ -14,8 +14,8 @@ export class Dial {
         element.classList.add('dp-dial');
         element.innerHTML = `
             <svg viewBox="0 0 56 56">
-                <circle cx="28" cy="28" r="24" fill="rgba(255,255,255,0.88)" stroke="#c0c0c0" stroke-width="1.5" />
-                <line x1="28" y1="28" x2="28" y2="7" stroke="#2a2a2a" stroke-width="2" stroke-linecap="round" />
+                <circle cx="28" cy="28" r="24" fill="rgba(0,0,0,0.45)" />
+                <line x1="28" y1="28" x2="28" y2="7" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
             </svg>
             <div class="dp-dial-label"></div>`;
         this._line = element.querySelector('line');

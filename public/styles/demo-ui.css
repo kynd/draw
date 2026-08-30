@@ -176,6 +176,10 @@ html, body {
 }
 .dp-icon-btn:hover { background: #ffffff; }
 .dp-icon-btn svg { width: 20px; height: 20px; fill: var(--demo-fg); }
+.dp-icon-btn.text {
+  width: auto; padding: 0 12px;
+  font-family: var(--font-ui); font-size: 0.6rem; color: var(--demo-fg);
+}
 
 /* Rotary dial — a circle and a line, dragged vertically */
 .dp-dials {

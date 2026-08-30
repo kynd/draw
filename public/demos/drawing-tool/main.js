@@ -31,10 +31,14 @@ const PRESSURE_FLOOR = 0.15;
 // Tools. Each entry lists the parameters it randomizes with their ranges; the
 // width comes from the tool dial and is never randomized.
 const registry = [
-    { id: 'ribbon', kind: 'stroke', params: [],
-        make: (v, ctx) => new RibbonStrokeRenderer({ cap: 'rounded', color: ctx.colorA }) },
-    { id: 'ribbon-ragged', kind: 'stroke', params: [],
-        make: (v, ctx) => new RibbonStrokeRenderer({ cap: 'ragged', color: ctx.colorA }) },
+    { id: 'ribbon', kind: 'stroke', params: [{ key: 'axis', pick: ['along', 'across'] }],
+        make: (v, ctx) => new RibbonStrokeRenderer({
+            cap: 'rounded', color: ctx.colorA, gradient: ctx.colorB, gradientAxis: v.axis,
+        }) },
+    { id: 'ribbon-ragged', kind: 'stroke', params: [{ key: 'axis', pick: ['along', 'across'] }],
+        make: (v, ctx) => new RibbonStrokeRenderer({
+            cap: 'ragged', color: ctx.colorA, gradient: ctx.colorB, gradientAxis: v.axis,
+        }) },
     { id: 'brush', kind: 'stroke',
         params: [{ key: 'bristles', min: 6, max: 50, step: 1 }, { key: 'rough', min: 0, max: 1 }, { key: 'dry', min: 0, max: 0.7 }],
         make: (v, ctx) => new BrushStrokeRenderer({
@@ -66,10 +70,15 @@ const registry = [
         params: [{ key: 'cell', min: 0.02, max: 0.08 }, { key: 'jitter', min: 0, max: 0.4 }],
         make: (v, ctx) => new PixelStrokeRenderer({ cell: v.cell, jitter: v.jitter, colors: ctx.colors }) },
     { id: 'spiky-blob', kind: 'blob',
-        params: [{ key: 'spikeAmp', min: 0.06, max: 0.3 }, { key: 'sharp', min: 1.5, max: 10 }],
-        make: (v, ctx) => new ShapedBlobRenderer({
-            color: ctx.colorA, spikes: 14, spikeAmp: v.spikeAmp, sharp: v.sharp,
-        }) },
+        params: [{ key: 'spikeAmp', min: 0.06, max: 0.3 }, { key: 'sharp', min: 1.5, max: 10 },
+            { key: 'axis', pick: ['along', 'across'] }],
+        make: (v, ctx) => {
+            const [gradientFrom, gradientTo] = gradPoints(ctx, v.axis);
+            return new ShapedBlobRenderer({
+                color: ctx.colorA, colorB: ctx.colorB, gradientFrom, gradientTo,
+                spikes: 14, spikeAmp: v.spikeAmp, sharp: v.sharp,
+            });
+        } },
     { id: 'knife-oil', kind: 'blob',
         params: [{ key: 'relief', min: 0.3, max: 1.5 }, { key: 'gloss', min: 0.1, max: 1.1 }],
         make: (v, ctx) => new PaintBlobRenderer({
@@ -92,8 +101,23 @@ const registry = [
         }) },
 ];
 
+
+// The two world points a flat tool's gradient runs between: the drawn chord for
+// 'along', its perpendicular through the middle for 'across'.
+function gradPoints(ctx, axis) {
+    const a = ctx.start, b = ctx.end;
+    if (axis !== 'across') return [[a.x, a.y], [b.x, b.y]];
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const len = Math.max(Math.hypot(dx, dy), 0.2);
+    const px = -dy / len, py = dx / len;
+    const r = Math.max(len * 0.25, 0.15);
+    return [[mx - px * r, my - py * r], [mx + px * r, my + py * r]];
+}
+
 function randomValues(entry) {
     return Object.fromEntries(entry.params.map(p => {
+        if (p.pick) return [p.key, p.pick[Math.floor(Math.random() * p.pick.length)]];
         const v = p.min + Math.random() * (p.max - p.min);
         return [p.key, p.step >= 1 ? Math.round(v) : v];
     }));
@@ -118,6 +142,7 @@ function buildMark(path, points, seed) {
     const ctx = {
         colorA: state.colorA, colorB: state.colorB, colors: state.colors,
         texture: board.texture, seed: useSeed,
+        start: path[0], end: path[path.length - 1],
     };
     const width = state.widthPx / PIXELS_PER_UNIT;
     const pressureAt = pressureAlong(points);
@@ -187,28 +212,37 @@ function rerollTool(widthValue) {
 const preview = new THREE.Group();
 preview.position.z = 0.2;
 stage.add(preview);
-const previewFrame = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({ color: '#9a9a9a', depthWrite: false }));
+// Semi-transparent black, so drawing behind the preview shows through.
 const previewPaper = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({ color: '#f5f2ea', depthWrite: false }));
-previewPaper.position.z = 0.002;
-preview.add(previewFrame, previewPaper);
+    new THREE.MeshBasicMaterial({ color: '#000000', transparent: true, opacity: 0.4, depthWrite: false }));
+preview.add(previewPaper);
 const PREVIEW_W = 1.1, PREVIEW_H = 0.62;
-previewFrame.scale.set(PREVIEW_W + 0.02, PREVIEW_H + 0.02, 1);
 previewPaper.scale.set(PREVIEW_W, PREVIEW_H, 1);
 let previewMark = null;
 
+function previewCenter() {
+    return {
+        x: stage.extentX - 0.08 - PREVIEW_W / 2,
+        y: -stage.extentY + 0.08 + PREVIEW_H / 2,
+    };
+}
+
 function positionPreview() {
-    preview.position.x = stage.extentX - 0.08 - PREVIEW_W / 2;
-    preview.position.y = -stage.extentY + 0.08 + PREVIEW_H / 2;
+    const c = previewCenter();
+    preview.position.x = c.x;
+    preview.position.y = c.y;
 }
 
 function refreshPreview() {
     if (previewMark) {
-        preview.remove(previewMark.mesh);
+        stage.remove(previewMark.mesh);
         previewMark.renderer.dispose(previewMark.mesh);
         previewMark = null;
     }
+    // The mark is built at its world position rather than inside the offset
+    // group: a blob's distance field lives in world space, so a translated
+    // parent would separate the quad from its own contour.
+    const c = previewCenter();
     const width = Math.min(state.widthPx / PIXELS_PER_UNIT, 0.15);
     const phase = Math.random() * Math.PI * 2;
     const freq = 4 + Math.random() * 4;
@@ -217,14 +251,15 @@ function refreshPreview() {
     for (let i = 0; i < n; i++) {
         const t = i / (n - 1);
         path.push(new THREE.Vector3(
-            (t - 0.5) * PREVIEW_W * 0.72,
-            Math.sin(phase + t * freq) * PREVIEW_H * 0.2,
+            c.x + (t - 0.5) * PREVIEW_W * 0.72,
+            c.y + Math.sin(phase + t * freq) * PREVIEW_H * 0.2,
             0
         ));
     }
     const ctx = {
         colorA: state.colorA, colorB: state.colorB, colors: state.colors,
         texture: board.texture, seed: Math.floor(Math.random() * 1000),
+        start: path[0], end: path[path.length - 1],
     };
     let mark = null;
     if (state.tool.kind === 'blob') {
@@ -242,8 +277,8 @@ function refreshPreview() {
         mark = { mesh: def.build(), renderer };
     }
     if (mark) {
-        mark.mesh.position.z = 0.004;
-        preview.add(mark.mesh);
+        mark.mesh.position.z = 0.21;
+        stage.add(mark.mesh);
         previewMark = mark;
     }
     stage.draw();
@@ -262,12 +297,16 @@ const dialTool = new Dial(document.getElementById('dial-tool'),
 
 const midi = new MidiInput({
     onMessage: m => {
+        console.log('[midi]', m.type, 'ch', m.channel, m.detail, m.data, m.port);
         if (m.type !== 'control change') return;
         if (m.data[1] === 16) dialHue.set(m.data[2]);
         else if (m.data[1] === 17) dialTool.set(m.data[2]);
     },
+    onDevices: inputs => console.log('[midi] inputs:', inputs.map(i => i.name).join(', ') || 'none'),
 });
-midi.start().catch(() => {});
+midi.start()
+    .then(() => console.log('[midi] access granted'))
+    .catch(err => console.log('[midi] unavailable:', err.message));
 
 // ---------------------------------------------------------------------------
 // Clear: a fresh canvas color and a few scattered marks, all from the palette
@@ -299,11 +338,24 @@ function scatterPath() {
 }
 
 function clearAll() {
-    const light = state.palette.entries.filter(e => e.L > 0.75);
-    const color = (light[Math.floor(Math.random() * light.length)] ?? state.palette.entries[0]).hex;
+    // A gradient background, as plain data so the recorder can reproduce it.
+    // The two colors come from different hue groups (entries are hue-major,
+    // five luminance steps per hue), so the gradient actually reads as one.
+    const groupLight = g => {
+        const group = state.palette.entries.slice(g * 5, g * 5 + 5).filter(e => e.L > 0.55);
+        return (group[Math.floor(Math.random() * group.length)] ?? state.palette.entries[g * 5]).hex;
+    };
+    const gi = Math.floor(Math.random() * 4);
+    const gj = (gi + 1 + Math.floor(Math.random() * 3)) % 4;
+    const background = {
+        type: Math.random() < 0.5 ? 'linear' : 'radial',
+        colorA: groupLight(gi), colorB: groupLight(gj),
+        angle: Math.random() * Math.PI * 2,
+        center: [0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.6],
+    };
     cycle.disposeGhost();
-    board.clear(color);
-    recorder.begin(color);
+    board.clear(background);
+    recorder.begin(background);
     for (let i = 0; i < 3; i++) {
         rerollTool(Math.floor(Math.random() * 128));
         const dark = state.colors;
@@ -331,17 +383,26 @@ function applyRecord(record) {
     state.seedOverride = record.seed;
 }
 
-document.getElementById('replay-btn').addEventListener('click', () => {
-    if (replaying || recorder.records.length === 0) return;
+const replayBtn = document.getElementById('replay-btn');
+const clearBtn = document.getElementById('clear-btn');
+let player = null;
+
+replayBtn.addEventListener('click', () => {
+    // While a replay runs the same button reads Stop, and stopping jumps
+    // straight to the end state.
+    if (replaying) { player?.finish(); return; }
+    if (recorder.records.length === 0) return;
     replaying = true;
     cycle.input.enabled = false;
+    replayBtn.textContent = 'Stop';
+    clearBtn.style.display = 'none';
     const saved = {
         tool: state.tool, values: { ...state.values }, widthPx: state.widthPx,
         sens: state.sens, colorA: state.colorA, colorB: state.colorB, colors: [...state.colors],
     };
-    board.clear(recorder.canvasColor);
+    board.clear(recorder.background);
     stage.draw();
-    replayRecords({
+    player = replayRecords({
         records: recorder.records,
         applyTool: applyRecord,
         feed: cycle.feed,
@@ -349,13 +410,16 @@ document.getElementById('replay-btn').addEventListener('click', () => {
         onDone: () => {
             Object.assign(state, saved, { seedOverride: null });
             replaying = false;
+            player = null;
             cycle.input.enabled = true;
+            replayBtn.textContent = 'Replay';
+            clearBtn.style.display = '';
             refreshPreview();
         },
     });
 });
 
-document.getElementById('clear-btn').addEventListener('click', () => {
+clearBtn.addEventListener('click', () => {
     if (replaying) return;
     clearAll();
 });
@@ -366,10 +430,12 @@ document.getElementById('fullscreen-btn').addEventListener('click', () => {
     else layout.requestFullscreen();
 });
 
-stage.onResize(() => { positionPreview(); stage.draw(); });
+stage.onResize(() => { positionPreview(); refreshPreview(); });
 
 // ---------------------------------------------------------------------------
 newPalette(dialHue.value / 127 * 360);
 rerollTool(dialTool.value);
 positionPreview();
 clearAll();
+// The first layout pass can land after init; refresh the preview once it has.
+requestAnimationFrame(() => { positionPreview(); refreshPreview(); });

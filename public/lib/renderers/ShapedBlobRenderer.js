@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import { BlobRenderer } from './BlobRenderer.js';
 
 /**
- * A flat fill whose boundary can grow spikes and bumps.
+ * A flat fill whose boundary can grow spikes and bumps. With `colorB` and two
+ * world points the fill becomes a linear gradient between them, so a caller can
+ * run it along the drawn spine or across it.
  *
  * Spikes follow the boundary's arc position with an integer count around the loop, so
  * the profile meets itself at the seam in a valley. Each spike hashes its height and
@@ -14,6 +16,9 @@ import { BlobRenderer } from './BlobRenderer.js';
 export class ShapedBlobRenderer extends BlobRenderer {
     constructor({
         color = '#46608a',
+        colorB = null,       // gradient end color; null keeps the fill flat
+        gradientFrom = null, // world point where the gradient starts, [x, y]
+        gradientTo = null,   // world point where it ends
         spikes = 0,          // spike count around the loop; 0 disables
         spikeAmp = 0.12,
         sharp = 5,
@@ -23,6 +28,9 @@ export class ShapedBlobRenderer extends BlobRenderer {
     } = {}) {
         super({ margin: 0.2 + spikeAmp * 1.6 + wobble, ...rest });
         this.color = color;
+        this.colorB = colorB;
+        this.gradientFrom = gradientFrom;
+        this.gradientTo = gradientTo;
         this.spikes = spikes;
         this.spikeAmp = spikeAmp;
         this.sharp = sharp;
@@ -31,8 +39,13 @@ export class ShapedBlobRenderer extends BlobRenderer {
     }
 
     uniforms() {
+        const hasGrad = Boolean(this.colorB && this.gradientFrom && this.gradientTo);
         return {
             uColor: { value: new THREE.Color(this.color) },
+            uColorB: { value: new THREE.Color(this.colorB ?? this.color) },
+            uGradFrom: { value: new THREE.Vector2(...(this.gradientFrom ?? [0, 0])) },
+            uGradTo: { value: new THREE.Vector2(...(this.gradientTo ?? [1, 0])) },
+            uHasGrad: { value: hasGrad ? 1 : 0 },
             uSpikes: { value: this.spikes },
             uSpikeAmp: { value: this.spikeAmp },
             uSharp: { value: this.sharp },
@@ -44,6 +57,10 @@ export class ShapedBlobRenderer extends BlobRenderer {
     fragmentShader() {
         return /* glsl */`
             uniform vec3 uColor;
+            uniform vec3 uColorB;
+            uniform vec2 uGradFrom;
+            uniform vec2 uGradTo;
+            uniform int uHasGrad;
             uniform float uSpikes;
             uniform float uSpikeAmp;
             uniform float uSharp;
@@ -77,7 +94,15 @@ export class ShapedBlobRenderer extends BlobRenderer {
 
                 float alpha = 1.0 - smoothstep(-0.006, 0.006, d - offset);
                 if (alpha <= 0.003) discard;
-                gl_FragColor = vec4(uColor, alpha);
+                // A linear gradient between two world points, so the fill can run
+                // along the drawn spine or across it, as the caller lays it out.
+                vec3 fill = uColor;
+                if (uHasGrad == 1) {
+                    vec2 g = uGradTo - uGradFrom;
+                    float gt = clamp(dot(vWorld - uGradFrom, g) / max(dot(g, g), 1e-6), 0.0, 1.0);
+                    fill = mix(uColor, uColorB, gt);
+                }
+                gl_FragColor = vec4(fill, alpha);
             }
         `;
     }

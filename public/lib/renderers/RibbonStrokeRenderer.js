@@ -23,7 +23,10 @@ export class RibbonStrokeRenderer extends StrokeRenderer {
      * @param {object}  opts
      * @param {'square'|'rounded'|'ragged'} [opts.cap]
      * @param {string}  [opts.color]           Fill color, or the start color of a gradient.
-     * @param {string}  [opts.gradient]        Optional end color, interpolated along u.
+     * @param {string}  [opts.gradient]        Optional end color of a gradient.
+     * @param {'along'|'across'} [opts.gradientAxis]  Whether the gradient runs along
+     *                                         the spine (on u) or across it, left rail
+     *                                         to right rail (on v).
      * @param {number}  [opts.opacity]
      * @param {number}  [opts.samplesPerUnit]  Spine samples per world unit of arc length.
      * @param {number}  [opts.capSegmentsPerUnit] Rounded-cap arc segments per unit of radius.
@@ -32,6 +35,7 @@ export class RibbonStrokeRenderer extends StrokeRenderer {
         cap = 'rounded',
         color = '#1a1a1a',
         gradient = null,
+        gradientAxis = 'along',
         opacity = 1,
         samplesPerUnit = 120,
         capSegmentsPerUnit = 260,
@@ -40,6 +44,7 @@ export class RibbonStrokeRenderer extends StrokeRenderer {
         this.cap = cap;
         this.color = color;
         this.gradient = gradient;
+        this.gradientAxis = gradientAxis;
         this.opacity = opacity;
         this.samplesPerUnit = samplesPerUnit;
         this.capSegmentsPerUnit = capSegmentsPerUnit;
@@ -96,15 +101,17 @@ export class RibbonStrokeRenderer extends StrokeRenderer {
         geometry.setIndex(indices);
         geometry.computeBoundingSphere();
 
-        // The gradient runs on u, so it follows the same arc-length parameter the
-        // UV convention defines. Caps included, since a cap holds u constant.
+        // The gradient runs on the UV convention's parameters: u is arc length for
+        // 'along', v is the left-to-right rail crossing for 'across'. Caps are
+        // covered by the same coordinates, so they continue the gradient.
         if (this.gradient) {
             const from = new THREE.Color(this.color);
             const to = new THREE.Color(this.gradient);
+            const axis = this.gradientAxis === 'across' ? 1 : 0;
             const colors = new Float32Array((positions.length / 3) * 3);
             const c = new THREE.Color();
             for (let i = 0; i < positions.length / 3; i++) {
-                c.copy(from).lerp(to, uvs[i * 2]);
+                c.copy(from).lerp(to, uvs[i * 2 + axis]);
                 colors[i * 3] = c.r;
                 colors[i * 3 + 1] = c.g;
                 colors[i * 3 + 2] = c.b;
