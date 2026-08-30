@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { seededRandom } from '../random.js';
-import { Stroke3DRenderer, STROKE3D_GLSL } from './Stroke3DRenderer.js';
+import { Stroke3DRenderer, STROKE3D_GLSL, shadowMaterial } from './Stroke3DRenderer.js';
 
 /**
  * A chain of 3D triangles along the spine, flat-shaded, in one of three looks.
@@ -118,14 +118,31 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
         geometry.computeBoundingSphere();
 
         const mesh = new THREE.Mesh(geometry, this._material(seed));
-        mesh.userData.samples = centers;
-        mesh.userData.stats = {
+        mesh.userData.wire = true;
+
+        // Drop shadow: every face flattened onto the canvas, shifted down the
+        // screen by its own height.
+        const sPos = new Float32Array(positions.length);
+        for (let i = 0; i < positions.length; i += 3) {
+            sPos[i] = positions[i];
+            sPos[i + 1] = positions[i + 1] - positions[i + 2];
+            sPos[i + 2] = 0.001;
+        }
+        const sGeometry = new THREE.BufferGeometry();
+        sGeometry.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+        sGeometry.computeBoundingSphere();
+        const shadow = new THREE.Mesh(sGeometry, shadowMaterial());
+
+        const group = new THREE.Group();
+        group.add(shadow, mesh);
+        group.userData.samples = centers;
+        group.userData.stats = {
             sampleCount: centers.length,
-            vertexCount: positions.length / 3,
-            triangleCount: positions.length / 9,
+            vertexCount: positions.length * 2 / 3,
+            triangleCount: positions.length * 2 / 9,
             length,
         };
-        return mesh;
+        return group;
     }
 
     _material(seed) {

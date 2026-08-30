@@ -22,9 +22,11 @@ export class Stroke3DRenderer extends StrokeRenderer {
      * @param {number} [opts.depth]  Amplitude of the spine's depth wave.
      * @param {number} [opts.twist]  Rotation around the spine, radians per unit of
      *                               distance from the end.
-     * @param {number} [opts.zBase]  Depth the wave rides on.
+     * @param {number} [opts.zBase]  Height the wave rides on, above the canvas.
+     *                               The default holds the spine about 100 CSS
+     *                               pixels over it.
      */
-    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.35 } = {}) {
+    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.5 } = {}) {
         super();
         this.samplesPerUnit = samplesPerUnit;
         this.depth = depth;
@@ -44,6 +46,18 @@ export class Stroke3DRenderer extends StrokeRenderer {
         const centers = samples.map((p, i) => new THREE.Vector3(p.x, p.y, zAt(ts[i] * length)));
         return { centers, normals, tangents, ts, length, phaseAt, seed };
     }
+}
+
+/**
+ * The drop shadow's material: flat black at low opacity. The shadow geometry is
+ * the mark flattened onto the canvas, each vertex pushed down the screen (world
+ * -y) by its own height, which is where the 45-degree top light throws it.
+ */
+export function shadowMaterial() {
+    return new THREE.MeshBasicMaterial({
+        color: '#000000', transparent: true, opacity: 0.1,
+        depthWrite: false, side: THREE.DoubleSide,
+    });
 }
 
 /** GLSL every 3D stroke's fragment shader shares: the light and the canvas lookup. */
