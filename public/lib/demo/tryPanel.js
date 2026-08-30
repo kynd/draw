@@ -3,7 +3,7 @@ import { StrokeDef } from '../StrokeDef.js';
 import { Palette } from '../Palette.js';
 import { taperByArc } from './strokePaths.js';
 import { setupDrawCycle } from './drawCycle.js';
-import { pressureAlong, averagePressure, limitWidthSlope, pathArcLength } from './pressure.js';
+import { pressureAlong, averagePressure, limitWidthSlope, pathArcLength, pressureResponse } from './pressure.js';
 
 /**
  * The try-drawing harness every stroke page shares.
@@ -24,6 +24,8 @@ import { pressureAlong, averagePressure, limitWidthSlope, pathArcLength } from '
  *   make(values, ctx) } where ctx carries colorA, colorB, colors (a shade list),
  *   texture (the accumulation, for strokes that sample the background), and seed.
  */
+const PRESSURE_FLOOR = 0.15;
+
 export function setupTryDrawing({ stage, board, canvas, registry, select, paramsEl, clearBtn, colorBtn, swatchesEl, pressureEl }) {
     const values = Object.fromEntries(registry.map(r =>
         [r.id, Object.fromEntries(r.params.map(p => [p.key, p.value]))]));
@@ -31,7 +33,8 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
     let palette, colors;
 
     // Pen pressure sensitivity: at 0 pressure does nothing, at 1 full pressure
-    // doubles the width. A mouse records zero pressure, so it is unaffected.
+    // doubles the width. A mouse records zero pressure, so it is unaffected, and
+    // the dead zone keeps a resting pen at the base width like a mouse.
     let pressureSens = pressureEl ? parseFloat(pressureEl.value) : 0;
     if (pressureEl) {
         const val = pressureEl.nextElementSibling;
@@ -115,7 +118,7 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
                 const made = reg.makeMesh(path, v, {
                     colorA: colors.a, colorB: colors.b, colors: colors.list,
                     texture: board.texture, seed,
-                    pressureScale: 1 + pressureSens * averagePressure(points),
+                    pressureScale: 1 + pressureSens * pressureResponse(averagePressure(points), 1, PRESSURE_FLOOR),
                 });
                 if (!made) return null;
                 made.mesh.position.z = 0.05;
@@ -129,7 +132,7 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
             const def = new StrokeDef({
                 points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
                 widthLeft: limitWidthSlope(path,
-                    s => baseWidth(s) * (1 + pressureSens * pressureAt(s))),
+                    s => baseWidth(s) * (1 + pressureSens * pressureResponse(pressureAt(s), 1, PRESSURE_FLOOR))),
                 renderer,
                 seed,
             });

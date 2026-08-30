@@ -19,13 +19,17 @@ export function pathArcLength(points) {
 }
 
 /**
- * The response curve applied before pressure drives anything: pressure raised to
- * `gamma`. Raw tablet pressure feels front-loaded (a light touch already reports a
- * substantial value), so a gamma above 1 spreads the low end out and a gamma below
- * 1 compresses it. 1 is linear.
+ * The response curve applied before pressure drives anything. `floor` is a dead
+ * zone: pressure below it counts as zero, and the remainder is stretched back to
+ * the full range, so the pen resting on the tablet reads like a mouse rather than
+ * already pressing. The result is then raised to `gamma`: raw tablet pressure
+ * feels front-loaded (a light touch already reports a substantial value), so a
+ * gamma above 1 spreads the low end out and a gamma below 1 compresses it.
  */
-export function pressureResponse(pressure, gamma = 1) {
-    return Math.pow(Math.min(Math.max(pressure, 0), 1), gamma);
+export function pressureResponse(pressure, gamma = 1, floor = 0) {
+    const p = Math.min(Math.max(pressure, 0), 1);
+    const lifted = floor < 1 ? Math.max(p - floor, 0) / (1 - floor) : 0;
+    return Math.pow(lifted, gamma);
 }
 
 /**

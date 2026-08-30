@@ -8,7 +8,7 @@ import { setupDrawCycle } from '../../lib/demo/drawCycle.js';
 import { pressureAlong, pressureResponse, limitWidthSlope } from '../../lib/demo/pressure.js';
 
 const controls = {};
-['base', 'add', 'curve', 'limit', 'minmove'].forEach(id => {
+['base', 'add', 'threshold', 'curve', 'limit', 'minmove'].forEach(id => {
     const input = document.getElementById(id);
     const val = input.nextElementSibling;
     const step = parseFloat(input.step);
@@ -30,13 +30,14 @@ const cycle = setupDrawCycle({
         const base = parseFloat(controls.base.value) / PIXELS_PER_UNIT;
         const add = parseFloat(controls.add.value) / PIXELS_PER_UNIT;
         const gamma = parseFloat(controls.curve.value);
+        const threshold = parseFloat(controls.threshold.value);
         const limit = parseFloat(controls.limit.value);
         const pressureAt = pressureAlong(points);
         const renderer = new RibbonStrokeRenderer({ cap: 'rounded', color: '#808080' });
         const def = new StrokeDef({
             points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
             widthLeft: limitWidthSlope(path,
-                s => base + add * pressureResponse(pressureAt(s), gamma), limit),
+                s => base + add * pressureResponse(pressureAt(s), gamma, threshold), limit),
             renderer,
             seed,
         });
