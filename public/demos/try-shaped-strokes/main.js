@@ -1,6 +1,9 @@
 import { CloudStrokeRenderer } from '../../lib/renderers/CloudStrokeRenderer.js';
 import { RoundedSquareStrokeRenderer } from '../../lib/renderers/RoundedSquareStrokeRenderer.js';
 import { SpikeStrokeRenderer } from '../../lib/renderers/SpikeStrokeRenderer.js';
+import { TubeStrokeRenderer } from '../../lib/renderers/TubeStrokeRenderer.js';
+import { TriangleStrokeRenderer } from '../../lib/renderers/TriangleStrokeRenderer.js';
+import * as THREE from 'three';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireWireframeToggle } from '../../lib/demo/panel.js';
 import { DrawingBoard } from '../../lib/demo/drawingBoard.js';
@@ -34,6 +37,70 @@ const registry = [
             { key: 'sharp', label: 'Sharp', min: 1, max: 12, step: 0.5, value: 5 },
         ],
         make: (v, ctx) => new SpikeStrokeRenderer({ color: ctx.colorA, spikes: v.spikes, amp: v.amp, sharp: v.sharp }),
+    },
+    {
+        id: 'tube-candy', label: 'Candy tube',
+        params: [
+            { key: 'width', label: 'Width', min: 0.03, max: 0.14, step: 0.005, value: 0.07 },
+            { key: 'twist', label: 'Twist', min: 0, max: 14, step: 0.5, value: 5 },
+            { key: 'stripes', label: 'Stripes', min: 1, max: 12, step: 0.5, value: 5 },
+        ],
+        make: (v, ctx) => new TubeStrokeRenderer({
+            mode: 'candy', colors: ctx.colors.slice(0, 4), twist: v.twist, stripes: v.stripes,
+        }),
+    },
+    {
+        id: 'tube-wobble', label: 'Wobble tube',
+        params: [
+            { key: 'width', label: 'Width', min: 0.03, max: 0.14, step: 0.005, value: 0.08 },
+            { key: 'twist', label: 'Twist', min: 0, max: 14, step: 0.5, value: 5 },
+        ],
+        make: (v, ctx) => new TubeStrokeRenderer({
+            mode: 'wobble', colorA: ctx.colorA, colorB: ctx.colorB, twist: v.twist,
+        }),
+    },
+    {
+        id: 'tube-metal', label: 'Metal tube',
+        params: [
+            { key: 'width', label: 'Width', min: 0.03, max: 0.14, step: 0.005, value: 0.08 },
+            { key: 'twist', label: 'Twist', min: 0, max: 14, step: 0.5, value: 5 },
+        ],
+        make: (v, ctx) => new TubeStrokeRenderer({
+            mode: 'metal', background: ctx.texture, twist: v.twist,
+            tint: new THREE.Color(ctx.colorA).lerp(new THREE.Color('#ffffff'), 0.55).getStyle(),
+        }),
+    },
+    {
+        id: 'tri-facets', label: 'Facet triangles',
+        params: [
+            { key: 'width', label: 'Width', min: 0.03, max: 0.14, step: 0.005, value: 0.08 },
+            { key: 'twist', label: 'Twist', min: 0, max: 14, step: 0.5, value: 5 },
+            { key: 'spacing', label: 'Spacing', min: 0.3, max: 1.4, step: 0.05, value: 0.55 },
+        ],
+        make: (v, ctx) => new TriangleStrokeRenderer({
+            mode: 'facets', colorA: ctx.colorA, twist: v.twist, spacing: v.spacing,
+        }),
+    },
+    {
+        id: 'tri-grain', label: 'Grain triangles',
+        params: [
+            { key: 'width', label: 'Width', min: 0.03, max: 0.14, step: 0.005, value: 0.08 },
+            { key: 'twist', label: 'Twist', min: 0, max: 14, step: 0.5, value: 5 },
+        ],
+        make: (v, ctx) => new TriangleStrokeRenderer({
+            mode: 'grain', colorA: ctx.colorA, colorB: ctx.colorB, twist: v.twist,
+        }),
+    },
+    {
+        id: 'tri-metal', label: 'Metal triangles',
+        params: [
+            { key: 'width', label: 'Width', min: 0.03, max: 0.14, step: 0.005, value: 0.08 },
+            { key: 'twist', label: 'Twist', min: 0, max: 14, step: 0.5, value: 5 },
+        ],
+        make: (v, ctx) => new TriangleStrokeRenderer({
+            mode: 'metal', background: ctx.texture, twist: v.twist,
+            tint: new THREE.Color(ctx.colorA).lerp(new THREE.Color('#ffffff'), 0.55).getStyle(),
+        }),
     },
 ];
 

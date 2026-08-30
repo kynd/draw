@@ -15,10 +15,12 @@ import { PaintBlobRenderer } from '../../lib/renderers/PaintBlobRenderer.js';
 import { WashBlobRenderer } from '../../lib/renderers/WashBlobRenderer.js';
 import { MaterialBlobRenderer } from '../../lib/renderers/MaterialBlobRenderer.js';
 import { StoneBlobRenderer } from '../../lib/renderers/StoneBlobRenderer.js';
+import { TubeStrokeRenderer } from '../../lib/renderers/TubeStrokeRenderer.js';
+import { TriangleStrokeRenderer } from '../../lib/renderers/TriangleStrokeRenderer.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawingBoard } from '../../lib/demo/drawingBoard.js';
 import { setupDrawCycle } from '../../lib/demo/drawCycle.js';
-import { taperByArc } from '../../lib/demo/strokePaths.js';
+import { taperByArc, scatterPath } from '../../lib/demo/strokePaths.js';
 import { pressureAlong, pressureResponse, limitWidthSlope, averagePressure, pathArcLength } from '../../lib/demo/pressure.js';
 import { Dial } from '../../lib/demo/dial.js';
 import { FrameLatch } from '../../lib/demo/latch.js';
@@ -99,6 +101,42 @@ const registry = [
         make: (v, ctx) => new StoneBlobRenderer({
             mode: 'rock', color: ctx.colorA, colorB: ctx.colorB, relief: v.relief,
         }) },
+    { id: 'tube-candy', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'stripes', min: 2, max: 10 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new TubeStrokeRenderer({
+            mode: 'candy', colors: ctx.colors.slice(0, 4),
+            twist: v.twist, stripes: v.stripes, depth: v.depth,
+        }) },
+    { id: 'tube-wobble', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'wobbleFreq', min: 3, max: 9 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new TubeStrokeRenderer({
+            mode: 'wobble', colorA: ctx.colorA, colorB: ctx.colorB,
+            twist: v.twist, wobbleFreq: v.wobbleFreq, depth: v.depth,
+        }) },
+    { id: 'tube-metal', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'bend', min: 0.2, max: 0.6 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new TubeStrokeRenderer({
+            mode: 'metal', background: ctx.texture, tint: ctx.tintLight,
+            twist: v.twist, bend: v.bend, depth: v.depth,
+        }) },
+    { id: 'tri-facets', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: 0.35, max: 1.2 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new TriangleStrokeRenderer({
+            mode: 'facets', colorA: ctx.colorA,
+            twist: v.twist, spacing: v.spacing, depth: v.depth,
+        }) },
+    { id: 'tri-grain', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: 0.35, max: 1.2 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new TriangleStrokeRenderer({
+            mode: 'grain', colorA: ctx.colorA, colorB: ctx.colorB,
+            twist: v.twist, spacing: v.spacing, depth: v.depth,
+        }) },
+    { id: 'tri-metal', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'bend', min: 0.2, max: 0.6 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new TriangleStrokeRenderer({
+            mode: 'metal', background: ctx.texture, tint: ctx.tintLight,
+            twist: v.twist, bend: v.bend, depth: v.depth,
+        }) },
 ];
 
 
@@ -143,6 +181,7 @@ function buildMark(path, points, seed) {
         colorA: state.colorA, colorB: state.colorB, colors: state.colors,
         texture: board.texture, seed: useSeed,
         start: path[0], end: path[path.length - 1],
+        tintLight: new THREE.Color(state.colorA).lerp(new THREE.Color('#ffffff'), 0.55).getStyle(),
     };
     const width = state.widthPx / PIXELS_PER_UNIT;
     const pressureAt = pressureAlong(points);
@@ -260,6 +299,7 @@ function refreshPreview() {
         colorA: state.colorA, colorB: state.colorB, colors: state.colors,
         texture: board.texture, seed: Math.floor(Math.random() * 1000),
         start: path[0], end: path[path.length - 1],
+        tintLight: new THREE.Color(state.colorA).lerp(new THREE.Color('#ffffff'), 0.55).getStyle(),
     };
     let mark = null;
     if (state.tool.kind === 'blob') {
@@ -311,32 +351,6 @@ midi.start()
 // ---------------------------------------------------------------------------
 // Clear: a fresh canvas color and a few scattered marks, all from the palette
 // and all recorded, so a replay reproduces them too.
-function scatterPath() {
-    const ex = stage.extentX * 0.7, ey = stage.extentY * 0.7;
-    const x0 = (Math.random() * 2 - 1) * ex * 0.6;
-    const y0 = (Math.random() * 2 - 1) * ey * 0.6;
-    const angle = Math.random() * Math.PI * 2;
-    const len = 0.8 + Math.random() * 1.2;
-    const amp = 0.08 + Math.random() * 0.22;
-    const freq = 3 + Math.random() * 5;
-    const dir = new THREE.Vector2(Math.cos(angle), Math.sin(angle));
-    const perp = new THREE.Vector2(-dir.y, dir.x);
-    const points = [];
-    for (let i = 0; i < 44; i++) {
-        const t = i / 43;
-        const along = (t - 0.5) * len;
-        const across = Math.sin(t * freq + angle) * amp;
-        const p = new THREE.Vector3(
-            Math.max(-ex, Math.min(ex, x0 + dir.x * along + perp.x * across)),
-            Math.max(-ey, Math.min(ey, y0 + dir.y * along + perp.y * across)),
-            0
-        );
-        p.pressure = 0.25 + 0.6 * Math.sin(t * Math.PI);
-        points.push(p);
-    }
-    return points;
-}
-
 function clearAll() {
     // A gradient background, as plain data so the recorder can reproduce it.
     // The two colors come from different hue groups (entries are hue-major,
@@ -361,7 +375,7 @@ function clearAll() {
         const dark = state.colors;
         state.colorA = dark[Math.floor(Math.random() * dark.length)];
         state.colorB = dark[Math.floor(Math.random() * dark.length)];
-        cycle.feed(scatterPath(), true);
+        cycle.feed(scatterPath(stage.extentX, stage.extentY), true);
     }
     // Back to what the dials say.
     newPalette(dialHue.value / 127 * 360);

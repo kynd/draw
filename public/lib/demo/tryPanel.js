@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../StrokeDef.js';
 import { Palette } from '../Palette.js';
-import { taperByArc } from './strokePaths.js';
+import { taperByArc, scatterPath } from './strokePaths.js';
 import { setupDrawCycle } from './drawCycle.js';
 import { pressureAlong, averagePressure, limitWidthSlope, pathArcLength, pressureResponse } from './pressure.js';
 
@@ -66,6 +66,11 @@ export function setupTryDrawing({ stage, board, canvas, registry, select, params
         cycle.disposeGhost();
         const e = palette.entries[Math.floor(Math.random() * palette.entries.length)];
         board.clear(e.hex);
+        // A fresh canvas starts with one random mark, from a random entry.
+        const previousId = currentId;
+        currentId = registry[Math.floor(Math.random() * registry.length)].id;
+        cycle.feed(scatterPath(stage.extentX, stage.extentY), true);
+        currentId = previousId;
         stage.draw();
     }
 

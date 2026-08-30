@@ -302,6 +302,16 @@ Renderers that fill a closed region rather than a stroke. The geometry is only a
 </ul>
 </div>
 
+## 3D strokes
+
+Strokes built from 3D shapes around the spine, lit and baked onto the canvas like any other mark. `Stroke3DRenderer` is the base: the spine gains depth from a seeded wave of arc length, so the mark reads as an object lying over the canvas, and the shape rotates around the spine by an angle keyed to the distance from the stroke's end, so a growing stroke visibly turns while it is drawn. The rotation is the one deliberate exception to prefix stability; the depth wave keys on distance from the start and holds still. Both members take `depth`, `twist`, and `zBase`.
+<div class="jp">スパインの周りの3D形状から作られ、他の印と同じように照らされてキャンバスに焼き込まれるストロークです。基底クラスは`Stroke3DRenderer`です。スパインは弧長のシード付き波から深さを得るため、印はキャンバスの上に置かれた物体として読めます。形はまた、ストロークの終端からの距離に応じた角度でスパインの周りを回転するため、伸びていくストロークは描いている間、目に見えて回ります。この回転はプレフィックスの安定性に対する唯一の意図的な例外です。深さの波は始点からの距離に基づき、動きません。どちらのメンバーも<code>depth</code>、<code>twist</code>、<code>zBase</code>を取ります。</div>
+
+<ul class="doc-list">
+<li><code>TubeStrokeRenderer</code> — a tube closed by rounded caps, in three looks: <code>candy</code> (diagonal stripes from a color list, wrapping with the tube's angle, under a tight highlight), <code>wobble</code> (the radius swells and thins on a seeded wave, and the color runs a gradient driven by the wobble and the position along the stroke), and <code>metal</code> (the current canvas is the environment map: the reflected direction offsets a lookup into it). Takes <code>mode</code>, <code>colors</code>, <code>colorA</code>, <code>colorB</code>, <code>tint</code>, <code>background</code>, <code>stripes</code>, <code>wobbleFreq</code>, <code>bend</code>.<br /><span class="jp">丸いキャップで閉じられたチューブで、3つの見た目を持ちます。<code>candy</code>（色のリストからなる斜めの縞がチューブの角度とともに巻き付き、鋭いハイライトの下にあります）、<code>wobble</code>（半径はシード付きの波でふくらみ、細り、色はうねりとストロークに沿った位置に従うグラデーションになります）、<code>metal</code>（現在のキャンバスが環境マップで、反射方向がその参照をずらします）。</span></li>
+<li><code>TriangleStrokeRenderer</code> — a chain of flat-shaded 3D triangles, each taking a random size, rotation, and tilt from the stroke's seed. <code>facets</code> keeps the base color's hue while lightness and chroma vary per face; <code>grain</code> carries a wood-like band pattern of world position warped by noise, between two colors; <code>metal</code> reflects the canvas, broken per triangle by the flat normals. Takes <code>mode</code>, <code>colorA</code>, <code>colorB</code>, <code>tint</code>, <code>background</code>, <code>spacing</code>, <code>bend</code>.<br /><span class="jp">フラットに陰影付けされた3D三角形の連なりで、各三角形はストロークのシードからランダムな大きさ、回転、傾きを取ります。<code>facets</code>は基本色の色相を保ちながら面ごとに明度と彩度を変えます。<code>grain</code>はノイズでゆがめたワールド座標の帯模様を2色の間で運びます。<code>metal</code>はキャンバスを反射し、フラットな法線がそれを三角形ごとに割ります。</span></li>
+</ul>
+
 ## Geometry renderers
 
 Three renderers that keep the path, the width and the resampling and throw away the ribbon. The same `StrokeDef` drives all of them.

@@ -34,6 +34,64 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
+  <section class="demo-section" id="tubes">
+    <div class="demo-header">
+      <h2>Tube strokes</h2>
+      <a href={`${base}/demos/tube-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/tube-strokes/index.html?embedded`} title="Tube strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>3D tubes around the spine, closed by rounded caps: candy stripes, a wobbling width, and metal that reflects the canvas.</p>
+      <div class="jp">スパインの周りの3Dチューブで、丸いキャップで閉じられます。キャンディの縞、うねる幅、そしてキャンバスを反射する金属。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Depth and rotation:</strong> The spine gains depth from a seeded wave of arc length, so the tube reads as an object lying over the canvas. The shape also rotates around the spine by an angle keyed to the distance from the stroke's end, so the whole mark visibly turns while it is drawn. The rotation is the one deliberate exception to prefix stability.</p>
+        <div class="jp"><strong>深さと回転：</strong>スパインは弧長のシード付き波から深さを得るため、チューブはキャンバスの上に置かれた物体として読めます。形はまた、ストロークの終端からの距離に応じた角度でスパインの周りを回転します。そのため、描いている間、印全体が目に見えて回ります。この回転は、プレフィックスの安定性に対する唯一の意図的な例外です。</div>
+
+        <p><strong>Candy:</strong> Diagonal stripes from a list of colors, wrapping with the tube's angle so they run like a barber pole, under a tight highlight.</p>
+        <div class="jp"><strong>キャンディ：</strong>色のリストからなる斜めの縞が、チューブの角度とともに巻き付き、床屋のポールのように走ります。鋭いハイライトの下で。</div>
+
+        <p><strong>Wobble:</strong> The radius swells and thins on a seeded wave, and the color runs a gradient driven by both the wobble and the position along the stroke.</p>
+        <div class="jp"><strong>うねり：</strong>半径はシード付きの波でふくらみ、細り、色はうねりとストロークに沿った位置の両方に従うグラデーションになります。</div>
+
+        <p><strong>Metal:</strong> The current canvas is the environment map: the reflected direction offsets a lookup into it, so the tube mirrors whatever has been drawn around it.</p>
+        <div class="jp"><strong>金属：</strong>現在のキャンバスが環境マップです。反射方向がキャンバスへの参照をずらすため、チューブは周りに描かれたものを映します。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="triangles">
+    <div class="demo-header">
+      <h2>Triangle strokes</h2>
+      <a href={`${base}/demos/triangle-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/triangle-strokes/index.html?embedded`} title="Triangle strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Chains of 3D triangles along the spine, flat-shaded: same-hue facets, a wood-like grain, and metal that reflects the canvas.</p>
+      <div class="jp">スパインに沿った3Dの三角形の連なりで、フラットに陰影付けされます。同じ色相のファセット、木のような木目、そしてキャンバスを反射する金属。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Placement:</strong> Each triangle takes a random size, rotation, and tilt from the stroke's seed, on the same deepened, rotating spine as the tubes, so the chain turns as the stroke grows.</p>
+        <div class="jp"><strong>配置：</strong>各三角形はストロークのシードからランダムな大きさ、回転、傾きを取ります。チューブと同じ、深さを持ち回転するスパインの上なので、連なりはストロークが伸びるにつれて回ります。</div>
+
+        <p><strong>Facets:</strong> Each triangle's color keeps the base color's hue while its lightness and chroma vary, so the chain reads as one material in many cuts.</p>
+        <div class="jp"><strong>ファセット：</strong>各三角形の色は基本色の色相を保ちながら、明度と彩度が変わります。そのため連なりは、さまざまに切られたひとつの素材として読めます。</div>
+
+        <p><strong>Grain:</strong> The faces carry a band pattern of world position warped by noise, between two colors, like cut wood.</p>
+        <div class="jp"><strong>木目：</strong>面は、ノイズでゆがめたワールド座標の帯模様を2色の間で運びます。切られた木材のようにです。</div>
+
+        <p><strong>Metal:</strong> The same canvas reflection as the tubes, but the flat normals break it per triangle.</p>
+        <div class="jp"><strong>金属：</strong>チューブと同じキャンバスの反射ですが、フラットな法線がそれを三角形ごとに割ります。</div>
+      </details>
+    </div>
+  </section>
+
   <section class="demo-section" id="try">
     <div class="demo-header">
       <h2>Try drawing</h2>

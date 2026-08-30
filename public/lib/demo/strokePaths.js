@@ -99,3 +99,35 @@ export function seededScribble(seed, { cx = 0, cy = 0, scale = 1 } = {}) {
     }
     return points;
 }
+
+/**
+ * A random wandering stroke for scattering marks on a fresh canvas: a wiggling
+ * run at a random position and direction inside the extents, with a pressure
+ * that swells through the middle. Uses Math.random; a caller that needs
+ * determinism records the points it gets back.
+ */
+export function scatterPath(extentX, extentY) {
+    const ex = extentX * 0.7, ey = extentY * 0.7;
+    const x0 = (Math.random() * 2 - 1) * ex * 0.6;
+    const y0 = (Math.random() * 2 - 1) * ey * 0.6;
+    const angle = Math.random() * Math.PI * 2;
+    const len = 0.8 + Math.random() * 1.2;
+    const amp = 0.08 + Math.random() * 0.22;
+    const freq = 3 + Math.random() * 5;
+    const dir = new THREE.Vector2(Math.cos(angle), Math.sin(angle));
+    const perp = new THREE.Vector2(-dir.y, dir.x);
+    const points = [];
+    for (let i = 0; i < 44; i++) {
+        const t = i / 43;
+        const along = (t - 0.5) * len;
+        const across = Math.sin(t * freq + angle) * amp;
+        const p = new THREE.Vector3(
+            Math.max(-ex, Math.min(ex, x0 + dir.x * along + perp.x * across)),
+            Math.max(-ey, Math.min(ey, y0 + dir.y * along + perp.y * across)),
+            0
+        );
+        p.pressure = 0.25 + 0.6 * Math.sin(t * Math.PI);
+        points.push(p);
+    }
+    return points;
+}

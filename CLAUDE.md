@@ -113,6 +113,8 @@ public/lib/                            library code
                 WashBlobRenderer.js  MaterialBlobRenderer.js  StoneBlobRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js
                 LineStrokeRenderer.js
+                Stroke3DRenderer.js  TubeStrokeRenderer.js
+                TriangleStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js
                 drawingBoard.js  drawCycle.js  tryPanel.js  blobShowcase.js
                 pressure.js  testBackground.js  midi.js  dial.js  latch.js
