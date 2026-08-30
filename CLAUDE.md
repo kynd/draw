@@ -176,6 +176,13 @@ add it to the writing-style page, and apply it from then on.
   the page's iframe reserves exactly that. Use `Viewport` from `public/lib/demo/viewport.js`;
   it reads `?embedded`, sizes the canvas, and fires a resize callback. Anything holding a
   render target or a camera must implement a `resize(width, height)` and be wired to it.
+- **The world scale is fixed to CSS pixels.** One world unit is `PIXELS_PER_UNIT`
+  (200) CSS pixels, exported from `CanvasBuffer`. A resize crops or reveals paper
+  instead of rescaling the drawing, and `DrawingBoard` carries the baked raster
+  across resizes by blitting it back into the world rectangle it covered. World
+  coordinates stay compact (not raw pixels) so the seeded shader hashes keep their
+  float precision. `fit`-mode framing still exists on `CanvasBuffer` but no stroke
+  demo uses it.
 - Shared demo chrome lives in `public/styles/demo-ui.css` — see rule 5.
 - Strokes are drawn into a `CanvasBuffer` render target, so the renderer's own
   `antialias` flag does nothing. Antialiasing comes from the target's `samples`

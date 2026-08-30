@@ -15,9 +15,7 @@ const curveSelect = document.getElementById('curve-select');
 spanInput.value = String(DEFAULT_SPAN);
 document.getElementById('span-val').textContent = DEFAULT_SPAN.toFixed(2);
 
-const stage = new StrokeStage(document.getElementById('canvas'), {
-    fit: { width: 1.70, height: 1.0 },
-});
+const stage = new StrokeStage(document.getElementById('canvas'));
 
 let drawn = [];
 let curve = 'bspline';

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { CanvasBuffer } from '../CanvasBuffer.js';
+import { CanvasBuffer, PIXELS_PER_UNIT } from '../CanvasBuffer.js';
 import { Viewport } from './viewport.js';
 
 /**
@@ -19,11 +19,17 @@ export class StrokeStage {
         this.renderer.setSize(this.viewport.pixelWidth, this.viewport.pixelHeight, false);
         this.renderer.autoClear = false;
 
+        // Fixed scale by default: the world maps to CSS pixels at PIXELS_PER_UNIT,
+        // so a resize crops or reveals paper instead of rescaling the drawing. A
+        // demo that instead wants a region kept visible at any size passes `fit`.
         this.buffer = new CanvasBuffer({
             width: this.viewport.pixelWidth,
             height: this.viewport.pixelHeight,
+            viewWidth: this.viewport.width,
+            viewHeight: this.viewport.height,
             background,
             fit,
+            ppu: fit ? null : PIXELS_PER_UNIT,
             samples,
         });
 
@@ -36,7 +42,7 @@ export class StrokeStage {
 
         this.viewport.onResize((width, height) => {
             this.renderer.setSize(width, height, false);
-            this.buffer.resize(width, height);
+            this.buffer.resize(width, height, this.viewport.width, this.viewport.height);
             this._resizeHandlers.forEach(fn => fn(width, height));
             this.draw();
         });

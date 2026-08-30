@@ -22,9 +22,7 @@ const ctrl = {
     edge: document.getElementById('edge'),
 };
 
-const stage = new StrokeStage(document.getElementById('canvas'), {
-    fit: { width: 1.70, height: 1.60 },
-});
+const stage = new StrokeStage(document.getElementById('canvas'));
 
 let palette = newPalette();
 const background = new TestBackground(palette);

@@ -11,9 +11,7 @@ const radiusInput = document.getElementById('radius');
 const spanInput = document.getElementById('span');
 const curveSelect = document.getElementById('curve-select');
 
-const stage = new StrokeStage(document.getElementById('canvas'), {
-    fit: { width: 1.70, height: 1.0 },
-});
+const stage = new StrokeStage(document.getElementById('canvas'));
 
 let drawn = [];
 let curve = 'bspline';

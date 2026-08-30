@@ -19,9 +19,7 @@ const ctrl = {
     width: document.getElementById('width'),
 };
 
-const stage = new StrokeStage(document.getElementById('canvas'), {
-    fit: { width: 1.70, height: 1.60 },
-});
+const stage = new StrokeStage(document.getElementById('canvas'));
 
 // One halo per effect. Each renders its own strokes into a private target, blurs
 // there, and hands back a plane, so the softness cannot fold with the path.

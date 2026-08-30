@@ -14,9 +14,7 @@ const stabilityEl = document.getElementById('stability');
 spanInput.value = String(DEFAULT_SPAN);
 document.getElementById('span-val').textContent = DEFAULT_SPAN.toFixed(2);
 
-const stage = new StrokeStage(document.getElementById('canvas'), {
-    fit: { width: 1.70, height: 1.0 },
-});
+const stage = new StrokeStage(document.getElementById('canvas'));
 
 function makeLine(color, z) {
     const line = new THREE.Line(

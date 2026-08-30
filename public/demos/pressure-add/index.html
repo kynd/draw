@@ -21,13 +21,13 @@
       <div class="dp-hd"><span class="dp-title">Pressure</span></div>
       <div class="dp-row">
         <span class="dp-label">Base width</span>
-        <input id="base" class="dp-range" type="range" min="0.01" max="0.2" step="0.005" value="0.06" />
-        <span class="dp-val">0.060</span>
+        <input id="base" class="dp-range" type="range" min="2" max="40" step="1" value="12" />
+        <span class="dp-val">12</span>
       </div>
       <div class="dp-row">
         <span class="dp-label">Add</span>
-        <input id="add" class="dp-range" type="range" min="0" max="0.5" step="0.01" value="0.3" />
-        <span class="dp-val">0.30</span>
+        <input id="add" class="dp-range" type="range" min="0" max="100" step="1" value="60" />
+        <span class="dp-val">60</span>
       </div>
       <div class="dp-row">
         <span class="dp-label">Curve</span>
@@ -41,8 +41,8 @@
       </div>
       <div class="dp-row">
         <span class="dp-label">Min move</span>
-        <input id="minmove" class="dp-range" type="range" min="0.002" max="0.06" step="0.002" value="0.008" />
-        <span class="dp-val">0.008</span>
+        <input id="minmove" class="dp-range" type="range" min="0.5" max="12" step="0.5" value="2" />
+        <span class="dp-val">2.0</span>
       </div>
 
       <hr class="dp-sub-divider" />
@@ -53,9 +53,9 @@
       </div>
       <div class="dp-row">
         <span class="dp-label">Width</span>
-        <span class="dp-val" id="stat-width">0.000</span>
+        <span class="dp-val" id="stat-width">0.0</span>
       </div>
-      <div class="dp-note">Width runs from the base at zero pressure to base plus the added width at full pressure. Curve is the response exponent: above 1 spreads out light touches, below 1 compresses them. Limit caps how fast the width may rise or fall per unit of length. Min move is how far the pen must travel before a new point is recorded; below it, nothing is added and the width cannot grow in place.</div>
+      <div class="dp-note">Width runs from the base at zero pressure to base plus the added width at full pressure. Curve is the response exponent: above 1 spreads out light touches, below 1 compresses them. Limit caps how fast the width may rise or fall per unit of length. Min move is how far the pen must travel before a new point is recorded; below it, nothing is added and the width cannot grow in place. Lengths here are CSS pixels.</div>
 
       <hr class="dp-divider" />
 

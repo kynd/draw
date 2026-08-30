@@ -9,8 +9,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   </div>
 
   <div class="prose">
-    <p>Both demos draw the basic rounded stroke in gray on white, so the only thing to look at is how pen pressure becomes width. DrawInput records a pressure on every drawn point (a mouse records zero), and a mapping turns it into the width along the stroke.</p>
-    <div class="jp">どちらのデモも、基本の丸いストロークを白地にグレーで描きます。見るものは、筆圧がどのように幅になるかだけです。DrawInputは描かれたすべての点に筆圧を記録し（マウスはゼロを記録します）、マッピングがそれをストロークに沿った幅へと変えます。</div>
+    <p>Both demos draw the basic rounded stroke in gray on white, so the only thing to look at is how pen pressure becomes width. DrawInput records a pressure on every drawn point (a mouse records zero), and a mapping turns it into the width along the stroke. Lengths in the controls and readouts are CSS pixels: the canvas draws at a fixed scale, so resizing the window crops or reveals paper rather than rescaling the drawing.</p>
+    <div class="jp">どちらのデモも、基本の丸いストロークを白地にグレーで描きます。見るものは、筆圧がどのように幅になるかだけです。DrawInputは描かれたすべての点に筆圧を記録し（マウスはゼロを記録します）、マッピングがそれをストロークに沿った幅へと変えます。コントロールと読み出しの長さはCSSピクセルです。キャンバスは固定スケールで描画するため、ウィンドウのリサイズは描画を拡大縮小せず、紙を切り取るか、広げます。</div>
 
     <p>Before the mapping, the pressure passes through a response curve: pressure raised to an exponent. Raw tablet pressure feels front-loaded (a light touch already reports a substantial value), so an exponent above 1 spreads the low end out and makes light strokes easier to hold; below 1 compresses it. Both demos expose the exponent as Curve.</p>
     <div class="jp">マッピングの前に、筆圧は応答カーブを通ります。筆圧を指数で累乗したものです。タブレットの生の筆圧は前寄りに感じられるため（軽いタッチでもかなりの値を報告します）、1より大きい指数は低域を広げ、軽いストロークを保ちやすくします。1より小さい指数はそれを圧縮します。どちらのデモも、この指数をCurveとして公開しています。</div>

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
-import { CanvasBuffer } from '../../lib/CanvasBuffer.js';
+import { CanvasBuffer, PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { Palette } from '../../lib/Palette.js';
 import { Viewport } from '../../lib/demo/viewport.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
@@ -43,13 +43,15 @@ renderer.autoClear = false;
 const buffer = new CanvasBuffer({
     width: viewport.pixelWidth,
     height: viewport.pixelHeight,
+    viewWidth: viewport.width,
+    viewHeight: viewport.height,
+    ppu: PIXELS_PER_UNIT,
     background: '#ffffff',
-    fit: { width: 1.70, height: 1.60 },
 });
 
 viewport.onResize((width, height) => {
     renderer.setSize(width, height, false);
-    buffer.resize(width, height);
+    buffer.resize(width, height, viewport.width, viewport.height);
     // The layout is derived from the frame height, so a resize has to rebuild.
     rebuild(colors);
 });

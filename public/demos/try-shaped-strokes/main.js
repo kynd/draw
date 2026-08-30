@@ -37,7 +37,7 @@ const registry = [
     },
 ];
 
-const stage = new StrokeStage(document.getElementById('canvas'), { fit: { width: 1.70, height: 1.0 } });
+const stage = new StrokeStage(document.getElementById('canvas'));
 const board = new DrawingBoard(stage);
 
 setupTryDrawing({

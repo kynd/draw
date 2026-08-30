@@ -19,9 +19,7 @@ const knotsBtn = document.getElementById('knots-btn');
 spanInput.value = String(DEFAULT_SPAN);
 document.getElementById('span-val').textContent = DEFAULT_SPAN.toFixed(2);
 
-const stage = new StrokeStage(document.getElementById('canvas'), {
-    fit: { width: 1.70, height: 1.0 },
-});
+const stage = new StrokeStage(document.getElementById('canvas'));
 
 // ── Lines ────────────────────────────────────────────────────────────────────
 // THREE.Line draws 1 pixel wide whatever the world scale, which is the point: the

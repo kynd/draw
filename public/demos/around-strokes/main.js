@@ -15,9 +15,7 @@ const ctrl = {
     width: document.getElementById('width'),
 };
 
-const stage = new StrokeStage(document.getElementById('canvas'), {
-    fit: { width: 1.75, height: 1.60 },
-});
+const stage = new StrokeStage(document.getElementById('canvas'));
 
 let entries = [];
 let colorGroups = [];
