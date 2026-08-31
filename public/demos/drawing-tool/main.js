@@ -18,6 +18,16 @@ import { MaterialBlobRenderer } from '../../lib/renderers/MaterialBlobRenderer.j
 import { StoneBlobRenderer } from '../../lib/renderers/StoneBlobRenderer.js';
 import { TubeStrokeRenderer } from '../../lib/renderers/TubeStrokeRenderer.js';
 import { TriangleStrokeRenderer } from '../../lib/renderers/TriangleStrokeRenderer.js';
+import { SmearStrokeRenderer } from '../../lib/renderers/SmearStrokeRenderer.js';
+import { MirrorStrokeRenderer } from '../../lib/renderers/MirrorStrokeRenderer.js';
+import { GlassStrokeRenderer } from '../../lib/renderers/GlassStrokeRenderer.js';
+import { PolygonStrokeRenderer } from '../../lib/renderers/PolygonStrokeRenderer.js';
+import { LineStrokeRenderer } from '../../lib/renderers/LineStrokeRenderer.js';
+import { DryMediaStrokeRenderer } from '../../lib/renderers/DryMediaStrokeRenderer.js';
+import { DebossStrokeRenderer } from '../../lib/renderers/DebossStrokeRenderer.js';
+import { CloudStrokeRenderer } from '../../lib/renderers/CloudStrokeRenderer.js';
+import { RoundedSquareStrokeRenderer } from '../../lib/renderers/RoundedSquareStrokeRenderer.js';
+import { SpikeStrokeRenderer } from '../../lib/renderers/SpikeStrokeRenderer.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawingBoard } from '../../lib/demo/drawingBoard.js';
 import { setupDrawCycle } from '../../lib/demo/drawCycle.js';
@@ -137,6 +147,116 @@ const registry = [
         make: (v, ctx) => new TriangleStrokeRenderer({
             mode: 'metal', background: ctx.texture, tint: ctx.tintLight,
             twist: v.twist, bend: v.bend, depth: v.depth,
+        }) },
+    { id: 'ribbon-square', kind: 'stroke', params: [{ key: 'axis', pick: ['along', 'across'] }],
+        make: (v, ctx) => new RibbonStrokeRenderer({
+            cap: 'square', color: ctx.colorA, gradient: ctx.colorB, gradientAxis: v.axis,
+        }) },
+    { id: 'smear', kind: 'stroke',
+        params: [{ key: 'drag', min: 20, max: 220 }, { key: 'variation', min: 0, max: 1 }],
+        make: (v, ctx) => new SmearStrokeRenderer({
+            cap: 'rounded', color: ctx.colorA, background: ctx.texture,
+            drag: v.drag, variation: v.variation,
+        }) },
+    { id: 'mirror', kind: 'stroke',
+        params: [{ key: 'strength', min: 0.008, max: 0.07 }, { key: 'specular', min: 0.3, max: 1.4 }],
+        make: (v, ctx) => new MirrorStrokeRenderer({
+            cap: 'rounded', background: ctx.texture, strength: v.strength, specular: v.specular,
+        }) },
+    { id: 'glass-stroke', kind: 'stroke',
+        params: [{ key: 'refract', min: 0.02, max: 0.14 }, { key: 'specular', min: 0.3, max: 1.4 }],
+        make: (v, ctx) => new GlassStrokeRenderer({
+            cap: 'rounded', background: ctx.texture, refract: v.refract,
+            reflect: v.refract * 0.4, specular: v.specular,
+        }) },
+    { id: 'polygons', kind: 'stroke',
+        params: [{ key: 'facets', min: 4, max: 50, step: 1 }, { key: 'jitter', min: 0, max: 0.9 }],
+        make: (v, ctx) => new PolygonStrokeRenderer({ facets: v.facets, jitter: v.jitter, colors: ctx.colors }) },
+    { id: 'lanes', kind: 'stroke',
+        params: [{ key: 'lanes', min: 2, max: 20, step: 1 }, { key: 'duty', min: 0.15, max: 1 }],
+        make: (v, ctx) => new LineStrokeRenderer({ lanes: v.lanes, duty: v.duty, colors: ctx.colors }) },
+    { id: 'pencil', kind: 'stroke',
+        params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
+        }) },
+    { id: 'charcoal', kind: 'stroke',
+        params: [{ key: 'grain', min: 0.4, max: 0.9 }, { key: 'pressure', min: 0.2, max: 0.7 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            tooth: 4.5, softness: 0.5, edge: 0.3, opacity: 0.92,
+        }) },
+    { id: 'pastel', kind: 'stroke',
+        params: [{ key: 'grain', min: 0.5, max: 1 }, { key: 'pressure', min: 0.2, max: 0.6 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            tooth: 7.0, softness: 0.65, edge: 0.55, opacity: 0.95,
+        }) },
+    { id: 'deboss', kind: 'stroke',
+        params: [{ key: 'bevel', min: 0.2, max: 1 }, { key: 'amount', min: 0.3, max: 1.4 }],
+        make: (v, ctx) => new DebossStrokeRenderer({
+            cap: 'rounded', color: ctx.colorA, bevel: v.bevel, amount: v.amount,
+        }) },
+    { id: 'cloud', kind: 'stroke',
+        params: [{ key: 'blob', min: 0.7, max: 2.6 }, { key: 'offset', min: 0.2, max: 2.6 }],
+        make: (v, ctx) => new CloudStrokeRenderer({ color: ctx.colorA, blob: v.blob, offset: v.offset }) },
+    { id: 'squares', kind: 'stroke',
+        params: [{ key: 'cell', min: 0.08, max: 0.28 }, { key: 'blend', min: 0.1, max: 0.6 }],
+        make: (v, ctx) => new RoundedSquareStrokeRenderer({ color: ctx.colorA, cell: v.cell, blend: v.blend }) },
+    { id: 'spikes', kind: 'stroke',
+        params: [{ key: 'spikes', min: 1, max: 10, step: 0.5 }, { key: 'amp', min: 0.3, max: 1.8 }, { key: 'sharp', min: 1.5, max: 10 }],
+        make: (v, ctx) => new SpikeStrokeRenderer({ color: ctx.colorA, spikes: v.spikes, amp: v.amp, sharp: v.sharp }) },
+    { id: 'flat-blob', kind: 'blob',
+        params: [{ key: 'axis', pick: ['along', 'across'] }],
+        make: (v, ctx) => {
+            const [gradientFrom, gradientTo] = gradPoints(ctx, v.axis);
+            return new ShapedBlobRenderer({ color: ctx.colorA, colorB: ctx.colorB, gradientFrom, gradientTo });
+        } },
+    { id: 'wobbly-blob', kind: 'blob',
+        params: [{ key: 'wobble', min: 0.02, max: 0.12 }, { key: 'axis', pick: ['along', 'across'] }],
+        make: (v, ctx) => {
+            const [gradientFrom, gradientTo] = gradPoints(ctx, v.axis);
+            return new ShapedBlobRenderer({
+                color: ctx.colorA, colorB: ctx.colorB, gradientFrom, gradientTo, wobble: v.wobble,
+            });
+        } },
+    { id: 'dry-brush', kind: 'blob',
+        params: [{ key: 'dry', min: 0.3, max: 1 }],
+        make: (v, ctx) => new PaintBlobRenderer({
+            color: ctx.colorA, colorB: ctx.colorB, fade: 0.5, relief: 0.12, swell: 0.8,
+            gloss: 0.1, edgeSoft: 0.03, dry: v.dry, noiseFreq: 3.5,
+        }) },
+    { id: 'flat-paint', kind: 'blob',
+        params: [{ key: 'relief', min: 0.1, max: 1 }],
+        make: (v, ctx) => new PaintBlobRenderer({
+            color: ctx.colorA, colorB: ctx.colorB, fade: 0.12, relief: v.relief, gloss: 0.4, edgeSoft: 0.02,
+        }) },
+    { id: 'gouache', kind: 'blob',
+        params: [{ key: 'flow', min: 0.02, max: 0.14 }],
+        make: (v, ctx) => new WashBlobRenderer({
+            color: ctx.colorA, background: ctx.texture,
+            pigment: 1.1, feather: 0.012, rim: 0.1, flow: v.flow, wet: 0.08, bristle: 0.05,
+        }) },
+    { id: 'glass-blob', kind: 'blob',
+        params: [{ key: 'bend', min: 0.02, max: 0.12 }],
+        make: (v, ctx) => new MaterialBlobRenderer({
+            mode: 'glass', background: ctx.texture, bend: v.bend, tint: '#dff0f5',
+        }) },
+    { id: 'facet-glass', kind: 'blob',
+        params: [{ key: 'bend', min: 0.02, max: 0.12 }, { key: 'relief', min: 0.15, max: 0.9 }],
+        make: (v, ctx) => new MaterialBlobRenderer({
+            mode: 'facet', background: ctx.texture, bend: v.bend, relief: v.relief, tint: '#e5eef2',
+        }) },
+    { id: 'marble', kind: 'blob',
+        params: [{ key: 'relief', min: 0.1, max: 1 }],
+        make: (v, ctx) => new StoneBlobRenderer({
+            mode: 'marble', color: ctx.colorA, colorB: ctx.colorB, relief: v.relief,
+        }) },
+    { id: 'sand', kind: 'blob',
+        params: [{ key: 'relief', min: 0.1, max: 1 }],
+        make: (v, ctx) => new StoneBlobRenderer({
+            mode: 'sand', color: ctx.colorA, colorB: ctx.colorB, relief: v.relief,
         }) },
 ];
 
