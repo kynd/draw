@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { Palette } from '../../lib/Palette.js';
+import { oklchToHex, maxChromaAt } from '../../lib/color.js';
 import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { blobOutline } from '../../lib/pathEffects.js';
 import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
@@ -225,6 +226,7 @@ function autoReroll() {
     newPalette(hueValue / 127 * 360);
     rerollTool(toolValue);
     refreshPreview();
+    syncPane();
 }
 
 function maybeAutoReroll(points) {
@@ -255,24 +257,35 @@ const cycle = setupDrawCycle({
 
 // ---------------------------------------------------------------------------
 // Palette. The first hue always follows the hue dial; the rest reroll.
-function newPalette(hue) {
+function newPalette(hue, { keepColorA = false } = {}) {
     const hues = [hue, ...Array.from({ length: 3 }, () => Math.random() * 360)];
     state.palette = Palette.fromHues(hues, {
         nLum: 5, lumHigh: 0.9, lumLow: 0.3, vibHigh: 0.95, vibLow: 0.3,
     });
     const dark = state.palette.entries.filter(e => e.L < 0.68);
-    const firstDark = state.palette.entries.slice(0, 5).filter(e => e.L < 0.68);
-    state.colorA = (firstDark[Math.floor(firstDark.length / 2)] ?? dark[0]).hex;
+    if (!keepColorA) {
+        const firstDark = state.palette.entries.slice(0, 5).filter(e => e.L < 0.68);
+        state.colorA = (firstDark[Math.floor(firstDark.length / 2)] ?? dark[0]).hex;
+    }
     state.colorB = dark[Math.floor(Math.random() * dark.length)].hex;
     state.colors = dark.map(e => e.hex);
 }
 
+const toolValues = {};
+let toolIndex = 0;
+
 function rerollTool(widthValue) {
     state.widthPx = 2 + widthValue / 127 * 58;
-    state.tool = registry[Math.floor(Math.random() * registry.length)];
+    toolIndex = Math.floor(Math.random() * registry.length);
+    state.tool = registry[toolIndex];
     state.values = randomValues(state.tool);
+    toolValues[state.tool.id] = state.values;
     // Pressure can widen the stroke by up to three times at full sensitivity.
     state.sens = Math.random() * 2;
+}
+
+function toolLabel(entry) {
+    return entry.id.replace(/-/g, ' ').replace(/^./, c => c.toUpperCase());
 }
 
 // ---------------------------------------------------------------------------
@@ -356,8 +369,16 @@ function refreshPreview() {
 // ---------------------------------------------------------------------------
 // Dials, frame-latched: input only stores the value, the update runs once on
 // the next frame.
-const hueLatch = new FrameLatch(v => { newPalette(v / 127 * 360); refreshPreview(); });
-const toolLatch = new FrameLatch(v => { rerollTool(v); refreshPreview(); });
+const hueLatch = new FrameLatch(v => {
+    if (advancedOn) return;
+    newPalette(v / 127 * 360);
+    refreshPreview();
+});
+const toolLatch = new FrameLatch(v => {
+    if (advancedOn) return;
+    rerollTool(v);
+    refreshPreview();
+});
 
 const dialHue = new Dial(document.getElementById('dial-hue'),
     { label: 'Hue', value: Math.floor(Math.random() * 128), onInput: v => hueLatch.set(v) });
@@ -430,17 +451,26 @@ const replayBtn = document.getElementById('replay-btn');
 const clearBtn = document.getElementById('clear-btn');
 let player = null;
 
-replayBtn.addEventListener('click', () => {
-    // While a replay runs the same button reads Stop, and stopping jumps
-    // straight to the end state.
-    if (replaying) { player?.finish(); return; }
-    if (recorder.records.length === 0) return;
+// Everything but Replay and Full screen goes away while a replay runs.
+function setReplayUi(on) {
+    replayBtn.textContent = on ? 'Stop' : 'Replay';
+    const hidden = on ? 'none' : '';
+    clearBtn.style.display = hidden;
+    autoBtn.style.display = hidden;
+    recordBtn.style.display = hidden;
+    guideBtn.style.display = hidden;
+    advBtn.style.display = hidden;
+    autoPanel.style.display = on || !autoRandom ? 'none' : '';
+    guidePanel.style.display = on || !guideMesh ? 'none' : '';
+    sidePane.style.display = on || !advancedOn ? 'none' : '';
+    updateGuideVisibility();
+}
+
+function startReplay(onFinished) {
+    if (replaying || recorder.records.length === 0) return false;
     replaying = true;
     cycle.input.enabled = false;
-    replayBtn.textContent = 'Stop';
-    clearBtn.style.display = 'none';
-    autoBtn.style.display = 'none';
-    autoPanel.style.display = 'none';
+    setReplayUi(true);
     const saved = {
         tool: state.tool, values: { ...state.values }, widthPx: state.widthPx,
         sens: state.sens, colorA: state.colorA, colorB: state.colorB, colors: [...state.colors],
@@ -457,13 +487,20 @@ replayBtn.addEventListener('click', () => {
             replaying = false;
             player = null;
             cycle.input.enabled = true;
-            replayBtn.textContent = 'Replay';
-            clearBtn.style.display = '';
-            autoBtn.style.display = '';
-            autoPanel.style.display = autoRandom ? '' : 'none';
+            setReplayUi(false);
             refreshPreview();
+            syncPane();
+            onFinished?.();
         },
     });
+    return true;
+}
+
+replayBtn.addEventListener('click', () => {
+    // While a replay runs the same button reads Stop, and stopping jumps
+    // straight to the end state.
+    if (replaying) { player?.finish(); return; }
+    startReplay();
 });
 
 clearBtn.addEventListener('click', () => {
@@ -483,6 +520,303 @@ document.getElementById('auto-px').addEventListener('input', e => {
     document.getElementById('auto-px-val').textContent = autoPx;
 });
 
+// ---------------------------------------------------------------------------
+// Advanced pane: exact HCL color by three dials, the tool by dial or dropdown,
+// and every parameter of the current tool as sliders. The two canvas dials hide
+// while it is open.
+let advancedOn = false;
+const advBtn = document.getElementById('adv-btn');
+const sidePane = document.getElementById('side-pane');
+const dialsEl = document.querySelector('.dp-dials');
+const adv = { h: Math.round(Math.random() * 360), c: 70, l: 45 };
+
+function applyAdvancedColor() {
+    const L = adv.l / 100;
+    const C = maxChromaAt(L, adv.h) * adv.c / 100;
+    state.colorA = oklchToHex(L, C, adv.h);
+    newPalette(adv.h, { keepColorA: true });
+    renderSwatches();
+    refreshPreview();
+}
+
+function selectToolByIndex(index) {
+    toolIndex = Math.max(0, Math.min(registry.length - 1, index));
+    state.tool = registry[toolIndex];
+    state.values = toolValues[state.tool.id] ??= randomValues(state.tool);
+    renderParams();
+    renderSwatches();
+    refreshPreview();
+}
+
+function renderSwatches() {
+    const toolColors = document.getElementById('tool-colors');
+    toolColors.innerHTML = '';
+    for (const hex of [state.colorA, state.colorB]) {
+        const sw = document.createElement('div');
+        sw.className = 'dp-swatch';
+        sw.style.background = hex;
+        toolColors.appendChild(sw);
+    }
+    const grid = document.getElementById('palette-grid');
+    grid.innerHTML = '';
+    for (const entry of state.palette?.entries ?? []) {
+        const cell = document.createElement('div');
+        cell.className = 'dp-swatch-cell'
+            + (entry.hex === state.colorA || entry.hex === state.colorB ? ' selected' : '');
+        cell.style.background = entry.hex;
+        grid.appendChild(cell);
+    }
+}
+
+function paramRow(container, label, min, max, step, value, decimals, onInput) {
+    const row = document.createElement('div');
+    row.className = 'dp-row';
+    const lab = document.createElement('span');
+    lab.className = 'dp-label';
+    lab.textContent = label;
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.className = 'dp-range';
+    input.min = min; input.max = max; input.step = step; input.value = value;
+    const val = document.createElement('span');
+    val.className = 'dp-val';
+    const show = () => { val.textContent = parseFloat(input.value).toFixed(decimals); };
+    show();
+    input.addEventListener('input', () => { show(); onInput(parseFloat(input.value)); });
+    row.append(lab, input, val);
+    container.appendChild(row);
+}
+
+function renderParams() {
+    const container = document.getElementById('tool-params');
+    container.innerHTML = '';
+    paramRow(container, 'Width', 2, 60, 1, state.widthPx, 0,
+        v => { state.widthPx = v; refreshPreview(); });
+    paramRow(container, 'Pressure', 0, 2, 0.05, state.sens, 2,
+        v => { state.sens = v; });
+    for (const param of state.tool.params) {
+        const label = param.key.replace(/^./, c => c.toUpperCase());
+        if (param.pick) {
+            const row = document.createElement('div');
+            row.className = 'dp-row';
+            const lab = document.createElement('span');
+            lab.className = 'dp-label';
+            lab.textContent = label;
+            const select = document.createElement('select');
+            select.className = 'dp-select';
+            for (const option of param.pick) {
+                const o = document.createElement('option');
+                o.value = option;
+                o.textContent = option;
+                select.appendChild(o);
+            }
+            select.value = state.values[param.key];
+            select.addEventListener('change', () => {
+                state.values[param.key] = select.value;
+                refreshPreview();
+            });
+            row.append(lab, select);
+            container.appendChild(row);
+            continue;
+        }
+        const step = param.step ?? (param.max - param.min) / 100;
+        const decimals = step >= 1 ? 0 : 2;
+        paramRow(container, label, param.min, param.max, step, state.values[param.key], decimals,
+            v => { state.values[param.key] = v; refreshPreview(); });
+    }
+}
+
+const dialH = new Dial(document.getElementById('dial-h'),
+    { label: 'H', min: 0, max: 360, value: adv.h, onInput: v => { adv.h = v; applyAdvancedColor(); } });
+const dialC = new Dial(document.getElementById('dial-c'),
+    { label: 'C', min: 0, max: 100, value: adv.c, onInput: v => { adv.c = v; applyAdvancedColor(); } });
+const dialL = new Dial(document.getElementById('dial-l'),
+    { label: 'L', min: 5, max: 95, value: adv.l, onInput: v => { adv.l = v; applyAdvancedColor(); } });
+
+const toolSelect = document.getElementById('tool-select');
+registry.forEach((entry, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = toolLabel(entry);
+    toolSelect.appendChild(o);
+});
+toolSelect.addEventListener('change', () => {
+    selectToolByIndex(parseInt(toolSelect.value, 10));
+    dialToolAdv.set(toolIndex, false);
+});
+// The dial is a shortcut through the same order as the dropdown, not a reroll.
+const dialToolAdv = new Dial(document.getElementById('dial-tool-adv'),
+    { label: 'Tool', min: 0, max: registry.length - 1, value: 0,
+      onInput: i => { selectToolByIndex(i); toolSelect.value = String(toolIndex); } });
+
+function syncPane() {
+    if (!advancedOn) return;
+    toolSelect.value = String(toolIndex);
+    dialToolAdv.set(toolIndex, false);
+    renderParams();
+    renderSwatches();
+}
+
+advBtn.addEventListener('click', () => {
+    if (replaying) return;
+    advancedOn = !advancedOn;
+    advBtn.classList.toggle('active', advancedOn);
+    dialsEl.style.display = advancedOn ? 'none' : '';
+    sidePane.style.display = advancedOn ? '' : 'none';
+    if (advancedOn) {
+        applyAdvancedColor();
+        selectToolByIndex(toolIndex);
+        syncPane();
+    }
+});
+
+// ---------------------------------------------------------------------------
+// While the pen is down, every overlay fades out of the way.
+{
+    const layout = document.getElementById('layout');
+    const canvas = document.getElementById('canvas');
+    canvas.addEventListener('pointerdown', () => {
+        if (cycle.input.enabled) layout.classList.add('dp-ui-hidden');
+    });
+    const show = () => layout.classList.remove('dp-ui-hidden');
+    window.addEventListener('pointerup', show);
+    window.addEventListener('pointercancel', show);
+}
+
+// ---------------------------------------------------------------------------
+// Record: run the replay while capturing the canvas, then save the video. The
+// file is mp4 where the browser can encode it, webm otherwise.
+const recordBtn = document.getElementById('record-btn');
+let recording = false;
+
+recordBtn.addEventListener('click', () => {
+    if (recording || replaying || recorder.records.length === 0) return;
+    const canvas = document.getElementById('canvas');
+    const stream = canvas.captureStream(60);
+    const mime = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']
+        .find(c => window.MediaRecorder && MediaRecorder.isTypeSupported(c));
+    if (!mime) { console.log('[record] MediaRecorder unavailable'); return; }
+    const media = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 12_000_000 });
+    const chunks = [];
+    media.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    media.onstop = () => {
+        const ext = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
+        const blob = new Blob(chunks, { type: mime });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `drawing.${ext}`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    };
+    media.start();
+    recording = true;
+    recordBtn.classList.add('active');
+    const ok = startReplay(() => {
+        media.stop();
+        recording = false;
+        recordBtn.classList.remove('active');
+    });
+    if (!ok) { media.stop(); recording = false; recordBtn.classList.remove('active'); }
+});
+
+// ---------------------------------------------------------------------------
+// Canvas size, offered in full screen: a fixed centered surface, or the window.
+const sizeSelect = document.getElementById('size-select');
+function applyCanvasSize(value) {
+    const wrap = document.querySelector('.canvas-wrap');
+    if (!value) {
+        wrap.style.flex = '';
+        wrap.style.width = '';
+        wrap.style.height = '';
+        wrap.style.margin = '';
+        return;
+    }
+    const [w, h] = value.split('x');
+    wrap.style.flex = 'none';
+    wrap.style.width = `${w}px`;
+    wrap.style.height = `${h}px`;
+    wrap.style.margin = 'auto';
+}
+sizeSelect.addEventListener('change', () => {
+    applyCanvasSize(sizeSelect.value);
+    clearOnResize = true;
+});
+
+// ---------------------------------------------------------------------------
+// Guide image: an overlay fit to the canvas, with opacity and visibility
+// controls. It is never baked and hides during replay and recording, so the
+// output is exactly as if it did not exist.
+const guideBtn = document.getElementById('guide-btn');
+const guidePanel = document.getElementById('guide-panel');
+const guideFile = document.getElementById('guide-file');
+const guideToggle = document.getElementById('guide-toggle');
+let guideMesh = null;
+let guideAspect = 1;
+let guideVisible = true;
+let guideOpacity = 0.5;
+
+function fitGuide() {
+    if (!guideMesh) return;
+    const w = Math.min(stage.extentX * 2, stage.extentY * 2 * guideAspect);
+    guideMesh.scale.set(w, w / guideAspect, 1);
+}
+
+function updateGuideVisibility() {
+    if (!guideMesh) return;
+    guideMesh.visible = guideVisible && !replaying;
+    stage.draw();
+}
+
+guideBtn.addEventListener('click', () => {
+    if (replaying) return;
+    guideFile.click();
+});
+guideFile.addEventListener('change', () => {
+    const file = guideFile.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+        guideAspect = image.naturalWidth / Math.max(image.naturalHeight, 1);
+        const texture = new THREE.Texture(image);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.needsUpdate = true;
+        if (guideMesh) {
+            stage.remove(guideMesh);
+            guideMesh.material.map?.dispose();
+            guideMesh.material.dispose();
+            guideMesh.geometry.dispose();
+        }
+        guideMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(1, 1),
+            new THREE.MeshBasicMaterial({
+                map: texture, transparent: true, opacity: guideOpacity, depthWrite: false,
+            })
+        );
+        guideMesh.position.z = 1.4;
+        stage.add(guideMesh);
+        fitGuide();
+        guidePanel.style.display = '';
+        updateGuideVisibility();
+        URL.revokeObjectURL(url);
+    };
+    image.src = url;
+    guideFile.value = '';
+});
+document.getElementById('guide-opacity').addEventListener('input', e => {
+    guideOpacity = parseFloat(e.target.value);
+    if (guideMesh) {
+        guideMesh.material.opacity = guideOpacity;
+        stage.draw();
+    }
+});
+guideToggle.addEventListener('click', () => {
+    guideVisible = !guideVisible;
+    guideToggle.classList.toggle('active', guideVisible);
+    guideToggle.textContent = guideVisible ? 'On' : 'Off';
+    updateGuideVisibility();
+});
+
 document.getElementById('fullscreen-btn').addEventListener('click', () => {
     const layout = document.getElementById('layout');
     if (document.fullscreenElement) document.exitFullscreen();
@@ -492,11 +826,20 @@ document.getElementById('fullscreen-btn').addEventListener('click', () => {
 // Toggling full screen restarts the canvas: the clear waits for the resize,
 // so the fresh gradient and scatter land on the new size.
 let clearOnResize = false;
-document.addEventListener('fullscreenchange', () => { clearOnResize = true; });
+document.addEventListener('fullscreenchange', () => {
+    clearOnResize = true;
+    const inFullscreen = Boolean(document.fullscreenElement);
+    sizeSelect.style.display = inFullscreen ? '' : 'none';
+    if (!inFullscreen) {
+        sizeSelect.value = '';
+        applyCanvasSize('');
+    }
+});
 
 stage.onResize(() => {
     positionPreview();
     refreshPreview();
+    fitGuide();
     if (clearOnResize && !replaying) {
         clearOnResize = false;
         clearAll();
