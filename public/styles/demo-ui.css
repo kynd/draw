@@ -168,36 +168,40 @@ html, body {
   position: absolute; top: 10px; right: 10px;
   display: flex; gap: 6px; z-index: 5;
 }
+.dp-overlay-tl {
+  position: absolute; top: 10px; left: 10px;
+  display: flex; gap: 6px; z-index: 7;
+}
 .dp-icon-btn {
-  width: 34px; height: 34px; border-radius: 17px;
+  width: 28px; height: 28px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   background: rgba(0,0,0,0.45); border: none; color: #ffffff;
   cursor: pointer; padding: 0;
 }
 .dp-icon-btn:hover { background: rgba(0,0,0,0.62); }
-.dp-icon-btn svg { width: 20px; height: 20px; fill: #ffffff; }
+.dp-icon-btn svg { width: 16px; height: 16px; fill: #ffffff; }
 .dp-icon-btn.text {
-  width: auto; padding: 0 12px;
-  font-family: var(--font-ui); font-size: 0.6rem; color: #ffffff;
+  width: auto; padding: 0 10px;
+  font-family: var(--font-ui); font-size: 0.56rem; color: #ffffff;
 }
 .dp-icon-btn.active { background: #ffffff; color: var(--demo-fg); }
 .dp-icon-btn.active svg { fill: var(--demo-fg); }
 .dp-overlay-panel {
-  position: absolute; top: 50px; right: 10px;
+  position: absolute; top: 44px; right: 10px;
   display: flex; align-items: center; gap: 6px;
   width: 200px; padding: 6px 10px; border-radius: 12px;
   background: rgba(0,0,0,0.45);
   z-index: 5;
 }
 .dp-overlay-panel .dp-label, .dp-overlay-panel .dp-val { color: #ffffff; }
-.dp-overlay-panel + .dp-overlay-panel { top: 92px; }
+.dp-overlay-panel + .dp-overlay-panel { top: 84px; }
 
 /* The advanced pane: a translucent card on the left of the canvas */
 .dp-side-pane {
-  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-  width: 232px; padding: 10px 12px; border-radius: 12px;
+  position: absolute; left: 0; top: 0; height: 100%;
+  width: 156px; padding: 44px 10px 12px;
   background: rgba(0,0,0,0.45);
-  max-height: calc(100% - 32px); overflow-y: auto;
+  overflow-y: auto;
   z-index: 6;
 }
 .dp-side-pane .dp-label, .dp-side-pane .dp-val { color: #ffffff; }
@@ -217,9 +221,9 @@ html, body {
 .dp-side-pane .dp-range::-moz-range-track { background: rgba(255,255,255,0.35); }
 .dp-overlay-panel .dp-range::-moz-range-thumb,
 .dp-side-pane .dp-range::-moz-range-thumb { background: #ffffff; }
-.dp-dial-row { display: flex; gap: 8px; justify-content: center; }
-.dp-dial.small { width: 46px; }
-.dp-dial.small svg { width: 46px; height: 46px; }
+.dp-dial-row { display: flex; gap: 6px; justify-content: center; }
+.dp-dial.small { width: 40px; }
+.dp-dial.small svg { width: 40px; height: 40px; }
 
 /* Palette swatch grid, with the entries in use outlined */
 .dp-swatch-grid { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 6px; }
@@ -227,9 +231,9 @@ html, body {
 .dp-swatch-cell.selected { outline: 2px solid #ffffff; outline-offset: -1px; }
 
 /* While the pen is down every overlay fades out of the way */
-.dp-overlay-tr, .dp-overlay-panel, .dp-dials, .dp-side-pane { transition: opacity 0.15s; }
-.dp-ui-hidden .dp-overlay-tr, .dp-ui-hidden .dp-overlay-panel,
-.dp-ui-hidden .dp-dials, .dp-ui-hidden .dp-side-pane {
+.dp-overlay-tr, .dp-overlay-tl, .dp-overlay-panel, .dp-dials, .dp-side-pane { transition: opacity 0.15s; }
+.dp-ui-hidden .dp-overlay-tr, .dp-ui-hidden .dp-overlay-tl,
+.dp-ui-hidden .dp-overlay-panel, .dp-ui-hidden .dp-dials, .dp-ui-hidden .dp-side-pane {
   opacity: 0; pointer-events: none;
 }
 

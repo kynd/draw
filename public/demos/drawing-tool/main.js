@@ -360,9 +360,11 @@ function refreshPreview() {
     }
     if (mark) {
         mark.mesh.position.z = 0.21;
+        mark.mesh.visible = !uiHidden;
         stage.add(mark.mesh);
         previewMark = mark;
     }
+    preview.visible = !uiHidden;
     stage.draw();
 }
 
@@ -671,14 +673,22 @@ advBtn.addEventListener('click', () => {
 });
 
 // ---------------------------------------------------------------------------
-// While the pen is down, every overlay fades out of the way.
+// While the pen is down, every overlay fades out of the way — the DOM controls
+// and the preview box in the scene alike.
+let uiHidden = false;
+function setUiHidden(hidden) {
+    uiHidden = hidden;
+    document.getElementById('layout').classList.toggle('dp-ui-hidden', hidden);
+    preview.visible = !hidden;
+    if (previewMark) previewMark.mesh.visible = !hidden;
+    stage.draw();
+}
 {
-    const layout = document.getElementById('layout');
     const canvas = document.getElementById('canvas');
     canvas.addEventListener('pointerdown', () => {
-        if (cycle.input.enabled) layout.classList.add('dp-ui-hidden');
+        if (cycle.input.enabled) setUiHidden(true);
     });
-    const show = () => layout.classList.remove('dp-ui-hidden');
+    const show = () => setUiHidden(false);
     window.addEventListener('pointerup', show);
     window.addEventListener('pointercancel', show);
 }
