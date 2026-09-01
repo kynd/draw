@@ -105,8 +105,8 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
             const base = pushRing(centers[i], normals[i], phaseAt(s), r, rInner, innerSide[i], ts[i], wob);
             if (prevBase >= 0) {
                 for (let j = 0; j < RADIAL; j++) {
-                    indices.push(prevBase + j, base + j, base + j + 1);
-                    indices.push(prevBase + j, base + j + 1, prevBase + j + 1);
+                    indices.push(prevBase + j, base + j + 1, base + j);
+                    indices.push(prevBase + j, prevBase + j + 1, base + j + 1);
                 }
             }
             prevBase = base;
@@ -157,11 +157,11 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                     // The start cap's rings run against the spine direction, so
                     // its winding flips to keep the faces outward.
                     if (end === 0) {
-                        indices.push(from + j, base + j + 1, base + j);
-                        indices.push(from + j, from + j + 1, base + j + 1);
-                    } else {
                         indices.push(from + j, base + j, base + j + 1);
                         indices.push(from + j, base + j + 1, from + j + 1);
+                    } else {
+                        indices.push(from + j, base + j + 1, base + j);
+                        indices.push(from + j, from + j + 1, base + j + 1);
                     }
                 }
                 prev = base;

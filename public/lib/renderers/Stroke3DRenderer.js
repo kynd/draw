@@ -13,8 +13,9 @@ import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
  * still.
  *
  * The frame is the 2D spine normal for the in-plane axis and +z for the
- * out-of-plane axis. Lighting in subclasses follows the site convention: the
- * light's world y is negative, so it reads as shining from the top of the screen.
+ * out-of-plane axis. The 3D strokes carry true normals, so their shared light
+ * in STROKE3D_GLSL has positive y; the 2D shaders' negative-y convention does
+ * not apply here.
  */
 export class Stroke3DRenderer extends StrokeRenderer {
     /**
@@ -65,11 +66,12 @@ export const STROKE3D_GLSL = /* glsl */`
     uniform vec2 uScreen;
     vec2 screenUv() { return gl_FragCoord.xy / uScreen; }
 
-    // From the top of the screen, 30 degrees above the camera. The 3D strokes
-    // carry true normals, and on screen +y is up, so the light's y is positive;
-    // the 2D shaders' negative-y convention compensates for their inverted
-    // dome normals and does not apply here.
-    vec3 lightDir() { return normalize(vec3(0.0, 0.5, 0.866)); }
+    // From the upper left: 60 degrees down from the screen's up axis, swung 30
+    // degrees to the left of the camera. The 3D strokes carry true normals, and
+    // on screen +y is up, so the light's y is positive; the 2D shaders'
+    // negative-y convention compensates for their inverted dome normals and
+    // does not apply here.
+    vec3 lightDir() { return normalize(vec3(-0.433, 0.5, 0.75)); }
 
     float diffuseAt(vec3 n) { return max(dot(n, lightDir()), 0.0); }
 
