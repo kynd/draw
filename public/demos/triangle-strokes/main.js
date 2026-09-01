@@ -46,8 +46,11 @@ function randomizeColors() {
     };
 }
 
+let showNormals = false;
+
 function makeRenderer(index) {
     const common = {
+        showNormals,
         depth: parseFloat(ctrl.depth.value),
         twist: parseFloat(ctrl.twist.value),
         spacing: parseFloat(ctrl.spacing.value),
@@ -126,3 +129,8 @@ wireCollapsibles();
 colors = randomizeColors();
 rebuild();
 wireWireframeToggle(document.getElementById('wire-btn'), stage);
+document.getElementById('normals-btn').addEventListener('click', e => {
+    showNormals = !showNormals;
+    e.currentTarget.classList.toggle('active', showNormals);
+    rebuild();
+});

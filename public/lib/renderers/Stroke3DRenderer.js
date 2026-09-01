@@ -26,12 +26,15 @@ export class Stroke3DRenderer extends StrokeRenderer {
      *                               The default holds the spine about 100 CSS
      *                               pixels over it.
      */
-    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.5 } = {}) {
+    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.5, showNormals = false } = {}) {
         super();
         this.samplesPerUnit = samplesPerUnit;
         this.depth = depth;
         this.twist = twist;
         this.zBase = zBase;
+        // Debug view: paint the surface with its normals (xyz as rgb), and tint
+        // back-facing pixels red, so winding and normal problems show themselves.
+        this.showNormals = showNormals;
     }
 
     /** The spine with depth, plus the frame and rotation phase along it. */
@@ -48,20 +51,14 @@ export class Stroke3DRenderer extends StrokeRenderer {
     }
 }
 
-/**
- * The drop shadow's material: flat black at low opacity. The shadow geometry is
- * the mark flattened onto the canvas, each vertex pushed down the screen (world
- * -y) by tan(30) of its own height, which is where the light throws it.
- */
-export function shadowMaterial() {
-    // Writing depth with a strict less-than test makes overlapping shadow
-    // triangles draw once: the fill stays one flat tenth of black however many
-    // parts of the mark cover the same spot.
-    return new THREE.MeshBasicMaterial({
-        color: '#000000', transparent: true, opacity: 0.1,
-        depthWrite: true, depthFunc: THREE.LessDepth, side: THREE.DoubleSide,
-    });
-}
+/** The normals debug view: rgb from xyz, back faces tinted red. */
+export const SHOW_NORMALS_GLSL = /* glsl */`
+    vec4 normalDebug(vec3 rawNormal) {
+        vec3 c = normalize(rawNormal) * 0.5 + 0.5;
+        if (!gl_FrontFacing) c = mix(c, vec3(1.0, 0.0, 0.0), 0.6);
+        return vec4(c, 1.0);
+    }
+`;
 
 /** GLSL every 3D stroke's fragment shader shares: the light and the canvas lookup. */
 export const STROKE3D_GLSL = /* glsl */`

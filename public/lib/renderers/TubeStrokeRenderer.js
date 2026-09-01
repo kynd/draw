@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Stroke3DRenderer, STROKE3D_GLSL, shadowMaterial } from './Stroke3DRenderer.js';
+import { Stroke3DRenderer, STROKE3D_GLSL, SHOW_NORMALS_GLSL } from './Stroke3DRenderer.js';
 
 const RADIAL = 14;
 const CAP_LAT = 5;
@@ -154,40 +154,14 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         geometry.computeBoundingSphere();
 
         const mesh = new THREE.Mesh(geometry, this._material(length, seed));
-        mesh.userData.wire = true;
-
-        // Drop shadow: the tube's silhouette as a flat ribbon on the canvas,
-        // shifted down the screen by the spine's height at each sample.
-        const sPos = [], sIdx = [];
-        for (let i = 0; i < n; i++) {
-            const s = ts[i] * length;
-            const { r } = this._radiusAt(def, ts[i], s, seed);
-            const cx = centers[i].x, cy = centers[i].y - centers[i].z * 0.577;
-            const nx = normals[i].x, ny = normals[i].y;
-            sPos.push(cx + nx * r, cy + ny * r, 0.001);
-            sPos.push(cx - nx * r, cy - ny * r, 0.001);
-            if (i > 0) {
-                const b = i * 2;
-                sIdx.push(b - 2, b - 1, b + 1);
-                sIdx.push(b - 2, b + 1, b);
-            }
-        }
-        const sGeometry = new THREE.BufferGeometry();
-        sGeometry.setAttribute('position', new THREE.Float32BufferAttribute(sPos, 3));
-        sGeometry.setIndex(sIdx);
-        sGeometry.computeBoundingSphere();
-        const shadow = new THREE.Mesh(sGeometry, shadowMaterial());
-
-        const group = new THREE.Group();
-        group.add(shadow, mesh);
-        group.userData.samples = centers;
-        group.userData.stats = {
+        mesh.userData.samples = centers;
+        mesh.userData.stats = {
             sampleCount: n,
-            vertexCount: (positions.length + sPos.length) / 3,
-            triangleCount: (indices.length + sIdx.length) / 3,
+            vertexCount: positions.length / 3,
+            triangleCount: indices.length / 3,
             length,
         };
-        return group;
+        return mesh;
     }
 
     _material(length, seed) {
@@ -207,6 +181,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                 uBend: { value: this.bend },
                 uLength: { value: length },
                 uSeed: { value: seed },
+                uShowNormal: { value: this.showNormals ? 1 : 0 },
                 uScreen: { value: new THREE.Vector2(1, 1) },
             },
             vertexShader: /* glsl */`
@@ -240,8 +215,11 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                 varying float vAlong;
                 varying float vAround;
                 varying float vWob;
+                uniform int uShowNormal;
                 ${STROKE3D_GLSL}
+                ${SHOW_NORMALS_GLSL}
                 void main() {
+                    if (uShowNormal == 1) { gl_FragColor = normalDebug(vNormal); return; }
                     vec3 n = normalize(vNormal);
                     float diff = diffuseAt(n);
                     vec3 color;

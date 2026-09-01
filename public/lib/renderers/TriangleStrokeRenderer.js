@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { seededRandom } from '../random.js';
-import { Stroke3DRenderer, STROKE3D_GLSL, shadowMaterial } from './Stroke3DRenderer.js';
+import { Stroke3DRenderer, STROKE3D_GLSL, SHOW_NORMALS_GLSL } from './Stroke3DRenderer.js';
 
 /**
  * A chain of 3D triangles along the spine, flat-shaded, in one of three looks.
@@ -118,31 +118,14 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
         geometry.computeBoundingSphere();
 
         const mesh = new THREE.Mesh(geometry, this._material(seed));
-        mesh.userData.wire = true;
-
-        // Drop shadow: every face flattened onto the canvas, shifted down the
-        // screen by its own height.
-        const sPos = new Float32Array(positions.length);
-        for (let i = 0; i < positions.length; i += 3) {
-            sPos[i] = positions[i];
-            sPos[i + 1] = positions[i + 1] - positions[i + 2] * 0.577;
-            sPos[i + 2] = 0.001;
-        }
-        const sGeometry = new THREE.BufferGeometry();
-        sGeometry.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
-        sGeometry.computeBoundingSphere();
-        const shadow = new THREE.Mesh(sGeometry, shadowMaterial());
-
-        const group = new THREE.Group();
-        group.add(shadow, mesh);
-        group.userData.samples = centers;
-        group.userData.stats = {
+        mesh.userData.samples = centers;
+        mesh.userData.stats = {
             sampleCount: centers.length,
-            vertexCount: positions.length * 2 / 3,
-            triangleCount: positions.length * 2 / 9,
+            vertexCount: positions.length / 3,
+            triangleCount: positions.length / 9,
             length,
         };
-        return group;
+        return mesh;
     }
 
     _material(seed) {
@@ -158,6 +141,7 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
                 uBg: { value: this.background },
                 uBend: { value: this.bend },
                 uSeed: { value: seed },
+                uShowNormal: { value: this.showNormals ? 1 : 0 },
                 uScreen: { value: new THREE.Vector2(1, 1) },
             },
             vertexShader: /* glsl */`
@@ -186,7 +170,9 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
                 varying vec3 vColor;
                 varying vec3 vWorld;
                 varying float vAlong;
+                uniform int uShowNormal;
                 ${STROKE3D_GLSL}
+                ${SHOW_NORMALS_GLSL}
                 float hash21(vec2 p) {
                     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
                 }
@@ -197,6 +183,7 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
                                mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), u.x), u.y);
                 }
                 void main() {
+                    if (uShowNormal == 1) { gl_FragColor = normalDebug(vNormal); return; }
                     vec3 n = normalize(vNormal) * (gl_FrontFacing ? 1.0 : -1.0);
                     float diff = diffuseAt(n);
                     vec3 color;
