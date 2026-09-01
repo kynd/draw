@@ -30,7 +30,7 @@ export class Stroke3DRenderer extends StrokeRenderer {
      *                               pixels over it.
      * @param {number} [opts.wander] Amplitude of the offset from the spine.
      */
-    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.5, wander = 0.05, showNormals = false } = {}) {
+    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.5, wander = 0.1, showNormals = false } = {}) {
         super();
         this.samplesPerUnit = samplesPerUnit;
         this.depth = depth;

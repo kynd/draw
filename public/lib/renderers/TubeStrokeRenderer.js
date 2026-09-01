@@ -269,12 +269,23 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                     float diff = diffuseAt(n);
                     vec3 color;
                     if (uMode == 0) {
-                        // Candy: diagonal stripes, wrapping with the tube's angle.
+                        // Candy: diagonal stripes, wrapping with the tube's angle,
+                        // shaded like glossy plastic. Wrapped diffuse keeps the
+                        // terminator soft, the shadow side and the rim fall back to
+                        // a saturated deep version of the stripe color as if light
+                        // scatters inside the body, and the highlight stays tight
+                        // and white.
                         float k = fract(vAlong * uLength * uStripes + vAround + uSeed * 0.37);
                         int ci = int(floor(k * 4.0));
                         vec3 base = ci == 0 ? uC0 : ci == 1 ? uC1 : ci == 2 ? uC2 : uC3;
-                        color = base * (0.2 + 0.9 * diff)
-                              + vec3(specularAt(n, 70.0)) * 0.9 + vec3(specularAt(n, 10.0)) * 0.3;
+                        vec3 deep = base * base;
+                        float ndl = dot(n, lightDir());
+                        float wrap = clamp((ndl + 0.55) / 1.55, 0.0, 1.0);
+                        color = mix(deep * 0.7, base, wrap);
+                        float rim = pow(1.0 - clamp(n.z, 0.0, 1.0), 2.5);
+                        color += deep * rim * 0.6;
+                        color += vec3(specularAt(n, 90.0)) * 0.85
+                               + vec3(specularAt(n, 12.0)) * 0.15;
                     } else if (uMode == 1) {
                         // Wobble: the gradient runs along the stroke and the wobble
                         // brightens the swells and darkens the waists.
