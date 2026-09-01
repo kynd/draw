@@ -8,9 +8,11 @@ import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
  * object lying over the canvas rather than a flat fill, and the shape rotates
  * around the spine by an angle that depends on the distance from the stroke's
  * end: as the stroke grows, that distance changes everywhere, so the whole mark
- * visibly turns while it is drawn. Rotation is the one deliberate exception to
- * prefix stability; the depth wave keys on distance from the start and holds
- * still.
+ * visibly turns while it is drawn. A seeded offset also pushes the shape
+ * slightly off the spine, in a direction that rotates with the same angle, so
+ * the mark orbits the spine as well as turning. Rotation is the one deliberate
+ * exception to prefix stability; the depth wave and the offset's amplitude key
+ * on distance from the start and hold still.
  *
  * The frame is the 2D spine normal for the in-plane axis and +z for the
  * out-of-plane axis. The 3D strokes carry true normals, so their shared light
@@ -26,13 +28,15 @@ export class Stroke3DRenderer extends StrokeRenderer {
      * @param {number} [opts.zBase]  Height the wave rides on, above the canvas.
      *                               The default holds the spine about 100 CSS
      *                               pixels over it.
+     * @param {number} [opts.wander] Amplitude of the offset from the spine.
      */
-    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.5, showNormals = false } = {}) {
+    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.5, wander = 0.05, showNormals = false } = {}) {
         super();
         this.samplesPerUnit = samplesPerUnit;
         this.depth = depth;
         this.twist = twist;
         this.zBase = zBase;
+        this.wander = wander;
         // Debug view: paint the surface with its normals (xyz as rgb), and tint
         // back-facing pixels red, so winding and normal problems show themselves.
         this.showNormals = showNormals;
@@ -47,7 +51,24 @@ export class Stroke3DRenderer extends StrokeRenderer {
             Math.sin(s * 6.7 + seed * 9.1) * 0.4
         );
         const phaseAt = s => (length - s) * this.twist + seed * 2.399;
-        const centers = samples.map((p, i) => new THREE.Vector3(p.x, p.y, zAt(ts[i] * length)));
+        // The offset from the spine: a seeded wave of arc length sets how far,
+        // and the twist phase sets which way around the spine, so the offset's
+        // direction rotates with the mark while it is drawn.
+        const offAt = s => this.wander * (
+            Math.sin(s * 2.1 + seed * 4.7) * 0.6 +
+            Math.sin(s * 4.3 + seed * 8.3) * 0.4
+        );
+        const centers = samples.map((p, i) => {
+            const s = ts[i] * length;
+            const off = offAt(s);
+            const ang = phaseAt(s);
+            const nrm = normals[i];
+            return new THREE.Vector3(
+                p.x + nrm.x * Math.cos(ang) * off,
+                p.y + nrm.y * Math.cos(ang) * off,
+                zAt(s) + Math.sin(ang) * off
+            );
+        });
         return { centers, normals, tangents, ts, length, phaseAt, seed };
     }
 }
