@@ -57,16 +57,39 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         const positions = [], normalsA = [], along = [], around = [], wobs = [];
         const indices = [];
         const dir = new THREE.Vector3();
+        const nrm = new THREE.Vector3();
 
-        const pushRing = (center, N, phase, r, t, wob) => {
+        // Signed curvature per sample, from the turn between neighboring
+        // segments. Where the bend is tighter than the tube is wide, the ring's
+        // reach toward the bend's center is clamped, so adjacent rings cannot
+        // pass through each other and fold the surface.
+        const innerLimit = new Array(n).fill(Infinity);
+        const innerSide = new Array(n).fill(0);
+        for (let i = 1; i < n - 1; i++) {
+            const ax = centers[i].x - centers[i - 1].x, ay = centers[i].y - centers[i - 1].y;
+            const bx = centers[i + 1].x - centers[i].x, by = centers[i + 1].y - centers[i].y;
+            const turn = Math.atan2(ax * by - ay * bx, ax * bx + ay * by);
+            const ds = (Math.hypot(ax, ay) + Math.hypot(bx, by)) / 2;
+            if (Math.abs(turn) > 1e-5 && ds > 1e-9) {
+                innerLimit[i] = (ds / Math.abs(turn)) * 0.85;
+                innerSide[i] = Math.sign(turn);
+            }
+        }
+        // The end rings stay circular, so the rounded caps seal against them.
+
+        const pushRing = (center, N, phase, r, rInner, side, t, wob) => {
             const base = positions.length / 3;
             for (let j = 0; j <= RADIAL; j++) {
                 const a = j / RADIAL;
                 const theta = a * Math.PI * 2 + phase;
-                dir.copy(N).multiplyScalar(Math.cos(theta))
-                    .addScaledVector(B, Math.sin(theta));
-                positions.push(center.x + dir.x * r, center.y + dir.y * r, center.z + dir.z * r);
-                normalsA.push(dir.x, dir.y, dir.z);
+                const cN = Math.cos(theta), sB = Math.sin(theta);
+                // The half of the ring facing the bend's center uses the
+                // clamped reach; the ellipse's normal is corrected to match.
+                const reach = cN * side > 0 ? rInner : r;
+                dir.copy(N).multiplyScalar(cN * reach).addScaledVector(B, sB * r);
+                nrm.copy(N).multiplyScalar(cN * r / reach).addScaledVector(B, sB).normalize();
+                positions.push(center.x + dir.x, center.y + dir.y, center.z + dir.z);
+                normalsA.push(nrm.x, nrm.y, nrm.z);
                 along.push(t);
                 around.push(a);
                 wobs.push(wob);
@@ -78,7 +101,8 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         for (let i = 0; i < n; i++) {
             const s = ts[i] * length;
             const { r, wob } = this._radiusAt(def, ts[i], s, seed);
-            const base = pushRing(centers[i], normals[i], phaseAt(s), r, ts[i], wob);
+            const rInner = Math.min(r, innerLimit[i]);
+            const base = pushRing(centers[i], normals[i], phaseAt(s), r, rInner, innerSide[i], ts[i], wob);
             if (prevBase >= 0) {
                 for (let j = 0; j < RADIAL; j++) {
                     indices.push(prevBase + j, base + j, base + j + 1);
@@ -228,20 +252,22 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                         float k = fract(vAlong * uLength * uStripes + vAround + uSeed * 0.37);
                         int ci = int(floor(k * 4.0));
                         vec3 base = ci == 0 ? uC0 : ci == 1 ? uC1 : ci == 2 ? uC2 : uC3;
-                        color = base * (0.35 + 0.75 * diff) + vec3(specularAt(n, 70.0)) * 0.9;
+                        color = base * (0.2 + 0.9 * diff)
+                              + vec3(specularAt(n, 70.0)) * 0.9 + vec3(specularAt(n, 10.0)) * 0.3;
                     } else if (uMode == 1) {
                         // Wobble: the gradient runs along the stroke and the wobble
                         // brightens the swells and darkens the waists.
                         vec3 g = mix(uColorA, uColorB, vAlong);
                         g = mix(g * 0.5, g * 1.35, vWob);
-                        color = g * (0.35 + 0.75 * diff) + vec3(specularAt(n, 24.0)) * 0.3;
+                        color = g * (0.2 + 0.9 * diff)
+                              + vec3(specularAt(n, 24.0)) * 0.45 + vec3(specularAt(n, 8.0)) * 0.2;
                     } else {
                         // Metal: the canvas is the environment map.
                         vec3 r = reflect(vec3(0.0, 0.0, -1.0), n);
                         vec2 suv = clamp(screenUv() + r.xy * uBend, 0.001, 0.999);
                         vec3 env = texture2D(uBg, suv).rgb;
-                        color = env * uTint * (0.45 + 0.65 * diff)
-                              + vec3(specularAt(n, 80.0)) * 1.1;
+                        color = env * uTint * (0.3 + 0.85 * diff)
+                              + vec3(specularAt(n, 80.0)) * 1.1 + vec3(specularAt(n, 12.0)) * 0.3;
                     }
                     gl_FragColor = vec4(color, 1.0);
                 }

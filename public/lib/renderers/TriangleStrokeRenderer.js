@@ -188,20 +188,20 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
                     float diff = diffuseAt(n);
                     vec3 color;
                     if (uMode == 0) {
-                        color = vColor * (0.4 + 0.7 * diff) + vec3(specularAt(n, 30.0)) * 0.25;
+                        color = vColor * (0.25 + 0.9 * diff) + vec3(specularAt(n, 30.0)) * 0.4;
                     } else if (uMode == 1) {
                         // Grain: a stripe field warped by noise, like cut wood.
                         float warp = noise2(vWorld.xy * 3.0 + uSeed);
                         float band = 0.5 + 0.5 * sin(vWorld.x * 26.0 + vWorld.y * 9.0 + warp * 10.0 + uSeed * 3.0);
                         band = pow(band, 1.6);
-                        color = mix(uColorA, uColorB, band) * (0.4 + 0.7 * diff)
-                              + vec3(specularAt(n, 20.0)) * 0.15;
+                        color = mix(uColorA, uColorB, band) * (0.25 + 0.9 * diff)
+                              + vec3(specularAt(n, 20.0)) * 0.3;
                     } else {
                         vec3 r = reflect(vec3(0.0, 0.0, -1.0), n);
                         vec2 suv = clamp(screenUv() + r.xy * uBend, 0.001, 0.999);
                         vec3 env = texture2D(uBg, suv).rgb;
-                        color = env * uTint * (0.45 + 0.65 * diff)
-                              + vec3(specularAt(n, 80.0)) * 1.0;
+                        color = env * uTint * (0.3 + 0.85 * diff)
+                              + vec3(specularAt(n, 80.0)) * 1.0 + vec3(specularAt(n, 12.0)) * 0.3;
                     }
                     gl_FragColor = vec4(color, 1.0);
                 }
