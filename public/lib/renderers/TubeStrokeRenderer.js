@@ -77,7 +77,26 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         }
         // The end rings stay circular, so the rounded caps seal against them.
 
-        const pushRing = (center, N, phase, r, rInner, side, t, wob) => {
+        // The radius per sample, and its slope along the spine. A swelling
+        // radius tilts the surface normal backward along the tangent by that
+        // slope; without the tilt the shading cannot show the swell at all.
+        const rs = new Array(n), wobArr = new Array(n);
+        for (let i = 0; i < n; i++) {
+            const { r, wob } = this._radiusAt(def, ts[i], ts[i] * length, seed);
+            rs[i] = r;
+            wobArr[i] = wob;
+        }
+        const tangs = [], drds = new Array(n).fill(0);
+        for (let i = 0; i < n; i++) {
+            const i0 = Math.max(i - 1, 0), i1 = Math.min(i + 1, n - 1);
+            const dv = centers[i1].clone().sub(centers[i0]);
+            const dsLen = dv.length() || 1;
+            tangs.push(dv.divideScalar(dsLen));
+            // The end rings keep untilted normals, so the caps seal cleanly.
+            if (i > 0 && i < n - 1) drds[i] = (rs[i1] - rs[i0]) / dsLen;
+        }
+
+        const pushRing = (center, N, T, slope, phase, r, rInner, side, t, wob) => {
             const base = positions.length / 3;
             for (let j = 0; j <= RADIAL; j++) {
                 const a = j / RADIAL;
@@ -87,7 +106,8 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                 // clamped reach; the ellipse's normal is corrected to match.
                 const reach = cN * side > 0 ? rInner : r;
                 dir.copy(N).multiplyScalar(cN * reach).addScaledVector(B, sB * r);
-                nrm.copy(N).multiplyScalar(cN * r / reach).addScaledVector(B, sB).normalize();
+                nrm.copy(N).multiplyScalar(cN * r / reach).addScaledVector(B, sB)
+                    .addScaledVector(T, -slope).normalize();
                 positions.push(center.x + dir.x, center.y + dir.y, center.z + dir.z);
                 normalsA.push(nrm.x, nrm.y, nrm.z);
                 along.push(t);
@@ -100,9 +120,10 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         let prevBase = -1;
         for (let i = 0; i < n; i++) {
             const s = ts[i] * length;
-            const { r, wob } = this._radiusAt(def, ts[i], s, seed);
+            const r = rs[i], wob = wobArr[i];
             const rInner = Math.min(r, innerLimit[i]);
-            const base = pushRing(centers[i], normals[i], phaseAt(s), r, rInner, innerSide[i], ts[i], wob);
+            const base = pushRing(centers[i], normals[i], tangs[i], drds[i],
+                phaseAt(s), r, rInner, innerSide[i], ts[i], wob);
             if (prevBase >= 0) {
                 for (let j = 0; j < RADIAL; j++) {
                     indices.push(prevBase + j, base + j + 1, base + j);
