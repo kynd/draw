@@ -83,20 +83,24 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
                 // The background is picked up through a noise-bent lens: taps
                 // displaced by a 2D noise field, with no relation to the
                 // stroke's direction, so what lies underneath seeps into the
-                // wash in blotches rather than streaks.
+                // wash in blotches rather than streaks. Wetter blotches bend
+                // the lens farther, and one tap reads the sharp background, so
+                // edges underneath grow warped tendrils instead of staying put.
                 vec2 nuv = suv * uScreen / 48.0;
+                float blot = fbm(nuv * 0.6 + uSeed * 11.0);
+                float amp = uBleed * (0.35 + 1.0 * blot);
                 vec2 disp1 = vec2(fbm(nuv + uSeed * 3.7) - 0.5,
                                   fbm(nuv + uSeed * 7.9 + 31.0) - 0.5);
                 vec2 disp2 = vec2(fbm(nuv * 2.3 + uSeed * 5.1 + 63.0) - 0.5,
                                   fbm(nuv * 2.3 + uSeed * 9.3 + 17.0) - 0.5);
                 vec2 px = 1.0 / uScreen;
                 vec3 soft = (texture2D(uBlurred, suv).rgb
-                    + texture2D(uBlurred, clamp(suv + disp1 * uBleed * 64.0 * px, 0.001, 0.999)).rgb
-                    + texture2D(uBlurred, clamp(suv + disp2 * uBleed * 26.0 * px, 0.001, 0.999)).rgb) / 3.0;
+                    + texture2D(uBlurred, clamp(suv + disp1 * amp * 220.0 * px, 0.001, 0.999)).rgb
+                    + texture2D(uBg, clamp(suv + disp2 * amp * 90.0 * px, 0.001, 0.999)).rgb * 1.2
+                    + texture2D(uBg, clamp(suv + disp1 * amp * 110.0 * px, 0.001, 0.999)).rgb * 0.8) / 4.0;
 
                 // Where the blotch noise runs wet, the pigment thins and more
                 // of the picked-up background shows through.
-                float blot = fbm(nuv * 0.6 + uSeed * 11.0);
                 float strength = uPigment * (0.72 + 0.42 * grain);
                 strength *= 1.0 - uBleed * 0.55 * smoothstep(0.35, 0.8, blot);
                 vec3 wash = mix(soft, uColor, clamp(strength, 0.0, 1.0));

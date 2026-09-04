@@ -217,8 +217,8 @@ Reads a pre-blurred copy of the background rather than gathering a neighbourhood
 Takes `blurred` alongside `background`, plus `pigment`, `rim`, `granulation`, `edge` and `bleed`. The rim darkens just inside the boundary, where water dries back and leaves pigment.
 <div class="jp">`background` に加えて `blurred` を受け取り、さらに `pigment`、`rim`、`granulation`、`edge`、`bleed` を取ります。rimは輪郭のすぐ内側を濃くします。水が引きながら乾き、そこに顔料を残すからです。</div>
 
-`bleed` picks the background up through taps displaced by a 2D noise field, unrelated to the stroke's direction, so what lies underneath seeps into the wash in blotches rather than streaks. Where the blotch noise runs wet, the pigment thins and more background shows through.
-<div class="jp">`bleed` は、ストロークの向きと無関係な2Dノイズ場でずらしたサンプリングで背景を拾います。そのため、下にあるものは筋ではなくにじみとして水彩に染み込みます。にじみのノイズが濡れているところでは顔料が薄まり、背景がより透けます。</div>
+`bleed` picks the background up through taps displaced by a 2D noise field, unrelated to the stroke's direction, so what lies underneath seeps into the wash in blotches rather than streaks. Wetter blotches bend the taps farther, and some taps read the sharp background, so edges underneath grow warped tendrils instead of staying put. Where the blotch noise runs wet, the pigment thins and more background shows through.
+<div class="jp">`bleed` は、ストロークの向きと無関係な2Dノイズ場でずらしたサンプリングで背景を拾います。そのため、下にあるものは筋ではなくにじみとして水彩に染み込みます。濡れたにじみほどサンプリングは遠くへ曲がり、一部のサンプリングは鮮明な背景を読むため、下にあるエッジはその場に留まらず、ゆがんだ触手を伸ばします。にじみのノイズが濡れているところでは顔料が薄まり、背景がより透けます。</div>
 
 ### SmearStrokeRenderer
 
