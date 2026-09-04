@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stroke splitting — cuts at abrupt turns</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+  <style>
+    .canvas-wrap { cursor: crosshair; touch-action: none; }
+  </style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Draw</span></div>
+      <div class="dp-note">Draw on the canvas with the mouse. Squiggle fast and zigzaggy; every abrupt turn starts a new stroke.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Splitting</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Angle</span>
+        <input id="angle" class="dp-range" type="range" min="30" max="170" step="1" value="100" />
+        <span class="dp-val" id="angle-val">100</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Window</span>
+        <input id="window" class="dp-range" type="range" min="0.02" max="0.15" step="0.01" value="0.05" />
+        <span class="dp-val" id="window-val">0.05</span>
+      </div>
+      <div class="dp-btn-row">
+        <button id="cuts-btn" class="dp-toggle active">Cuts</button>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Smoothing</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Span</span>
+        <input id="span" class="dp-range" type="range" min="0.05" max="0.6" step="0.01" value="0.20" />
+        <span class="dp-val" id="span-val">0.20</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Strokes</span></div>
+      <div class="dp-note">The drawn line is gray; each split stroke is smoothed on its own, in an alternating color.</div>
+      <div class="dp-stats" id="stats"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

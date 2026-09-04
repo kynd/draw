@@ -39,4 +39,9 @@ John Hobby's curve through the knots, the interpolation METAFONT draws paths wit
 It swings wider through corners than the natural spline. The natural spline minimizes bending energy along the whole curve, while Hobby's construction aims for locally even curvature, which rounds a corner into a fuller arc.
 <div class="jp">角ではnaturalスプラインより大きく膨らみます。naturalスプラインは曲線全体の曲げエネルギーを最小化しますが、Hobbyの構築は局所的に均一な曲率を目指すため、角はより丸いふくらみを持った弧になります。</div>
 
+## splitByTurn
+
+Splits a point list into separate runs wherever the direction turns more than `angle` radians. The turn at a point compares the incoming and outgoing directions, each measured over `span` of arc rather than one segment, so the jitter of dense points does not trigger cuts. A cut cannot follow another within `span` of arc, so one corner yields one cut, and each run shares its boundary point with the next, so the pieces stay connected end to end.
+<div class="jp">向きが`angle`ラジアンを超えて変わる場所で、点の列を別々の連なりに分割します。ある点での回転は入る方向と出る方向を比べます。どちらも1セグメントではなく`span`の弧長で測るため、密集した点のジッタでは分割は起きません。`span`の弧長の内側では次の分割は起きないため、ひとつの角はちょうど1回だけ分割されます。各連なりは境界の点を次の連なりと共有するので、断片は端と端でつながったままです。</div>
+
 </div>

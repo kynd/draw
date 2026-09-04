@@ -252,6 +252,43 @@ export function bSpline(knots, samplesPerSegment = 16, closed = false) {
     return out;
 }
 
+/**
+ * Splits a point list into separate runs wherever the direction turns more than
+ * `angle` radians. The turn at a point compares the incoming and outgoing
+ * directions, each measured over `span` of arc rather than one segment, so the
+ * jitter of dense points does not trigger cuts. A cut cannot follow another
+ * within `span` of arc, so one corner yields one cut, and each run shares its
+ * boundary point with the next, so the pieces stay connected end to end.
+ */
+export function splitByTurn(points, { angle = Math.PI * 0.55, span = 0.05 } = {}) {
+    if (points.length < 3) return [points.slice()];
+    const arc = [0];
+    for (let i = 1; i < points.length; i++) {
+        arc.push(arc[i - 1] + Math.hypot(
+            points[i].x - points[i - 1].x, points[i].y - points[i - 1].y));
+    }
+    const runs = [];
+    let start = 0;
+    let lastCutArc = -Infinity;
+    let j = 0, k = 0;
+    for (let i = 1; i < points.length - 1; i++) {
+        while (arc[i] - arc[j + 1] >= span) j++;
+        if (k < i) k = i;
+        while (k < points.length - 1 && arc[k] - arc[i] < span) k++;
+        if (arc[i] - arc[j] < span * 0.5 || arc[k] - arc[i] < span * 0.5) continue;
+        const ax = points[i].x - points[j].x, ay = points[i].y - points[j].y;
+        const bx = points[k].x - points[i].x, by = points[k].y - points[i].y;
+        const turn = Math.abs(Math.atan2(ax * by - ay * bx, ax * bx + ay * by));
+        if (turn >= angle && arc[i] - lastCutArc >= span) {
+            runs.push(points.slice(start, i + 1));
+            start = i;
+            lastCutArc = arc[i];
+        }
+    }
+    runs.push(points.slice(start));
+    return runs;
+}
+
 function sampleLine(a, b, samples) {
     return Array.from({ length: samples + 1 }, (_, k) => a.clone().lerp(b, k / samples));
 }

@@ -63,6 +63,29 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
+  <section class="demo-section" id="splitting">
+    <div class="demo-header">
+      <h2>Stroke splitting</h2>
+      <a href={`${base}/demos/stroke-splitting/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/stroke-splitting/index.html?embedded`} title="Stroke splitting" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>A drawn line split into separate strokes wherever its direction turns more than a threshold angle. Fast zigzag squiggling becomes a run of short strokes instead of one folded line. Each piece is smoothed on its own, so a corner ends one curve and starts the next instead of being rounded away.</p>
+      <div class="jp">向きがしきい値の角度を超えて変わる場所で、描かれた線を別々のストロークに分割します。速いジグザグの走り書きは、折りたたまれた1本の線ではなく、短いストロークの連なりになります。各断片は個別にスムージングされるため、角は丸められて消えるのではなく、ひとつの曲線を終え、次の曲線を始めます。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Turn over a window:</strong> The turn at a point compares the incoming and outgoing directions, each measured over a fixed arc window rather than one segment, so the jitter of dense points does not trigger cuts.</p>
+        <div class="jp"><strong>窓で測る回転：</strong>ある点での回転は、入る方向と出る方向を比べます。どちらも1セグメントではなく固定の弧長の窓で測るため、密集した点のジッタでは分割は起きません。</div>
+
+        <p><strong>One cut per corner:</strong> A cut cannot follow another within the window's arc, so a sharp corner yields exactly one cut. The boundary point is shared by both pieces, so the strokes stay connected end to end.</p>
+        <div class="jp"><strong>角ごとに1回の分割：</strong>窓の弧長の内側では次の分割は起きないため、鋭い角はちょうど1回だけ分割されます。境界の点は両方の断片が共有するので、ストロークは端と端でつながったままです。</div>
+      </details>
+    </div>
+  </section>
+
   <section class="demo-section" id="smoothed-brush">
     <div class="demo-header">
       <h2>Smoothed brush</h2>
