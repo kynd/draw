@@ -59,10 +59,11 @@ const registry = [
             bristles: v.bristles, rough: v.rough, dry: v.dry,
         }) },
     { id: 'watercolor', kind: 'stroke',
-        params: [{ key: 'pigment', min: 0.2, max: 1 }, { key: 'rim', min: 0, max: 1 }],
+        params: [{ key: 'pigment', min: 0.2, max: 1 }, { key: 'rim', min: 0, max: 1 },
+            { key: 'bleed', min: 0, max: 1 }],
         make: (v, ctx) => new WatercolorStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, background: ctx.texture, blurred: ctx.texture,
-            pigment: v.pigment, rim: v.rim,
+            pigment: v.pigment, rim: v.rim, bleed: v.bleed,
         }) },
     { id: 'wet-brush', kind: 'stroke',
         params: [{ key: 'drag', min: 10, max: 160 }, { key: 'pigment', min: 0.2, max: 1 }],

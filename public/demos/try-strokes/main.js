@@ -74,7 +74,7 @@ const registry = [
         id: 'oil', label: 'Oil',
         params: [width(0.1, 0.04, 0.2),
             { key: 'paint', label: 'Coverage', min: 0.3, max: 1, step: 0.02, value: 1 },
-            { key: 'drag', label: 'Drag', min: 0, max: 160, step: 5, value: 25 },
+            { key: 'drag', label: 'Drag', min: 0, max: 160, step: 5, value: 45 },
             { key: 'noise', label: 'Ridges', min: 0, max: 1, step: 0.02, value: 0.5 }],
         make: (v, ctx) => new OilStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, background: ctx.texture,

@@ -214,8 +214,11 @@ Three renderers that read what is underneath and move it. All take a `background
 Reads a pre-blurred copy of the background rather than gathering a neighbourhood per fragment. A thirty pixel radius costs hundreds of taps on every covered fragment, while the same result is one texel read against a copy blurred once for the whole frame.
 <div class="jp">フラグメントごとに周辺を集めるのではなく、あらかじめぼかした背景のコピーを読みます。半径30ピクセルなら覆われた全フラグメントで数百回のサンプリングが必要ですが、同じ結果はフレーム全体で一度ぼかしたコピーを1テクセル読むだけで得られます。</div>
 
-Takes `blurred` alongside `background`, plus `pigment`, `rim`, `granulation` and `edge`. The rim darkens just inside the boundary, where water dries back and leaves pigment.
-<div class="jp">`background` に加えて `blurred` を受け取り、さらに `pigment`、`rim`、`granulation`、`edge` を取ります。rimは輪郭のすぐ内側を濃くします。水が引きながら乾き、そこに顔料を残すからです。</div>
+Takes `blurred` alongside `background`, plus `pigment`, `rim`, `granulation`, `edge` and `bleed`. The rim darkens just inside the boundary, where water dries back and leaves pigment.
+<div class="jp">`background` に加えて `blurred` を受け取り、さらに `pigment`、`rim`、`granulation`、`edge`、`bleed` を取ります。rimは輪郭のすぐ内側を濃くします。水が引きながら乾き、そこに顔料を残すからです。</div>
+
+`bleed` picks the background up through taps displaced by a 2D noise field, unrelated to the stroke's direction, so what lies underneath seeps into the wash in blotches rather than streaks. Where the blotch noise runs wet, the pigment thins and more background shows through.
+<div class="jp">`bleed` は、ストロークの向きと無関係な2Dノイズ場でずらしたサンプリングで背景を拾います。そのため、下にあるものは筋ではなくにじみとして水彩に染み込みます。にじみのノイズが濡れているところでは顔料が薄まり、背景がより透けます。</div>
 
 ### SmearStrokeRenderer
 
@@ -264,8 +267,8 @@ Refraction offsets the lookup along the normal, so the bead acts as a lens and d
 Thick paint: the smear's drag under a dominant paint color, lit through the height field. The dragged background is mixed under `color` at the `paint` ratio, thinner where the height field dips, and the relief is lit with diffuse and specular terms from a fixed light.
 <div class="jp">厚塗りの絵の具です。smearの引きずりを支配的な絵の具の色の下で行い、高さフィールドを通してライティングします。引きずられた背景は`paint`の比率で`color`の下に混ぜられ、高さフィールドが低い場所では層が薄くなります。起伏は固定光源からの拡散反射と鏡面反射で照らされます。</div>
 
-The drag and the ridges share one lane noise, so the paint that moved furthest also sits highest. Takes `background`, `drag`, `paint`, `gloss`, and `shininess`, plus the height field options.
-<div class="jp">引きずりと畝はひとつのレーンノイズを共有するため、最も動いた絵の具が最も高く盛り上がります。`background`、`drag`、`paint`、`gloss`、`shininess`に加え、高さフィールドのオプションを受け取ります。</div>
+The drag and the ridges share one lane noise, so the paint that moved furthest also sits highest. Coverage varies by the same lanes: loaded lanes lay solid paint, dug lanes carry the dragged background through nearly bare. Takes `background`, `drag`, `paint`, `gloss`, and `shininess`, plus the height field options.
+<div class="jp">引きずりと畝はひとつのレーンノイズを共有するため、最も動いた絵の具が最も高く盛り上がります。被覆も同じレーンに従って変わります。絵の具を含んだレーンは塗りつぶし、掘れたレーンは引きずられた背景をほとんど素のまま運びます。`background`、`drag`、`paint`、`gloss`、`shininess`に加え、高さフィールドのオプションを受け取ります。</div>
 
 ## Shaped strokes
 

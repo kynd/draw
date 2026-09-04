@@ -16,6 +16,7 @@ const readout = document.getElementById('readout');
 const ctrl = {
     pigment: document.getElementById('pigment'),
     rim: document.getElementById('rim'),
+    bleed: document.getElementById('bleed'),
     drag: document.getElementById('drag'),
     variation: document.getElementById('variation'),
     width: document.getElementById('width'),
@@ -60,6 +61,7 @@ function makeRenderer(index) {
             ...shared,
             pigment: parseFloat(ctrl.pigment.value),
             rim: parseFloat(ctrl.rim.value),
+            bleed: parseFloat(ctrl.bleed.value),
         });
     }
     if (index === 1) {

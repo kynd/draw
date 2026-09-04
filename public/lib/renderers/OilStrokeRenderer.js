@@ -9,7 +9,9 @@ const TAPS = 10;
  *
  * The drag and the relief share one lane noise. The lanes that drag the background
  * furthest are also the lanes that ridge highest, which is what a loaded brush does:
- * where the most paint moved, the most paint sits.
+ * where the most paint moved, the most paint sits. Coverage varies by the same
+ * lanes: loaded lanes lay solid paint, dug lanes carry the dragged background
+ * through nearly bare.
  */
 export class OilStrokeRenderer extends HeightFieldStrokeRenderer {
     /**
@@ -24,7 +26,7 @@ export class OilStrokeRenderer extends HeightFieldStrokeRenderer {
     constructor({
         color = '#803020',
         background = null,
-        drag = 25,
+        drag = 45,
         paint = 1.0,
         gloss = 0.4,
         shininess = 48,
@@ -85,9 +87,15 @@ export class OilStrokeRenderer extends HeightFieldStrokeRenderer {
                 }
                 vec3 dragged = acc / wsum;
 
-                // Paint dominates. The dragged background survives only in the
-                // crevices, where the layer is thinnest.
-                float coat = clamp(uPaint * (0.94 + 0.08 * lane) - 0.10 * (1.0 - clamp(height, 0.0, 1.0)), 0.0, 1.0);
+                // Coverage varies by bristle lane, like the wet brush: loaded
+                // lanes lay solid paint, dug lanes carry the dragged background
+                // through nearly bare, and the crevices thin the coat further.
+                // The coverage lanes are narrower and sharper than the relief's,
+                // so the bare streaks read as individual bristles.
+                float laneC = fbm(vec2(vUv.x * uLength * uStretch * 1.6,
+                    vCross * uAcross * 3.0 + uSeed * 23.0));
+                float coat = clamp(uPaint * (0.15 + 0.95 * smoothstep(0.32, 0.62, laneC))
+                    - 0.15 * (1.0 - clamp(height, 0.0, 1.0)), 0.0, 1.0);
                 vec3 pigment = mix(dragged, uColor, coat);
 
                 vec3 light = normalize(vec3(-0.4, -0.75, 0.55));
