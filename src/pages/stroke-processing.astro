@@ -109,6 +109,26 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
+  <section class="demo-section" id="split-brush">
+    <div class="demo-header">
+      <h2>Split brush</h2>
+      <a href={`${base}/demos/split-brush/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/split-brush/index.html?embedded`} title="Split brush" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The stroke splitting, drawn as strokes instead of lines: each split piece feeds the brush renderer as its own stroke, with its own taper, ragged ends, and colors. Fast zigzag squiggling lays down a run of separate brush marks in one gesture.</p>
+      <div class="jp">ストローク分割を、線ではなくストロークとして描いたものです。分割された各断片は、それぞれのテーパー、raggedな端、色を持つ独立したストロークとしてbrushレンダラに渡されます。速いジグザグの走り書きは、ひとつのジェスチャーで別々の筆の跡の連なりを置きます。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Per-piece processing:</strong> Each piece is resampled and smoothed on its own before rendering, so a corner ends one tapered stroke and starts the next instead of being rounded away.</p>
+        <div class="jp"><strong>断片ごとの処理：</strong>各断片は描画の前に個別に再サンプリングされ、滑らかにされます。そのため角は丸められて消えるのではなく、テーパーを持つひとつのストロークを終え、次を始めます。</div>
+      </details>
+    </div>
+  </section>
+
   <section class="demo-section" id="blobs">
     <div class="demo-header">
       <h2>Blob drawing</h2>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Split brush — abrupt turns start new strokes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+  <style>
+    .canvas-wrap { cursor: crosshair; touch-action: none; }
+  </style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Draw</span></div>
+      <div class="dp-note">Draw on the canvas with the mouse. Squiggle fast and zigzaggy; every abrupt turn starts a new stroke.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Splitting</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Angle</span>
+        <input id="angle" class="dp-range" type="range" min="30" max="170" step="1" value="100" />
+        <span class="dp-val" id="angle-val">100</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Window</span>
+        <input id="window" class="dp-range" type="range" min="0.02" max="0.15" step="0.01" value="0.05" />
+        <span class="dp-val" id="window-val">0.05</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Stroke</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Span</span>
+        <input id="span" class="dp-range" type="range" min="0.05" max="0.6" step="0.01" value="0.20" />
+        <span class="dp-val" id="span-val">0.20</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Width</span>
+        <input id="width" class="dp-range" type="range" min="0.02" max="0.16" step="0.005" value="0.090" />
+        <span class="dp-val" id="width-val">0.090</span>
+      </div>
+      <div class="dp-btn-row">
+        <button id="random-btn" class="dp-btn secondary">Randomize colors</button>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Overlays</span></div>
+      <div class="dp-btn-row">
+        <button id="wire-btn" class="dp-toggle">Wireframe</button>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-section collapsed">
+        <div class="dp-section-hd">
+          <span class="dp-chevron"></span>
+          <span class="dp-title">Geometry</span>
+        </div>
+        <div class="dp-section-body"><div id="readout"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
