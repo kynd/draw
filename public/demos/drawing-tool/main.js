@@ -297,7 +297,6 @@ const board = new DrawingBoard(stage);
 const recorder = new StrokeRecorder();
 
 function buildMark(path, points, seed) {
-    maybeAutoReroll(points);
     const useSeed = state.seedOverride ?? seed;
     const ctx = {
         colorA: state.colorA, colorB: state.colorB, colors: state.colors,
@@ -332,30 +331,18 @@ function buildMark(path, points, seed) {
 }
 
 // Auto randomize: with the toggle on, the colors and the whole tool (width,
-// parameters, pressure sensitivity) reroll on every release, and again each
-// time the pen travels the set number of pixels within a stroke.
+// parameters, pressure sensitivity) reroll on every release. The tool comes
+// from a step along the trail, so a dialed-back history includes what auto
+// mode used.
 let autoRandom = false;
-let autoPx = 200;
-let strokeRerollLen = 0;
 
 function autoReroll() {
     const hueValue = Math.floor(Math.random() * 128);
-    const toolValue = Math.floor(Math.random() * 128);
     dialHue.set(hueValue, false);
-    dialTool.set(toolValue, false);
     newPalette(hueValue / 127 * 360);
-    rerollTool(toolValue);
+    stepTrail(1);
     refreshPreview();
     syncPane();
-}
-
-function maybeAutoReroll(points) {
-    if (!autoRandom || replaying) return;
-    const lengthPx = pathArcLength(points) * PIXELS_PER_UNIT;
-    if (lengthPx - strokeRerollLen >= autoPx) {
-        strokeRerollLen = lengthPx;
-        autoReroll();
-    }
 }
 
 const cycle = setupDrawCycle({
@@ -363,7 +350,6 @@ const cycle = setupDrawCycle({
     canvas: document.getElementById('canvas'),
     build: buildMark,
     onCommit: (points, seed) => {
-        strokeRerollLen = 0;
         if (autoRandom && !replaying) autoReroll();
         if (replaying) return;
         recorder.add({
@@ -394,14 +380,47 @@ function newPalette(hue, { keepColorA = false } = {}) {
 const toolValues = {};
 let toolIndex = 0;
 
-function rerollTool(widthValue) {
-    state.widthPx = 2 + widthValue / 127 * 58;
-    toolIndex = Math.floor(Math.random() * registry.length);
-    state.tool = registry[toolIndex];
-    state.values = randomValues(state.tool);
-    toolValues[state.tool.id] = state.values;
-    // Pressure can widen the stroke by up to three times at full sensitivity.
-    state.sens = Math.random() * 2;
+// The tool dial walks a trail of rolled tools: the current one with ten
+// remembered on each side, so passing a tool over and dialing back finds the
+// same one, with the width, parameters, and pressure sensitivity it was
+// rolled with. Each step drops the entry on the far end behind and rolls a
+// fresh one onto the end ahead.
+const TRAIL_SIDE = 10;
+
+function rollEntry() {
+    const tool = registry[Math.floor(Math.random() * registry.length)];
+    return {
+        tool,
+        values: randomValues(tool),
+        widthPx: 2 + Math.random() * 58,
+        // Pressure can widen the stroke by up to three times at full sensitivity.
+        sens: Math.random() * 2,
+    };
+}
+
+const trail = Array.from({ length: TRAIL_SIDE * 2 + 1 }, rollEntry);
+
+function applyRoll(entry) {
+    state.tool = entry.tool;
+    state.values = entry.values;
+    state.widthPx = entry.widthPx;
+    state.sens = entry.sens;
+    toolIndex = registry.indexOf(entry.tool);
+    toolValues[entry.tool.id] = entry.values;
+}
+
+function stepTrail(steps) {
+    // Adjusted width, parameters, and sensitivity stay with the entry, so the
+    // trail remembers the tool as it was left, not as it was rolled.
+    trail[TRAIL_SIDE] = {
+        tool: state.tool, values: state.values,
+        widthPx: state.widthPx, sens: state.sens,
+    };
+    for (let i = 0; i < Math.abs(steps); i++) {
+        if (steps > 0) { trail.shift(); trail.push(rollEntry()); }
+        else { trail.pop(); trail.unshift(rollEntry()); }
+    }
+    applyRoll(trail[TRAIL_SIDE]);
 }
 
 function toolLabel(entry) {
@@ -496,9 +515,16 @@ const hueLatch = new FrameLatch(v => {
     newPalette(v / 127 * 360);
     refreshPreview();
 });
+// The dial's range is quantized into buckets; crossing into a new bucket
+// steps the trail by the difference, so turning back retraces the same tools.
+const TOOL_STEP = 6;
+let toolBucket = Math.round(48 / TOOL_STEP);
 const toolLatch = new FrameLatch(v => {
     if (advancedOn) return;
-    rerollTool(v);
+    const bucket = Math.round(v / TOOL_STEP);
+    if (bucket === toolBucket) return;
+    stepTrail(bucket - toolBucket);
+    toolBucket = bucket;
     refreshPreview();
 });
 
@@ -543,15 +569,16 @@ function clearAll() {
     board.clear(background);
     recorder.begin(background);
     for (let i = 0; i < 3; i++) {
-        rerollTool(Math.floor(Math.random() * 128));
+        applyRoll(rollEntry());
         const dark = state.colors;
         state.colorA = dark[Math.floor(Math.random() * dark.length)];
         state.colorB = dark[Math.floor(Math.random() * dark.length)];
         cycle.feed(scatterPath(stage.extentX, stage.extentY), true);
     }
-    // Back to what the dials say.
+    // Back to what the dials say: the palette from the hue dial, the tool
+    // from the trail's current entry.
     newPalette(dialHue.value / 127 * 360);
-    rerollTool(dialTool.value);
+    applyRoll(trail[TRAIL_SIDE]);
     refreshPreview();
 }
 
@@ -582,7 +609,6 @@ function setReplayUi(on) {
     recordBtn.style.display = hidden;
     guideBtn.style.display = hidden;
     advBtn.style.display = hidden;
-    autoPanel.style.display = on || !autoRandom ? 'none' : '';
     guidePanel.style.display = on || !guideMesh ? 'none' : '';
     sidePane.style.display = on || !advancedOn ? 'none' : '';
     // The preview box lives in the scene, so it would be captured into the
@@ -635,15 +661,9 @@ clearBtn.addEventListener('click', () => {
 });
 
 const autoBtn = document.getElementById('auto-btn');
-const autoPanel = document.getElementById('auto-panel');
 autoBtn.addEventListener('click', () => {
     autoRandom = !autoRandom;
     autoBtn.classList.toggle('active', autoRandom);
-    autoPanel.style.display = autoRandom ? '' : 'none';
-});
-document.getElementById('auto-px').addEventListener('input', e => {
-    autoPx = parseFloat(e.target.value);
-    document.getElementById('auto-px-val').textContent = autoPx;
 });
 
 // ---------------------------------------------------------------------------
@@ -982,7 +1002,7 @@ stage.onResize(() => {
 
 // ---------------------------------------------------------------------------
 newPalette(dialHue.value / 127 * 360);
-rerollTool(dialTool.value);
+applyRoll(trail[TRAIL_SIDE]);
 positionPreview();
 // The first layout pass can land after init, when the stage still has no
 // size. A scatter drawn then collapses to a point and records a degenerate
