@@ -88,6 +88,14 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         const knots = resampleEvery(points, 0.06);
         const path = knots.length >= 3 ? catmullRomSpline(knots, 6) : points;
         if (path.length < 2) return null;
+        // A path with no extent (all points coincident, as a replay's first few
+        // points can be) would make the renderers' arc-length sampling divide
+        // by zero. There is nothing to draw yet.
+        let arc = 0;
+        for (let i = 1; i < path.length; i++) {
+            arc += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
+        }
+        if (arc < 1e-6) return null;
         return build(path, points, seed);
     }
 

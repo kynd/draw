@@ -480,11 +480,11 @@ function refreshPreview() {
     }
     if (mark) {
         mark.mesh.position.z = 0.21;
-        mark.mesh.visible = !uiHidden;
+        mark.mesh.visible = !uiHidden && !replaying;
         stage.add(mark.mesh);
         previewMark = mark;
     }
-    preview.visible = !uiHidden;
+    preview.visible = !uiHidden && !replaying;
     stage.draw();
 }
 
@@ -585,6 +585,10 @@ function setReplayUi(on) {
     autoPanel.style.display = on || !autoRandom ? 'none' : '';
     guidePanel.style.display = on || !guideMesh ? 'none' : '';
     sidePane.style.display = on || !advancedOn ? 'none' : '';
+    // The preview box lives in the scene, so it would be captured into the
+    // replay's canvas, and into a recording of it.
+    preview.visible = !on && !uiHidden;
+    if (previewMark) previewMark.mesh.visible = !on && !uiHidden;
     updateGuideVisibility();
 }
 
@@ -799,8 +803,8 @@ let uiHidden = false;
 function setUiHidden(hidden) {
     uiHidden = hidden;
     document.getElementById('layout').classList.toggle('dp-ui-hidden', hidden);
-    preview.visible = !hidden;
-    if (previewMark) previewMark.mesh.visible = !hidden;
+    preview.visible = !hidden && !replaying;
+    if (previewMark) previewMark.mesh.visible = !hidden && !replaying;
     stage.draw();
 }
 {
@@ -980,6 +984,9 @@ stage.onResize(() => {
 newPalette(dialHue.value / 127 * 360);
 rerollTool(dialTool.value);
 positionPreview();
-clearAll();
-// The first layout pass can land after init; refresh the preview once it has.
+// The first layout pass can land after init, when the stage still has no
+// size. A scatter drawn then collapses to a point and records a degenerate
+// stroke, so the first clear waits for the resize that sizes the stage.
+if (stage.extentX > 0.01) clearAll();
+else clearOnResize = true;
 requestAnimationFrame(() => { positionPreview(); refreshPreview(); });
