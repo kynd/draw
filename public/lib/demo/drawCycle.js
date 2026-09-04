@@ -1,32 +1,40 @@
 import * as THREE from 'three';
-import { resampleEvery, catmullRomSpline } from '../curves.js';
+import { resampleEvery, catmullRomSpline, splitByTurn } from '../curves.js';
 import { DrawInput } from './drawInput.js';
 
 /**
  * The draw-then-bake cycle every freehand demo shares.
  *
- * Wires a DrawInput to a stage and a DrawingBoard: the drawn points are lightly
- * smoothed, `build` turns them into a mesh, the pointer's own path shows as a one
- * pixel black line while drawing, and the finished mark bakes into the board. While
- * the stage's wireframe overlay is on, the last baked mark keeps its wireframe, as
- * plain black lines, until the next mark starts.
+ * Wires a DrawInput to a stage and a DrawingBoard: the drawn points are split
+ * into pieces wherever the direction turns abruptly, each piece is lightly
+ * smoothed, `build` turns it into a mesh, the pointer's own path shows as a one
+ * pixel black line while drawing, and the finished pieces bake into the board.
+ * The splitting means fast zigzag squiggling bakes as separate strokes, one per
+ * leg, instead of one folded line. While the stage's wireframe overlay is on,
+ * the last baked mark keeps its wireframe, as plain black lines, until the next
+ * mark starts.
  *
- * `build(path, points, seed)` receives the smoothed path, the raw points (which
- * carry pressure), and the mark's seed, and returns `{ mesh, renderer }` or null.
+ * `build(path, points, seed)` receives one piece's smoothed path, its raw
+ * points (which carry pressure), and the piece's seed, and returns
+ * `{ mesh, renderer }` or null.
  *
  * The pointer is one source of strokes, not the only one: the returned `feed`
  * takes (points, done) exactly as the pointer produces them, so a replay or a
  * generated stroke runs through the same cycle. `onCommit(points, seed)` fires
- * after a mark bakes, with the raw points that made it.
+ * once per piece after it bakes, with the raw points that made it, so a
+ * recorded piece replays as its own stroke; `onRelease()` fires once after all
+ * of a gesture's pieces have committed. `split` sets the turn threshold and
+ * measurement window ({ angle, span }), or `false` to draw unsplit.
  */
-export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCommit }) {
+export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCommit, onRelease,
+    split = { angle: Math.PI * 0.55, span: 0.05 } }) {
     let seed = 1;
 
     let live = null;
     function disposeLive() {
         if (!live) return;
-        stage.remove(live.mesh);
-        live.renderer.dispose(live.mesh);
+        stage.remove(live.group);
+        for (const piece of live.pieces) piece.renderer.dispose(piece.mesh);
         live = null;
     }
 
@@ -34,10 +42,10 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     // readable over the bake. The mark's own shader would redraw the baked pixels
     // in place, so the overlay swaps in plain black lines.
     let ghost = null;
-    function makeWireOnly(mesh) {
+    function makeWireOnly(object) {
         // Flag the meshes themselves: the stage's wireframe pass walks meshes,
         // and a mark may be a group, which it would skip.
-        mesh.traverse(child => {
+        object.traverse(child => {
             if (!child.isMesh) return;
             child.userData.wireOnly = true;
             child.userData.origMaterial = child.material;
@@ -46,14 +54,14 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     }
     function disposeGhost() {
         if (!ghost) return;
-        stage.remove(ghost.mesh);
-        ghost.mesh.traverse(child => {
+        stage.remove(ghost.group);
+        ghost.group.traverse(child => {
             if (!child.isMesh || !child.userData.origMaterial) return;
             child.material.dispose();
             child.material = child.userData.origMaterial;
             delete child.userData.origMaterial;
         });
-        ghost.renderer.dispose(ghost.mesh);
+        for (const piece of ghost.pieces) piece.renderer.dispose(piece.mesh);
         ghost = null;
     }
 
@@ -80,7 +88,7 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         pointerLine.geometry = geometry;
     }
 
-    function buildFromPoints(points) {
+    function smoothPiece(points) {
         if (points.length < 2) return null;
         // Light smoothing, so the mark follows the hand without recording its
         // jitter. The spline is local: a new point reshapes only the last few
@@ -96,24 +104,44 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
             arc += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
         }
         if (arc < 1e-6) return null;
-        return build(path, points, seed);
+        return path;
+    }
+
+    function buildFromPoints(points) {
+        if (points.length < 2) return null;
+        const runs = split ? splitByTurn(points, split) : [points];
+        const group = new THREE.Group();
+        const pieces = [];
+        const committed = [];
+        runs.forEach((run, k) => {
+            const path = smoothPiece(run);
+            if (!path) return;
+            const mark = build(path, run, seed + k);
+            if (!mark) return;
+            group.add(mark.mesh);
+            pieces.push(mark);
+            committed.push({ points: run, seed: seed + k });
+        });
+        if (!pieces.length) return null;
+        return { group, pieces, committed, seedSpan: runs.length };
     }
 
     function feed(points, done) {
         disposeGhost();
         disposeLive();
         live = buildFromPoints(points);
-        if (live) stage.add(live.mesh);
+        if (live) stage.add(live.group);
         setPointerLine(done ? [] : points);
         if (done && live) {
-            board.bake([live.mesh]);
+            board.bake([live.group]);
             ghost = live;
-            makeWireOnly(ghost.mesh);
-            // The bake scene borrowed the mesh; the overlay needs it back.
-            stage.add(ghost.mesh);
+            makeWireOnly(ghost.group);
+            // The bake scene borrowed the group; the overlay needs it back.
+            stage.add(ghost.group);
             live = null;
-            onCommit?.(points, seed);
-            seed++;
+            for (const piece of ghost.committed) onCommit?.(piece.points, piece.seed);
+            seed += ghost.seedSpan;
+            onRelease?.();
         }
         stage.draw();
     }

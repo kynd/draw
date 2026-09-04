@@ -9,8 +9,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   </div>
 
   <div class="prose">
-    <p>One canvas that mixes the strokes, the fills, the palette, the pen pressure, and the MIDI input. The interface floats over the canvas as translucent buttons and dials, and every piece of it fades away while the pen is down.</p>
-    <div class="jp">ストローク、塗り、パレット、筆圧、MIDI入力を混ぜ合わせた、ひとつのキャンバスです。インターフェースは半透明のボタンとダイヤルとしてキャンバスの上に浮かび、ペンを置いている間はそのすべてが消えます。</div>
+    <p>One canvas that mixes the strokes, the fills, the palette, the pen pressure, and the MIDI input. The interface floats over the canvas as translucent buttons and dials, and every piece of it fades away while the pen is down. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes and records as separate strokes.</p>
+    <div class="jp">ストローク、塗り、パレット、筆圧、MIDI入力を混ぜ合わせた、ひとつのキャンバスです。インターフェースは半透明のボタンとダイヤルとしてキャンバスの上に浮かび、ペンを置いている間はそのすべてが消えます。しきい値より鋭い曲がりで描いた線は分割されるため、速いジグザグは別々のストロークとして焼き込まれ、記録されます。</div>
 
     <p>The hue dial rotates the palette: the first key color follows the dial, the rest reroll, and the current stroke takes its colors from the result. The tool dial steps through a trail of rolled tools, each with its own width, parameters, and pressure sensitivity (up to three times the width at full pressure). Ten entries are remembered on each side of the current one, so dialing back finds the same tool again; each step ahead rolls a fresh entry as the far end falls away. Both dials also listen to MIDI controls 16 and 17, and either source is latched to one update per frame. The box at the bottom right previews the current tool on a wiggle. No tool paints one flat color: the flat ones fill with a gradient between the two current colors, running along the drawn spine or across it.</p>
     <div class="jp">色相ダイヤルはパレットを回します。最初のキーカラーはダイヤルに従い、残りは引き直され、現在のストロークはその結果から色を取ります。ツールダイヤルは、それぞれが自分の幅、パラメータ、筆圧の感度（最大の筆圧で幅の3倍まで）を持つ、ロールされたツールの列をたどります。現在のツールの両側に10個ずつが記憶されるため、ダイヤルを戻すと同じツールが見つかります。先へ進むたびに、遠い端が落ちて新しいロールが加わります。どちらのダイヤルもMIDIコントロール16と17を聞いており、どちらの入力も1フレームにつき1回の更新にラッチされます。右下の箱は、現在のツールをうねりの上でプレビューします。単色で塗るツールはありません。平坦なツールは、現在の2色の間のグラデーションで塗ります。描かれたスパインに沿うか、それを横切るかのどちらかです。</div>

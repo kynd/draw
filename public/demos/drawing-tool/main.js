@@ -352,15 +352,17 @@ const cycle = setupDrawCycle({
     build: buildMark,
     onCommit: (points, seed) => {
         if (replaying) return;
-        // Record before the auto reroll: the record must capture the state
-        // the mark was drawn with, not the state rolled for the next one.
         recorder.add({
             toolId: state.tool.id, values: { ...state.values },
             widthPx: state.widthPx, sens: state.sens,
             colorA: state.colorA, colorB: state.colorB, colors: [...state.colors],
             seed,
         }, points);
-        if (autoRandom) autoReroll();
+    },
+    // Once per gesture, after every piece has committed, so the reroll cannot
+    // leak into a later piece's record.
+    onRelease: () => {
+        if (autoRandom && !replaying) autoReroll();
     },
 });
 
