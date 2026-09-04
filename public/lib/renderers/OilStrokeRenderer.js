@@ -94,8 +94,8 @@ export class OilStrokeRenderer extends HeightFieldStrokeRenderer {
                 // so the bare streaks read as individual bristles.
                 float laneC = fbm(vec2(vUv.x * uLength * uStretch * 1.6,
                     vCross * uAcross * 3.0 + uSeed * 23.0));
-                float coat = clamp(uPaint * (0.15 + 0.95 * smoothstep(0.32, 0.62, laneC))
-                    - 0.15 * (1.0 - clamp(height, 0.0, 1.0)), 0.0, 1.0);
+                float coat = clamp(uPaint * (0.45 + 0.65 * smoothstep(0.32, 0.62, laneC))
+                    - 0.1 * (1.0 - clamp(height, 0.0, 1.0)), 0.0, 1.0);
                 vec3 pigment = mix(dragged, uColor, coat);
 
                 vec3 light = normalize(vec3(-0.4, -0.75, 0.55));
