@@ -350,14 +350,16 @@ const cycle = setupDrawCycle({
     canvas: document.getElementById('canvas'),
     build: buildMark,
     onCommit: (points, seed) => {
-        if (autoRandom && !replaying) autoReroll();
         if (replaying) return;
+        // Record before the auto reroll: the record must capture the state
+        // the mark was drawn with, not the state rolled for the next one.
         recorder.add({
             toolId: state.tool.id, values: { ...state.values },
             widthPx: state.widthPx, sens: state.sens,
             colorA: state.colorA, colorB: state.colorB, colors: [...state.colors],
             seed,
         }, points);
+        if (autoRandom) autoReroll();
     },
 });
 
