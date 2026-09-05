@@ -112,8 +112,8 @@ const demos = [
       <iframe src={`${base}/demos/try-more-strokes/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
     </div>
     <div class="prose">
-      <p>Draw with the strokes on this page. The dropdown selects a stroke and shows its parameters, adjusted values are remembered per stroke, and each released stroke bakes into the canvas. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes as separate strokes. Strokes that read the background read the canvas itself, so they drag and bend what is already painted. Clear fills the canvas with a random color. With a pen tablet, pressure widens the stroke, up to double at full sensitivity; a mouse is unaffected.</p>
-      <div class="jp">このページのストロークで描いてみてください。ドロップダウンでストロークを選ぶと、そのパラメータが表示されます。調整した値はストロークごとに記憶され、描き終えたストロークはキャンバスに焼き込まれます。しきい値より鋭い曲がりで描いた線は分割されるため、速いジグザグは別々のストロークとして焼き込まれます。背景を読むストロークはキャンバスそのものを読むため、すでに描かれたものを引きずり、ゆがめます。Clearはキャンバス全体をランダムな色で塗りつぶします。ペンタブレットでは、筆圧がストロークを太らせます。感度が最大のとき、最大で2倍になります。マウスには影響しません。</div>
+      <p>Draw with the strokes on this page, in the drawing tool: the settings panel picks the tool, its colors, and its parameters exactly, the floating dials reroll the palette and walk a trail of rolled tools, and Clear, Replay, and recording work as on the Drawing Tool Demo page. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes as separate strokes. Strokes that read the background read the canvas itself, so they drag and bend what is already painted. With a pen tablet, pressure widens the stroke, up to three times the width at full sensitivity; a mouse is unaffected.</p>
+      <div class="jp">このページのストロークで、描画ツールの中で描いてみてください。設定パネルはツール、その色、パラメータを正確に選び、浮かぶ2つのダイヤルはパレットを引き直し、ロールされたツールの列をたどります。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭い曲がりで描いた線は分割されるため、速いジグザグは別々のストロークとして焼き込まれます。背景を読むストロークはキャンバスそのものを読むため、すでに描かれたものを引きずり、ゆがめます。ペンタブレットでは、筆圧がストロークを太らせます。感度が最大のとき、最大で3倍になります。マウスには影響しません。</div>
     </div>
   </section>
 </PageLayout>

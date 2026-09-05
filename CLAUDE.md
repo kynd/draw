@@ -116,10 +116,16 @@ public/lib/                            library code
                 Stroke3DRenderer.js  TubeStrokeRenderer.js
                 TriangleStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js
-                drawingBoard.js  drawCycle.js  tryPanel.js  blobShowcase.js
+                drawingBoard.js  drawCycle.js  blobShowcase.js
                 pressure.js  testBackground.js  midi.js  dial.js  latch.js
-                strokeRecorder.js
+                strokeRecorder.js  toolRegistry.js  drawingTool.js
                                        shared demo support, still library code
+                                       drawingTool.js is the reusable instrument:
+                                       it takes any tool registry and builds the
+                                       whole interface; every try-drawing demo and
+                                       the drawing tool demo are thin harnesses
+                                       over it, with toolRegistry.js as the master
+                                       tool catalog
 public/demos/<name>/                   index.html + main.js per demo
 src/pages/experimental/<name>.astro    experimental pages, local only
 public/demos/experimental/<name>/      demos for experimental pages, local only

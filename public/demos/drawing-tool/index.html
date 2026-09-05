@@ -9,75 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
   <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
   <link rel="stylesheet" href="../../styles/demo-ui.css" />
-  <style>
-    .canvas-wrap { cursor: crosshair; touch-action: none; }
-  </style>
 </head>
 <body>
-  <div class="demo-layout" id="layout">
-    <div class="canvas-wrap">
-      <canvas id="canvas"></canvas>
-
-      <div class="dp-overlay-tl">
-        <button id="adv-btn" class="dp-icon-btn" title="Advanced settings">
-          <svg viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
-        </button>
-      </div>
-
-      <div class="dp-overlay-tr">
-        <button id="clear-btn" class="dp-icon-btn text" title="Clear and rescatter">Clear</button>
-        <button id="replay-btn" class="dp-icon-btn text" title="Replay">Replay</button>
-        <button id="auto-btn" class="dp-icon-btn text" title="Randomize on release and every so many pixels">Auto</button>
-        <button id="record-btn" class="dp-icon-btn" title="Replay and export a video">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>
-        </button>
-        <button id="guide-btn" class="dp-icon-btn" title="Upload a guide image">
-          <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-        </button>
-        <select id="size-select" class="dp-select" style="display:none; width:auto" title="Canvas size">
-          <option value="">Window</option>
-          <option value="1920x1080">Full HD horizontal</option>
-          <option value="1080x1920">Full HD vertical</option>
-          <option value="1280x1280">Square 1280</option>
-          <option value="960x960">Square 960</option>
-        </select>
-        <button id="fullscreen-btn" class="dp-icon-btn" title="Full screen">
-          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-        </button>
-      </div>
-
-      <div class="dp-overlay-panel" id="guide-panel" style="display:none">
-        <span class="dp-label">Guide</span>
-        <input id="guide-opacity" class="dp-range" type="range" min="0" max="1" step="0.05" value="0.5" />
-        <button id="guide-toggle" class="dp-icon-btn text active" style="height:24px">On</button>
-      </div>
-      <input id="guide-file" type="file" accept="image/*" style="display:none" />
-
-      <div class="dp-dials">
-        <div id="dial-hue"></div>
-        <div id="dial-tool"></div>
-      </div>
-
-      <div class="dp-side-pane" id="side-pane" style="display:none">
-        <div class="dp-sub-label">Palette</div>
-        <div class="dp-dial-row">
-          <div id="dial-h" class="small"></div>
-          <div id="dial-c" class="small"></div>
-          <div id="dial-l" class="small"></div>
-        </div>
-        <div class="dp-swatch-row" id="tool-colors" style="margin-top:8px"></div>
-        <div class="dp-swatch-grid" id="palette-grid"></div>
-        <div class="dp-sub-label">Tool</div>
-        <div style="display:flex; gap:8px; align-items:center">
-          <div id="dial-tool-adv" class="small"></div>
-          <select id="tool-select" class="dp-select"></select>
-        </div>
-        <div class="dp-sub-label">Parameters</div>
-        <div id="tool-params"></div>
-      </div>
-    </div>
-  </div>
-
   <script type="module" src="./main.js"></script>
 </body>
 </html>

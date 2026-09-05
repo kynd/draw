@@ -40,6 +40,7 @@ html, body {
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  position: relative;
   width: 100vw; height: 100vh;
 }
 .demo-layout.embedded { width: 960px; height: 620px; }
@@ -196,31 +197,20 @@ html, body {
 .dp-overlay-panel .dp-label, .dp-overlay-panel .dp-val { color: #ffffff; }
 .dp-overlay-panel + .dp-overlay-panel { top: 84px; }
 
-/* The advanced pane: a translucent card on the left of the canvas */
-.dp-side-pane {
-  position: absolute; left: 0; top: 0; height: 100%;
-  width: 156px; padding: 44px 10px 12px;
-  background: rgba(0,0,0,0.45);
-  overflow-y: auto;
-  z-index: 6;
+/* The drawing tool component */
+.demo-layout.drawing-tool .canvas-wrap { cursor: crosshair; touch-action: none; }
+
+/* The drawing tool's settings panel: the standard panel, on the left */
+.dp-panel.left {
+  border-left: none;
+  border-right: 1px solid var(--demo-line);
+  padding-top: 44px;
 }
-.dp-side-pane .dp-label, .dp-side-pane .dp-val { color: #ffffff; }
-.dp-side-pane .dp-sub-label { color: rgba(255,255,255,0.7); }
-.dp-side-pane .dp-select {
-  background: rgba(255,255,255,0.14); color: #ffffff;
-  border-color: rgba(255,255,255,0.35);
-}
-.dp-side-pane .dp-select option { color: var(--demo-fg); }
-.dp-side-pane .dp-dial-label { color: #ffffff; background: transparent; }
-.dp-overlay-panel .dp-range, .dp-side-pane .dp-range { background: rgba(255,255,255,0.35); }
-.dp-overlay-panel .dp-range::-webkit-slider-runnable-track,
-.dp-side-pane .dp-range::-webkit-slider-runnable-track { background: rgba(255,255,255,0.35); }
-.dp-overlay-panel .dp-range::-webkit-slider-thumb,
-.dp-side-pane .dp-range::-webkit-slider-thumb { background: #ffffff; }
-.dp-overlay-panel .dp-range::-moz-range-track,
-.dp-side-pane .dp-range::-moz-range-track { background: rgba(255,255,255,0.35); }
-.dp-overlay-panel .dp-range::-moz-range-thumb,
-.dp-side-pane .dp-range::-moz-range-thumb { background: #ffffff; }
+.dp-overlay-panel .dp-range { background: rgba(255,255,255,0.35); }
+.dp-overlay-panel .dp-range::-webkit-slider-runnable-track { background: rgba(255,255,255,0.35); }
+.dp-overlay-panel .dp-range::-webkit-slider-thumb { background: #ffffff; }
+.dp-overlay-panel .dp-range::-moz-range-track { background: rgba(255,255,255,0.35); }
+.dp-overlay-panel .dp-range::-moz-range-thumb { background: #ffffff; }
 .dp-dial-row { display: flex; gap: 6px; justify-content: center; }
 .dp-dial.small { width: 40px; }
 .dp-dial.small svg { width: 40px; height: 40px; }
@@ -228,13 +218,18 @@ html, body {
 /* Palette swatch grid, with the entries in use outlined */
 .dp-swatch-grid { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 6px; }
 .dp-swatch-cell { width: 17px; height: 17px; border-radius: 3px; }
-.dp-swatch-cell.selected { outline: 2px solid #ffffff; outline-offset: -1px; }
+.dp-swatch-cell.selected { outline: 2px solid var(--demo-fg); outline-offset: -1px; }
 
-/* While the pen is down every overlay fades out of the way */
-.dp-overlay-tr, .dp-overlay-tl, .dp-overlay-panel, .dp-dials, .dp-side-pane { transition: opacity 0.15s; }
+/* While the pen is down every overlay fades out of the way. The panel keeps
+   its layout space, so the canvas does not resize under the stroke. */
+.dp-overlay-tr, .dp-overlay-tl, .dp-overlay-panel, .dp-dials, .dp-panel.left { transition: opacity 0.15s; }
 .dp-ui-hidden .dp-overlay-tr, .dp-ui-hidden .dp-overlay-tl,
-.dp-ui-hidden .dp-overlay-panel, .dp-ui-hidden .dp-dials, .dp-ui-hidden .dp-side-pane {
+.dp-ui-hidden .dp-overlay-panel, .dp-ui-hidden .dp-dials, .dp-ui-hidden .dp-panel.left {
   opacity: 0; pointer-events: none;
+}
+
+.dp-btn:disabled, .dp-toggle:disabled, .dp-icon-btn:disabled {
+  opacity: 0.4; pointer-events: none;
 }
 
 /* Rotary dial — a circle and a line, dragged vertically */
