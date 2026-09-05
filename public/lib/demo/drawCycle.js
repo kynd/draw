@@ -126,6 +126,12 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
             if (!path) return;
             const mark = build(path, run, seed + k);
             if (!mark) return;
+            // Each piece sits a hair above the one before. A single-coverage
+            // material dedupes overlaps at equal depth, which is wanted within
+            // a piece but not between pieces: without the stagger, an earlier
+            // piece's transparent skirt would claim the pixels and knock the
+            // next piece out where they cross.
+            mark.mesh.position.z += Math.min(k, 40) * 0.0005;
             group.add(mark.mesh);
             pieces.push(mark);
             committed.push({ points: run, seed: seed + k });
