@@ -213,3 +213,19 @@ add it to the writing-style page, and apply it from then on.
 ## Git
 
 - Never `git push` unless the user explicitly asks.
+
+## Video: hold the last frame
+
+When asked to edit a video to hold the last frame, prepend the video's last frame
+held for 0.5 seconds, then play the whole video normally. Save next to the original
+as `<name>_hold.mp4`, never overwriting it. With ffmpeg:
+
+```
+ffmpeg -sseof -0.3 -i "in.mp4" -update 1 -q:v 1 last.png
+ffmpeg -loop 1 -t 0.5 -framerate 60 -i last.png -i "in.mp4" \
+  -filter_complex "[0:v]format=yuv420p,fps=60[hold];[1:v]format=yuv420p,fps=60[main];[hold][main]concat=n=2:v=1:a=0[out]" \
+  -map "[out]" -c:v libx264 -crf 18 -movflags +faststart "in_hold.mp4"
+```
+
+Write `last.png` to the scratchpad. Verify the output duration is the input's plus
+0.5 seconds.
