@@ -342,13 +342,13 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
 
     // ------------------------------------------------------------------
     // Dials, frame-latched: input only stores the value, the update runs once
-    // on the next frame. The hue dial sets the color at full chroma; exact
-    // chroma and lightness stay on the panel's own dials.
+    // on the next frame. The hue dial rolls the chroma too, biased toward the
+    // vivid end; exact chroma and lightness stay on the panel's own dials.
     function setDialColor(hueValue) {
         adv.h = Math.round(hueValue / 127 * 360);
-        adv.c = 100;
+        adv.c = Math.round(100 * (1 - Math.random() * Math.random()));
         dialH.set(adv.h, false);
-        dialC.set(100, false);
+        dialC.set(adv.c, false);
         applyAdvancedColor();
     }
     const hueLatch = new FrameLatch(v => setDialColor(v));
