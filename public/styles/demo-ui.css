@@ -200,12 +200,6 @@ html, body {
 /* The drawing tool component */
 .demo-layout.drawing-tool .canvas-wrap { cursor: crosshair; touch-action: none; }
 
-/* The drawing tool's settings panel: the standard panel, on the left */
-.dp-panel.left {
-  border-left: none;
-  border-right: 1px solid var(--demo-line);
-  padding-top: 44px;
-}
 .dp-overlay-panel .dp-range { background: rgba(255,255,255,0.35); }
 .dp-overlay-panel .dp-range::-webkit-slider-runnable-track { background: rgba(255,255,255,0.35); }
 .dp-overlay-panel .dp-range::-webkit-slider-thumb { background: #ffffff; }
@@ -222,9 +216,10 @@ html, body {
 
 /* While the pen is down every overlay fades out of the way. The panel keeps
    its layout space, so the canvas does not resize under the stroke. */
-.dp-overlay-tr, .dp-overlay-tl, .dp-overlay-panel, .dp-dials, .dp-panel.left { transition: opacity 0.15s; }
+.dp-overlay-tr, .dp-overlay-tl, .dp-overlay-panel, .dp-dials,
+.drawing-tool .dp-panel { transition: opacity 0.15s; }
 .dp-ui-hidden .dp-overlay-tr, .dp-ui-hidden .dp-overlay-tl,
-.dp-ui-hidden .dp-overlay-panel, .dp-ui-hidden .dp-dials, .dp-ui-hidden .dp-panel.left {
+.dp-ui-hidden .dp-overlay-panel, .dp-ui-hidden .dp-dials, .dp-ui-hidden .dp-panel {
   opacity: 0; pointer-events: none;
 }
 

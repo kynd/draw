@@ -24,7 +24,15 @@ const TEMPLATE = /* html */`
     </button>
   </div>
 
-  <div class="dp-panel left" id="side-pane">
+  <div class="canvas-wrap">
+    <canvas id="canvas"></canvas>
+    <div class="dp-dials">
+      <div id="dial-hue"></div>
+      <div id="dial-tool"></div>
+    </div>
+  </div>
+
+  <div class="dp-panel" id="side-pane">
     <div class="dp-sub-label">Canvas</div>
     <div class="dp-btn-row">
       <button id="clear-btn" class="dp-btn secondary">Clear</button>
@@ -77,14 +85,6 @@ const TEMPLATE = /* html */`
 
     <div class="dp-sub-label">Parameters</div>
     <div id="tool-params"></div>
-  </div>
-
-  <div class="canvas-wrap">
-    <canvas id="canvas"></canvas>
-    <div class="dp-dials">
-      <div id="dial-hue"></div>
-      <div id="dial-tool"></div>
-    </div>
   </div>
 
   <input id="guide-file" type="file" accept="image/*" style="display:none" />
