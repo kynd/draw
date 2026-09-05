@@ -185,7 +185,7 @@ export const toolRegistry = [
             cap: 'rounded', color: ctx.colorA, bevel: v.bevel, amount: v.amount,
         }) },
     { id: 'cloud', kind: 'stroke',
-        params: [{ key: 'blob', min: 0.7, max: 2.6 }, { key: 'offset', min: 0.2, max: 2.6 }],
+        params: [{ key: 'blob', min: 0.35, max: 0.8 }, { key: 'offset', min: 0.1, max: 0.6 }],
         make: (v, ctx) => new CloudStrokeRenderer({ color: ctx.colorA, blob: v.blob, offset: v.offset }) },
     { id: 'squares', kind: 'stroke',
         params: [{ key: 'cell', min: 0.08, max: 0.28 }, { key: 'blend', min: 0.1, max: 0.6 }],
