@@ -33,7 +33,7 @@ export class WetPatternStrokeRenderer extends PatternStrokeRenderer {
             depthWrite: false,
             side: THREE.DoubleSide,
             uniforms: {
-                uMode: { value: this.mode === 'dots' ? 1 : 0 },
+                uMode: { value: this.mode === 'dots' ? 1 : this.mode === 'leaves' ? 2 : 0 },
                 uBg: { value: this.background },
                 uDrag: { value: this.drag },
                 uPigment: { value: this.pigment },
@@ -84,6 +84,12 @@ export class WetPatternStrokeRenderer extends PatternStrokeRenderer {
                         vec2 perp = vec2(-vDir.y, vDir.x);
                         vec2 outward = vDir * vLocal.x + perp * vLocal.y;
                         dragDirWorld = length(outward) > 1e-6 ? normalize(outward) : vDir;
+                    } else if (uMode == 2) {
+                        float u = clamp(vLocal.x / max(vDims.x, 1e-5), -1.0, 1.0);
+                        float bow = sin(u * 3.14159 + vSeed) * vDims.y * 0.3;
+                        float prof = pow(max(1.0 - u * u, 0.0), 0.65);
+                        d = abs(vLocal.y - bow) - vDims.y * prof;
+                        dragDirWorld = vDir;
                     } else {
                         vec2 p = vec2(max(abs(vLocal.x) - max(vDims.x - vDims.y, 0.0), 0.0), vLocal.y);
                         d = length(p) - vDims.y;

@@ -5,7 +5,7 @@ import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
 
-const ROWS = 3;
+const MODES = ['feather', 'leaves', 'fringe'];
 const SEEDS = [1.0, 2.3, 5.1];
 
 const readout = document.getElementById('readout');
@@ -28,7 +28,7 @@ function randomizeColors() {
     const pick = list => list[Math.floor(Math.random() * list.length)];
     stage.setBackground(pick(palette.entries.filter(e => e.L > 0.85)).hex);
     const dark = palette.entries.filter(e => e.L < 0.6);
-    return Array.from({ length: ROWS }, () => [pick(dark).hex, pick(dark).hex]);
+    return MODES.map(() => [pick(dark).hex, pick(dark).hex]);
 }
 
 function rebuild() {
@@ -44,12 +44,12 @@ function rebuild() {
     const { spread } = layout(stage.extentY, width * 1.6);
     let samples = 0, vertices = 0, triangles = 0;
 
-    for (let i = 0; i < ROWS; i++) {
+    for (let i = 0; i < MODES.length; i++) {
         const renderer = new PatternStrokeRenderer({
-            mode: 'fringe', color: colors[i][0], colorB: colors[i][1], size, angle,
+            mode: MODES[i], color: colors[i][0], colorB: colors[i][1], size, angle,
         });
         const def = new StrokeDef({
-            points: straightThenWiggle(centerY(i, ROWS, spread), { z0: 0.01 + i * 0.01 }),
+            points: straightThenWiggle(centerY(i, MODES.length, spread), { z0: 0.01 + i * 0.01 }),
             widthLeft: taper(width),
             renderer,
             seed: SEEDS[i],
@@ -65,7 +65,7 @@ function rebuild() {
     }
 
     readout.innerHTML = `<div class="dp-stats">`
-        + `<span>strokes<strong>${ROWS}</strong></span>`
+        + `<span>strokes<strong>${MODES.length}</strong></span>`
         + `<span>samples<strong>${samples}</strong></span>`
         + `<span>vertices<strong>${vertices}</strong></span>`
         + `<span>triangles<strong>${triangles}</strong></span></div>`;

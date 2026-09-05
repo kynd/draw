@@ -11,9 +11,13 @@ import { seededRandom } from '../random.js';
  *   dots    uneven discs, 10 to 15 pixels, wobbled like circles drawn by hand.
  *   strips  longer and wider strokes than the dashes, laid out more roughly,
  *           so they sometimes overlap.
- *   fringe  small strokes sprouting from the spine to both sides, swept from
- *           the local direction by `angle`, alternating two colors; their
- *           length follows the local width.
+ *   feather small strokes sprouting from the spine to both sides, swept from
+ *           the local direction by `angle`; each left-right pair takes one
+ *           color and the next pair the other, like a bird feather's bands.
+ *   leaves  the sprouting strokes as tapered leaf shapes, sized randomly from
+ *           well below the width to well past it, with more sway.
+ *   fringe  the sprouting strokes thinner and denser, one color on one side
+ *           of the spine and the other color on the other.
  *
  * Elements sit on rows across the width, each row walking the arc from the
  * start with its own seeded random sequence, so a growing stroke adds elements
@@ -23,7 +27,7 @@ import { seededRandom } from '../random.js';
 export class PatternStrokeRenderer extends StrokeRenderer {
     /**
      * @param {object} opts
-     * @param {'dashes'|'dots'|'strips'|'fringe'} [opts.mode]
+     * @param {'dashes'|'dots'|'strips'|'feather'|'leaves'|'fringe'} [opts.mode]
      * @param {string} [opts.color]
      * @param {string} [opts.colorB]  Second color the fringe alternates with.
      * @param {number} [opts.size]   Scale on the elements' built-in pixel sizes.
@@ -46,7 +50,9 @@ export class PatternStrokeRenderer extends StrokeRenderer {
         switch (this.mode) {
             case 'dots': return { len: 0.062, wid: 0.062, step: 1.15, row: 1.25, rot: 0, jitter: 0.5, vary: 0.42 };
             case 'strips': return { len: 0.21, wid: 0.05, step: 0.7, row: 1.5, rot: 0.3, jitter: 1.0, vary: 0.25 };
-            case 'fringe': return { len: 0, wid: 0.026, step: 2.6, row: 0, rot: 0.1, jitter: 0, vary: 0.15 };
+            case 'feather': return { len: 0, wid: 0.026, step: 2.4, row: 0, rot: 0.1, jitter: 0, vary: 0.15 };
+            case 'leaves': return { len: 0, wid: 0.034, step: 3.4, row: 0, rot: 0.3, jitter: 0, vary: 0.22 };
+            case 'fringe': return { len: 0, wid: 0.015, step: 1.5, row: 0, rot: 0.12, jitter: 0, vary: 0.15 };
             default: return { len: 0.1, wid: 0.028, step: 0.75, row: 2.2, rot: 0.18, jitter: 1.6, vary: 0.18 };
         }
     }
@@ -107,12 +113,15 @@ export class PatternStrokeRenderer extends StrokeRenderer {
             count++;
         };
 
-        if (this.mode === 'fringe') {
+        if (this.mode === 'feather' || this.mode === 'leaves' || this.mode === 'fringe') {
             // Small strokes sprouting from the spine to both sides, swept from
-            // the local direction by `angle`, alternating the two colors in a
-            // checker. Their length follows the local width, so the fringe
-            // fills the band the stroke was given. One walk, one seeded
-            // sequence, so a growing stroke only adds elements at the tip.
+            // the local direction by `angle`. Their length follows the local
+            // width, so the sprouts fill the band the stroke was given. One
+            // walk, one seeded sequence, so a growing stroke only adds
+            // elements at the tip. The modes differ in shape and in how the
+            // two colors divide: feather alternates by left-right pair, fringe
+            // by side, leaves in a checker.
+            const isLeaves = this.mode === 'leaves';
             const rand = seededRandom((def.seed ?? 1) * 13.7 + 47.3);
             const rad = this.angle * Math.PI / 180;
             const spacing = wid * preset.step;
@@ -125,10 +134,18 @@ export class PatternStrokeRenderer extends StrokeRenderer {
                     const dx = tangent.x * Math.cos(rad) + normal.x * side * Math.sin(rad);
                     const dy = tangent.y * Math.cos(rad) + normal.y * side * Math.sin(rad);
                     const angleEl = Math.atan2(dy, dx) + (rand() - 0.5) * 2 * preset.rot;
-                    const hl = (w * 0.7) * (0.85 + rand() * 0.3);
-                    const hw = (wid / 2) * (0.85 + rand() * 0.3);
+                    // Leaves range from well below the width to well past it;
+                    // the others follow it closely.
+                    const hl = isLeaves
+                        ? w * (0.35 + rand() * 1.15)
+                        : (w * 0.7) * (0.85 + rand() * 0.3);
+                    const hw = isLeaves
+                        ? Math.max(hl * 0.26 * (0.8 + rand() * 0.4), 0.008)
+                        : (wid / 2) * (0.85 + rand() * 0.3);
                     const out = hl * 0.85;
-                    const useB = (k + (side < 0 ? 1 : 0)) % 2 === 1;
+                    const useB = this.mode === 'feather' ? k % 2 === 1
+                        : this.mode === 'fringe' ? side < 0
+                        : (k + (side < 0 ? 1 : 0)) % 2 === 1;
                     const shade = 1 - preset.vary / 2 + rand() * preset.vary;
                     pushElement(center.x + Math.cos(angleEl) * out, center.y + Math.sin(angleEl) * out,
                         angleEl, hl, hw, rand() * 100,
@@ -196,7 +213,7 @@ export class PatternStrokeRenderer extends StrokeRenderer {
             transparent: true,
             depthWrite: false,
             side: THREE.DoubleSide,
-            uniforms: { uMode: { value: this.mode === 'dots' ? 1 : 0 } },
+            uniforms: { uMode: { value: this.mode === 'dots' ? 1 : this.mode === 'leaves' ? 2 : 0 } },
             vertexShader: /* glsl */`
                 attribute vec2 aLocal;
                 attribute vec2 aDims;
@@ -228,6 +245,13 @@ export class PatternStrokeRenderer extends StrokeRenderer {
                         float wob = 1.0 + 0.10 * sin(ang * 3.0 + vSeed * 7.1)
                                         + 0.07 * sin(ang * 5.0 + vSeed * 13.7);
                         d = length(vLocal) - vDims.x * wob;
+                    } else if (uMode == 2) {
+                        // A leaf: the width tapers to points at both ends, and
+                        // a seeded bow curves the blade.
+                        float u = clamp(vLocal.x / max(vDims.x, 1e-5), -1.0, 1.0);
+                        float bow = sin(u * 3.14159 + vSeed) * vDims.y * 0.3;
+                        float prof = pow(max(1.0 - u * u, 0.0), 0.65);
+                        d = abs(vLocal.y - bow) - vDims.y * prof;
                     } else {
                         // A capsule, bowed by a seeded sine along its length so
                         // the edge is not ruler-straight.
