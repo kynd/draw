@@ -1,0 +1,53 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Patterned strokes" slug="patterned-strokes">
+  <div class="monologue">
+    One gesture, many small marks
+  </div>
+
+  <section class="demo-section" id="patterns">
+    <div class="demo-header">
+      <h2>Dashes, dots, strips</h2>
+      <a href={`${base}/demos/patterned-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/patterned-strokes/index.html?embedded`} title="Dashes, dots, strips" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Strokes that build many small elements instead of one body: short rounded dashes stepped along the spine, uneven hand-drawn dots, and longer strips laid out roughly enough to overlap. The elements fill the stroke's width and follow its taper.</p>
+      <div class="jp">ひとつの身体ではなく、たくさんの小さな要素を作るストロークです。スパインに沿って刻まれる短い丸みのあるダッシュ、手描きの不揃いな点、そして重なるほど粗く置かれた長めの帯。要素はストロークの幅を埋め、テーパーに従います。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Dashes:</strong> Each dash is about 20 pixels, laid along the local spine direction and stepped by about three quarters of its own length, on rows spread across the width.</p>
+        <div class="jp"><strong>ダッシュ：</strong>各ダッシュは約20ピクセルで、局所的なスパインの向きに沿って置かれ、自分の長さの約4分の3ずつ進みます。幅に広がる列の上に並びます。</div>
+
+        <p><strong>Dots:</strong> Discs of 10 to 15 pixels, wobbled by seeded harmonics of the angle, so each reads as a circle drawn by hand rather than a stamp.</p>
+        <div class="jp"><strong>点：</strong>10から15ピクセルの円で、角度のシード付き倍音で揺らされます。そのため、それぞれがスタンプではなく手で描かれた円として読めます。</div>
+
+        <p><strong>Strips:</strong> Longer and wider than the dashes, with more rotation and placement jitter and tighter rows, so neighbors sometimes overlap.</p>
+        <div class="jp"><strong>帯：</strong>ダッシュより長く幅広で、回転と配置の揺れが大きく、列が詰まっているため、隣同士がときどき重なります。</div>
+
+        <p><strong>Stability:</strong> Each row across the width walks the arc from the start with its own seeded random sequence, so a growing stroke adds elements at the tip without reshuffling the ones already placed.</p>
+        <div class="jp"><strong>安定性：</strong>幅方向の各列は、それぞれのシード付き乱数列で始点から弧をたどります。そのため、伸びていくストロークは先端に要素を加えるだけで、すでに置かれたものを並べ直しません。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-patterned-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed" data-w="860" data-h="620" style="width:860px;height:620px">
+      <iframe src={`${base}/demos/try-patterned-strokes/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw with the strokes on this page, in the drawing tool: the settings panel picks the tool, its colors, and its parameters exactly, the floating dials reroll the palette and walk a trail of rolled tools, and Clear, Replay, and recording work as on the Drawing Tool Demo page. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes as separate strokes. With a pen tablet, pressure widens the stroke, up to three times the width at full sensitivity; a mouse is unaffected.</p>
+      <div class="jp">このページのストロークで、描画ツールの中で描いてみてください。設定パネルはツール、その色、パラメータを正確に選び、浮かぶ2つのダイヤルはパレットを引き直し、ロールされたツールの列をたどります。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭い曲がりで描いた線は分割されるため、速いジグザグは別々のストロークとして焼き込まれます。ペンタブレットでは、筆圧がストロークを太らせます。感度が最大のとき、最大で3倍になります。マウスには影響しません。</div>
+    </div>
+  </section>
+</PageLayout>

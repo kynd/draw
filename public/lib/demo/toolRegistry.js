@@ -27,6 +27,7 @@ import { DebossStrokeRenderer } from '../renderers/DebossStrokeRenderer.js';
 import { CloudStrokeRenderer } from '../renderers/CloudStrokeRenderer.js';
 import { RoundedSquareStrokeRenderer } from '../renderers/RoundedSquareStrokeRenderer.js';
 import { SpikeStrokeRenderer } from '../renderers/SpikeStrokeRenderer.js';
+import { PatternStrokeRenderer } from '../renderers/PatternStrokeRenderer.js';
 
 export const toolRegistry = [
     { id: 'ribbon', kind: 'stroke', params: [{ key: 'axis', pick: ['along', 'across'] }],
@@ -193,6 +194,15 @@ export const toolRegistry = [
     { id: 'spikes', kind: 'stroke',
         params: [{ key: 'spikes', min: 1, max: 10, step: 0.5 }, { key: 'amp', min: 0.3, max: 1.8 }, { key: 'sharp', min: 1.5, max: 10 }],
         make: (v, ctx) => new SpikeStrokeRenderer({ color: ctx.colorA, spikes: v.spikes, amp: v.amp, sharp: v.sharp }) },
+    { id: 'pattern-dashes', kind: 'stroke',
+        params: [{ key: 'size', min: 0.6, max: 1.6 }],
+        make: (v, ctx) => new PatternStrokeRenderer({ mode: 'dashes', color: ctx.colorA, size: v.size }) },
+    { id: 'pattern-dots', kind: 'stroke',
+        params: [{ key: 'size', min: 0.6, max: 1.6 }],
+        make: (v, ctx) => new PatternStrokeRenderer({ mode: 'dots', color: ctx.colorA, size: v.size }) },
+    { id: 'pattern-strips', kind: 'stroke',
+        params: [{ key: 'size', min: 0.6, max: 1.6 }],
+        make: (v, ctx) => new PatternStrokeRenderer({ mode: 'strips', color: ctx.colorA, size: v.size }) },
     { id: 'flat-blob', kind: 'blob',
         params: [{ key: 'axis', pick: ['along', 'across'] }],
         make: (v, ctx) => {

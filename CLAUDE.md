@@ -92,6 +92,7 @@ src/content/pages/
 src/pages/
   palette-maker.astro                  demo/log pages, written as .astro for embeds
   strokes.astro  more-strokes.astro  shaped-strokes.astro
+  patterned-strokes.astro
   fills.astro  stroke-processing.astro  pen-pressure.astro             every stroke demo, one section each
   drawing-tool.astro                    the combined instrument demo
 public/lib/                            library code
@@ -108,7 +109,7 @@ public/lib/                            library code
                 GlassStrokeRenderer.js  OilStrokeRenderer.js
                 DryMediaStrokeRenderer.js  DebossStrokeRenderer.js
                 CloudStrokeRenderer.js  RoundedSquareStrokeRenderer.js
-                SpikeStrokeRenderer.js
+                SpikeStrokeRenderer.js  PatternStrokeRenderer.js
                 BlobRenderer.js  ShapedBlobRenderer.js  PaintBlobRenderer.js
                 WashBlobRenderer.js  MaterialBlobRenderer.js  StoneBlobRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js

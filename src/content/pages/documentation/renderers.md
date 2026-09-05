@@ -290,6 +290,14 @@ Rounded squares on a fixed grid, stamped from the spine like the pixel stroke an
 The boundary pushed outward by a power of a triangle wave. The corner at each tip survives any power while the valley's derivative goes to zero, so the tips stay sharp and the valleys stay rounded. Each spike hashes its own height and lean from its index, spacing is warped by a low-frequency noise, and the two sides hash independently, so the edges do not mirror. Takes `color`, `spikes`, `amp`, and `sharp`.
 <div class="jp">境界を三角波の累乗で外へ押し出したものです。先端の角はどんな累乗でも残り、谷の微分はゼロに向かうため、先端は鋭いまま、谷は丸いままになります。各トゲは高さと傾きを自身のインデックスのハッシュから決め、間隔は低周波のノイズでゆがめられ、両側は独立にハッシュされるため、左右の縁が鏡映しになることはありません。`color`、`spikes`、`amp`、`sharp`を受け取ります。</div>
 
+## Pattern strokes
+
+`PatternStrokeRenderer` rebuilds the mark as many small elements filling the stroke's band, in three modes: `dashes` (short rounded strokes, about 20 pixels each, laid along the spine and stepped by about three quarters of their own length), `dots` (uneven discs of 10 to 15 pixels, wobbled by seeded harmonics of the angle so each reads as a circle drawn by hand), and `strips` (longer and wider than the dashes, with more rotation and placement jitter and tighter rows, so neighbors sometimes overlap). Takes `mode`, `color`, and `size`, a scale on the elements' built-in pixel sizes. Each element carries a slight lightness variation of the base color.
+<div class="jp">`PatternStrokeRenderer`は、印をストロークの帯を埋めるたくさんの小さな要素として作り直します。3つのモードがあります。`dashes`（約20ピクセルの短い丸みのあるストロークで、スパインに沿って置かれ、自分の長さの約4分の3ずつ進みます）、`dots`（10から15ピクセルの不揃いな円で、角度のシード付き倍音で揺らされ、それぞれが手で描かれた円として読めます）、`strips`（ダッシュより長く幅広で、回転と配置の揺れが大きく、列が詰まっているため、隣同士がときどき重なります）。`mode`、`color`、そして要素の組み込みピクセルサイズへの倍率である`size`を受け取ります。各要素は基本色のわずかな明度の変化を持ちます。</div>
+
+Elements sit on rows across the width, each row walking the arc from the start with its own seeded random sequence, so a growing stroke adds elements at the tip without reshuffling the ones already placed. Row offsets scale with the local width, so the fill follows the taper.
+<div class="jp">要素は幅方向の列の上に並び、各列はそれぞれのシード付き乱数列で始点から弧をたどります。そのため、伸びていくストロークは先端に要素を加えるだけで、すでに置かれたものを並べ直しません。列のオフセットは局所的な幅に比例するので、塗りはテーパーに従います。</div>
+
 ## Blob renderers
 
 Renderers that fill a closed region rather than a stroke. The geometry is only a quad over the contour's bounds; the shape lives in the fragment shader as the signed distance to the contour polygon, so a renderer can push the boundary, texture the interior, or shade it as a surface without new geometry. `BlobRenderer` is the base; contours come from `blobOutline` on the Path Effects page.
