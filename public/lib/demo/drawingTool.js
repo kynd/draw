@@ -8,14 +8,14 @@ import { StrokeStage } from './stage.js';
 import { DrawingBoard } from './drawingBoard.js';
 import { setupDrawCycle } from './drawCycle.js';
 import { taperByArc, scatterPath } from './strokePaths.js';
-import { pressureAlong, pressureResponse, limitWidthSlope, averagePressure, pathArcLength } from './pressure.js';
+import { pathArcLength } from './pressure.js';
 import { Dial } from './dial.js';
 import { FrameLatch } from './latch.js';
-import { StrokeRecorder, replayRecords } from './strokeRecorder.js';
+import { StrokeRecorder } from './strokeRecorder.js';
+import { StrokePlayer, downloadDrawingZip } from './strokePlayer.js';
+import { makeMarkBuilder, applyRecordTo } from './markBuilder.js';
 import { MidiInput } from './midi.js';
 import { randomValues, toolLabel } from './toolRegistry.js';
-
-const PRESSURE_FLOOR = 0.15;
 
 const TEMPLATE = /* html */`
   <div class="dp-overlay-tl">
@@ -57,6 +57,7 @@ const TEMPLATE = /* html */`
     <div class="dp-btn-row">
       <button id="replay-btn" class="dp-btn secondary">Replay</button>
       <button id="record-btn" class="dp-btn secondary">Record</button>
+      <button id="download-btn" class="dp-btn secondary">Download</button>
     </div>
 
     <div class="dp-sub-label">Guide image</div>
@@ -126,40 +127,7 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     const stage = new StrokeStage($('canvas'));
     const board = new DrawingBoard(stage);
     const recorder = new StrokeRecorder();
-
-    function buildMark(path, points, seed) {
-        const useSeed = state.seedOverride ?? seed;
-        const ctx = {
-            colorA: state.colorA, colorB: state.colorB, colors: state.colors,
-            texture: board.texture, seed: useSeed,
-            start: path[0], end: path[path.length - 1],
-            tintLight: new THREE.Color(state.colorA).lerp(new THREE.Color('#ffffff'), 0.55).getStyle(),
-        };
-        const width = state.widthPx / PIXELS_PER_UNIT;
-        const pressureAt = pressureAlong(points);
-        if (state.tool.kind === 'blob') {
-            const scale = 1 + state.sens * pressureResponse(averagePressure(points), 1, PRESSURE_FLOOR);
-            const radius = Math.min(Math.max(width * 1.3 * scale, 0.05), 0.45);
-            const contour = blobOutline(path, { span: 0.12, radius });
-            if (!contour) return null;
-            const renderer = state.tool.make(state.values, ctx);
-            const mesh = renderer.build(contour, useSeed);
-            mesh.position.z = 0.05;
-            return { mesh, renderer };
-        }
-        const renderer = state.tool.make(state.values, ctx);
-        const base = taperByArc(width, pathArcLength(path));
-        const def = new StrokeDef({
-            points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
-            widthLeft: limitWidthSlope(path,
-                s => base(s) * (1 + state.sens * pressureResponse(pressureAt(s), 1, PRESSURE_FLOOR))),
-            renderer,
-            seed: useSeed,
-        });
-        const mesh = def.build();
-        mesh.position.z = 0.05;
-        return { mesh, renderer };
-    }
+    const buildMark = makeMarkBuilder({ state, board });
 
     // Auto randomize: with the toggle on, the colors and the whole tool (width,
     // parameters, pressure sensitivity) reroll on every release. The tool comes
@@ -433,29 +401,25 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     }
 
     // ------------------------------------------------------------------
-    // Replay: everything since the last clear, through the same cycle, with
-    // the idle time skipped.
-    function applyRecord(record) {
-        state.tool = registry.find(r => r.id === record.toolId) ?? registry[0];
-        state.values = { ...record.values };
-        state.widthPx = record.widthPx;
-        state.sens = record.sens;
-        state.colorA = record.colorA;
-        state.colorB = record.colorB;
-        state.colors = [...record.colors];
-        state.seedOverride = record.seed;
-    }
+    // Replay and record run through the standalone player engine: the recorder's
+    // data is handed to it, and it plays everything since the last clear through
+    // the same cycle, with the idle time skipped.
+    const player = new StrokePlayer({
+        feed: (points, done) => cycle.feed(points, done),
+        applyRecord: record => applyRecordTo(state, record, registry),
+        clear: background => { board.clear(background); stage.draw(); },
+        canvas: $('canvas'),
+    });
 
     const replayBtn = $('replay-btn');
     const clearBtn = $('clear-btn');
-    let player = null;
 
     // While a replay runs the other controls disable, and the preview hides:
     // it lives in the scene, so it would be captured into the replay's canvas,
     // and into a recording of it.
     function setReplayUi(on) {
         replayBtn.textContent = on ? 'Stop' : 'Replay';
-        for (const el of [clearBtn, autoCheck, traceCheck, recordBtn, guideBtn, guideToggle, advBtn]) {
+        for (const el of [clearBtn, autoCheck, traceCheck, recordBtn, downloadBtn, guideBtn, guideToggle, advBtn]) {
             el.disabled = on;
         }
         preview.visible = !on && !uiHidden;
@@ -463,7 +427,10 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
         updateGuideVisibility();
     }
 
-    function startReplay(onFinished) {
+    // Runs the player over the recorder's data, saving the live selection
+    // around it and holding the interface while it runs. `mode` picks plain
+    // playback or a recorded one.
+    function runPlayer(mode, onFinished) {
         if (replaying || recorder.records.length === 0) return false;
         replaying = true;
         cycle.input.enabled = false;
@@ -472,32 +439,26 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
             tool: state.tool, values: { ...state.values }, widthPx: state.widthPx,
             sens: state.sens, colorA: state.colorA, colorB: state.colorB, colors: [...state.colors],
         };
-        board.clear(recorder.background);
-        stage.draw();
-        player = replayRecords({
-            records: recorder.records,
-            applyTool: applyRecord,
-            feed: cycle.feed,
-            pointsPerFrame: 4,
-            onDone: () => {
-                Object.assign(state, saved, { seedOverride: null });
-                replaying = false;
-                player = null;
-                cycle.input.enabled = true;
-                setReplayUi(false);
-                refreshPreview();
-                syncPane();
-                onFinished?.();
-            },
-        });
-        return true;
+        player.setData(recorder);
+        const done = () => {
+            Object.assign(state, saved, { seedOverride: null });
+            replaying = false;
+            cycle.input.enabled = true;
+            setReplayUi(false);
+            refreshPreview();
+            syncPane();
+            onFinished?.();
+        };
+        const ok = mode === 'record' ? player.record({ onDone: done }) : player.play({ onDone: done });
+        if (!ok) done();
+        return ok;
     }
 
     replayBtn.addEventListener('click', () => {
         // While a replay runs the same button reads Stop, and stopping jumps
         // straight to the end state.
-        if (replaying) { player?.finish(); return; }
-        startReplay();
+        if (replaying) { player.finish(); return; }
+        runPlayer('play');
     });
 
     clearBtn.addEventListener('click', () => {
@@ -684,39 +645,21 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     }
 
     // ------------------------------------------------------------------
-    // Record: run the replay while capturing the canvas, then save the video.
-    // The file is mp4 where the browser can encode it, webm otherwise.
+    // Record: the player runs the replay while capturing the canvas and saves
+    // the video. Download saves the drawing's log itself, as a zip of JSON the
+    // Player page plays back.
     const recordBtn = $('record-btn');
-    let recording = false;
 
     recordBtn.addEventListener('click', () => {
-        if (recording || replaying || recorder.records.length === 0) return;
-        const canvas = $('canvas');
-        const stream = canvas.captureStream(60);
-        const mime = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']
-            .find(c => window.MediaRecorder && MediaRecorder.isTypeSupported(c));
-        if (!mime) { console.log('[record] MediaRecorder unavailable'); return; }
-        const media = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 12_000_000 });
-        const chunks = [];
-        media.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
-        media.onstop = () => {
-            const ext = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
-            const blob = new Blob(chunks, { type: mime });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `drawing.${ext}`;
-            a.click();
-            setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-        };
-        media.start();
-        recording = true;
         recordBtn.classList.add('active');
-        const ok = startReplay(() => {
-            media.stop();
-            recording = false;
-            recordBtn.classList.remove('active');
-        });
-        if (!ok) { media.stop(); recording = false; recordBtn.classList.remove('active'); }
+        const ok = runPlayer('record', () => recordBtn.classList.remove('active'));
+        if (!ok) recordBtn.classList.remove('active');
+    });
+
+    const downloadBtn = $('download-btn');
+    downloadBtn.addEventListener('click', () => {
+        if (replaying || recorder.records.length === 0) return;
+        downloadDrawingZip(recorder, 'drawing');
     });
 
     // ------------------------------------------------------------------

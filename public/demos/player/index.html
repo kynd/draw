@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Player — plays back a downloaded drawing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Player</span></div>
+      <div class="dp-note">Load a drawing downloaded from a drawing demo, then play it back or record it.</div>
+      <div class="dp-btn-row">
+        <button id="load-btn" class="dp-btn secondary">Load drawing</button>
+      </div>
+      <div class="dp-btn-row" id="player-controls" style="display:none">
+        <button id="play-btn" class="dp-btn secondary">Play</button>
+        <button id="record-btn" class="dp-btn secondary">Record</button>
+      </div>
+      <div class="dp-note" id="load-info"></div>
+      <input id="load-file" type="file" accept=".zip,.json" style="display:none" />
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

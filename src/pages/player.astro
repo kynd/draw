@@ -1,0 +1,29 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Player" slug="player">
+  <div class="monologue">
+    A drawing, replayed from its data alone
+  </div>
+
+  <div class="prose">
+    <p>A standalone player for recorded drawings. The playback engine is separate from any interface: it receives a drawing's log (the starting background and every mark's tool, parameters, colors, seed, and drawn points) and plays it through the same drawing cycle the marks were made with, or records the playback to a video. The drawing tool's Download button saves that log as a zip of JSON; this page has no control but loading one, and Play and Record appear once it has data.</p>
+    <div class="jp">記録された描画のための独立したプレイヤーです。再生エンジンはどのインターフェースからも切り離されています。描画のログ（開始時の背景と、各印のツール、パラメータ、色、シード、描かれた点）を受け取り、印が作られたのと同じ描画サイクルを通して再生するか、再生をビデオに録画します。描画ツールのDownloadボタンはそのログをJSONのzipとして保存します。このページにはそれを読み込む以外のコントロールはなく、データを受け取るとPlayとRecordが現れます。</div>
+  </div>
+
+  <section class="demo-section" id="demo">
+    <div class="demo-header">
+      <h2>Player</h2>
+      <a href={`${base}/demos/player/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/player/index.html?embedded`} title="Player" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw on the Drawing Tool Demo page, press Download there, and load the zip here.</p>
+      <div class="jp">Drawing Tool Demoページで描き、そこでDownloadを押し、そのzipをここで読み込んでください。</div>
+    </div>
+  </section>
+</PageLayout>

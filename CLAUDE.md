@@ -95,6 +95,7 @@ src/pages/
   patterned-strokes.astro
   fills.astro  stroke-processing.astro  pen-pressure.astro             every stroke demo, one section each
   drawing-tool.astro                    the combined instrument demo
+  player.astro                          plays back a downloaded drawing log
 public/lib/                            library code
   StrokeDef.js  Palette.js  color.js  CanvasBuffer.js  random.js  pathEffects.js
   StrokeHalo.js  curves.js
@@ -121,6 +122,7 @@ public/lib/                            library code
                 drawingBoard.js  drawCycle.js  blobShowcase.js
                 pressure.js  testBackground.js  midi.js  dial.js  latch.js
                 strokeRecorder.js  toolRegistry.js  drawingTool.js
+                markBuilder.js  strokePlayer.js
                                        shared demo support, still library code
                                        drawingTool.js is the reusable instrument:
                                        it takes any tool registry and builds the
