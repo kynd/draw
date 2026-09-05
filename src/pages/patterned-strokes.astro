@@ -51,6 +51,20 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
+  <section class="demo-section" id="fringe">
+    <div class="demo-header">
+      <h2>Fringe</h2>
+      <a href={`${base}/demos/fringe-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/fringe-strokes/index.html?embedded`} title="Fringe" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Small strokes sprouting from the spine to both sides, swept from the local direction by an angle (45 degrees by default), alternating two colors in a checker. Their length follows the local width, so the fringe fills the band the stroke was given and thins with the taper.</p>
+      <div class="jp">スパインから両側へ生える小さなストロークです。局所的な向きから角度（既定では45度）だけ振られ、2つの色を市松に交互します。長さは局所的な幅に従うため、フリンジはストロークに与えられた帯を埋め、テーパーとともに細くなります。</div>
+    </div>
+  </section>
+
   <section class="demo-section" id="try">
     <div class="demo-header">
       <h2>Try drawing</h2>

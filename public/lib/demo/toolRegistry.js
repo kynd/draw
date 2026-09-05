@@ -216,6 +216,16 @@ export const toolRegistry = [
         params: [{ key: 'size', min: 0.6, max: 1.6 }, { key: 'drag', min: 10, max: 90 }],
         make: (v, ctx) => new WetPatternStrokeRenderer({
             mode: 'strips', color: ctx.colorA, size: v.size, drag: v.drag, background: ctx.texture }) },
+    { id: 'fringe', kind: 'stroke',
+        params: [{ key: 'size', min: 0.6, max: 1.6 }, { key: 'angle', min: 25, max: 65 }],
+        make: (v, ctx) => new PatternStrokeRenderer({
+            mode: 'fringe', color: ctx.colorA, colorB: ctx.colorB, size: v.size, angle: v.angle }) },
+    { id: 'wet-fringe', kind: 'stroke',
+        params: [{ key: 'size', min: 0.6, max: 1.6 }, { key: 'angle', min: 25, max: 65 },
+            { key: 'drag', min: 10, max: 90 }],
+        make: (v, ctx) => new WetPatternStrokeRenderer({
+            mode: 'fringe', color: ctx.colorA, colorB: ctx.colorB, size: v.size, angle: v.angle,
+            drag: v.drag, background: ctx.texture }) },
     { id: 'flat-blob', kind: 'blob',
         params: [{ key: 'axis', pick: ['along', 'across'] }],
         make: (v, ctx) => {

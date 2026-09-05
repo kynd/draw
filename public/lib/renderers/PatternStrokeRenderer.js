@@ -11,6 +11,9 @@ import { seededRandom } from '../random.js';
  *   dots    uneven discs, 10 to 15 pixels, wobbled like circles drawn by hand.
  *   strips  longer and wider strokes than the dashes, laid out more roughly,
  *           so they sometimes overlap.
+ *   fringe  small strokes sprouting from the spine to both sides, swept from
+ *           the local direction by `angle`, alternating two colors; their
+ *           length follows the local width.
  *
  * Elements sit on rows across the width, each row walking the arc from the
  * start with its own seeded random sequence, so a growing stroke adds elements
@@ -20,15 +23,20 @@ import { seededRandom } from '../random.js';
 export class PatternStrokeRenderer extends StrokeRenderer {
     /**
      * @param {object} opts
-     * @param {'dashes'|'dots'|'strips'} [opts.mode]
+     * @param {'dashes'|'dots'|'strips'|'fringe'} [opts.mode]
      * @param {string} [opts.color]
-     * @param {number} [opts.size]  Scale on the elements' built-in pixel sizes.
+     * @param {string} [opts.colorB]  Second color the fringe alternates with.
+     * @param {number} [opts.size]   Scale on the elements' built-in pixel sizes.
+     * @param {number} [opts.angle]  The fringe's spread from the spine, in degrees.
      */
-    constructor({ mode = 'dashes', color = '#46608a', size = 1, samplesPerUnit = 90 } = {}) {
+    constructor({ mode = 'dashes', color = '#46608a', colorB = null, size = 1,
+        angle = 45, samplesPerUnit = 90 } = {}) {
         super();
         this.mode = mode;
         this.color = color;
+        this.colorB = colorB;
         this.size = size;
+        this.angle = angle;
         this.samplesPerUnit = samplesPerUnit;
     }
 
@@ -38,6 +46,7 @@ export class PatternStrokeRenderer extends StrokeRenderer {
         switch (this.mode) {
             case 'dots': return { len: 0.062, wid: 0.062, step: 1.15, row: 1.25, rot: 0, jitter: 0.5, vary: 0.42 };
             case 'strips': return { len: 0.21, wid: 0.05, step: 0.7, row: 1.5, rot: 0.3, jitter: 1.0, vary: 0.25 };
+            case 'fringe': return { len: 0, wid: 0.026, step: 2.6, row: 0, rot: 0.1, jitter: 0, vary: 0.15 };
             default: return { len: 0.1, wid: 0.028, step: 0.75, row: 2.2, rot: 0.18, jitter: 1.6, vary: 0.18 };
         }
     }
@@ -69,20 +78,21 @@ export class PatternStrokeRenderer extends StrokeRenderer {
         const nRows = Math.max(1, Math.round((wMax * 2) / rowSpacing));
 
         const positions = [], locals = [], dims = [], seeds = [], colors = [], dirs = [], indices = [];
-        const baseColor = new THREE.Color(this.color);
         const hsl = {};
-        baseColor.getHSL(hsl);
+        new THREE.Color(this.color).getHSL(hsl);
+        const hslB = {};
+        new THREE.Color(this.colorB ?? this.color).getHSL(hslB);
         const elColor = new THREE.Color();
         const dir = new THREE.Vector2();
         const perp = new THREE.Vector2();
         const pad = 0.006;
         let count = 0;
 
-        const pushElement = (cx, cy, angle, hl, hw, seed, shade) => {
+        const pushElement = (cx, cy, angle, hl, hw, seed, shade, base = hsl) => {
             dir.set(Math.cos(angle), Math.sin(angle));
             perp.set(-dir.y, dir.x);
             const el = hl + pad, ew = hw + pad;
-            const base = count * 4;
+            const first = count * 4;
             for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
                 positions.push(cx + dir.x * el * sx + perp.x * ew * sy,
                     cy + dir.y * el * sx + perp.y * ew * sy, 0);
@@ -90,12 +100,46 @@ export class PatternStrokeRenderer extends StrokeRenderer {
                 dims.push(hl, hw);
                 seeds.push(seed);
                 dirs.push(dir.x, dir.y);
-                elColor.setHSL(hsl.h, hsl.s, Math.min(0.92, Math.max(0.05, hsl.l * shade)));
+                elColor.setHSL(base.h, base.s, Math.min(0.92, Math.max(0.05, base.l * shade)));
                 colors.push(elColor.r, elColor.g, elColor.b);
             }
-            indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+            indices.push(first, first + 1, first + 2, first, first + 2, first + 3);
             count++;
         };
+
+        if (this.mode === 'fringe') {
+            // Small strokes sprouting from the spine to both sides, swept from
+            // the local direction by `angle`, alternating the two colors in a
+            // checker. Their length follows the local width, so the fringe
+            // fills the band the stroke was given. One walk, one seeded
+            // sequence, so a growing stroke only adds elements at the tip.
+            const rand = seededRandom((def.seed ?? 1) * 13.7 + 47.3);
+            const rad = this.angle * Math.PI / 180;
+            const spacing = wid * preset.step;
+            let s = rand() * spacing;
+            let k = 0;
+            while (s <= length) {
+                const { t, center, normal, tangent } = atArc(s);
+                const w = Math.max(def.widthLeftAt(t), 0.01);
+                for (const side of [1, -1]) {
+                    const dx = tangent.x * Math.cos(rad) + normal.x * side * Math.sin(rad);
+                    const dy = tangent.y * Math.cos(rad) + normal.y * side * Math.sin(rad);
+                    const angleEl = Math.atan2(dy, dx) + (rand() - 0.5) * 2 * preset.rot;
+                    const hl = (w * 0.7) * (0.85 + rand() * 0.3);
+                    const hw = (wid / 2) * (0.85 + rand() * 0.3);
+                    const out = hl * 0.85;
+                    const useB = (k + (side < 0 ? 1 : 0)) % 2 === 1;
+                    const shade = 1 - preset.vary / 2 + rand() * preset.vary;
+                    pushElement(center.x + Math.cos(angleEl) * out, center.y + Math.sin(angleEl) * out,
+                        angleEl, hl, hw, rand() * 100,
+                        this.colorB ? shade : (useB ? shade * 0.6 : shade),
+                        useB ? hslB : hsl);
+                }
+                s += spacing * (0.8 + 0.4 * rand());
+                k++;
+            }
+            return this._finish(def, positions, locals, dims, seeds, dirs, colors, indices, samples, length);
+        }
 
         // Each row has its own random sequence keyed by the stroke's seed and
         // the row index, so growing the stroke never reshuffles placed rows.
@@ -122,6 +166,10 @@ export class PatternStrokeRenderer extends StrokeRenderer {
             }
         }
 
+        return this._finish(def, positions, locals, dims, seeds, dirs, colors, indices, samples, length);
+    }
+
+    _finish(def, positions, locals, dims, seeds, dirs, colors, indices, samples, length) {
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
         geometry.setAttribute('aLocal', new THREE.Float32BufferAttribute(locals, 2));
