@@ -166,7 +166,7 @@ export const toolRegistry = [
     { id: 'pencil', kind: 'stroke',
         params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
-            cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            cap: 'rounded', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
         }) },
     { id: 'charcoal', kind: 'stroke',
@@ -184,7 +184,7 @@ export const toolRegistry = [
     { id: 'pencil-rainbow', kind: 'stroke',
         params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
-            cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'along',
+            cap: 'rounded', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'along',
             grain: v.grain, pressure: v.pressure,
             tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
         }) },
