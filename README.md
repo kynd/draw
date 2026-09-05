@@ -18,6 +18,7 @@ public/lib/          library code
   renderers/         one geometry or shading strategy per class
   demo/              shared demo scaffolding
 public/demos/<name>/ index.html + main.js per demo
+public/styles/       the shared demo UI stylesheet
 src/                 the Astro site
 ```
 
