@@ -28,6 +28,7 @@ import { CloudStrokeRenderer } from '../renderers/CloudStrokeRenderer.js';
 import { RoundedSquareStrokeRenderer } from '../renderers/RoundedSquareStrokeRenderer.js';
 import { SpikeStrokeRenderer } from '../renderers/SpikeStrokeRenderer.js';
 import { PatternStrokeRenderer } from '../renderers/PatternStrokeRenderer.js';
+import { WetPatternStrokeRenderer } from '../renderers/WetPatternStrokeRenderer.js';
 
 export const toolRegistry = [
     { id: 'ribbon', kind: 'stroke', params: [{ key: 'axis', pick: ['along', 'across'] }],
@@ -203,6 +204,18 @@ export const toolRegistry = [
     { id: 'pattern-strips', kind: 'stroke',
         params: [{ key: 'size', min: 0.6, max: 1.6 }],
         make: (v, ctx) => new PatternStrokeRenderer({ mode: 'strips', color: ctx.colorA, size: v.size }) },
+    { id: 'wet-dashes', kind: 'stroke',
+        params: [{ key: 'size', min: 0.6, max: 1.6 }, { key: 'drag', min: 10, max: 90 }],
+        make: (v, ctx) => new WetPatternStrokeRenderer({
+            mode: 'dashes', color: ctx.colorA, size: v.size, drag: v.drag, background: ctx.texture }) },
+    { id: 'wet-dots', kind: 'stroke',
+        params: [{ key: 'size', min: 0.6, max: 1.6 }, { key: 'drag', min: 10, max: 90 }],
+        make: (v, ctx) => new WetPatternStrokeRenderer({
+            mode: 'dots', color: ctx.colorA, size: v.size, drag: v.drag, background: ctx.texture }) },
+    { id: 'wet-strips', kind: 'stroke',
+        params: [{ key: 'size', min: 0.6, max: 1.6 }, { key: 'drag', min: 10, max: 90 }],
+        make: (v, ctx) => new WetPatternStrokeRenderer({
+            mode: 'strips', color: ctx.colorA, size: v.size, drag: v.drag, background: ctx.texture }) },
     { id: 'flat-blob', kind: 'blob',
         params: [{ key: 'axis', pick: ['along', 'across'] }],
         make: (v, ctx) => {

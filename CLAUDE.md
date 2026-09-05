@@ -110,6 +110,7 @@ public/lib/                            library code
                 DryMediaStrokeRenderer.js  DebossStrokeRenderer.js
                 CloudStrokeRenderer.js  RoundedSquareStrokeRenderer.js
                 SpikeStrokeRenderer.js  PatternStrokeRenderer.js
+                WetPatternStrokeRenderer.js
                 BlobRenderer.js  ShapedBlobRenderer.js  PaintBlobRenderer.js
                 WashBlobRenderer.js  MaterialBlobRenderer.js  StoneBlobRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js

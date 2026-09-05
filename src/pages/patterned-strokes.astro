@@ -37,6 +37,20 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
+  <section class="demo-section" id="wet-patterns">
+    <div class="demo-header">
+      <h2>Wet patterns</h2>
+      <a href={`${base}/demos/wet-patterns/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/wet-patterns/index.html?embedded`} title="Wet patterns" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The same placement, with the elements as wet marks that drag the background. A dash or strip walks backward along its own direction and averages what it finds, dragging harder toward its tail, so each element reads as a short pull of wet paint; a dot pulls the surrounding color inward, so it reads as a blot. The picked-up background is tinted with the element's color.</p>
+      <div class="jp">同じ配置で、要素を背景を引きずる濡れた印にしたものです。ダッシュと帯は自分の向きに沿って後方を歩き、そこで見つけたものを平均します。尾に向かうほど強く引きずるため、各要素は濡れた絵の具の短いひと引きとして読めます。点は周囲の色を内側へ引き込むため、しみとして読めます。拾われた背景は要素の色で染められます。</div>
+    </div>
+  </section>
+
   <section class="demo-section" id="try">
     <div class="demo-header">
       <h2>Try drawing</h2>

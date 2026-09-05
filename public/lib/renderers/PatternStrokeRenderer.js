@@ -68,7 +68,7 @@ export class PatternStrokeRenderer extends StrokeRenderer {
         const rowSpacing = wid * preset.row;
         const nRows = Math.max(1, Math.round((wMax * 2) / rowSpacing));
 
-        const positions = [], locals = [], dims = [], seeds = [], colors = [], indices = [];
+        const positions = [], locals = [], dims = [], seeds = [], colors = [], dirs = [], indices = [];
         const baseColor = new THREE.Color(this.color);
         const hsl = {};
         baseColor.getHSL(hsl);
@@ -89,6 +89,7 @@ export class PatternStrokeRenderer extends StrokeRenderer {
                 locals.push(el * sx, ew * sy);
                 dims.push(hl, hw);
                 seeds.push(seed);
+                dirs.push(dir.x, dir.y);
                 elColor.setHSL(hsl.h, hsl.s, Math.min(0.92, Math.max(0.05, hsl.l * shade)));
                 colors.push(elColor.r, elColor.g, elColor.b);
             }
@@ -126,6 +127,7 @@ export class PatternStrokeRenderer extends StrokeRenderer {
         geometry.setAttribute('aLocal', new THREE.Float32BufferAttribute(locals, 2));
         geometry.setAttribute('aDims', new THREE.Float32BufferAttribute(dims, 2));
         geometry.setAttribute('aSeed', new THREE.Float32BufferAttribute(seeds, 1));
+        geometry.setAttribute('aDir', new THREE.Float32BufferAttribute(dirs, 2));
         geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
         geometry.setIndex(indices);
         geometry.computeBoundingSphere();

@@ -298,6 +298,9 @@ The boundary pushed outward by a power of a triangle wave. The corner at each ti
 Elements sit on rows across the width, each row walking the arc from the start with its own seeded random sequence, so a growing stroke adds elements at the tip without reshuffling the ones already placed. Row offsets scale with the local width, so the fill follows the taper.
 <div class="jp">要素は幅方向の列の上に並び、各列はそれぞれのシード付き乱数列で始点から弧をたどります。そのため、伸びていくストロークは先端に要素を加えるだけで、すでに置かれたものを並べ直しません。列のオフセットは局所的な幅に比例するので、塗りはテーパーに従います。</div>
 
+`WetPatternStrokeRenderer` keeps the placement and swaps the elements' surface for wet marks that drag the background. A dash or strip walks backward along its own direction in screen space and averages what it finds, dragging harder toward its tail; a dot pulls the surrounding color inward, so it reads as a blot. Takes `background`, `drag` (reach in pixels), and `pigment` (the ratio of the element's color over the drag) alongside the base parameters.
+<div class="jp">`WetPatternStrokeRenderer`は配置をそのままに、要素の表面を背景を引きずる濡れた印に置き換えます。ダッシュと帯は画面上で自分の向きに沿って後方を歩き、そこで見つけたものを平均します。尾に向かうほど強く引きずります。点は周囲の色を内側へ引き込むため、しみとして読めます。基本のパラメータに加えて、`background`、`drag`（届く距離、ピクセル）、`pigment`（引きずりに対する要素の色の比率）を受け取ります。</div>
+
 ## Blob renderers
 
 Renderers that fill a closed region rather than a stroke. The geometry is only a quad over the contour's bounds; the shape lives in the fragment shader as the signed distance to the contour polygon, so a renderer can push the boundary, texture the interior, or shade it as a surface without new geometry. `BlobRenderer` is the base; contours come from `blobOutline` on the Path Effects page.
