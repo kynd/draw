@@ -23,6 +23,8 @@ Each major class, or each group of closely related classes, gets its own page. B
 <li><a href="/draw/documentation/curves"><strong>Curves</strong></a> — natural and Hobby curve constructions over resampled knots.<br /><span class="jp">再サンプリングしたノット上のnatural曲線とHobby曲線の構築。</span></li>
 <li><a href="/draw/documentation/path-effects"><strong>Path Effects</strong></a> — generators that derive new paths from a base path.<br /><span class="jp">元のパスから新しいパスを導く生成器。</span></li>
 <li><a href="/draw/documentation/palette"><strong>Palette</strong></a> — OKLCH palette generation and selection.<br /><span class="jp">OKLCHによるパレットの生成と選択。</span></li>
+<li><a href="/draw/documentation/drawing-tool"><strong>Drawing Tool</strong></a> — the reusable instrument: <code>setupDrawingTool</code>, the tool registry, and the mark builder.<br /><span class="jp">再利用可能な楽器。<code>setupDrawingTool</code>、ツールレジストリ、そしてマークビルダー。</span></li>
+<li><a href="/draw/documentation/player"><strong>Player</strong></a> — the drawing log, and the standalone playback and recording engine.<br /><span class="jp">描画のログと、独立した再生・録画エンジン。</span></li>
 <li><a href="/draw/documentation/writing-style"><strong>Writing Style</strong></a> — the conventions every explanation on this site follows.<br /><span class="jp">このサイトのすべての説明が従う規約。</span></li>
 </ul>
 
