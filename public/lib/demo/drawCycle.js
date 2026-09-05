@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { resampleEvery, catmullRomSpline, splitByTurn } from '../curves.js';
+import { STAIRCASE_WINDOW, STAIRCASE_STEP, STAIRCASE_CAP } from '../renderers/ShaderStrokeRenderer.js';
 import { DrawInput } from './drawInput.js';
 
 /**
@@ -121,17 +122,22 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         const group = new THREE.Group();
         const pieces = [];
         const committed = [];
+        // Each piece lifts past the top of the staircase the piece before it
+        // climbed, so a translucent single-coverage piece composites over its
+        // neighbors instead of losing the depth test where they cross; the
+        // dedupe stays confined to folds within one arc window.
+        let zLift = 0;
         runs.forEach((run, k) => {
             const path = smoothPiece(run);
             if (!path) return;
             const mark = build(path, run, seed + k);
             if (!mark) return;
-            // Each piece sits a hair above the one before. A single-coverage
-            // material dedupes overlaps at equal depth, which is wanted within
-            // a piece but not between pieces: without the stagger, an earlier
-            // piece's transparent skirt would claim the pixels and knock the
-            // next piece out where they cross.
-            mark.mesh.position.z += Math.min(k, 40) * 0.0005;
+            mark.mesh.position.z += Math.min(zLift, STAIRCASE_CAP * STAIRCASE_STEP);
+            let arc = 0;
+            for (let i = 1; i < run.length; i++) {
+                arc += Math.hypot(run[i].x - run[i - 1].x, run[i].y - run[i - 1].y);
+            }
+            zLift += (Math.floor(arc / STAIRCASE_WINDOW) + 1) * STAIRCASE_STEP;
             group.add(mark.mesh);
             pieces.push(mark);
             committed.push({ points: run, seed: seed + k });

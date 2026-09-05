@@ -3,6 +3,13 @@ import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
 
 const MIN_SAMPLES = 8;
 const MAX_SAMPLES = 2048;
+
+// The single-coverage z staircase: flat within an arc window, one step up per
+// window. The draw cycle uses the same constants to lift each split piece past
+// the one before, so the staircase continues across a whole gesture.
+export const STAIRCASE_WINDOW = 0.2;
+export const STAIRCASE_STEP = 0.0004;
+export const STAIRCASE_CAP = 100;
 const CAP_SEGMENTS = 16;
 
 /**
@@ -72,8 +79,20 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
         const indices = [];
         let maxWidth = 0;
 
+        // Single coverage dedupes overlaps at equal depth, which is wanted
+        // where a bend folds adjacent geometry over itself but not where the
+        // stroke genuinely crosses a part drawn earlier. Arc length tells the
+        // two apart: the z climbs in a staircase of arc windows, so a fold
+        // (neighbors, same window) stays equal and dedupes, while a crossing
+        // (a much later window) sits closer and composites over the earlier
+        // pass. See STAIRCASE_* below for the shared constants.
+        const lift = u => this.singleCoverage
+            ? Math.min(Math.floor(u * length / STAIRCASE_WINDOW), STAIRCASE_CAP) * STAIRCASE_STEP
+            : 0;
+
         const push = (p, nrm, tan, offset, u, cross) => {
-            positions.push(p.x + nrm.x * offset, p.y + nrm.y * offset, p.z + nrm.z * offset);
+            positions.push(p.x + nrm.x * offset, p.y + nrm.y * offset,
+                p.z + nrm.z * offset + lift(u));
             uvs.push(u, (cross / this.inflate + 1) / 2);
             crosses.push(cross);
             beyonds.push(0);
@@ -119,7 +138,7 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
                     positions.push(
                         p.x + nrm.x * lateral + tan.x * away,
                         p.y + nrm.y * lateral + tan.y * away,
-                        p.z + nrm.z * lateral + tan.z * away
+                        p.z + nrm.z * lateral + tan.z * away + lift(end.t)
                     );
                     uvs.push(end.t, (side + 1) / 2);
                     crosses.push(side * this.inflate);
