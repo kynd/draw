@@ -127,12 +127,16 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
                     int i1 = int(mod(floor(f) + 1.0, float(uColorCount)));
                     color = mix(listColor(i0), listColor(i1), smoothstep(0.25, 0.75, fract(f)));
                 } else if (uColorMode == 2) {
-                    // Each cell of the paper tooth takes its own color from the
-                    // list, so the flecks read as mixed pigment.
-                    vec2 cell = floor(screenUv() * uScreen / (uTooth * 1.5));
-                    float h = fract(sin(dot(cell, vec2(127.1, 311.7)) + uSeed * 13.0) * 43758.5453);
-                    color = listColor(int(h * float(uColorCount)));
-                    color *= 0.85 + 0.3 * fract(h * 7.31);
+                    // The color comes from a second noise at the tooth's own
+                    // scale, so each fleck of pigment takes its color from an
+                    // organic patch rather than a square cell, and a per-pixel
+                    // jitter varies the value like ground pigment.
+                    vec2 sp = screenUv() * uScreen;
+                    float cn = fbm(sp / (uTooth * 1.6) + vec2(uSeed * 13.0 + 31.0, uSeed * 7.0));
+                    cn = clamp((cn - 0.5) * 2.4 + 0.5, 0.0, 0.999);
+                    color = listColor(int(cn * float(uColorCount)));
+                    float sparkle = fract(sin(dot(sp, vec2(12.9898, 78.233)) + uSeed * 3.0) * 43758.5453);
+                    color *= 0.82 + 0.32 * sparkle;
                 }
                 gl_FragColor = vec4(color, alpha);
             }
