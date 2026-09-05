@@ -197,8 +197,15 @@ html, body {
 .dp-overlay-panel .dp-label, .dp-overlay-panel .dp-val { color: #ffffff; }
 .dp-overlay-panel + .dp-overlay-panel { top: 84px; }
 
-/* The drawing tool component */
+/* The drawing tool component. The canvas always fills the window; the
+   settings panel floats over its right edge, under the toggle button. */
 .demo-layout.drawing-tool .canvas-wrap { cursor: crosshair; touch-action: none; }
+.drawing-tool .dp-panel {
+  position: absolute; right: 0; top: 0; height: 100%;
+  padding-top: 44px;
+  z-index: 6;
+}
+.drawing-tool .dp-overlay-tr { z-index: 7; }
 
 .dp-overlay-panel .dp-range { background: rgba(255,255,255,0.35); }
 .dp-overlay-panel .dp-range::-webkit-slider-runnable-track { background: rgba(255,255,255,0.35); }
