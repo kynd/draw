@@ -156,6 +156,13 @@ export function resampleSpine(def, samplesPerUnit, minSamples = 8, maxSamples = 
     const ts = positions.map(s => s / length);
     const samples = ts.map(t => curve.getPointAt(t));
 
+    // The depth ramp: z rises very slightly from start to end, so where the
+    // stroke overlaps itself the later section, and the end cap built past the
+    // last sample, sit over the earlier ones, and the start cap sits under the
+    // body. Smaller than the draw cycle's per-piece stagger, so split pieces
+    // keep their own ordering above it.
+    samples.forEach((p, i) => { p.z += ts[i] * 0.00015; });
+
     const tangents = [];
     const normals  = [];
     let lastNormal = new THREE.Vector3(0, 1, 0);
