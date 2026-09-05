@@ -1,0 +1,41 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Coverage layer" slug="coverage-layer">
+  <div class="monologue">
+    What a translucent stroke does before it reaches the canvas
+  </div>
+
+  <div class="prose">
+    <p>A translucent stroke whose geometry covers a pixel more than once (a bend folding the ribbon over itself) would composite that pixel more than once and darken into creases. Marks that opt in render alone into an offscreen buffer with MAX blending first, so any number of coverings leaves the strongest single one, and the buffer then composites into the canvas exactly once. There are no thresholds, so there is nothing for a seam to form along.</p>
+    <div class="jp">半透明のストロークは、ジオメトリがピクセルを二度以上覆うと（曲がりでリボンが自分の上に折り重なる場所）、そのピクセルを二度以上合成して折り目のように濃くなってしまいます。オプトインした印はまず、オフスクリーンのバッファに単独で、MAXブレンディングで描画されます。何度覆われても最も強いひとつだけが残り、バッファはキャンバスへちょうど一度だけ合成されます。しきい値がないため、継ぎ目の生まれる場所がありません。</div>
+  </div>
+
+  <section class="demo-section" id="demo">
+    <div class="demo-header">
+      <h2>The buffer, live</h2>
+      <a href={`${base}/demos/coverage-layer/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/coverage-layer/index.html?embedded`} title="The buffer, live" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw on the left half with a broad charcoal; the right half shows the coverage buffer while you draw, its coverage drawn as brightness. Curl the stroke tightly over itself and watch both sides: the buffer holds the piece alone at uniform strength, its folds already reduced to single coverage, and the canvas receives exactly that.</p>
+      <div class="jp">左半分に幅の広い木炭で描いてみてください。描いている間、右半分にカバレッジバッファが、その被覆を明るさとして表示されます。ストロークを自分の上にきつく巻いて、両側を見比べてください。バッファは断片だけを均一な濃さで保持し、折り重なりはすでに単一の被覆に減らされていて、キャンバスはまさにそれを受け取ります。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>What the buffer holds:</strong> The piece currently being drawn, alone. A turn sharper than a threshold splits the drawn line, so after a sharp corner the buffer shows only the newest piece; finished pieces composite out of it and live on the canvas.</p>
+        <div class="jp"><strong>バッファが保持するもの：</strong>いま描かれている断片だけです。しきい値より鋭い曲がりで描いた線は分割されるため、鋭い角の後、バッファには最も新しい断片だけが映ります。描き終えた断片はバッファから合成されて出て、キャンバスの上で生き続けます。</div>
+
+        <p><strong>Why MAX:</strong> With MAX blending, a pixel covered twice by the same mark keeps the stronger covering instead of the sum, so the result of drawing a region twice equals drawing it once. Separate pieces and separate strokes still layer, because each composites from its own pass.</p>
+        <div class="jp"><strong>MAXの理由：</strong>MAXブレンディングでは、同じ印に二度覆われたピクセルは合計ではなく強い方の被覆を保つため、ある領域を二度描いた結果は一度描いた結果と等しくなります。別々の断片と別々のストロークは、それぞれ自分のパスから合成されるため、いまも重なり合います。</div>
+
+        <p>The mechanism is `singleCoverage` on the shader stroke base, documented on <a href={`${base}/documentation/renderers`}>Renderers</a>.</p>
+        <div class="jp">この仕組みはシェーダストロークの基底クラスの`singleCoverage`で、<a href={`${base}/documentation/renderers`}>Renderers</a>に記載されています。</div>
+      </details>
+    </div>
+  </section>
+</PageLayout>

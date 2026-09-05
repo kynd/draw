@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coverage layer — the buffer behind a translucent stroke</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../styles/demo-ui.css" />
+  <style>
+    .canvas-wrap { cursor: crosshair; touch-action: none; }
+    .buffer-shield {
+      position: absolute; top: 0; right: 0; width: 50%; height: 100%;
+      cursor: default;
+    }
+    .buffer-shield .dp-label {
+      position: absolute; top: 8px; left: 10px;
+      color: rgba(255,255,255,0.75);
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap">
+      <canvas id="canvas"></canvas>
+      <div class="buffer-shield" id="shield"><span class="dp-label">The coverage buffer</span></div>
+    </div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Coverage layer</span></div>
+      <div class="dp-note">Draw on the left half with a broad charcoal. The right half shows the layer's buffer, its coverage drawn as brightness: the piece being drawn, alone, with its self-overlaps already reduced to single coverage.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Stroke</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Width</span>
+        <input id="width" class="dp-range" type="range" min="20" max="70" step="1" value="48" />
+        <span class="dp-val" id="width-val">48</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Canvas</span></div>
+      <div class="dp-btn-row">
+        <button id="clear-btn" class="dp-btn secondary">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

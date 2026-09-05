@@ -94,6 +94,7 @@ src/pages/
   strokes.astro  dry-media-strokes.astro  shaped-strokes.astro
   patterned-strokes.astro
   fills.astro  stroke-processing.astro  pen-pressure.astro             every stroke demo, one section each
+  coverage-layer.astro                  explains the single-coverage buffer live
   drawing-tool.astro                    the combined instrument demo
   player.astro                          plays back a downloaded drawing log
 public/lib/                            library code
