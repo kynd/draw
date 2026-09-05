@@ -49,11 +49,14 @@ const TEMPLATE = /* html */`
       </select>
     </div>
 
+    <div class="dp-sub-label">Drawing</div>
+    <label class="dp-check"><input id="auto-check" type="checkbox" />Randomize tool on release</label>
+    <label class="dp-check"><input id="trace-check" type="checkbox" />Show pointer trace</label>
+
     <div class="dp-sub-label">Replay</div>
     <div class="dp-btn-row">
       <button id="replay-btn" class="dp-btn secondary">Replay</button>
       <button id="record-btn" class="dp-btn secondary">Record</button>
-      <button id="auto-btn" class="dp-toggle">Auto</button>
     </div>
 
     <div class="dp-sub-label">Guide image</div>
@@ -191,6 +194,8 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
         onRelease: () => {
             if (autoRandom && !replaying) autoReroll();
         },
+        // The pointer's own line stays off unless the checkbox turns it on.
+        pointerTrace: false,
     });
 
     // ------------------------------------------------------------------
@@ -439,7 +444,7 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     // and into a recording of it.
     function setReplayUi(on) {
         replayBtn.textContent = on ? 'Stop' : 'Replay';
-        for (const el of [clearBtn, autoBtn, recordBtn, guideBtn, guideToggle, advBtn]) {
+        for (const el of [clearBtn, autoCheck, traceCheck, recordBtn, guideBtn, guideToggle, advBtn]) {
             el.disabled = on;
         }
         preview.visible = !on && !uiHidden;
@@ -489,10 +494,13 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
         clearAll();
     });
 
-    const autoBtn = $('auto-btn');
-    autoBtn.addEventListener('click', () => {
-        autoRandom = !autoRandom;
-        autoBtn.classList.toggle('active', autoRandom);
+    const autoCheck = $('auto-check');
+    autoCheck.addEventListener('change', () => {
+        autoRandom = autoCheck.checked;
+    });
+    const traceCheck = $('trace-check');
+    traceCheck.addEventListener('change', () => {
+        cycle.setPointerTrace(traceCheck.checked);
     });
 
     // ------------------------------------------------------------------

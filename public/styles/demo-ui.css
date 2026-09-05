@@ -227,6 +227,14 @@ html, body {
   opacity: 0.4; pointer-events: none;
 }
 
+/* Checkbox row */
+.dp-check {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
+  font-family: var(--font-ui); font-size: 0.58rem; color: var(--demo-fg);
+  cursor: pointer; user-select: none;
+}
+.dp-check input { margin: 0; accent-color: var(--demo-fg); }
+
 /* Rotary dial — a circle and a line, dragged vertically */
 .dp-dials {
   position: absolute; left: 10px; top: 50%; transform: translateY(-50%);

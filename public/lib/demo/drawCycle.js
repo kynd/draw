@@ -25,9 +25,11 @@ import { DrawInput } from './drawInput.js';
  * recorded piece replays as its own stroke; `onRelease()` fires once after all
  * of a gesture's pieces have committed. `split` sets the turn threshold and
  * measurement window ({ angle, span }), or `false` to draw unsplit.
+ * `pointerTrace` shows or hides the pointer's own line; the returned
+ * `setPointerTrace` changes it later.
  */
 export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCommit, onRelease,
-    split = { angle: Math.PI * 0.55, span: 0.05 } }) {
+    split = { angle: Math.PI * 0.55, span: 0.05 }, pointerTrace = true }) {
     let seed = 1;
 
     let live = null;
@@ -73,7 +75,13 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     );
     pointerLine.position.z = 0.06;
     pointerLine.frustumCulled = false;
+    pointerLine.visible = pointerTrace;
     stage.add(pointerLine);
+
+    function setPointerTrace(on) {
+        pointerLine.visible = on;
+        stage.draw();
+    }
 
     function setPointerLine(points) {
         pointerLine.geometry.dispose();
@@ -148,5 +156,5 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
 
     const input = new DrawInput(canvas, stage, { minDistance, onChange: feed });
 
-    return { disposeGhost, input, feed };
+    return { disposeGhost, input, feed, setPointerTrace };
 }
