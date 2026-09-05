@@ -152,6 +152,9 @@ Effects that reach past the stroke, a watercolor bleed or a dragged smear, need 
 The cap is carved in the shader rather than built as geometry. Each end gets a plain quad running past the last sample, and `aBeyond` tells the shader how far past the end a fragment sits, in the same half-width units as `aCross`. `capDistance()` then returns the distance from the mark's centre line where 1.0 is the boundary, closing the shape at the ends the same way it closes at the sides. A square cap needs no room past the end, so it gets no quad at all.
 <div class="jp">端点はジオメトリとして作るのではなく、シェーダで削り出します。各終端には最後のサンプルより先へ伸びる単純な四角形が置かれ、`aBeyond` が、そのフラグメントが終端からどれだけ先にあるかを `aCross` と同じ半幅の単位で伝えます。`capDistance()` は線の中心からの距離を、1.0を境界として返し、側面と同じやり方で終端の形を閉じます。squareは終端の先に余地を必要としないため、四角形自体が作られません。</div>
 
+`singleCoverage` shades each pixel once per mark: where a tight curve folds the ribbon over itself, a translucent material would composite twice and darken into creases. A drawn stroke's geometry is flat in z, so a strict less depth test makes the first fragment claim the pixel and the overlapping ones fail. The dry media turn it on.
+<div class="jp">`singleCoverage`は、印ごとに各ピクセルを一度だけ陰影付けします。急なカーブでリボンが自分の上に折り重なる場所では、半透明のマテリアルは二度合成されて折り目のように濃くなります。描かれたストロークのジオメトリはzで平坦なので、厳密なlessの深度テストにより、最初のフラグメントがピクセルを取り、重なるフラグメントは落ちます。ドライメディアはこれをオンにします。</div>
+
 <div class="page-note">
 <p>Every subclass shader receives:</p>
 <ul>

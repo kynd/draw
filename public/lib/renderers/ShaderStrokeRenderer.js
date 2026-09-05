@@ -33,14 +33,21 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
      * @param {number}  [opts.samplesPerUnit]
      * @param {boolean} [opts.transparent]
      * @param {boolean} [opts.depthWrite]
+     * @param {boolean} [opts.singleCoverage]  Shade each pixel once per mark: where
+     *     the ribbon overlaps itself, a translucent material would composite twice
+     *     and darken into creases. A drawn stroke's geometry is flat in z, so a
+     *     strict less depth test makes the first fragment claim the pixel and the
+     *     overlapping ones fail.
      */
-    constructor({ cap = 'rounded', inflate = 1, samplesPerUnit = 120, transparent = true, depthWrite = true } = {}) {
+    constructor({ cap = 'rounded', inflate = 1, samplesPerUnit = 120, transparent = true,
+        depthWrite = true, singleCoverage = false } = {}) {
         super();
         this.cap = cap;
         this.inflate = inflate;
         this.samplesPerUnit = samplesPerUnit;
         this.transparent = transparent;
         this.depthWrite = depthWrite;
+        this.singleCoverage = singleCoverage;
     }
 
     /** Subclasses return their fragment shader body. */
@@ -148,7 +155,8 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
             fragmentShader: FRAGMENT_PRELUDE + this.fragmentShader(),
             side: THREE.DoubleSide,
             transparent: this.transparent,
-            depthWrite: this.depthWrite,
+            depthWrite: this.singleCoverage ? true : this.depthWrite,
+            depthFunc: this.singleCoverage ? THREE.LessDepth : THREE.LessEqualDepth,
         });
 
         const mesh = new THREE.Mesh(geometry, material);
