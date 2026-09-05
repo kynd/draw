@@ -217,6 +217,16 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     const toolValues = {};
     let toolIndex = 0;
 
+    // On a tool change, every color the tool uses besides the main one
+    // re-picks from the palette, so a new tool arrives with a fresh pairing
+    // while the chosen color holds.
+    function rerollSecondaryColors() {
+        const dark = state.palette?.entries.filter(e => e.L < 0.68) ?? [];
+        if (!dark.length) return;
+        state.colorB = dark[Math.floor(Math.random() * dark.length)].hex;
+        state.colors = [...dark].sort(() => Math.random() - 0.5).map(e => e.hex);
+    }
+
     // The tool dial walks a trail of rolled tools: the current one with ten
     // remembered on each side, so passing a tool over and dialing back finds
     // the same one, with the width, parameters, and pressure sensitivity it was
@@ -361,6 +371,7 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
         if (bucket === toolBucket) return;
         stepTrail(bucket - toolBucket);
         toolBucket = bucket;
+        rerollSecondaryColors();
         refreshPreview();
         syncPane();
     });
@@ -624,13 +635,14 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
         toolSelect.appendChild(o);
     });
     toolSelect.addEventListener('change', () => {
+        rerollSecondaryColors();
         selectToolByIndex(parseInt(toolSelect.value, 10));
         dialToolAdv.set(toolIndex, false);
     });
     // The dial is a shortcut through the same order as the dropdown, not a reroll.
     const dialToolAdv = new Dial($('dial-tool-adv'),
         { label: 'Tool', min: 0, max: registry.length - 1, value: 0,
-          onInput: i => { selectToolByIndex(i); toolSelect.value = String(toolIndex); } });
+          onInput: i => { rerollSecondaryColors(); selectToolByIndex(i); toolSelect.value = String(toolIndex); } });
 
     function syncPane() {
         toolSelect.value = String(toolIndex);
