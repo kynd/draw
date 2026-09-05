@@ -1,0 +1,70 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+---
+
+<PageLayout title="Dry media strokes" slug="dry-media-strokes">
+  <div class="monologue">
+    Pigment catching the tooth of the paper
+  </div>
+
+  <div class="prose">
+    <p>The path, the layout, and everything under Common to every demo on <a href={`${base}/strokes`}>Strokes</a> apply here unchanged.</p>
+    <div class="jp">パス、レイアウト、そして<a href={`${base}/strokes`}>Strokes</a>のCommon to every demoにある内容は、ここでもそのまま当てはまります。</div>
+  </div>
+
+  <section class="demo-section" id="dry-strokes">
+    <div class="demo-header">
+      <h2>Dry media strokes</h2>
+      <a href={`${base}/demos/dry-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/dry-strokes/index.html?embedded`} title="Dry media strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Pencil, charcoal, and pastel from top to bottom, drawn by one renderer at three settings.</p>
+      <div class="jp">上から順に鉛筆、木炭、パステルです。ひとつのレンダラを3つの設定で使い分けています。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Grain:</strong> Paper tooth is a screen-space noise thresholded against coverage, so a light line breaks into speckle instead of fading evenly.</p>
+        <div class="jp"><strong>粒子：</strong>紙の目は画面空間のノイズを被覆でしきい値処理したもので、薄い線は均一に薄れるのではなく、粒に割れて途切れます。</div>
+
+        <p><strong>Media:</strong> The three media are separated by tooth scale (in pixels), width, softness, and edge roughness.</p>
+        <div class="jp"><strong>画材：</strong>3つの画材は、紙の目のスケール（ピクセル単位）、幅、柔らかさ、輪郭の粗さによって描き分けられます。</div>
+
+        <p><strong>Pressure:</strong> A low-frequency noise along the stroke scales both the darkness and the drawn width.</p>
+        <div class="jp"><strong>筆圧：</strong>線に沿った低周波のノイズが、濃さと描かれる幅の両方を変化させます。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="multicolor">
+    <div class="demo-header">
+      <h2>Multicolor dry media</h2>
+      <a href={`${base}/demos/dry-colors/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/dry-colors/index.html?embedded`} title="Multicolor dry media" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The same media with a list of colors. The pencil shifts its color along the stroke, like a pencil with a rainbow lead; the charcoal and the pastel color each cell of the paper tooth from the list, so the flecks read as mixed pigment.</p>
+      <div class="jp">同じ画材に色のリストを与えたものです。鉛筆は、虹色の芯を持つ色鉛筆のように、ストロークに沿って色を変えます。木炭とパステルは紙の目のセルごとにリストから色を取るため、粒は混ざった顔料として読めます。</div>
+    </div>
+  </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-dry-media/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed" data-w="860" data-h="620" style="width:860px;height:620px">
+      <iframe src={`${base}/demos/try-dry-media/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw with the strokes on this page, in the drawing tool: the settings panel picks the tool, its colors, and its parameters exactly, the floating dials reroll the palette and walk a trail of rolled tools, and Clear, Replay, and recording work as on the Drawing Tool Demo page. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes as separate strokes. Strokes that read the background read the canvas itself, so they drag and bend what is already painted. With a pen tablet, pressure widens the stroke, up to three times the width at full sensitivity; a mouse is unaffected.</p>
+      <div class="jp">このページのストロークで、描画ツールの中で描いてみてください。設定パネルはツール、その色、パラメータを正確に選び、浮かぶ2つのダイヤルはパレットを引き直し、ロールされたツールの列をたどります。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭い曲がりで描いた線は分割されるため、速いジグザグは別々のストロークとして焼き込まれます。背景を読むストロークはキャンバスそのものを読むため、すでに描かれたものを引きずり、ゆがめます。ペンタブレットでは、筆圧がストロークを太らせます。感度が最大のとき、最大で3倍になります。マウスには影響しません。</div>
+    </div>
+  </section>
+</PageLayout>

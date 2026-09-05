@@ -91,7 +91,7 @@ src/content/pages/
     writing-style.md                   how every explanation on this site is written
 src/pages/
   palette-maker.astro                  demo/log pages, written as .astro for embeds
-  strokes.astro  more-strokes.astro  shaped-strokes.astro
+  strokes.astro  dry-media-strokes.astro  shaped-strokes.astro
   patterned-strokes.astro
   fills.astro  stroke-processing.astro  pen-pressure.astro             every stroke demo, one section each
   drawing-tool.astro                    the combined instrument demo

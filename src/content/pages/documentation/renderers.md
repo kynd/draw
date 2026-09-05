@@ -191,6 +191,9 @@ Pencil, charcoal, and pastel are one renderer at different settings. Paper tooth
 What separates the media is scale: `tooth` is in pixels, and `softness` and `edge` set the falloff and the wobble of the boundary. Takes `color`, `grain`, `tooth`, `pressure`, `softness`, `edge`, and `opacity`.
 <div class="jp">画材を分けるのはスケールです。`tooth`はピクセル単位で、`softness`と`edge`が輪郭の減衰と揺らぎを決めます。`color`、`grain`、`tooth`、`pressure`、`softness`、`edge`、`opacity`を受け取ります。</div>
 
+With a `colors` list (up to four are used) the media turn multicolor, by `blend`: `'along'` shifts the color along the stroke, cycling the list with arc length and blending at the joins, like a pencil with a rainbow lead; `'grain'` colors each cell of the paper tooth from the list, with a slight per-cell value jitter, so the flecks read as mixed pigment.
+<div class="jp">`colors`のリスト（最大4色まで使われます）を与えると、画材は`blend`に従って多色になります。`'along'`は、虹色の芯を持つ色鉛筆のように、弧長とともにリストを循環させ、継ぎ目で混ぜながらストロークに沿って色を変えます。`'grain'`は紙の目のセルごとにリストから色を取り、セルごとにわずかに明度を揺らすため、粒は混ざった顔料として読めます。</div>
+
 ## StrokeHalo
 
 A blurred silhouette of one or more strokes, presented as a tinted plane. Not a renderer: it takes finished meshes, renders them into a private low-resolution target, blurs there, and hands back a plane to place in the scene. Offset and dark beneath a stroke the plane is a drop shadow; wide and bright around one, a glow.

@@ -221,6 +221,35 @@ const demos = [
     </div>
   </section>
 
+  <section class="demo-section" id="shadow-strokes">
+    <div class="demo-header">
+      <h2>Shadow strokes</h2>
+      <a href={`${base}/demos/shadow-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/shadow-strokes/index.html?embedded`} title="Shadow strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Effects around the mark: a drop shadow, a debossed bevel, and a glow from top to bottom.</p>
+      <div class="jp">線のまわりの効果です。上から順にドロップシャドウ、デボス、グローです。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Drop shadow:</strong> A blurred silhouette of the stroke, offset and drawn beneath, so the mark reads as floating.</p>
+        <div class="jp"><strong>ドロップシャドウ：</strong>ストロークのぼかしたシルエットをずらして下に描くため、線は浮いて見えます。</div>
+
+        <p><strong>Deboss:</strong> A band inside the boundary darkens where its outward direction faces a fixed light, the shadow a cutout's lit rim casts onto its floor. There is no highlight, so the stroke reads as cut out of the paper.</p>
+        <div class="jp"><strong>デボス：</strong>輪郭の内側の帯は、外向きの方向が固定光源を向く場所で暗くなります。切り抜きの光の当たる縁が、底に落とす影です。ハイライトはないため、ストロークは紙から切り抜かれたように見えます。</div>
+
+        <p><strong>Glow:</strong> The same silhouette blurred wider, in the most saturated bright color of the palette.</p>
+        <div class="jp"><strong>グロー：</strong>同じシルエットをより広くぼかし、パレットの中で最も彩度の高い明るい色で描いたものです。</div>
+
+        <p>The shadow and the glow are one class, StrokeHalo. It renders the stroke into a private low-resolution target and blurs there, so the softness cannot fold with the path.</p>
+        <div class="jp">シャドウとグローはひとつのクラス、StrokeHaloです。ストロークを専用の低解像度ターゲットに描画してそこでぼかすため、柔らかさがパスに沿って折り重なることはありません。</div>
+      </details>
+    </div>
+  </section>
+
   <section class="demo-section" id="try">
     <div class="demo-header">
       <h2>Try drawing</h2>

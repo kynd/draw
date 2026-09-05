@@ -65,6 +65,35 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
+  <section class="demo-section" id="around-strokes">
+    <div class="demo-header">
+      <h2>Around strokes</h2>
+      <a href={`${base}/demos/around-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/around-strokes/index.html?embedded`} title="Around strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Paths derived from the base path (spiral, entangled, and scattered from top to bottom), drawn with the brush renderer. The count of sub-strokes and their offset from the base both follow the width.</p>
+      <div class="jp">元のパスから導いたパスです（上から順にspiral、entangled、scattered）。描画にはbrushレンダラを使います。サブストロークの本数と元のパスからのオフセットは、どちらも幅に従います。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Spiral:</strong> The tip circles with sin and cos while its center moves along the base path, producing one continuous coil.</p>
+        <div class="jp"><strong>スパイラル：</strong>中心が元のパスに沿って進むあいだ、先端がsinとcosで円を描き、一本の連続したコイルになります。</div>
+
+        <p><strong>Entangled:</strong> Copies of the path are offset by seeded low-frequency waves, and their endpoints pull back toward the base so the bundle reads as one gesture.</p>
+        <div class="jp"><strong>もつれ：</strong>パスの複製がシード付きの低周波の波でずらされます。端点は元のパスへ引き戻されるため、束はひとつの身振りとして読めます。</div>
+
+        <p><strong>Scattered:</strong> Short strokes copy small segments of the base and move sideways by a seeded offset.</p>
+        <div class="jp"><strong>散布：</strong>短いストロークが元のパスの一部を写し取り、シード付きのオフセットで横へ移動します。</div>
+
+        <p>The generators return plain point arrays, documented on <a href={`${base}/documentation/path-effects`}>Path Effects</a>, so any renderer can draw the result.</p>
+        <div class="jp">生成器は通常の点の配列を返すため（<a href={`${base}/documentation/path-effects`}>Path Effects</a>に記載）、どのレンダラでも結果を描画できます。</div>
+      </details>
+    </div>
+  </section>
+
   <section class="demo-section" id="try">
     <div class="demo-header">
       <h2>Try drawing</h2>

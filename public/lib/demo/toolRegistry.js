@@ -181,6 +181,27 @@ export const toolRegistry = [
             cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 7.0, softness: 0.65, edge: 0.55, opacity: 0.95,
         }) },
+    { id: 'pencil-rainbow', kind: 'stroke',
+        params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'along',
+            grain: v.grain, pressure: v.pressure,
+            tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
+        }) },
+    { id: 'charcoal-multi', kind: 'stroke',
+        params: [{ key: 'grain', min: 0.4, max: 0.9 }, { key: 'pressure', min: 0.2, max: 0.7 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',
+            grain: v.grain, pressure: v.pressure,
+            tooth: 4.5, softness: 0.5, edge: 0.3, opacity: 0.92,
+        }) },
+    { id: 'pastel-multi', kind: 'stroke',
+        params: [{ key: 'grain', min: 0.5, max: 1 }, { key: 'pressure', min: 0.2, max: 0.6 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',
+            grain: v.grain, pressure: v.pressure,
+            tooth: 7.0, softness: 0.65, edge: 0.55, opacity: 0.95,
+        }) },
     { id: 'deboss', kind: 'stroke',
         params: [{ key: 'bevel', min: 0.2, max: 1 }, { key: 'amount', min: 0.3, max: 1.4 }],
         make: (v, ctx) => new DebossStrokeRenderer({
