@@ -3,13 +3,6 @@ import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
 
 const MIN_SAMPLES = 8;
 const MAX_SAMPLES = 2048;
-
-// The single-coverage z staircase: flat within an arc window, one step up per
-// window. The draw cycle uses the same constants to lift each split piece past
-// the one before, so the staircase continues across a whole gesture.
-export const STAIRCASE_WINDOW = 0.2;
-export const STAIRCASE_STEP = 0.0004;
-export const STAIRCASE_CAP = 100;
 const CAP_SEGMENTS = 16;
 
 /**
@@ -42,9 +35,8 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
      * @param {boolean} [opts.depthWrite]
      * @param {boolean} [opts.singleCoverage]  Shade each pixel once per mark: where
      *     the ribbon overlaps itself, a translucent material would composite twice
-     *     and darken into creases. A drawn stroke's geometry is flat in z, so a
-     *     strict less depth test makes the first fragment claim the pixel and the
-     *     overlapping ones fail.
+     *     and darken into creases. The mark is flagged for the coverage layer,
+     *     which renders it alone with MAX blending and composites it once.
      */
     constructor({ cap = 'rounded', inflate = 1, samplesPerUnit = 120, transparent = true,
         depthWrite = true, singleCoverage = false } = {}) {
@@ -79,20 +71,8 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
         const indices = [];
         let maxWidth = 0;
 
-        // Single coverage dedupes overlaps at equal depth, which is wanted
-        // where a bend folds adjacent geometry over itself but not where the
-        // stroke genuinely crosses a part drawn earlier. Arc length tells the
-        // two apart: the z climbs in a staircase of arc windows, so a fold
-        // (neighbors, same window) stays equal and dedupes, while a crossing
-        // (a much later window) sits closer and composites over the earlier
-        // pass. See STAIRCASE_* below for the shared constants.
-        const lift = u => this.singleCoverage
-            ? Math.min(Math.floor(u * length / STAIRCASE_WINDOW), STAIRCASE_CAP) * STAIRCASE_STEP
-            : 0;
-
         const push = (p, nrm, tan, offset, u, cross) => {
-            positions.push(p.x + nrm.x * offset, p.y + nrm.y * offset,
-                p.z + nrm.z * offset + lift(u));
+            positions.push(p.x + nrm.x * offset, p.y + nrm.y * offset, p.z + nrm.z * offset);
             uvs.push(u, (cross / this.inflate + 1) / 2);
             crosses.push(cross);
             beyonds.push(0);
@@ -138,7 +118,7 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
                     positions.push(
                         p.x + nrm.x * lateral + tan.x * away,
                         p.y + nrm.y * lateral + tan.y * away,
-                        p.z + nrm.z * lateral + tan.z * away + lift(end.t)
+                        p.z + nrm.z * lateral + tan.z * away
                     );
                     uvs.push(end.t, (side + 1) / 2);
                     crosses.push(side * this.inflate);
@@ -174,11 +154,11 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
             fragmentShader: FRAGMENT_PRELUDE + this.fragmentShader(),
             side: THREE.DoubleSide,
             transparent: this.transparent,
-            depthWrite: this.singleCoverage ? true : this.depthWrite,
-            depthFunc: this.singleCoverage ? THREE.LessDepth : THREE.LessEqualDepth,
+            depthWrite: this.depthWrite,
         });
 
         const mesh = new THREE.Mesh(geometry, material);
+        if (this.singleCoverage) mesh.userData.coverageLayer = true;
         mesh.userData.samples = samples;
         mesh.userData.stats = {
             sampleCount: n,

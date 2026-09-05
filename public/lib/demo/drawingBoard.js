@@ -208,11 +208,16 @@ export class DrawingBoard {
 
         this._bakeScene.clear();
         this._bakeScene.add(this._copyPlane);
+        const layered = [];
         meshes.forEach(mesh => {
             // A mesh baked straight from input may never have been through a stage
             // draw, so its screen uniforms are still the defaults.
             this.stage.syncScreenUniforms(mesh);
             mesh.traverse(child => {
+                if (child.isMesh && child.userData.coverageLayer) {
+                    layered.push(child);
+                    return;
+                }
                 const materials = Array.isArray(child.material) ? child.material : [child.material];
                 materials.forEach(m => {
                     if (!m || !m.transparent) return;
@@ -226,6 +231,7 @@ export class DrawingBoard {
             });
             this._bakeScene.add(mesh);
         });
+        layered.forEach(child => { child.visible = false; });
 
         const previous = renderer.getRenderTarget();
         const previousAuto = renderer.autoClear;
@@ -233,6 +239,14 @@ export class DrawingBoard {
         renderer.setRenderTarget(back);
         renderer.clear(true, true, false);
         renderer.render(this._bakeScene, camera);
+
+        // Coverage-layer marks bake one at a time through the shared layer,
+        // so their self-overlaps keep single coverage in the bake too.
+        layered.forEach(child => {
+            child.visible = true;
+            this.stage.coverage.draw(renderer, camera, child, back);
+        });
+
         renderer.setRenderTarget(previous);
         renderer.autoClear = previousAuto;
 

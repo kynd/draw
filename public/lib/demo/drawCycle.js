@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { resampleEvery, catmullRomSpline, splitByTurn } from '../curves.js';
-import { STAIRCASE_WINDOW, STAIRCASE_STEP, STAIRCASE_CAP } from '../renderers/ShaderStrokeRenderer.js';
 import { DrawInput } from './drawInput.js';
 
 /**
@@ -77,6 +76,8 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     pointerLine.position.z = 0.06;
     pointerLine.frustumCulled = false;
     pointerLine.visible = pointerTrace;
+    // Drawn in the stage's overlay pass, above the coverage-layer composites.
+    pointerLine.userData.overlay = true;
     stage.add(pointerLine);
 
     function setPointerTrace(on) {
@@ -122,22 +123,15 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         const group = new THREE.Group();
         const pieces = [];
         const committed = [];
-        // Each piece lifts past the top of the staircase the piece before it
-        // climbed, so a translucent single-coverage piece composites over its
-        // neighbors instead of losing the depth test where they cross; the
-        // dedupe stays confined to folds within one arc window.
-        let zLift = 0;
         runs.forEach((run, k) => {
             const path = smoothPiece(run);
             if (!path) return;
             const mark = build(path, run, seed + k);
             if (!mark) return;
-            mark.mesh.position.z += Math.min(zLift, STAIRCASE_CAP * STAIRCASE_STEP);
-            let arc = 0;
-            for (let i = 1; i < run.length; i++) {
-                arc += Math.hypot(run[i].x - run[i - 1].x, run[i].y - run[i - 1].y);
-            }
-            zLift += (Math.floor(arc / STAIRCASE_WINDOW) + 1) * STAIRCASE_STEP;
+            // A hair of stagger keeps the pieces' draw order deterministic;
+            // single-coverage pieces composite through the coverage layer in
+            // this order, later pieces over earlier ones.
+            mark.mesh.position.z += Math.min(k, 40) * 0.0002;
             group.add(mark.mesh);
             pieces.push(mark);
             committed.push({ points: run, seed: seed + k });

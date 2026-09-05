@@ -242,6 +242,8 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     // Preview: a box at the bottom left showing the current tool on a wiggle.
     const preview = new THREE.Group();
     preview.position.z = 0.2;
+    // Overlays render above the coverage-layer composites.
+    preview.userData.overlay = true;
     stage.add(preview);
     // Semi-transparent black, so drawing behind the preview shows through.
     const previewPaper = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
@@ -311,6 +313,7 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
         if (mark) {
             mark.mesh.position.z = 0.21;
             mark.mesh.visible = !uiHidden && !replaying;
+            mark.mesh.userData.overlay = true;
             stage.add(mark.mesh);
             previewMark = mark;
         }
@@ -739,6 +742,7 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
                 })
             );
             guideMesh.position.z = 1.4;
+            guideMesh.userData.overlay = true;
             stage.add(guideMesh);
             fitGuide();
             guideRow.style.display = '';
