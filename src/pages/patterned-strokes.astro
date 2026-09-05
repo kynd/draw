@@ -94,6 +94,41 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
+  <section class="demo-section" id="graphic-strokes">
+    <div class="demo-header">
+      <h2>Graphic strokes</h2>
+      <a href={`${base}/demos/graphic-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/graphic-strokes/index.html?embedded`} title="Graphic strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Strokes that keep the path, the width, and the resampling and throw away the ribbon. Top to bottom: grid cells, large flat facets, and parallel lanes.</p>
+      <div class="jp">パス、幅、再サンプリングを保ったまま、リボンだけを捨てたストロークです。上から順に、グリッドのセル、大きな単色の面、平行なレーンです。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p>The same StrokeDef drives all three; swapping the renderer is the only change.</p>
+        <div class="jp">3つとも同じStrokeDefが駆動し、変わるのはレンダラだけです。</div>
+
+        <p><strong>Caps:</strong> Ends are closed by extending vertices along the tangent by a cap profile. For a rounded cap the profile is a circle, so outer lanes and facets stop short of the middle ones.</p>
+        <div class="jp"><strong>端点：</strong>終端は、接線方向に頂点を端点プロファイルの分だけ伸ばして閉じます。roundedではプロファイルが円になるため、外側のレーンや面は中央のものより手前で止まります。</div>
+
+        <p><strong>Pixels:</strong> Cells are stamped from the spine outward, deduplicated by grid coordinate. The inside test uses signed distance across the spine, so the left and right widths stay independent.</p>
+        <div class="jp"><strong>ピクセル：</strong>セルはスパインから外向きにスタンプされ、グリッド座標で重複が除かれます。内外の判定にはスパインを挟んだ符号付きの距離を使うため、左右の幅は独立したままです。</div>
+
+        <p><strong>Facets:</strong> The spine is resampled coarsely and each triangle takes one flat color. Vertices are jittered across the width, so the silhouette breaks along with the shading.</p>
+        <div class="jp"><strong>面：</strong>スパインは粗く再サンプリングされ、各三角形は単色を取ります。頂点は幅方向にばらつかされるため、陰影だけでなく輪郭も崩れます。</div>
+
+        <p><strong>Lanes:</strong> Each lane is its own thin ribbon offset across the width, so the lanes follow the curve.</p>
+        <div class="jp"><strong>レーン：</strong>各レーンは幅方向にずらされた独自の細いリボンなので、レーンは曲線に沿って進みます。</div>
+
+        <p><strong>Seeded randomness:</strong> Colors and dropped cells come from a seeded generator, not <code>Math.random</code>, so the same settings redraw identically.</p>
+        <div class="jp"><strong>シード付きランダム：</strong>色の配置とセルの間引きは<code>Math.random</code>ではなくシード付きの生成器から得られるため、同じ設定からは同じ絵が描き直されます。</div>
+      </details>
+    </div>
+  </section>
+
   <section class="demo-section" id="try">
     <div class="demo-header">
       <h2>Try drawing</h2>

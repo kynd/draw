@@ -205,6 +205,14 @@ A blurred silhouette of one or more strokes, presented as a tinted plane. Not a 
 Blurring a silhouette is the second design. Expanding the stroke's own geometry outward was the first, and it folds wherever the reach exceeds the curvature radius, which every soft shadow on a wavy path does. Takes `color`, `opacity`, `blur`, `downsample`, and `additive`; `update()` runs before the frame, from the stage's pre-render hook.
 <div class="jp">シルエットをぼかすのは2番目の設計です。最初はストローク自身のジオメトリを外へ広げる方式でしたが、届く距離が曲率半径を超える場所で必ず折り重なります。うねるパスの上の柔らかい影では、それが必ず起こります。`color`、`opacity`、`blur`、`downsample`、`additive`を受け取り、`update()`はステージのpre-renderフックからフレームの前に実行されます。</div>
 
+## HaloStrokeRenderer
+
+A ribbon with a soft silhouette around it, built as one mark. The silhouette is a shader falloff on inflated geometry rather than StrokeHalo's blurred target, so the mark builds once like any other renderer's and needs no per-frame pass. Two modes: `shadow` puts the silhouette dark and offset toward the lower right, so the mark reads as floating over the canvas; `glow` puts it wide, bright, and centered. Takes `mode`, `color` (the ribbon), `haloColor`, `opacity`, and `spread`, the silhouette's reach in widths past the mark.
+<div class="jp">まわりに柔らかいシルエットを持つリボンを、ひとつの印として作ります。シルエットはStrokeHaloのぼかしターゲットではなく、広げたジオメトリの上のシェーダの減衰なので、印は他のレンダラと同じく一度だけ作られ、フレームごとの処理を必要としません。2つのモードがあります。`shadow`はシルエットを暗くして右下へずらし、印はキャンバスの上に浮いて見えます。`glow`は広く、明るく、中央に置きます。`mode`、`color`（リボンの色）、`haloColor`、`opacity`、`spread`（シルエットが印の外へ届く距離、幅単位）を受け取ります。</div>
+
+The falloff folds with the path where the reach exceeds the curvature radius, which is why StrokeHalo blurs in a target instead. At the shadow's default reach the folding is not visible; the glow pushes further and shows it on tight curls.
+<div class="jp">減衰は、届く距離が曲率半径を超える場所でパスに沿って折り重なります。StrokeHaloがターゲットでぼかすのはそのためです。shadowの既定の距離では折り重なりは見えません。glowはより遠くまで届くため、きつい渦では見えます。</div>
+
 ## DebossStrokeRenderer
 
 A flat fill with an inner shadow, so the stroke reads as cut out of the paper. A band inside the boundary darkens where its outward direction faces a fixed light, the shadow the lit rim of a cutout casts onto its floor. There is no highlight: a hole has nothing to catch the light with. The outward direction comes from the stroke frame, so the ends shade the same way the sides do. Takes `color`, `bevel`, `amount`, and `angle`.
@@ -306,6 +314,11 @@ Elements sit on rows across the width, each row walking the arc from the start w
 
 `WetPatternStrokeRenderer` keeps the placement and swaps the elements' surface for wet marks that drag the background. A dash or strip walks backward along its own direction in screen space and averages what it finds, dragging harder toward its tail; a dot pulls the surrounding color inward, so it reads as a blot. Takes `background`, `drag` (reach in pixels), and `pigment` (the ratio of the element's color over the drag) alongside the base parameters.
 <div class="jp">`WetPatternStrokeRenderer`は配置をそのままに、要素の表面を背景を引きずる濡れた印に置き換えます。ダッシュと帯は画面上で自分の向きに沿って後方を歩き、そこで見つけたものを平均します。尾に向かうほど強く引きずります。点は周囲の色を内側へ引き込むため、しみとして読めます。基本のパラメータに加えて、`background`、`drag`（届く距離、ピクセル）、`pigment`（引きずりに対する要素の色の比率）を受け取ります。</div>
+
+## AroundStrokeRenderer
+
+Paths derived from the drawn path, each drawn with the brush renderer. Three modes: `spiral` (the tip circles while its center moves along the path, one continuous coil), `entangled` (copies of the path offset by seeded low-frequency waves, their endpoints pulled back toward the base), and `scattered` (short strokes copying small segments of the path, moved sideways by a seeded offset). The count of sub-strokes and their offset from the base both follow the width, so a heavier stroke spreads further and splits into more parts rather than only thickening. The width is capped at 0.03 world units for the derivation, the range the formulas are calibrated for; past it the counts grow without bound. Takes `mode`, `colorA`, `colorB` (alternated between sub-strokes), `reach` (how far the derived paths stray, in widths), and `turns` for the spiral. The generators are documented on the Path Effects page.
+<div class="jp">描かれたパスから導いたパスを、それぞれbrushレンダラで描きます。3つのモードがあります。`spiral`（中心がパスに沿って進むあいだ、先端が円を描く、一本の連続したコイル）、`entangled`（シード付きの低周波の波でずらされたパスの複製で、端点は元のパスへ引き戻されます）、`scattered`（元のパスの一部を写し取り、シード付きのオフセットで横へ移動する短いストローク）。サブストロークの本数と元のパスからのオフセットはどちらも幅に従うため、太いストロークはただ太るのではなく、より遠くへ広がり、より多くの部分に分かれます。導出に使う幅は0.03ワールド単位で頭打ちになります。式が調整された範囲であり、それを超えると本数は際限なく増えるからです。`mode`、`colorA`、`colorB`（サブストロークごとに交互）、`reach`（導いたパスが離れる距離、幅単位）、そしてspiralの`turns`を受け取ります。生成器はPath Effectsページに記載しています。</div>
 
 ## Blob renderers
 

@@ -29,6 +29,8 @@ import { RoundedSquareStrokeRenderer } from '../renderers/RoundedSquareStrokeRen
 import { SpikeStrokeRenderer } from '../renderers/SpikeStrokeRenderer.js';
 import { PatternStrokeRenderer } from '../renderers/PatternStrokeRenderer.js';
 import { WetPatternStrokeRenderer } from '../renderers/WetPatternStrokeRenderer.js';
+import { AroundStrokeRenderer } from '../renderers/AroundStrokeRenderer.js';
+import { HaloStrokeRenderer } from '../renderers/HaloStrokeRenderer.js';
 
 export const toolRegistry = [
     { id: 'ribbon', kind: 'stroke', params: [{ key: 'axis', pick: ['along', 'across'] }],
@@ -43,6 +45,18 @@ export const toolRegistry = [
         params: [{ key: 'bristles', min: 6, max: 50, step: 1 }, { key: 'rough', min: 0, max: 1 }, { key: 'dry', min: 0, max: 0.7 }],
         make: (v, ctx) => new BrushStrokeRenderer({
             cap: 'ragged', colorA: ctx.colorA, colorB: ctx.colorB,
+            bristles: v.bristles, rough: v.rough, dry: v.dry,
+        }) },
+    { id: 'brush-rounded', kind: 'stroke',
+        params: [{ key: 'bristles', min: 6, max: 50, step: 1 }, { key: 'rough', min: 0, max: 1 }, { key: 'dry', min: 0, max: 0.7 }],
+        make: (v, ctx) => new BrushStrokeRenderer({
+            cap: 'rounded', colorA: ctx.colorA, colorB: ctx.colorB,
+            bristles: v.bristles, rough: v.rough, dry: v.dry,
+        }) },
+    { id: 'brush-square', kind: 'stroke',
+        params: [{ key: 'bristles', min: 6, max: 50, step: 1 }, { key: 'rough', min: 0, max: 1 }, { key: 'dry', min: 0, max: 0.7 }],
+        make: (v, ctx) => new BrushStrokeRenderer({
+            cap: 'square', colorA: ctx.colorA, colorB: ctx.colorB,
             bristles: v.bristles, rough: v.rough, dry: v.dry,
         }) },
     { id: 'watercolor', kind: 'stroke',
@@ -62,6 +76,18 @@ export const toolRegistry = [
         params: [{ key: 'paint', min: 0.5, max: 1 }, { key: 'drag', min: 0, max: 120 }, { key: 'noise', min: 0.1, max: 1 }],
         make: (v, ctx) => new OilStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, background: ctx.texture,
+            paint: v.paint, drag: v.drag, noise: v.noise,
+        }) },
+    { id: 'oil-square', kind: 'stroke',
+        params: [{ key: 'paint', min: 0.5, max: 1 }, { key: 'drag', min: 0, max: 120 }, { key: 'noise', min: 0.1, max: 1 }],
+        make: (v, ctx) => new OilStrokeRenderer({
+            cap: 'square', color: ctx.colorA, background: ctx.texture,
+            paint: v.paint, drag: v.drag, noise: v.noise,
+        }) },
+    { id: 'oil-ragged', kind: 'stroke',
+        params: [{ key: 'paint', min: 0.5, max: 1 }, { key: 'drag', min: 0, max: 120 }, { key: 'noise', min: 0.1, max: 1 }],
+        make: (v, ctx) => new OilStrokeRenderer({
+            cap: 'ragged', color: ctx.colorA, background: ctx.texture,
             paint: v.paint, drag: v.drag, noise: v.noise,
         }) },
     { id: 'chrome', kind: 'stroke',
@@ -91,6 +117,12 @@ export const toolRegistry = [
         make: (v, ctx) => new WashBlobRenderer({
             color: ctx.colorA, background: ctx.texture,
             pigment: v.pigment, feather: 0.05, rim: 0.2, flow: v.flow, wet: v.wet,
+        }) },
+    { id: 'watery-wash', kind: 'blob',
+        params: [{ key: 'wet', min: 0.7, max: 0.95 }, { key: 'flow', min: 0.01, max: 0.05 }],
+        make: (v, ctx) => new WashBlobRenderer({
+            color: ctx.colorA, background: ctx.texture,
+            pigment: 0.35, feather: 0.1, rim: 0.18, flow: v.flow, wet: v.wet,
         }) },
     { id: 'metal', kind: 'blob',
         params: [{ key: 'relief', min: 0.1, max: 0.9 }],
@@ -207,6 +239,17 @@ export const toolRegistry = [
         make: (v, ctx) => new DebossStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, bevel: v.bevel, amount: v.amount,
         }) },
+    { id: 'shadow', kind: 'stroke',
+        params: [{ key: 'spread', min: 0.4, max: 1.4 }, { key: 'opacity', min: 0.2, max: 0.6 }],
+        make: (v, ctx) => new HaloStrokeRenderer({
+            mode: 'shadow', color: ctx.colorA, spread: v.spread, opacity: v.opacity,
+        }) },
+    { id: 'glow', kind: 'stroke',
+        params: [{ key: 'spread', min: 1, max: 2.4 }, { key: 'opacity', min: 0.5, max: 1 }],
+        make: (v, ctx) => new HaloStrokeRenderer({
+            mode: 'glow', color: ctx.colorA, haloColor: ctx.tintLight,
+            spread: v.spread, opacity: v.opacity,
+        }) },
     { id: 'cloud', kind: 'stroke',
         params: [{ key: 'blob', min: 0.35, max: 0.8 }, { key: 'offset', min: 0.1, max: 0.6 }],
         make: (v, ctx) => new CloudStrokeRenderer({ color: ctx.colorA, blob: v.blob, offset: v.offset }) },
@@ -255,6 +298,21 @@ export const toolRegistry = [
         make: (v, ctx) => new WetPatternStrokeRenderer({
             mode: 'fringe', color: ctx.colorA, colorB: ctx.colorB, size: v.size, angle: v.angle,
             drag: v.drag, background: ctx.texture }) },
+    { id: 'around-spiral', kind: 'stroke',
+        params: [{ key: 'turns', min: 8, max: 30, step: 1 }, { key: 'reach', min: 4, max: 10 }],
+        make: (v, ctx) => new AroundStrokeRenderer({
+            mode: 'spiral', colorA: ctx.colorA, colorB: ctx.colorB, turns: v.turns, reach: v.reach,
+        }) },
+    { id: 'around-entangled', kind: 'stroke',
+        params: [{ key: 'reach', min: 4, max: 10 }],
+        make: (v, ctx) => new AroundStrokeRenderer({
+            mode: 'entangled', colorA: ctx.colorA, colorB: ctx.colorB, reach: v.reach,
+        }) },
+    { id: 'around-scattered', kind: 'stroke',
+        params: [{ key: 'reach', min: 4, max: 10 }],
+        make: (v, ctx) => new AroundStrokeRenderer({
+            mode: 'scattered', colorA: ctx.colorA, colorB: ctx.colorB, reach: v.reach,
+        }) },
     { id: 'flat-blob', kind: 'blob',
         params: [{ key: 'axis', pick: ['along', 'across'] }],
         make: (v, ctx) => {

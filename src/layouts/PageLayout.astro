@@ -27,28 +27,20 @@ const navItems: NavItem[] = [
       { label: 'Distribution of the steps',  href: '#distribution-of-the-steps' },
     ]
   },
-  { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
-    subLinks: [
-      { label: 'Curve smoothing', href: '#smoothing' },
-      { label: 'Local smoothing', href: '#local-smoothing' },
-      { label: 'Stroke splitting', href: '#splitting' },
-      { label: 'Smoothed brush',  href: '#smoothed-brush' },
-      { label: 'Split brush',     href: '#split-brush' },
-      { label: 'Blob drawing',    href: '#blobs' },
-      { label: 'Tight blob',      href: '#tight-blobs' },
-    ]
-  },
-  { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer' },
   { label: 'Strokes', href: `${base}/strokes`, slug: 'strokes',
     subLinks: [
       { label: 'Common to every demo', href: '#common-to-every-demo' },
       { label: 'Basic strokes',    href: '#basic-strokes' },
       { label: 'Brush strokes',    href: '#brush-strokes' },
+      { label: 'Shadow strokes',   href: '#shadow-strokes' },
+      { label: 'Try drawing',      href: '#try' },
+    ]
+  },
+  { label: 'Wet & material strokes', href: `${base}/wet-material-strokes`, slug: 'wet-material-strokes',
+    subLinks: [
       { label: 'Wet strokes',      href: '#wet-strokes' },
       { label: 'Oil strokes',      href: '#oil-strokes' },
       { label: 'Material strokes', href: '#material-strokes' },
-      { label: 'Graphic strokes',  href: '#graphic-strokes' },
-      { label: 'Shadow strokes',   href: '#shadow-strokes' },
       { label: 'Try drawing',      href: '#try' },
     ]
   },
@@ -73,6 +65,7 @@ const navItems: NavItem[] = [
       { label: 'Wet patterns',         href: '#wet-patterns' },
       { label: 'Fringe',               href: '#fringe' },
       { label: 'Around strokes',       href: '#around-strokes' },
+      { label: 'Graphic strokes',      href: '#graphic-strokes' },
       { label: 'Try drawing',          href: '#try' },
     ]
   },
@@ -86,6 +79,18 @@ const navItems: NavItem[] = [
       { label: 'Try drawing',    href: '#try' },
     ]
   },
+  { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
+    subLinks: [
+      { label: 'Curve smoothing', href: '#smoothing' },
+      { label: 'Local smoothing', href: '#local-smoothing' },
+      { label: 'Stroke splitting', href: '#splitting' },
+      { label: 'Smoothed brush',  href: '#smoothed-brush' },
+      { label: 'Split brush',     href: '#split-brush' },
+      { label: 'Blob drawing',    href: '#blobs' },
+      { label: 'Tight blob',      href: '#tight-blobs' },
+    ]
+  },
+  { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer' },
   { label: 'Pen pressure', href: `${base}/pen-pressure`, slug: 'pen-pressure',
     subLinks: [
       { label: 'Scaled width', href: '#scale' },
@@ -113,11 +118,13 @@ const navItems: NavItem[] = [
           { label: 'BrushStrokeRenderer',      href: '#brushstrokerenderer' },
           { label: 'DryMediaStrokeRenderer',   href: '#drymediastrokerenderer' },
           { label: 'StrokeHalo',               href: '#strokehalo' },
+          { label: 'HaloStrokeRenderer',       href: '#halostrokerenderer' },
           { label: 'DebossStrokeRenderer',     href: '#debossstrokerenderer' },
           { label: 'Background samplers',      href: '#background-samplers' },
           { label: 'Height field materials',   href: '#height-field-materials' },
           { label: 'Shaped strokes',           href: '#shaped-strokes' },
           { label: 'Pattern strokes',          href: '#pattern-strokes' },
+          { label: 'AroundStrokeRenderer',     href: '#aroundstrokerenderer' },
           { label: 'Blob renderers',           href: '#blob-renderers' },
           { label: '3D strokes',               href: '#3d-strokes' },
           { label: 'OilStrokeRenderer',        href: '#oilstrokerenderer' },
