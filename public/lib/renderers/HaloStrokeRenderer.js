@@ -14,6 +14,11 @@ import { StrokeDef } from '../StrokeDef.js';
  * The silhouette here is a shader falloff on inflated geometry rather than
  * StrokeHalo's blurred render target, so the mark builds like any other and
  * needs no per-frame pass; the showcase keeps the target-blurred version.
+ *
+ * Both meshes render through the coverage layer: the silhouette so its folds
+ * keep single coverage where the reach exceeds the curvature radius, and the
+ * ribbon so it composites after the silhouette rather than under it (layered
+ * marks draw after the main pass, in depth order among themselves).
  */
 export class HaloStrokeRenderer extends StrokeRenderer {
     /**
@@ -67,6 +72,7 @@ export class HaloStrokeRenderer extends StrokeRenderer {
             points: def.points, widthLeft: def.widthLeft, widthRight: def.widthRight,
             renderer: ribbon, seed: def.seed,
         }).build();
+        ribbonMesh.userData.coverageLayer = true;
         group.add(ribbonMesh);
 
         const a = haloMesh.userData.stats, b = ribbonMesh.userData.stats;
@@ -83,7 +89,7 @@ export class HaloStrokeRenderer extends StrokeRenderer {
 /** The soft silhouette: opacity falls from the mark's edge to the geometry's. */
 class SoftSilhouetteRenderer extends ShaderStrokeRenderer {
     constructor({ color, opacity, inflate, cap }) {
-        super({ cap, inflate, depthWrite: false });
+        super({ cap, inflate, depthWrite: false, singleCoverage: true });
         this.color = color;
         this.opacity = opacity;
     }

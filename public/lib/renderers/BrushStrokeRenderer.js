@@ -29,8 +29,11 @@ export class BrushStrokeRenderer extends ShaderStrokeRenderer {
         dry = 0.30,
         samplesPerUnit = 120,
         cap = 'rounded',
+        singleCoverage = true,
     } = {}) {
-        super({ cap, inflate: 1.25, samplesPerUnit });
+        // The eroded edge is translucent, so a self-overlapping gesture would
+        // composite twice and darken into creases; each pixel shades once.
+        super({ cap, inflate: 1.25, samplesPerUnit, singleCoverage });
         this.colorA = colorA;
         this.colorB = colorB;
         this.bristles = bristles;

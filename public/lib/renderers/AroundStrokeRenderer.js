@@ -70,6 +70,9 @@ export class AroundStrokeRenderer extends StrokeRenderer {
             if (path.length < 2) return;
             const renderer = new BrushStrokeRenderer({
                 cap: 'rounded',
+                // Hundreds of sub-strokes; a layer pass each would be that many
+                // full-screen composites per frame.
+                singleCoverage: false,
                 colorA: k % 2 === 0 ? this.colorA : this.colorB,
                 colorB: k % 2 === 0 ? this.colorB : this.colorA,
                 bristles: Math.max(4, Math.round(width * 700)),

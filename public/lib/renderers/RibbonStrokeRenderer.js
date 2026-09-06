@@ -191,11 +191,13 @@ export class RibbonStrokeRenderer extends StrokeRenderer {
         const away = tangent.clone().multiplyScalar(isStart ? -1 : 1);
 
         // Inner row sits on the ribbon's end edge, so the cap seals against the body.
+        // The row's parameter runs right rail to left rail, and the body's v runs
+        // left to right, so v mirrors the parameter.
         for (let i = 0; i <= segments; i++) {
             const t = (i / segments) * 2 - 1;
             const lo = t >= 0 ? t * wL : t * wR;
             positions.push(center.x + normal.x * lo, center.y + normal.y * lo, center.z + normal.z * lo);
-            uvs.push(u, (t + 1) / 2);
+            uvs.push(u, (1 - t) / 2);
         }
         // Outer row is pushed past the end by a per-vertex depth.
         for (let i = 0; i <= segments; i++) {
@@ -209,7 +211,7 @@ export class RibbonStrokeRenderer extends StrokeRenderer {
                 center.y + normal.y * lo + away.y * depth,
                 center.z + normal.z * lo + away.z * depth
             );
-            uvs.push(u, (t + 1) / 2);
+            uvs.push(u, (1 - t) / 2);
         }
         for (let i = 0; i < segments; i++) {
             indices.push(base + i, base + i + 1, base + segments + 1 + i);

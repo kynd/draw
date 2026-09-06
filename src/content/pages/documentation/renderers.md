@@ -176,6 +176,9 @@ Bristle streaks along the mark, an eroded edge, and dry patches where the brush 
 One noise field draws the bristles, pushes the edge, and decides which pigment shows. Separate fields would let the streaks, the edge and the color disagree, and the mark would stop reading as one gesture.
 <div class="jp">ひとつのノイズが、毛の筋を描き、輪郭を押し、どちらの顔料が出るかを決めます。別々のノイズでは、筋と輪郭と色が食い違い、線はひとつの身振りとして読めなくなります。</div>
 
+The eroded edge is translucent, so the mark renders through the coverage layer by default (`singleCoverage`, on): a self-overlapping gesture keeps single coverage instead of darkening where it crosses itself.
+<div class="jp">削られた輪郭は半透明なので、印は既定でカバレッジレイヤーを通して描画されます（`singleCoverage`、既定でオン）。自分と交差する身振りは、交差した場所で濃くなる代わりに単一の被覆を保ちます。</div>
+
 <div class="page-note">
 <ul>
 <li><code>colorA</code> / <code>colorB</code> — the two pigments.<br /><span class="jp">2つの顔料。</span></li>
@@ -210,8 +213,8 @@ Blurring a silhouette is the second design. Expanding the stroke's own geometry 
 A ribbon with a soft silhouette around it, built as one mark. The silhouette is a shader falloff on inflated geometry rather than StrokeHalo's blurred target, so the mark builds once like any other renderer's and needs no per-frame pass. Two modes: `shadow` puts the silhouette dark and offset toward the lower right, so the mark reads as floating over the canvas; `glow` puts it wide, bright, and centered. Takes `mode`, `color` (the ribbon), `haloColor`, `opacity`, and `spread`, the silhouette's reach in widths past the mark.
 <div class="jp">まわりに柔らかいシルエットを持つリボンを、ひとつの印として作ります。シルエットはStrokeHaloのぼかしターゲットではなく、広げたジオメトリの上のシェーダの減衰なので、印は他のレンダラと同じく一度だけ作られ、フレームごとの処理を必要としません。2つのモードがあります。`shadow`はシルエットを暗くして右下へずらし、印はキャンバスの上に浮いて見えます。`glow`は広く、明るく、中央に置きます。`mode`、`color`（リボンの色）、`haloColor`、`opacity`、`spread`（シルエットが印の外へ届く距離、幅単位）を受け取ります。</div>
 
-The falloff folds with the path where the reach exceeds the curvature radius, which is why StrokeHalo blurs in a target instead. At the shadow's default reach the folding is not visible; the glow pushes further and shows it on tight curls.
-<div class="jp">減衰は、届く距離が曲率半径を超える場所でパスに沿って折り重なります。StrokeHaloがターゲットでぼかすのはそのためです。shadowの既定の距離では折り重なりは見えません。glowはより遠くまで届くため、きつい渦では見えます。</div>
+The falloff folds with the path where the reach exceeds the curvature radius, so the silhouette renders through the coverage layer: overlaps keep single coverage instead of stacking into creases. The ribbon renders through the same layer, because layered marks draw after the main pass in depth order among themselves, and only another layered mark can composite above the silhouette.
+<div class="jp">減衰は、届く距離が曲率半径を超える場所でパスに沿って折り重なります。そのためシルエットはカバレッジレイヤーを通して描画され、重なりは折り目として積み重なる代わりに単一の被覆を保ちます。リボンも同じレイヤーを通します。レイヤー化された印はメインパスの後に、印同士の深度順で描かれるため、シルエットの上に合成できるのは別のレイヤー化された印だけだからです。</div>
 
 ## DebossStrokeRenderer
 
