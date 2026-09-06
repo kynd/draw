@@ -145,6 +145,16 @@ export class StrokeStage {
             }
 
             if (overlays.length) {
+                // Overlays honor the coverage flag too, so a flagged mark (the
+                // tool preview, say) looks the same here as in the main phases.
+                const overlayLayered = [];
+                overlays.forEach(o => {
+                    o.traverse(c => {
+                        if (c.visible && c.isMesh && c.userData.coverageLayer && !c.userData.wireOnly) {
+                            overlayLayered.push(c);
+                        }
+                    });
+                });
                 const hidden = [];
                 this.buffer.scene.children.forEach(child => {
                     if (child.visible && !overlays.includes(child)) {
@@ -152,11 +162,20 @@ export class StrokeStage {
                         hidden.push(child);
                     }
                 });
+                overlayLayered.forEach(m => { m.visible = false; });
                 const previousTarget = this.renderer.getRenderTarget();
                 this.renderer.setRenderTarget(this.buffer.target);
                 this.renderer.render(this.buffer.scene, this.buffer.camera);
                 this.renderer.setRenderTarget(previousTarget);
+                overlayLayered.forEach(m => { m.visible = true; });
                 hidden.forEach(child => { child.visible = true; });
+                if (overlayLayered.length) {
+                    overlayLayered.sort((a, b) =>
+                        a.getWorldPosition(_wp).z - b.getWorldPosition(_wq).z || 0);
+                    overlayLayered.forEach(mesh => {
+                        this.coverage.draw(this.renderer, this.buffer.camera, mesh, this.buffer.target);
+                    });
+                }
             }
 
             this.buffer.present(this.renderer);
