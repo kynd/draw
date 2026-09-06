@@ -62,7 +62,7 @@ export class HaloStrokeRenderer extends StrokeRenderer {
         }).build();
         if (this.mode === 'shadow') {
             haloMesh.position.x += width * 0.5;
-            haloMesh.position.y += width * 0.7;
+            haloMesh.position.y -= width * 0.7;
         }
         haloMesh.position.z -= 0.002;
         group.add(haloMesh);
