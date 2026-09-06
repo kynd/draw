@@ -27,7 +27,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
       <h2>Distribution of the steps</h2>
       <p>The steps are not distributed evenly between Lightest and Darkest. Each hue reaches its maximum chroma at a particular lightness: yellows near the top of the range, blues much lower. The generator finds that lightness, snaps the nearest step to it, then redistributes the remaining steps on either side.</p>
-      <div class="jp">ステップはLightestとDarkestの間に均等に配置されるわけではありません。それぞれの色相は特定の明度で最大の彩度に達します（黄色は範囲の上のほう、青はずっと下のほう）。生成処理はその明度を求め、最も近いステップをそこにスナップさせたうえで、残りのステップを両側に配分し直します。</div>
+      <div class="jp">ステップはLightestとDarkestの間に均等に配置されるわけではありません。各色相は特定の明度で最大の彩度に達します（黄色は範囲の上のほう、青はずっと下のほう）。生成処理はその明度を求め、最も近いステップをそこにスナップさせたうえで、残りのステップを両側に配分し直します。</div>
 
       <p>So every row contains a color at the lightness where that hue can be most chromatic, regardless of the step count. Move a handle toward yellow and watch its row: the vivid cell shifts left, toward the light end, where yellow's chroma peaks.</p>
       <div class="jp">そのため、ステップ数がいくつであっても、各行にはその色相が最も鮮やかになれる明度の色が必ず1つ含まれます。ハンドルを黄色のほうへ動かして、その行を見てください。鮮やかなセルが明るい側（左）へ移動します。黄色の彩度が最大になるのはそこだからです。</div>

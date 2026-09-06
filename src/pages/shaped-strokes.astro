@@ -23,7 +23,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <details>
         <summary>Details</summary>
         <p><strong>Cloud:</strong> Discs are seeded offsets from the spine with large radii, and the fragment shader draws their union. A union has one well-defined outline whatever the placement, so the boundary never crosses itself, however far the blobs are thrown.</p>
-        <div class="jp"><strong>雲：</strong>円はスパインからシード付きでずらされた大きな半径のもので、フラグメントシェーダはその和集合を描きます。和集合の輪郭は配置によらずひとつに定まるため、円をどれだけ遠くへ飛ばしても境界が自分と交差することはありません。</div>
+        <div class="jp"><strong>雲：</strong>円は、スパインからシード付きのオフセットで置かれた半径の大きな円で、フラグメントシェーダはその和集合を描きます。和集合の輪郭は配置によらずひとつに定まるため、円をどれだけ遠くへ飛ばしても、境界が自分自身と交差することはありません。</div>
 
         <p><strong>Rounded squares:</strong> Cells are stamped on a fixed grid like the pixel stroke, but drawn as a smooth-minimum over every cell's rounded-box distance. Adding a square reshapes the outline around it instead of overlapping it: the boundary is recomputed as a whole each time.</p>
         <div class="jp"><strong>角丸の正方形：</strong>セルはピクセルのストロークと同じく固定グリッドに置かれますが、全セルの角丸ボックス距離のsmooth minimumとして描かれます。正方形を加えると、重なるのではなくその周りの輪郭が作り直されます。境界は毎回、全体として再計算されます。</div>
@@ -44,18 +44,18 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>3D tubes around the spine, closed by rounded caps: candy stripes, a wobbling width, and metal that reflects the canvas.</p>
-      <div class="jp">スパインの周りの3Dチューブで、丸いキャップで閉じられます。キャンディの縞、うねる幅、そしてキャンバスを反射する金属。</div>
+      <div class="jp">スパインを囲む3Dチューブを、丸いキャップで閉じたものです。キャンディの縞、うねる幅、そしてキャンバスを反射する金属。</div>
 
       <details>
         <summary>Details</summary>
         <p><strong>Depth and rotation:</strong> The spine gains depth from a seeded wave of arc length, so the tube reads as an object lying over the canvas. The shape also rotates around the spine by an angle keyed to the distance from the stroke's end, and a seeded offset pushes it slightly off the spine in a direction that rotates with the same angle, so the whole mark visibly turns and orbits while it is drawn. The rotation is the one deliberate exception to prefix stability. The mark floats about 100 pixels over the canvas, lit from the upper left.</p>
-        <div class="jp"><strong>深さと回転：</strong>スパインは弧長のシード付き波から深さを得るため、チューブはキャンバスの上に置かれた物体として読めます。形はまた、ストロークの終端からの距離に応じた角度でスパインの周りを回転し、シード付きのオフセットが同じ角度で回転する方向へ形をスパインからわずかに押し出します。そのため、描いている間、印全体が目に見えて回り、周回します。この回転は、プレフィックスの安定性に対する唯一の意図的な例外です。印はキャンバスの約100ピクセル上に浮かび、左上からの光に照らされます。</div>
+        <div class="jp"><strong>深さと回転：</strong>スパインは弧長のシード付き波から深さを得るため、チューブはキャンバスの上に置かれた物体として読めます。形はさらに、ストロークの終端からの距離に応じた角度でスパインの周りを回転し、同じ角度で回転する方向へ、シード付きのオフセットでスパインからわずかにずらされます。そのため、描いている間は印全体が目に見えて回転し、周回します。この回転は、プレフィックスの安定性に対する唯一の意図的な例外です。印はキャンバスの約100ピクセル上に浮かび、左上からの光に照らされます。</div>
 
         <p><strong>Candy:</strong> Diagonal stripes from a list of colors, wrapping with the tube's angle so they run like a barber pole, shaded like glossy plastic: the shadow side and the rim fall back to a saturated deep version of the stripe color, as if light scatters inside the body, under a tight white highlight.</p>
-        <div class="jp"><strong>キャンディ：</strong>色のリストからなる斜めの縞が、チューブの角度とともに巻き付き、床屋のポールのように走ります。光沢のあるプラスチックとして陰影付けされます。影の側と縁は、光が中で散乱しているかのように縞の色の彩度の高い深い色へ落ち、その上に鋭い白いハイライトが乗ります。</div>
+        <div class="jp"><strong>キャンディ：</strong>色のリストからなる斜めの縞が、チューブの角度とともに巻き付き、床屋のポールのように走ります。光沢のあるプラスチックとして陰影付けされます。影の側と縁は、光が中で散乱しているかのように、縞の色を深く鮮やかにした色へ沈み、その上に鋭い白いハイライトが乗ります。</div>
 
         <p><strong>Wobble:</strong> The radius swells and thins on a seeded wave, and the color runs a gradient driven by both the wobble and the position along the stroke.</p>
-        <div class="jp"><strong>うねり：</strong>半径はシード付きの波でふくらみ、細り、色はうねりとストロークに沿った位置の両方に従うグラデーションになります。</div>
+        <div class="jp"><strong>うねり：</strong>半径はシード付きの波に乗ってふくらんだり細くなったりし、色は、うねりとストロークに沿った位置の両方に応じたグラデーションになります。</div>
 
         <p><strong>Metal:</strong> The current canvas is the environment map: the reflected direction offsets a lookup into it, so the tube mirrors whatever has been drawn around it.</p>
         <div class="jp"><strong>金属：</strong>現在のキャンバスが環境マップです。反射方向がキャンバスへの参照をずらすため、チューブは周りに描かれたものを映します。</div>
@@ -73,21 +73,21 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>Chains of 3D triangles along the spine, flat-shaded: same-hue facets, a wood-like grain, and metal that reflects the canvas.</p>
-      <div class="jp">スパインに沿った3Dの三角形の連なりで、フラットに陰影付けされます。同じ色相のファセット、木のような木目、そしてキャンバスを反射する金属。</div>
+      <div class="jp">スパインに沿った3Dの三角形の連なりで、フラットに陰影付けされます。同じ色相のファセット、木材を思わせる木目、そしてキャンバスを反射する金属。</div>
 
       <details>
         <summary>Details</summary>
         <p><strong>Placement:</strong> Each triangle takes a random size, rotation, and tilt from the stroke's seed, on the same deepened, rotating spine as the tubes, so the chain turns as the stroke grows.</p>
-        <div class="jp"><strong>配置：</strong>各三角形はストロークのシードからランダムな大きさ、回転、傾きを取ります。チューブと同じ、深さを持ち回転するスパインの上なので、連なりはストロークが伸びるにつれて回ります。</div>
+        <div class="jp"><strong>配置：</strong>各三角形は、ストロークのシードからランダムな大きさ、回転、傾きを取ります。チューブと同じ、深さがつき回転するスパインの上に置かれるため、連なりはストロークが伸びるにつれて回ります。</div>
 
         <p><strong>Facets:</strong> Each triangle's color keeps the base color's hue while its lightness and chroma vary, so the chain reads as one material in many cuts.</p>
-        <div class="jp"><strong>ファセット：</strong>各三角形の色は基本色の色相を保ちながら、明度と彩度が変わります。そのため連なりは、さまざまに切られたひとつの素材として読めます。</div>
+        <div class="jp"><strong>ファセット：</strong>各三角形の色は基本色の色相を保ちながら、明度と彩度が変わります。そのため連なりは、さまざまに切り出されたひとつの素材として読めます。</div>
 
         <p><strong>Grain:</strong> The faces carry a band pattern of world position warped by noise, between two colors, like cut wood.</p>
-        <div class="jp"><strong>木目：</strong>面は、ノイズでゆがめたワールド座標の帯模様を2色の間で運びます。切られた木材のようにです。</div>
+        <div class="jp"><strong>木目：</strong>面には、ワールド座標をノイズでゆがめた、2色の間を行き来する帯模様が乗り、切り出した木材のように見えます。</div>
 
         <p><strong>Metal:</strong> The same canvas reflection as the tubes, but the flat normals break it per triangle.</p>
-        <div class="jp"><strong>金属：</strong>チューブと同じキャンバスの反射ですが、フラットな法線がそれを三角形ごとに割ります。</div>
+        <div class="jp"><strong>金属：</strong>チューブと同じキャンバスの反射ですが、法線がフラットなため、反射は三角形ごとに分断されます。</div>
       </details>
     </div>
   </section>
@@ -102,7 +102,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>Draw with the strokes on this page, in the drawing tool: the settings panel picks the tool, its colors, and its parameters exactly, the floating dials reroll the palette and walk a trail of rolled tools, and Clear, Replay, and recording work as on the Drawing Tool Demo page. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes as separate strokes. With a pen tablet, pressure widens the stroke, up to three times the width at full sensitivity; a mouse is unaffected.</p>
-      <div class="jp">このページのストロークで、描画ツールの中で描いてみてください。設定パネルはツール、その色、パラメータを正確に選び、浮かぶ2つのダイヤルはパレットを引き直し、ロールされたツールの列をたどります。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭い曲がりで描いた線は分割されるため、速いジグザグは別々のストロークとして焼き込まれます。ペンタブレットでは、筆圧がストロークを太らせます。感度が最大のとき、最大で3倍になります。マウスには影響しません。</div>
+      <div class="jp">このページのストロークを使って、描画ツールの中で描いてみてください。設定パネルでは、ツールとその色、パラメータを正確に選べます。浮かぶ2つのダイヤルでは、パレットを引き直したり、ロールしてきたツールの列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭く曲がると描いた線はそこで分割されるため、速いジグザグは別々のストロークとして焼き込まれます。ペンタブレットでは筆圧でストロークが太くなり、感度が最大のときは幅が最大3倍になります。マウスには影響しません。</div>
     </div>
   </section>
 </PageLayout>

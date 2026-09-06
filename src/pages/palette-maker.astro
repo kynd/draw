@@ -18,33 +18,33 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p><code>ThemedPaletteMaker</code> takes a key hue, a color count, and a theme, and the theme decides everything else: which hues are used, and how light and how saturated each color is. Drag the handle to move the key hue, set the count, and pick a theme. Click a swatch to copy its hex value.</p>
-      <div class="jp"><code>ThemedPaletteMaker</code>は、基準となる色相、色数、テーマを受け取ります。それ以外はすべてテーマが決めます。どの色相を使うか、そして各色の明るさと彩度です。ハンドルをドラッグして基準の色相を動かし、色数を決めて、テーマを選んでください。スウォッチをクリックすると16進値がコピーされます。</div>
+      <div class="jp"><code>ThemedPaletteMaker</code>は、基準となる色相、色数、テーマを受け取ります。どの色相を使うか、各色をどれだけ明るく、どれだけ鮮やかにするかは、すべてテーマが決めます。ハンドルをドラッグして基準の色相を動かし、色数を決めて、テーマを選んでください。スウォッチをクリックすると16進値をコピーできます。</div>
 
       <p>Colors are generated in OKLCH (lightness, chroma, hue) rather than RGB or HSL, so a fixed lightness reads as a consistent lightness across hues, and every color is clamped to the largest chroma sRGB can display at its lightness and hue.</p>
       <div class="jp">色はRGBやHSLではなく、OKLCH（明度・彩度・色相）で生成されます。そのため、明度を固定すればどの色相でも同じ明るさに見え、すべての色はその明度と色相でsRGBが表示できる最大の彩度に収められます。</div>
 
       <h2 id="themes">Themes</h2>
       <p><strong>Monochrome:</strong> every color at the key hue. The first sits at the hue's most vibrant point, and the rest divide the lightness range as evenly as that fixed first color allows, each at the largest chroma available.</p>
-      <div class="jp"><strong>Monochrome：</strong>すべての色が基準の色相です。最初の色はその色相が最も鮮やかになる点に置かれ、残りはその固定された最初の色が許すかぎり均等に明度の範囲を分割します。彩度はそれぞれの明度で使える最大値です。</div>
+      <div class="jp"><strong>Monochrome：</strong>すべての色は基準の色相に揃えられます。最初の色は、その色相が最も鮮やかになる点に配置され、残りの色は、その最初の色が許す範囲で明度の幅を均等に分割して配置します。彩度は、各明度で取りうる最大値です。</div>
 
       <p><strong>Vivid &amp; dark:</strong> the whole wheel divided evenly, starting at the key hue. The half nearest the key hue is vivid, at each hue's representative lightness; the far half is dark.</p>
       <div class="jp"><strong>Vivid &amp; dark：</strong>基準の色相から始めて、色相環全体を均等に分割します。基準に近い半分は、各色相の代表的な明度で鮮やかに、遠い半分は暗くなります。</div>
 
       <p><strong>Pastel cluster:</strong> hues clustered around the key hue, all light and low in chroma.</p>
-      <div class="jp"><strong>Pastel cluster：</strong>基準の色相のまわりに集まった色相で、すべて明るく、彩度は低くなります。</div>
+      <div class="jp"><strong>Pastel cluster：</strong>基準の色相のまわりに色相を集め、どの色も明るく、彩度を低くしたものです。</div>
 
       <p><strong>Dark cluster:</strong> the same clustering, tighter, with every color dark.</p>
       <div class="jp"><strong>Dark cluster：</strong>同じクラスタをより狭くし、すべての色を暗くしたものです。</div>
 
       <p><strong>Vivid wheel:</strong> the whole wheel divided evenly, every color at its own hue's most vibrant point.</p>
-      <div class="jp"><strong>Vivid wheel：</strong>色相環全体を均等に分割し、すべての色をそれぞれの色相が最も鮮やかになる点に置きます。</div>
+      <div class="jp"><strong>Vivid wheel：</strong>色相環全体を均等に分割し、各色を、その色相が最も鮮やかになる点に配置します。</div>
 
       <p><strong>Black:</strong> every color black.</p>
       <div class="jp"><strong>Black：</strong>すべての色が黒です。</div>
 
       <h2 id="representative-lightness">Representative lightness</h2>
       <p>A hue reads as the paint its name would be on at a particular lightness, not at the lightness where its chroma peaks: yellow only reads as yellow when bright, while green and blue read as their names well below their max-chroma points. The vivid half of Vivid &amp; dark uses this lightness, anchored per hue name (red 0.58, yellow 0.90, green 0.50, blue 0.45) and interpolated around the wheel.</p>
-      <div class="jp">色相が名前どおりの絵の具に見えるのは特定の明度であり、彩度が最大になる明度ではありません。黄色は明るいときだけ黄色に見え、緑や青は最大彩度の点よりずっと下で名前どおりに見えます。Vivid &amp; darkの鮮やかな半分はこの明度を使います。色相の名前ごとの基準値（赤0.58、黄0.90、緑0.50、青0.45）を色相環に沿って補間したものです。</div>
+      <div class="jp">色相が名前どおりの絵の具に見えるのは特定の明度のときであり、彩度が最大になる明度ではありません。黄色は明るいときだけ黄色に見え、緑や青は最大彩度の点よりずっと下で名前どおりに見えます。Vivid &amp; darkの鮮やかな半分はこの明度を使います。色相の名前ごとの基準値（赤0.58、黄0.90、緑0.50、青0.45）を色相環に沿って補間したものです。</div>
 
       <h2 id="randomness">Randomness</h2>
       <p>Every theme except Black jitters the hue and lightness of the colors other than the key color. The jitter comes from a seed, so the same settings reproduce the same palette; Reroll draws a new seed while the key color holds.</p>

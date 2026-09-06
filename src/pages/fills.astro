@@ -36,7 +36,7 @@ const demos = [
       <details>
         <summary>Details</summary>
         <p><strong>Spikes:</strong> An integer count of spikes runs around the boundary's arc, so the profile meets itself at the seam in a valley. Each spike hashes its height and lean from its index, and each valley hashes its depth from the boundary its two neighbors share, dipping inside the shape.</p>
-        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧に沿って並ぶため、プロファイルは継ぎ目で谷として出会います。各トゲは高さと傾きを自身のインデックスのハッシュから決め、各谷は隣り合う2本が共有する境界のハッシュから深さを決めて、形の内側に食い込みます。</div>
+        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧をひと回りするため、プロファイルは継ぎ目でも谷でつながります。各トゲは高さと傾きを自身のインデックスのハッシュから決め、各谷は隣り合う2本が共有する境界のハッシュから深さを決めて、形の内側に食い込みます。</div>
 
         <p><strong>Wobble:</strong> The bump offset is a noise of world position rather than arc, so it cannot show a seam at all.</p>
         <div class="jp"><strong>うねり：</strong>ふくらみのオフセットは弧ではなくワールド座標のノイズなので、継ぎ目がそもそも現れません。</div>
@@ -62,13 +62,13 @@ const demos = [
         <div class="jp"><strong>高さ：</strong>縁のドームと内部のノイズです。ドームは距離のsmoothstepで、傾きは解析的に求まるため、立ち上がりは折り目なく平坦な内部へとなだらかに続きます。ノイズは、大きなうねりのための低周波と、細部のための高周波を混ぜています。</div>
 
         <p><strong>Dry brush:</strong> A tooth like the dry media's, only denser, erodes both the edge and the interior, leaving rough transparent speckle where the paint ran out.</p>
-        <div class="jp"><strong>ドライブラシ：</strong>ドライメディアと同様の、ただし少し密な紙の目が、縁と内部の両方を削り、絵の具が切れた場所に粗い透明の粒を残します。</div>
+        <div class="jp"><strong>ドライブラシ：</strong>ドライメディアと同様の、ただしより密な紙の目が、縁と内部の両方を削り、絵の具が途切れた場所に粗い透明の粒を残します。</div>
 
         <p><strong>Two pigments:</strong> Every paint mixes two colors in smooth patches, the way a loaded brush lays down more than one. The thick oil sharpens the mix instead: its colors meet on a hard boundary shaped by low-frequency noise, two paints laid side by side without blending.</p>
-        <div class="jp"><strong>2つの顔料：</strong>すべての絵の具は2色をなだらかな斑で混ぜます。絵の具を含んだ筆が複数の色を置いていくのと同じです。厚塗りの油絵の具はかわりに混合を鋭くします。2色は低周波ノイズが形作る硬い境界で出会い、混ざらないまま並んで置かれた2つの絵の具になります。</div>
+        <div class="jp"><strong>2つの顔料：</strong>すべての絵の具は2色をなだらかな斑で混ぜます。絵の具を含んだ筆が複数の色を置いていくのと同じです。厚塗りの油絵の具は、逆に混合を鋭くします。2色は低周波ノイズが形作る硬い境界で接し、混ざらないまま並べて置かれた2つの絵の具になります。</div>
 
         <p><strong>The knife:</strong> The thick oil's height is flat patches, each with its own drag direction and striations along it, meeting at hard steps. The rim does not trace the edge: a noise varies it around the boundary, tall and steep in some stretches, scraped nearly flat in others. The edge is straight cut segments, offset piecewise-linearly along the boundary's arc.</p>
-        <div class="jp"><strong>ナイフ：</strong>厚塗りの油絵の具の高さは平らな斑からなり、それぞれが独自の引き方向とそれに沿った筋を持ち、硬い段差で出会います。縁の盛り上がりは輪郭をなぞりません。ノイズが境界に沿ってそれを変化させ、高く急な区間もあれば、削がれてほとんど平らな区間もあります。輪郭は、境界の弧に沿って区分線形にオフセットされた、まっすぐに切られた線分です。</div>
+        <div class="jp"><strong>ナイフ：</strong>厚塗りの油絵の具の高さは平らな斑からなり、それぞれが独自の引き方向とそれに沿った筋を持ち、硬い段差で接します。縁の盛り上がりは輪郭をなぞらず、ノイズによって境界に沿って変化します。高く急な区間もあれば、削がれてほとんど平らな区間もあります。輪郭は、境界の弧に沿って区分線形にオフセットされた、まっすぐに切られた線分です。</div>
       </details>
     </div>
   </section>
@@ -88,7 +88,7 @@ const demos = [
       <details>
         <summary>Details</summary>
         <p><strong>Water:</strong> One renderer spans the three. The paint meets the background two ways: a min that darkens like pigment layered over it, and a mix that covers like body. Water decides the balance, and the more of it, the more the paint darkens instead of covering; less sharpens the edge and covers, until the fill reads as gouache. Water also pools the opacity, leaving patches where the fill is nearly bare.</p>
-        <div class="jp"><strong>水：</strong>ひとつのレンダラが3つをまたぎます。絵の具は2つの方法で背景と出会います。上に重ねた顔料のように暗くするminと、絵の具の身のように覆うmixです。水がその配分を決め、多いほど絵の具は覆うのではなく暗くなります。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。水はまた不透明度をたまりに分け、塗りがほとんど無い斑を残します。</div>
+        <div class="jp"><strong>水：</strong>ひとつのレンダラが3つすべてを描き分けます。絵の具は2つの方法で背景と重なります。上に重ねた顔料のように暗くするminと、絵の具の厚みとして覆うmixです。水がその配分を決め、多いほど絵の具は覆うのではなく暗くなります。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。水はまた、不透明度をたまりに偏らせ、塗りがほとんど残らない斑を作ります。</div>
 
         <p><strong>Flow:</strong> The background is not read at one point but dragged along a direction that wanders with position, so the pigment looks carried by water. The gouache covers most and drags hardest, which is what implies the brush.</p>
         <div class="jp"><strong>流れ：</strong>背景は1点で読まれるのではなく、位置とともに揺らぐ方向に沿って引きずられます。そのため顔料は水に運ばれたように見えます。ガッシュは最も覆いが強く、最も強く引きずります。それが筆を思わせる理由です。</div>
@@ -164,7 +164,7 @@ const demos = [
     </div>
     <div class="prose">
       <p>Paint with every fill on this page, in the drawing tool: the settings panel picks the fill, its colors, and its parameters exactly, the floating dials reroll the palette and walk a trail of rolled fills, and Clear, Replay, and recording work as on the Drawing Tool Demo page. Each released gesture becomes a blob (a turn sharper than a threshold splits the gesture into separate blobs), and the washes and glasses read the canvas itself, so they bleed and bend what is already painted. With a pen tablet, pressure grows the blob, up to three times at full sensitivity; a mouse is unaffected.</p>
-      <div class="jp">このページのすべての塗りで、描画ツールの中で描いてみてください。設定パネルは塗り、その色、パラメータを正確に選び、浮かぶ2つのダイヤルはパレットを引き直し、ロールされた塗りの列をたどります。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。描き終えた身振りはブロブになります（しきい値より鋭い曲がりで、身振りは別々のブロブに分割されます）。washとガラスはキャンバスそのものを読むため、すでに描かれたものをにじませ、ゆがめます。ペンタブレットでは、筆圧がブロブを大きくします。感度が最大のとき、最大で3倍になります。マウスには影響しません。</div>
+      <div class="jp">このページのすべての塗りを使って、描画ツールの中で描いてみてください。設定パネルでは、塗りとその色、パラメータを正確に選べます。浮かぶ2つのダイヤルでは、パレットを引き直したり、ロールしてきた塗りの列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。描き終えた身振りはブロブになります（しきい値より鋭く曲がると、身振りは別々のブロブに分割される）。washとガラスはキャンバスそのものを読むため、すでに描かれたものをにじませ、ゆがめます。ペンタブレットでは筆圧でブロブが大きくなり、感度が最大のときは最大3倍になります。マウスには影響しません。</div>
     </div>
   </section>
 </PageLayout>

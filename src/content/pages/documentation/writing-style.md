@@ -142,8 +142,19 @@ Every English paragraph is followed by its Japanese counterpart in a `<div class
 Use full-width parentheses （） for asides, with the plain form inside: 見かけの明るさが大きく変わってしまいます（黄色は飛び出し、青は沈む）。
 <div class="jp">補足には全角括弧（）を使い、その中は常体にします。</div>
 
-Prefer the active or potential form over the passive.
-<div class="jp">受身よりも能動形・可能形を優先します。</div>
+Write the Japanese from the meaning, not as a gloss of the English sentence. When the English rests on a copula or a noun phrase, pick the verb that says what happens.
+<div class="jp">日本語は、英文の逐語的な写しではなく、意味から書き起こします。英語がコピュラや名詞句で済ませている場合は、何が起こるのかを示す動詞を選びます。</div>
+
+<div class="page-note">
+<p><strong>Not:</strong> すべての色が基準の色相です。最初の色はその色相が最も鮮やかになる点に置かれ、残りはその固定された最初の色が許すかぎり均等に明度の範囲を分割します。彩度はそれぞれの明度で使える最大値です。<br />
+<strong>But:</strong> すべての色は基準の色相に揃えられます。最初の色は、その色相が最も鮮やかになる点に配置され、残りの色は、その最初の色が許す範囲で明度の幅を均等に分割して配置します。彩度は、各明度で取りうる最大値です。</p>
+</div>
+
+That example carries several rules. Put a 読点 after a topic phrase (「最初の色は、」) when the sentence continues at length. Drop modifiers the English needed but the Japanese context already carries (「その固定された最初の色」 becomes 「その最初の色」). Choose the verb that names the operation rather than the generic verb the English word suggests (置く becomes 配置する, 使える becomes 取りうる), and complete the action the English leaves implied (分割します becomes 分割して配置します). Prefer 各明度 over それぞれの明度.
+<div class="jp">この例はいくつかの規則を含んでいます。文が長く続くときは、主題の句のあとに読点を打ちます（「最初の色は、」）。英語には必要でも、日本語では文脈が担っている修飾語は落とします（「その固定された最初の色」は「その最初の色」に）。英単語が示す一般的な動詞ではなく、その操作を名指す動詞を選び（置く→配置する、使える→取りうる）、英語が言外に済ませている動作は言い切ります（分割します→分割して配置します）。「それぞれの明度」よりも「各明度」を使います。</div>
+
+Prefer the active or potential form over the passive when the reader acts. The passive is fine, and often natural, when describing how the generated result is arranged.
+<div class="jp">読者が操作する場面では、受身よりも能動形・可能形を優先します。生成された結果の配置を述べる場面では、受身のままで構いません（そのほうが自然なことも多くあります）。</div>
 
 <div class="page-note">
 <p><strong>Not:</strong> スウォッチをクリックすると16進数の値がコピーされます。<br />

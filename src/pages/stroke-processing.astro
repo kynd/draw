@@ -29,10 +29,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <div class="jp"><strong>natural曲線：</strong>ノットを通る3次スプラインで、両端の2階微分はゼロです。弦長でパラメータ化するため、ノットの間隔が不均一でも形は歪みません。</div>
 
         <p><strong>Hobby curve:</strong> The interpolation METAFONT draws paths with: tangent directions come from a mock-curvature system and control handles from Hobby's velocity function. It swings wider through corners than the natural spline, which is the visible difference between the two.</p>
-        <div class="jp"><strong>Hobby曲線：</strong>METAFONTがパスを描くのに使う補間です。接線方向は擬似曲率の連立方程式から、制御ハンドルはHobbyの速度関数から求まります。角ではnaturalスプラインより大きく膨らみ、それが2つの見た目の違いになります。</div>
+        <div class="jp"><strong>Hobby曲線：</strong>METAFONTがパスを描くのに使う補間です。接線方向は擬似曲率の連立方程式から、制御ハンドルはHobbyの速度関数から求まります。角ではnaturalスプラインより大きく膨らみ、これが両者の見た目の違いです。</div>
 
         <p>Both take the same knots, so moving the span slider trades fidelity against smoothness for both at once. The curves are documented on <a href={`${base}/documentation/curves`}>Curves</a>.</p>
-        <div class="jp">どちらも同じノットを受け取るため、スパンのスライダーを動かすと、両方の忠実さと滑らかさが同時に入れ替わります。曲線については<a href={`${base}/documentation/curves`}>Curves</a>に記載しています。</div>
+        <div class="jp">どちらも同じノットを受け取るため、スパンのスライダーを動かすと、両方の曲線で忠実さと滑らかさのバランスが同時に変わります。曲線については<a href={`${base}/documentation/curves`}>Curves</a>に記載しています。</div>
       </details>
     </div>
   </section>
@@ -47,7 +47,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>Two curves that cannot move the settled part of a growing stroke: a Catmull-Rom spline (blue) and a cubic B-spline (green). The stability readout shows the largest movement of the settled part per added point; for both it is exactly zero.</p>
-      <div class="jp">伸びていくストロークの、すでに描かれた部分を動かせない2つの曲線です。Catmull-Romスプライン（青）と3次B-スプライン（緑）。Stabilityの表示は、点を1つ加えるごとの、確定した部分の最大移動量です。どちらも正確にゼロになります。</div>
+      <div class="jp">伸びていくストロークの、すでに描かれた部分を動かさない2つの曲線です。Catmull-Romスプライン（青）と3次B-スプライン（緑）。Stabilityの表示は、点を1つ加えるごとの、確定した部分の最大移動量です。どちらも正確にゼロになります。</div>
 
       <details>
         <summary>Details</summary>
@@ -58,7 +58,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <div class="jp"><strong>局所性：</strong>この2つの曲線の各セグメントは、周囲の4つのノットにだけ依存します。ノットを追加しても変わるのは末尾のセグメントだけで、それより前は変わりません。表示される値が正確にゼロなのはそのためです。</div>
 
         <p><strong>The trade:</strong> The Catmull-Rom passes through every knot but is only C1, so its curvature can kink at knots. The B-spline is C2 and smoother, and pays for it by approximating the knots instead of passing through them, visibly cutting the corners.</p>
-        <div class="jp"><strong>引き換え：</strong>Catmull-Romはすべてのノットを通りますが、C1連続に留まるため、ノットで曲率が折れることがあります。B-スプラインはC2連続でより滑らかですが、その代わりノットを通らず近似するため、角を目に見えて内側に切り落とします。</div>
+        <div class="jp"><strong>引き換え：</strong>Catmull-Romはすべてのノットを通りますが、C1連続に留まるため、ノットで曲率が折れることがあります。B-スプラインはC2連続でより滑らかですが、その代わりノットを通らずに近似するため、角が目に見えて内側に削られます。</div>
       </details>
     </div>
   </section>
@@ -73,12 +73,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>A drawn line split into separate strokes wherever its direction turns more than a threshold angle. Fast zigzag squiggling becomes a run of short strokes instead of one folded line. Each piece is smoothed on its own, so a corner ends one curve and starts the next instead of being rounded away.</p>
-      <div class="jp">向きがしきい値の角度を超えて変わる場所で、描かれた線を別々のストロークに分割します。速いジグザグの走り書きは、折りたたまれた1本の線ではなく、短いストロークの連なりになります。各断片は個別にスムージングされるため、角は丸められて消えるのではなく、ひとつの曲線を終え、次の曲線を始めます。</div>
+      <div class="jp">向きがしきい値の角度を超えて変わる場所で、描かれた線を別々のストロークに分割します。速いジグザグの走り書きは、折りたたまれた1本の線ではなく、短いストロークの連なりになります。各断片は個別に平滑化されるため、角では、丸められて消えるのではなく、ひとつの曲線が終わり、次の曲線が始まります。</div>
 
       <details>
         <summary>Details</summary>
         <p><strong>Turn over a window:</strong> The turn at a point compares the incoming and outgoing directions, each measured over a fixed arc window rather than one segment, so the jitter of dense points does not trigger cuts.</p>
-        <div class="jp"><strong>窓で測る回転：</strong>ある点での回転は、入る方向と出る方向を比べます。どちらも1セグメントではなく固定の弧長の窓で測るため、密集した点のジッタでは分割は起きません。</div>
+        <div class="jp"><strong>窓で測る回転：</strong>ある点での回転は、入る方向と出る方向を比べて求めます。どちらの方向も、1セグメントではなく固定の弧長の窓で測るため、密集した点のジッタで分割が起きることはありません。</div>
 
         <p><strong>One cut per corner:</strong> A cut cannot follow another within the window's arc, so a sharp corner yields exactly one cut. The boundary point is shared by both pieces, so the strokes stay connected end to end.</p>
         <div class="jp"><strong>角ごとに1回の分割：</strong>窓の弧長の内側では次の分割は起きないため、鋭い角はちょうど1回だけ分割されます。境界の点は両方の断片が共有するので、ストロークは端と端でつながったままです。</div>
@@ -96,7 +96,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>The same smoothing, drawn as a stroke instead of a line: the smoothed path feeds the brush renderer with ragged ends. The dropdown selects among all four curves.</p>
-      <div class="jp">同じ平滑化を、線ではなくストロークとして描いたものです。滑らかにしたパスをbrushレンダラに渡し、端はraggedにしています。ドロップダウンで4つの曲線をすべて選べます。</div>
+      <div class="jp">同じ平滑化を、線ではなくストロークとして描いたものです。滑らかにしたパスをbrushレンダラに渡し、端はraggedにしています。ドロップダウンで4つの曲線のどれでも選べます。</div>
 
       <details>
         <summary>Details</summary>
@@ -119,12 +119,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>The stroke splitting, drawn as strokes instead of lines: each split piece feeds the brush renderer as its own stroke, with its own taper, ragged ends, and colors. Fast zigzag squiggling lays down a run of separate brush marks in one gesture. Every try-drawing demo and the drawing tool split strokes this way.</p>
-      <div class="jp">ストローク分割を、線ではなくストロークとして描いたものです。分割された各断片は、それぞれのテーパー、raggedな端、色を持つ独立したストロークとしてbrushレンダラに渡されます。速いジグザグの走り書きは、ひとつのジェスチャーで別々の筆の跡の連なりを置きます。すべてのTry drawingデモと描画ツールは、この方法でストロークを分割します。</div>
+      <div class="jp">ストローク分割を、線ではなくストロークとして描いたものです。分割された各断片は、それぞれのテーパー、raggedな端、色を持つ独立したストロークとしてbrushレンダラに渡されます。速いジグザグの走り書きでは、ひとつの身振りで別々の筆の跡が連なって置かれます。すべてのTry drawingデモと描画ツールは、この方法でストロークを分割します。</div>
 
       <details>
         <summary>Details</summary>
         <p><strong>Per-piece processing:</strong> Each piece is resampled and smoothed on its own before rendering, so a corner ends one tapered stroke and starts the next instead of being rounded away.</p>
-        <div class="jp"><strong>断片ごとの処理：</strong>各断片は描画の前に個別に再サンプリングされ、滑らかにされます。そのため角は丸められて消えるのではなく、テーパーを持つひとつのストロークを終え、次を始めます。</div>
+        <div class="jp"><strong>断片ごとの処理：</strong>各断片は描画の前に個別に再サンプリングされ、滑らかにされます。そのため角では、丸められて消えるのではなく、テーパーを持つひとつのストロークが終わり、次のストロークが始まります。</div>
       </details>
     </div>
   </section>
@@ -144,13 +144,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <details>
         <summary>Details</summary>
         <p><strong>The hull:</strong> The convex hull of the drawn points is the smallest convex region containing all of them. Its perimeter is resampled at the span for even knots, and the closed Catmull-Rom or B-spline rounds it into a blob.</p>
-        <div class="jp"><strong>ハル：</strong>描いた点の凸包は、そのすべてを含む最小の凸領域です。その外周をスパンで再サンプリングして等間隔のノットを取り、閉じたCatmull-RomまたはB-スプラインがブロブへと丸めます。</div>
+        <div class="jp"><strong>ハル：</strong>描いた点の凸包は、そのすべてを含む最小の凸領域です。その外周をスパンで再サンプリングして等間隔のノットを取り、閉じたCatmull-RomまたはB-スプラインでブロブへと丸めます。</div>
 
         <p><strong>Containment:</strong> Smoothing cuts inside the hull, so each knot is pushed outward along its edge normal by a fraction of the span. The curve then still contains every drawn point.</p>
         <div class="jp"><strong>包含：</strong>平滑化はハルの内側を通るため、各ノットは辺の法線方向へスパンの一部だけ外へ押し出されます。これにより、曲線は描いたすべての点を含んだままになります。</div>
 
         <p><strong>Filling:</strong> The closed polyline becomes a THREE.Shape and its triangulation fills the area.</p>
-        <div class="jp"><strong>塗り：</strong>閉じたポリラインはTHREE.Shapeになり、その三角形分割が領域を塗りつぶします。</div>
+        <div class="jp"><strong>塗り：</strong>閉じたポリラインはTHREE.Shapeになり、その三角形分割で領域を塗りつぶします。</div>
       </details>
     </div>
   </section>
@@ -165,12 +165,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>A blob that stays a blob and still keeps its concavities: the drawn path is closed into a smooth loop, and the shape is everything within a radius of that loop.</p>
-      <div class="jp">ブロブであり続けながら、凹みも保つブロブです。描いたパスは滑らかなループとして閉じられ、その形はループから一定の半径以内のすべてになります。</div>
+      <div class="jp">ブロブであり続けながら、凹みも保つブロブです。描いたパスは滑らかなループとして閉じられ、そのループから一定の半径以内にある領域すべてが形になります。</div>
 
       <details>
         <summary>Details</summary>
         <p><strong>Closing first:</strong> The path knots feed the closed spline, so the gesture becomes an enclosed loop before the offset. Without this, an open stroke offsets into a tube that follows the line; with it, the result is always a mass. The offset's distance field does not care if the closure crosses the stroke, so any gesture closes safely.</p>
-        <div class="jp"><strong>先に閉じる：</strong>パスのノットは閉じたスプラインに渡され、オフセットの前に身振りが閉じたループになります。これがないと、開いたストロークは線に沿ったチューブになってしまいます。閉じておけば、結果は常にひとつのかたまりです。オフセットの距離場は、閉じ目がストロークと交差しても気にしないため、どんな身振りでも安全に閉じられます。</div>
+        <div class="jp"><strong>先に閉じる：</strong>パスのノットは閉じたスプラインに渡され、オフセットの前に身振りが閉じたループになります。これがないと、開いたストロークは線に沿ったチューブになってしまいます。閉じておけば、結果は常にひとつのかたまりです。オフセットの距離場は、閉じ目がストロークと交差していても変わらないため、どんな身振りでも安全に閉じられます。</div>
 
         <p><strong>The outline:</strong> The distance field to the closed loop is stamped onto a grid, and the radius contour is extracted with marching squares. Its outer boundary keeps the loop's concavities, where the convex hull above spans them.</p>
         <div class="jp"><strong>輪郭：</strong>閉じたループへの距離場をグリッドに書き込み、半径の等値線をmarching squaresで取り出します。その外側の境界はループの凹みを保ちます。上の凸包はそこをまたいでしまいます。</div>
@@ -179,7 +179,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <div class="jp"><strong>平滑化：</strong>等値線はスパンで再サンプリングされ、閉じたCatmull-RomまたはB-スプラインで丸められます。等値線はパスから半径の分だけ外にあるため、平滑化が内側を通っても、描いた点が外に出ることはありません。</div>
 
         <p><strong>Radius:</strong> Small, the blob reads as a tube around the line; large, the concavities fill in and it approaches the hull.</p>
-        <div class="jp"><strong>半径：</strong>小さいとブロブは線を包むチューブとして読め、大きいと凹みが埋まっていき、凸包に近づきます。</div>
+        <div class="jp"><strong>半径：</strong>小さいと、ブロブは線を包むチューブに見えます。大きくすると凹みが埋まっていき、凸包に近づきます。</div>
       </details>
     </div>
   </section>

@@ -18,12 +18,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>Strokes that build many small elements instead of one body: short rounded dashes stepped along the spine, uneven hand-drawn dots, and longer strips laid out roughly enough to overlap. The elements fill the stroke's width and follow its taper.</p>
-      <div class="jp">ひとつの身体ではなく、たくさんの小さな要素を作るストロークです。スパインに沿って刻まれる短い丸みのあるダッシュ、手描きの不揃いな点、そして重なるほど粗く置かれた長めの帯。要素はストロークの幅を埋め、テーパーに従います。</div>
+      <div class="jp">ひとつの本体ではなく、たくさんの小さな要素を組み立てるストロークです。スパインに沿って刻まれる短い丸みのあるダッシュ、手描きの不揃いな点、そして重なるほど粗く置かれた長めの帯。要素はストロークの幅を埋め、テーパーに従います。</div>
 
       <details>
         <summary>Details</summary>
         <p><strong>Dashes:</strong> Each dash is about 20 pixels, laid along the local spine direction and stepped by about three quarters of its own length, on rows spread across the width.</p>
-        <div class="jp"><strong>ダッシュ：</strong>各ダッシュは約20ピクセルで、局所的なスパインの向きに沿って置かれ、自分の長さの約4分の3ずつ進みます。幅に広がる列の上に並びます。</div>
+        <div class="jp"><strong>ダッシュ：</strong>各ダッシュは約20ピクセルで、その場所でのスパインの向きに沿って置かれ、自身の長さの約4分の3ずつ進みます。ダッシュは、幅方向に広がった複数の列の上に並びます。</div>
 
         <p><strong>Dots:</strong> Discs of 10 to 15 pixels, wobbled by seeded harmonics of the angle, so each reads as a circle drawn by hand rather than a stamp.</p>
         <div class="jp"><strong>点：</strong>10から15ピクセルの円で、角度のシード付き倍音で揺らされます。そのため、それぞれがスタンプではなく手で描かれた円として読めます。</div>
@@ -32,7 +32,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <div class="jp"><strong>帯：</strong>ダッシュより長く幅広で、回転と配置の揺れが大きく、列が詰まっているため、隣同士がときどき重なります。</div>
 
         <p><strong>Stability:</strong> Each row across the width walks the arc from the start with its own seeded random sequence, so a growing stroke adds elements at the tip without reshuffling the ones already placed.</p>
-        <div class="jp"><strong>安定性：</strong>幅方向の各列は、それぞれのシード付き乱数列で始点から弧をたどります。そのため、伸びていくストロークは先端に要素を加えるだけで、すでに置かれたものを並べ直しません。</div>
+        <div class="jp"><strong>安定性：</strong>幅方向の各列は、固有のシード付き乱数列で始点から弧をたどります。そのため、伸びていくストロークは先端に要素を加えるだけで、すでに置かれたものを並べ直しません。</div>
       </details>
     </div>
   </section>
@@ -47,7 +47,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>The same placement, with the elements as wet marks that drag the background. A dash or strip walks backward along its own direction and averages what it finds, dragging harder toward its tail, so each element reads as a short pull of wet paint; a dot pulls the surrounding color inward, so it reads as a blot. The picked-up background is tinted with the element's color.</p>
-      <div class="jp">同じ配置で、要素を背景を引きずる濡れた印にしたものです。ダッシュと帯は自分の向きに沿って後方を歩き、そこで見つけたものを平均します。尾に向かうほど強く引きずるため、各要素は濡れた絵の具の短いひと引きとして読めます。点は周囲の色を内側へ引き込むため、しみとして読めます。拾われた背景は要素の色で染められます。</div>
+      <div class="jp">同じ配置のまま、各要素を、背景を引きずる濡れた印にしたものです。ダッシュと帯は自身の向きに沿って後方をたどり、そこにあるものを平均します。尾に向かうほど強く引きずるため、各要素は濡れた絵の具の短いひと引きとして読めます。点は周囲の色を内側へ引き込むため、しみとして読めます。拾われた背景は要素の色で染められます。</div>
     </div>
   </section>
 
@@ -61,7 +61,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>Small strokes sprouting from the spine to both sides, swept from the local direction by an angle (45 degrees by default). Their length follows the local width, so the sprouts fill the band the stroke was given and thin with the taper. Three looks: feather, where each left-right pair takes one color and the next pair the other, like a feather's bands; leaves, where the sprouts are tapered leaf shapes sized randomly from well below the width to well past it; and fringe, thinner and denser, with one color on each side of the spine.</p>
-      <div class="jp">スパインから両側へ生える小さなストロークです。局所的な向きから角度（既定では45度）だけ振られます。長さは局所的な幅に従うため、ストロークに与えられた帯を埋め、テーパーとともに細くなります。3つの見た目があります。featherは左右のペアごとに色が交互し、羽の縞のようになります。leavesは先の尖った葉の形で、幅よりずっと小さいものから大きく超えるものまでランダムな大きさになります。fringeはより細く密で、スパインの片側ずつに別の色を持ちます。</div>
+      <div class="jp">スパインから両側へ生える小さなストロークです。局所的な向きから角度（既定では45度）だけ振られます。長さは局所的な幅に従うため、ストロークに与えられた帯を埋め、テーパーとともに細くなります。3つの見た目があります。featherは、左右のペアがひとつの色を取り、次のペアがもう一方の色を取って、羽の縞のようになります。leavesは先の尖った葉の形で、幅よりずっと小さいものから大きく超えるものまで、ランダムな大きさになります。fringeはより細く密で、スパインの左右で色が異なります。</div>
     </div>
   </section>
 
@@ -109,7 +109,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <details>
         <summary>Details</summary>
         <p>The same StrokeDef drives all three; swapping the renderer is the only change.</p>
-        <div class="jp">3つとも同じStrokeDefが駆動し、変わるのはレンダラだけです。</div>
+        <div class="jp">3つとも同じStrokeDefで動き、変わるのはレンダラだけです。</div>
 
         <p><strong>Caps:</strong> Ends are closed by extending vertices along the tangent by a cap profile. For a rounded cap the profile is a circle, so outer lanes and facets stop short of the middle ones.</p>
         <div class="jp"><strong>端点：</strong>終端は、接線方向に頂点を端点プロファイルの分だけ伸ばして閉じます。roundedではプロファイルが円になるため、外側のレーンや面は中央のものより手前で止まります。</div>
@@ -118,7 +118,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <div class="jp"><strong>ピクセル：</strong>セルはスパインから外向きにスタンプされ、グリッド座標で重複が除かれます。内外の判定にはスパインを挟んだ符号付きの距離を使うため、左右の幅は独立したままです。</div>
 
         <p><strong>Facets:</strong> The spine is resampled coarsely and each triangle takes one flat color. Vertices are jittered across the width, so the silhouette breaks along with the shading.</p>
-        <div class="jp"><strong>面：</strong>スパインは粗く再サンプリングされ、各三角形は単色を取ります。頂点は幅方向にばらつかされるため、陰影だけでなく輪郭も崩れます。</div>
+        <div class="jp"><strong>面：</strong>スパインは粗く再サンプリングされ、各三角形は単色を取ります。頂点は幅方向に揺らされるため、陰影だけでなく輪郭も崩れます。</div>
 
         <p><strong>Lanes:</strong> Each lane is its own thin ribbon offset across the width, so the lanes follow the curve.</p>
         <div class="jp"><strong>レーン：</strong>各レーンは幅方向にずらされた独自の細いリボンなので、レーンは曲線に沿って進みます。</div>
@@ -139,7 +139,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>Draw with the strokes on this page, in the drawing tool: the settings panel picks the tool, its colors, and its parameters exactly, the floating dials reroll the palette and walk a trail of rolled tools, and Clear, Replay, and recording work as on the Drawing Tool Demo page. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes as separate strokes. With a pen tablet, pressure widens the stroke, up to three times the width at full sensitivity; a mouse is unaffected.</p>
-      <div class="jp">このページのストロークで、描画ツールの中で描いてみてください。設定パネルはツール、その色、パラメータを正確に選び、浮かぶ2つのダイヤルはパレットを引き直し、ロールされたツールの列をたどります。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭い曲がりで描いた線は分割されるため、速いジグザグは別々のストロークとして焼き込まれます。ペンタブレットでは、筆圧がストロークを太らせます。感度が最大のとき、最大で3倍になります。マウスには影響しません。</div>
+      <div class="jp">このページのストロークを使って、描画ツールの中で描いてみてください。設定パネルでは、ツールとその色、パラメータを正確に選べます。浮かぶ2つのダイヤルでは、パレットを引き直したり、ロールしてきたツールの列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭く曲がると描いた線はそこで分割されるため、速いジグザグは別々のストロークとして焼き込まれます。ペンタブレットでは筆圧でストロークが太くなり、感度が最大のときは幅が最大3倍になります。マウスには影響しません。</div>
     </div>
   </section>
 </PageLayout>

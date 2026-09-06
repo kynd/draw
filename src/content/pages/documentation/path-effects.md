@@ -5,7 +5,7 @@ title: Path Effects
 <div class="prose">
 
 Generators that derive new paths from a base path. Each takes an array of control points and returns one or more new point arrays, ready to hand to a `StrokeDef`. They know nothing about renderers: the derived paths are ordinary paths, drawn by whatever renderer the caller picks.
-<div class="jp">元のパスから新しいパスを導く生成器です。それぞれ制御点の配列を受け取り、`StrokeDef`にそのまま渡せる点の配列をひとつ以上返します。レンダラについては何も知りません。導かれたパスは通常のパスであり、呼び出し側が選んだレンダラで描かれます。</div>
+<div class="jp">元のパスから新しいパスを導く生成器です。それぞれ制御点の配列を受け取り、`StrokeDef`にそのまま渡せる点の配列をひとつ以上返します。生成器はレンダラからは切り離されています。導かれたパスは通常のパスとして、呼び出し側が選んだレンダラで描かれます。</div>
 
 <div class="page-note">
 <p><code>public/lib/pathEffects.js</code></p>
@@ -22,12 +22,12 @@ The tip circles with sin and cos while its center moves along the base path, ret
 ## entangledPaths
 
 Copies of the path, each offset by its own seeded low-frequency waves. Endpoints pull back toward the base so the bundle reads as one gesture. Takes `count`, `amplitude`, `waves`, and `seed`.
-<div class="jp">パスの複製で、それぞれが独自のシード付き低周波の波でずらされます。端点は元のパスへ引き戻されるため、束はひとつの身振りとして読めます。`count`、`amplitude`、`waves`、`seed`を受け取ります。</div>
+<div class="jp">パスの複製で、それぞれが独自のシード付き低周波の波でずらされます。端点は元のパスへ引き戻されるため、束全体がひとつの身振りに見えます。`count`、`amplitude`、`waves`、`seed`を受け取ります。</div>
 
 ## scatteredPaths
 
 Short strokes that copy small segments of the base and move sideways by a seeded offset. Takes `count`, `length`, `offset`, and `seed`.
-<div class="jp">元のパスの一部を写し取り、シード付きのオフセットで横へ移動する短いストロークです。`count`、`length`、`offset`、`seed`を受け取ります。</div>
+<div class="jp">元のパスの短い区間を写し取り、シード付きのオフセットで横へずらした短いストロークです。`count`、`length`、`offset`、`seed`を受け取ります。</div>
 
 ## convexHull
 
@@ -37,11 +37,11 @@ The convex hull of a set of points, counterclockwise, by Andrew's monotone chain
 ## offsetOutline
 
 The outline of everything within `radius` of the polyline: an offset of the path itself, so it follows the gesture into its concavities instead of spanning them. The distance field to the polyline is stamped onto a grid and the radius contour is extracted with marching squares. Returns the longest closed contour, counterclockwise. Takes `radius` and `cell`.
-<div class="jp">ポリラインから`radius`以内にあるすべての輪郭です。パスそのもののオフセットなので、身振りの凹みをまたがずに沿って進みます。ポリラインへの距離場をグリッドに書き込み、半径の等値線をmarching squaresで取り出します。最も長い閉じた輪郭を反時計回りで返します。`radius`と`cell`を受け取ります。</div>
+<div class="jp">ポリラインから`radius`以内にある領域全体の輪郭です。パスそのもののオフセットなので、身振りの凹みをまたがずに沿って進みます。ポリラインへの距離場をグリッドに書き込み、半径の等値線をmarching squaresで取り出します。最も長い閉じた輪郭を反時計回りで返します。`radius`と`cell`を受け取ります。</div>
 
 ## blobOutline
 
 The full blob pipeline: a gesture in, a smooth closed contour out. The path is resampled to knots, closed into a smooth loop, offset by `radius`, and the contour smoothed again. Closing first keeps the result a mass rather than a tube, and the offset field does not care when the closure crosses the stroke. Takes `span` and `radius`.
-<div class="jp">ブロブのパイプライン全体です。身振りを入れると、滑らかな閉じた輪郭が出てきます。パスはノットに再サンプリングされ、滑らかなループとして閉じられ、`radius`でオフセットされ、輪郭が再び滑らかにされます。先に閉じることで結果はチューブではなくかたまりに保たれ、オフセットの距離場は閉じ目がストロークと交差しても気にしません。`span`と`radius`を受け取ります。</div>
+<div class="jp">ブロブのパイプライン全体です。身振りを入れると、滑らかな閉じた輪郭が出てきます。パスはノットに再サンプリングされ、滑らかなループとして閉じられ、`radius`でオフセットされ、輪郭が再び滑らかにされます。先に閉じておくことで、結果はチューブではなくかたまりになります。閉じ目がストロークと交差しても、オフセットの距離場には影響しません。`span`と`radius`を受け取ります。</div>
 
 </div>

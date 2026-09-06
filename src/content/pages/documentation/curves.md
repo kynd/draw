@@ -14,7 +14,7 @@ Curve constructions over a list of knots. Each takes points and returns a dense 
 ## resampleEvery
 
 Points spaced `span` apart along the polyline, walked by arc length. The first and last points are always kept, so the curve starts and ends where the path did. A span of zero returns every point unchanged.
-<div class="jp">ポリラインに沿って弧長基準で`span`間隔に置かれた点です。最初と最後の点は常に保持されるため、曲線はパスと同じ場所で始まり、終わります。スパンがゼロのときは、すべての点をそのまま返します。</div>
+<div class="jp">ポリラインに沿って、弧長で測って`span`間隔に配置した点です。最初と最後の点は常に保持されるため、曲線はパスと同じ場所で始まり、終わります。スパンがゼロのときは、すべての点をそのまま返します。</div>
 
 ## naturalSpline
 
@@ -37,11 +37,11 @@ John Hobby's curve through the knots, the interpolation METAFONT draws paths wit
 <div class="jp">ノットを通るJohn Hobbyの曲線で、METAFONTがパスを描くのに使う補間です。接線方向は擬似曲率の連立方程式をThomasアルゴリズムで解いて求め、制御ハンドルはHobbyの速度関数から求めます。Jake Lowの実装（ISCライセンス）を基にしています。`samplesPerSegment`と、端点でのカールである`omega`を受け取ります。</div>
 
 It swings wider through corners than the natural spline. The natural spline minimizes bending energy along the whole curve, while Hobby's construction aims for locally even curvature, which rounds a corner into a fuller arc.
-<div class="jp">角ではnaturalスプラインより大きく膨らみます。naturalスプラインは曲線全体の曲げエネルギーを最小化しますが、Hobbyの構築は局所的に均一な曲率を目指すため、角はより丸いふくらみを持った弧になります。</div>
+<div class="jp">角ではnaturalスプラインより大きく膨らみます。naturalスプラインは曲線全体の曲げエネルギーを最小化しますが、Hobbyの構築は局所的に均一な曲率を目指すため、角はより丸くふくらんだ弧になります。</div>
 
 ## splitByTurn
 
 Splits a point list into separate runs wherever the direction turns more than `angle` radians. The turn at a point compares the incoming and outgoing directions, each measured over `span` of arc rather than one segment, so the jitter of dense points does not trigger cuts. A cut cannot follow another within `span` of arc, so one corner yields one cut, and each run shares its boundary point with the next, so the pieces stay connected end to end.
-<div class="jp">向きが`angle`ラジアンを超えて変わる場所で、点の列を別々の連なりに分割します。ある点での回転は入る方向と出る方向を比べます。どちらも1セグメントではなく`span`の弧長で測るため、密集した点のジッタでは分割は起きません。`span`の弧長の内側では次の分割は起きないため、ひとつの角はちょうど1回だけ分割されます。各連なりは境界の点を次の連なりと共有するので、断片は端と端でつながったままです。</div>
+<div class="jp">向きが`angle`ラジアンを超えて変わる場所で、点の列を別々の連なりに分割します。ある点での回転は、入る方向と出る方向を比べて求めます。どちらも1セグメントではなく`span`の弧長で測るため、密集した点のジッタでは分割は起きません。分割の直後、`span`の弧長のあいだは次の分割が起きないため、ひとつの角で分割されるのは1回だけです。各連なりは境界の点を次の連なりと共有するので、断片は端と端でつながったままです。</div>
 
 </div>

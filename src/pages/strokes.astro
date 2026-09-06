@@ -22,7 +22,7 @@ const demos = [
 
     <h2>Common to every demo</h2>
     <p>Depth ordering, sampling, and color selection are shared across every demo on this page. Each demo section covers only what its renderer adds.</p>
-    <div class="jp">深度順序付け、サンプリング、色の選択は、このページのすべてのデモで共通しています。各デモのセクションでは、そのレンダラが追加する要素のみを説明します。</div>
+    <div class="jp">深度の順序付け、サンプリング、色の選択は、このページのすべてのデモで共通です。各デモのセクションでは、そのレンダラが加える部分だけを説明します。</div>
 
     <details>
       <summary>Details</summary>
@@ -30,10 +30,10 @@ const demos = [
       <div class="jp"><strong>深度：</strong>ストロークは2Dです。XとY方向にだけ動き、Zは紙のすぐ上に配置されます。zファイティングを避けるため、Zはストロークに沿って少しずつ上がっていきます。</div>
 
       <p><strong>Sampling:</strong> Sample count (number of vertices) is derived from measured arc length, not from how many control points the path was authored with.</p>
-      <div class="jp"><strong>サンプリング：</strong>サンプル数（頂点数）は、パスを描いた際の制御点の数ではなく、測定した弧長から導かれます。</div>
+      <div class="jp"><strong>サンプリング：</strong>サンプル数（頂点数）は、パスを描いた際の制御点の数ではなく、実測した弧長から求められます。</div>
 
       <p><strong>Color:</strong> Every demo draws its colors from one generated <a href={`${base}/documentation/palette`}>Palette</a>.</p>
-      <div class="jp"><strong>色：</strong>すべてのデモは、生成された<a href={`${base}/documentation/palette`}>パレット</a>から色を取得します。</div>
+      <div class="jp"><strong>色：</strong>どのデモも、生成されたひとつの<a href={`${base}/documentation/palette`}>パレット</a>から色を取ります。</div>
     </details>
   </div>
 
@@ -55,7 +55,7 @@ const demos = [
         <div class="jp"><strong>端点のスタイル：</strong>3本のストロークはひとつのレンダラクラスを共有し、端点はそのオプションです。squareはジオメトリを追加せず、リボンは最後のサンプルで終わります。roundedは左端から外向きの接線を通って右端までトライアングルファンを掃引します。raggedは終端の先へ、深さの異なるスパイクの帯を押し出します。</div>
 
         <p><strong>Rounded cap:</strong> Radius interpolates from the left width to the right width across the sweep, so an asymmetric stroke ends in a half-ellipse that meets both edges. Resolution scales with radius.</p>
-        <div class="jp"><strong>roundedの端点：</strong>半径は掃引に沿って左の幅から右の幅へ補間されるため、左右非対称なストロークは両方の端に接する半楕円で終わります。分割数は半径に応じて決まります。</div>
+        <div class="jp"><strong>roundedの端点：</strong>半径は掃引に沿って左の幅から右の幅へ補間されるため、左右非対称なストロークは左右の縁に接する半楕円で終わります。分割数は半径に応じて決まります。</div>
 
         <p><strong>Ragged cap:</strong> Spike depths come from two sine samples offset by the stroke's seed, so the same seed always tears the same way.</p>
         <div class="jp"><strong>raggedの端点：</strong>スパイクの深さはストロークのシードでずらした2つの正弦波のサンプルから求められるため、同じシードからは常に同じ裂け方になります。</div>
@@ -78,7 +78,7 @@ const demos = [
       <details>
         <summary>Details</summary>
         <p><strong>Shading:</strong> The ribbon is handed to a fragment shader that computes a color per pixel, so the texture follows the mark instead of repeating on top of it.</p>
-        <div class="jp"><strong>陰影付け：</strong>リボンはフラグメントシェーダに渡され、ピクセルごとに色が計算されます。そのためテクスチャは、上で繰り返されるのではなく、線に沿って走ります。</div>
+        <div class="jp"><strong>陰影付け：</strong>リボンはフラグメントシェーダに渡され、ピクセルごとに色が計算されます。そのためテクスチャは、線の上で繰り返されるのではなく、線に沿って流れます。</div>
 
         <p><strong>Bristle noise:</strong> One noise field draws the bristle lanes, erodes the edge, and decides which pigment shows at each point.</p>
         <div class="jp"><strong>毛のノイズ：</strong>ひとつのノイズが、毛の筋を描き、輪郭を削り、各点でどちらの顔料が表に出るかを決めます。</div>
@@ -107,13 +107,13 @@ const demos = [
         <div class="jp"><strong>ドロップシャドウ：</strong>ストロークのぼかしたシルエットをずらして下に描くため、線は浮いて見えます。</div>
 
         <p><strong>Deboss:</strong> A band inside the boundary darkens where its outward direction faces a fixed light, the shadow a cutout's lit rim casts onto its floor. There is no highlight, so the stroke reads as cut out of the paper.</p>
-        <div class="jp"><strong>デボス：</strong>輪郭の内側の帯は、外向きの方向が固定光源を向く場所で暗くなります。切り抜きの光の当たる縁が、底に落とす影です。ハイライトはないため、ストロークは紙から切り抜かれたように見えます。</div>
+        <div class="jp"><strong>デボス：</strong>輪郭の内側の帯は、外向きの方向が固定光源を向く場所で暗くなります。これは、切り抜きの光の当たる縁が底面に落とす影にあたります。ハイライトはないため、ストロークは紙から切り抜かれたように見えます。</div>
 
         <p><strong>Glow:</strong> The same silhouette blurred wider, in the most saturated bright color of the palette.</p>
         <div class="jp"><strong>グロー：</strong>同じシルエットをより広くぼかし、パレットの中で最も彩度の高い明るい色で描いたものです。</div>
 
         <p>The shadow and the glow are one class, StrokeHalo. It renders the stroke into a private low-resolution target and blurs there, so the softness cannot fold with the path.</p>
-        <div class="jp">シャドウとグローはひとつのクラス、StrokeHaloです。ストロークを専用の低解像度ターゲットに描画してそこでぼかすため、柔らかさがパスに沿って折り重なることはありません。</div>
+        <div class="jp">シャドウとグローは、StrokeHaloというひとつのクラスです。ストロークを専用の低解像度ターゲットに描いてそこでぼかすため、ぼかしがパスとともに折り重なることはありません。</div>
       </details>
     </div>
   </section>
@@ -128,7 +128,7 @@ const demos = [
     </div>
     <div class="prose">
       <p>Draw with the strokes on this page, in the drawing tool: the settings panel picks the tool, its colors, and its parameters exactly, the floating dials reroll the palette and walk a trail of rolled tools, and Clear, Replay, and recording work as on the Drawing Tool Demo page. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes as separate strokes. With a pen tablet, pressure widens the stroke, up to three times the width at full sensitivity; a mouse is unaffected.</p>
-      <div class="jp">このページのストロークで、描画ツールの中で描いてみてください。設定パネルはツール、その色、パラメータを正確に選び、浮かぶ2つのダイヤルはパレットを引き直し、ロールされたツールの列をたどります。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭い曲がりで描いた線は分割されるため、速いジグザグは別々のストロークとして焼き込まれます。ペンタブレットでは、筆圧がストロークを太らせます。感度が最大のとき、最大で3倍になります。マウスには影響しません。</div>
+      <div class="jp">このページのストロークを使って、描画ツールの中で描いてみてください。設定パネルでは、ツールとその色、パラメータを正確に選べます。浮かぶ2つのダイヤルでは、パレットを引き直したり、ロールしてきたツールの列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭く曲がると描いた線はそこで分割されるため、速いジグザグは別々のストロークとして焼き込まれます。ペンタブレットでは筆圧でストロークが太くなり、感度が最大のときは幅が最大3倍になります。マウスには影響しません。</div>
     </div>
   </section>
 </PageLayout>

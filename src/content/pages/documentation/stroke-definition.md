@@ -31,10 +31,10 @@ Constructed from a single options object.
 </div>
 
 "Left" is the +90° rotation of the tangent in the XY plane. Because the two sides are stored separately, a stroke can lean off the path that generated it — the spine stays where the gesture put it while the visible mark thickens to one side.
-<div class="jp">「左」とは、XY平面上で接線を+90°回転させた向きです。左右を別々に保持しているため、ストロークは自分を生成したパスから偏ることができます。スパインは身振りが置いた位置に留まったまま、目に見える線だけが片側に太っていきます。</div>
+<div class="jp">「左」とは、XY平面上で接線を+90°回転させた向きです。左右を別々に保持しているため、ストロークを、元になったパスから片側へ寄せることができます。スパインは身振りが置いた位置に留まったまま、目に見える線だけが片側へ太くなっていきます。</div>
 
 `build()` hands the definition to its renderer and returns a `THREE.Object3D`. `maxWidth()` samples both sides and returns the largest value; `polylineLength` measures the control polygon, which is a cheap approximation renderers do not rely on — they measure the resampled curve instead.
-<div class="jp">`build()` は定義をレンダラに渡し、`THREE.Object3D` を返します。`maxWidth()` は左右をサンプリングして最大値を返します。`polylineLength` は制御点を結んだ折れ線の長さで、これは安価な近似値であり、レンダラはこれに依存せず、再サンプリングした曲線を計測します。</div>
+<div class="jp">`build()` は定義をレンダラに渡し、`THREE.Object3D` を返します。`maxWidth()` は左右をサンプリングして最大値を返します。`polylineLength`は制御点を結んだ折れ線の長さで、安価な近似値です。レンダラはこれに頼らず、再サンプリングした曲線の長さを測ります。</div>
 
 ## Width
 
@@ -57,7 +57,7 @@ Because `t` is normalised over *arc length* rather than over the control point i
 `renderer` is a reference, not a subclass hook: one renderer instance can build any
 number of strokes, because it carries style and never state about a particular stroke.
 `build()` simply hands the definition over.
-<div class="jp">`renderer` はサブクラス用のフックではなく参照です。レンダラのインスタンスは任意の数のストロークを構築できます。保持するのはスタイルであって、特定のストロークの状態ではないからです。`build()` は単に定義を渡すだけです。</div>
+<div class="jp">`renderer`はサブクラス用のフックではなく参照です。一つのレンダラのインスタンスで、いくつでもストロークを構築できます。保持するのはスタイルであって、特定のストロークの状態ではないからです。`build()` は単に定義を渡すだけです。</div>
 
 Renderers, the contract they share, and `RibbonStrokeRenderer` are documented on
 <a href="/draw/documentation/renderers">Renderers</a>.
