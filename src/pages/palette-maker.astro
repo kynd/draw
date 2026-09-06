@@ -43,8 +43,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <div class="jp"><strong>Black：</strong>すべての色が黒です。</div>
 
       <h2 id="representative-lightness">Representative lightness</h2>
-      <p>A hue reads as the paint its name would be on at a particular lightness, not at the lightness where its chroma peaks: yellow only reads as yellow when bright, while green and blue read as their names well below their max-chroma points. The vivid half of Vivid &amp; dark uses this lightness, anchored per hue name (red 0.58, yellow 0.90, green 0.50, blue 0.45) and interpolated around the wheel.</p>
-      <div class="jp">色相が名前どおりの絵の具に見えるのは特定の明度のときであり、彩度が最大になる明度ではありません。黄色は明るいときだけ黄色に見え、緑や青は最大彩度の点よりずっと下で名前どおりに見えます。Vivid &amp; darkの鮮やかな半分はこの明度を使います。色相の名前ごとの基準値（赤0.58、黄0.90、緑0.50、青0.45）を色相環に沿って補間したものです。</div>
+      <p>Each hue has a prototypical color, the one people recognize by the simplest color term (red, green, blue, pink), and that color sits at a particular lightness, not at the lightness where the hue's chroma peaks: yellow is only yellow when bright, while green and blue are their names well below their chroma peaks. The vivid half of Vivid &amp; dark uses this lightness, anchored per color term (red 0.58, yellow 0.90, yellow-green 0.82, green 0.50, blue 0.45, pink 0.78) and interpolated around the wheel. The prototypes are cultural: which terms are basic, and where their colors sit, varies between cultures, and the anchors are one such choice.</p>
+      <div class="jp">各色相には、最も典型的な色があります。赤、緑、青、ピンクといった、いちばん単純な色名で誰もが思い浮かべる色です。その色は特定の明度にあり、色相の彩度が最大になる明度とは一致しません。黄色は明るいときだけ黄色であり、緑や青は彩度のピークよりずっと下でその名前の色になります。Vivid &amp; darkの鮮やかな半分はこの明度を使います。色名ごとの基準値（赤0.58、黄0.90、黄緑0.82、緑0.50、青0.45、ピンク0.78）を色相環に沿って補間したものです。この典型は文化に依存します。どの色名が基本になるか、その色がどこにあるかは文化によって異なり、この基準値はそのひとつの選択です。</div>
 
       <h2 id="randomness">Randomness</h2>
       <p>Every theme except Black jitters the hue and lightness of the colors other than the key color. The jitter comes from a seed, so the same settings reproduce the same palette; Reroll draws a new seed while the key color holds.</p>

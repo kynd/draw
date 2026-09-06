@@ -28,19 +28,23 @@ function clampL(L) { return Math.max(0.05, Math.min(0.97, L)); }
 // Symmetric jitter: ±amount.
 function jit(rng, amount) { return (rng() * 2 - 1) * amount; }
 
-// The lightness at which a hue looks like the paint its name would be on:
-// yellow only reads as yellow when bright, green and blue read as their names
-// well below their max-chroma point. Anchored per hue name, interpolated
-// around the wheel.
+// Each hue's most prototypical color, the one people recognize by the
+// simplest color term (red, green, pink), sits at a particular lightness,
+// not at the hue's max-chroma point: yellow is only yellow when bright,
+// while green and blue are their names well below their chroma peaks.
+// Anchored per color term, interpolated around the wheel. The prototypes
+// are cultural; the anchors are one such choice.
 const REPR_ANCHORS = [
     [30, 0.58],   // red
     [65, 0.72],   // orange
     [100, 0.90],  // yellow
+    [130, 0.82],  // yellow-green
     [145, 0.50],  // green
     [200, 0.70],  // cyan
     [265, 0.45],  // blue
     [305, 0.45],  // purple
     [340, 0.58],  // magenta
+    [355, 0.78],  // pink
 ];
 
 export function representativeL(H) {
