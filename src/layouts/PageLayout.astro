@@ -21,10 +21,10 @@ const navItems: NavItem[] = [
   { label: 'Intro', href: `${base}/`, slug: '' },
   { label: 'Palette maker', href: `${base}/palette-maker`, slug: 'palette-maker',
     subLinks: [
-      { label: 'Generating a palette',       href: '#generating-a-palette' },
-      { label: 'Color Selection',            href: '#color-selection' },
-      { label: 'Chroma',                     href: '#chroma' },
-      { label: 'Distribution of the steps',  href: '#distribution-of-the-steps' },
+      { label: 'Themed palette',          href: '#themed-palette' },
+      { label: 'Themes',                  href: '#themes' },
+      { label: 'Representative lightness', href: '#representative-lightness' },
+      { label: 'Randomness',              href: '#randomness' },
     ]
   },
   { label: 'Strokes', href: `${base}/strokes`, slug: 'strokes',
@@ -153,6 +153,7 @@ const navItems: NavItem[] = [
           { label: 'Gamut',      href: '#gamut' },
           { label: 'Generating', href: '#generating' },
           { label: 'Chroma',     href: '#chroma' },
+          { label: 'ThemedPaletteMaker', href: '#themedpalettemaker' },
           { label: 'Selecting',  href: '#selecting' },
         ]
       },
@@ -189,6 +190,7 @@ const navItems: NavItem[] = [
   // removes their built pages and demos, so they never reach the published site.
   ...(import.meta.env.DEV ? [
     { label: '[Experimental] MIDI control', href: `${base}/experimental/midi-control`, slug: 'experimental/midi-control', sketch: true },
+    { label: '[Experimental] Old palette maker', href: `${base}/experimental/palette-maker`, slug: 'experimental/palette-maker', sketch: true },
   ] : []),
 ];
 

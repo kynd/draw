@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { resampleEvery, catmullRomSpline, splitByTurn } from '../../lib/curves.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawInput } from '../../lib/demo/drawInput.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
@@ -21,14 +21,9 @@ let entries = [];
 let colors = ['#2c3a5e', '#7a4a2f', '#3f6b3a', '#6b2f4a', '#8a6a2f'];
 
 function randomizeColors() {
-    const palette = Palette.fromHues(
-        Array.from({ length: 4 }, () => Math.random() * 360),
-        { nLum: 5, lumHigh: 0.93, lumLow: 0.28, vibHigh: 0.95, vibLow: 0.30 }
-    );
-    const pick = list => list[Math.floor(Math.random() * list.length)];
-    stage.setBackground(pick(palette.entries.filter(e => e.L > 0.85)).hex);
-    const dark = palette.entries.filter(e => e.L < 0.6);
-    return Array.from({ length: 5 }, () => pick(dark).hex);
+    const palette = randomThemedPalette('vivid-dark');
+    stage.setBackground(paperColor(palette.entries[0].H));
+    return Array.from({ length: 5 }, (_, i) => palette.entries[i % palette.length].hex);
 }
 
 function refresh() {

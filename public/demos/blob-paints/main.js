@@ -2,6 +2,7 @@ import { PaintBlobRenderer } from '../../lib/renderers/PaintBlobRenderer.js';
 import { setupBlobShowcase } from '../../lib/demo/blobShowcase.js';
 
 setupBlobShowcase({
+    theme: 'vivid-dark',
     controls: { relief: 2, gloss: 2 },
     makeRow: (i, ctx) => {
         const relief = ctx.values.relief;

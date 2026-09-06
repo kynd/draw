@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { resampleEvery, catmullRomSpline, bSpline } from '../../lib/curves.js';
 import { convexHull } from '../../lib/pathEffects.js';
 import { seededRandom } from '../../lib/random.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireWireframeToggle } from '../../lib/demo/panel.js';
 import { DrawInput } from '../../lib/demo/drawInput.js';
@@ -45,17 +45,12 @@ function setLine(object, points) {
 }
 
 function randomizeColors() {
-    const palette = Palette.fromHues(
-        Array.from({ length: 4 }, () => Math.random() * 360),
-        { nLum: 5, lumHigh: 0.92, lumLow: 0.3, vibHigh: 0.95, vibLow: 0.3 }
-    );
-    const pick = list => list[Math.floor(Math.random() * list.length)];
-    stage.setBackground(pick(palette.entries.filter(e => e.L > 0.82)).hex);
-    const mid = palette.entries.filter(e => e.L > 0.4 && e.L < 0.75);
-    const dark = palette.entries.filter(e => e.L < 0.4);
+    const palette = randomThemedPalette('vivid-dark');
+    stage.setBackground(paperColor(palette.entries[0].H));
+    const sorted = [...palette.entries].sort((a, b) => a.L - b.L);
     colors = {
-        fill: pick(mid.length ? mid : palette.entries).hex,
-        line: pick(dark.length ? dark : palette.entries).hex,
+        fill: sorted[Math.floor(sorted.length / 2)].hex,
+        line: sorted[0].hex,
     };
 }
 

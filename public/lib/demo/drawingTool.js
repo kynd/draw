@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../StrokeDef.js';
-import { Palette } from '../Palette.js';
+import { ThemedPaletteMaker, PALETTE_THEMES } from '../ThemedPaletteMaker.js';
 import { oklchToHex, maxChromaAt } from '../color.js';
 import { PIXELS_PER_UNIT } from '../CanvasBuffer.js';
 import { blobOutline } from '../pathEffects.js';
@@ -73,10 +73,12 @@ const TEMPLATE = /* html */`
     <hr class="dp-divider" />
 
     <div class="dp-sub-label">Color</div>
-    <div class="dp-dial-row">
+    <div style="display:flex; gap:8px; align-items:center">
       <div id="dial-h" class="small"></div>
-      <div id="dial-c" class="small"></div>
-      <div id="dial-l" class="small"></div>
+      <select id="theme-select" class="dp-select"></select>
+    </div>
+    <div class="dp-btn-row" style="margin-top:8px">
+      <button id="palette-reroll" class="dp-btn secondary">Reroll palette</button>
     </div>
     <div class="dp-swatch-row" id="tool-colors" style="margin-top:8px"></div>
     <div class="dp-swatch-grid" id="palette-grid"></div>
@@ -101,11 +103,11 @@ const TEMPLATE = /* html */`
  * `{ id, kind: 'stroke'|'blob', params, make(values, ctx) }`, and the
  * component builds the whole interface around it.
  *
- * The interface: a settings panel on the left, open by default, holding every
- * control but the two floating dials; the hue dial rotates the palette at full
- * chroma, the tool dial walks a trail of rolled tools; the current tool
- * previews on a wiggle at the bottom left. Everything fades while the pen is
- * down.
+ * The interface: a settings panel on the right, open by default, holding
+ * every control but the two floating dials; each hue dial step moves the
+ * palette's key hue by about ten degrees and rolls a fresh theme, the tool
+ * dial walks a trail of rolled tools; the current tool previews on a wiggle
+ * at the bottom left. Everything fades while the pen is down.
  */
 export function setupDrawingTool({ registry, root = document.body, square = false }) {
     const layout = document.createElement('div');
@@ -136,9 +138,7 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     let autoRandom = false;
 
     function autoReroll() {
-        const hueValue = Math.floor(Math.random() * 128);
-        dialHue.set(hueValue, false);
-        setDialColor(hueValue);
+        paletteStep(Math.random() < 0.5 ? -1 : 1);
         stepTrail(1);
         refreshPreview();
         syncPane();
@@ -158,42 +158,57 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
             }, points);
         },
         // Once per gesture, after every piece has committed, so the reroll
-        // cannot leak into a later piece's record.
+        // cannot leak into a later piece's record. Every release rerolls the
+        // palette's jitter under the same hue and theme; auto mode also rolls
+        // the tool.
         onRelease: () => {
-            if (autoRandom && !replaying) autoReroll();
+            if (replaying) return;
+            if (autoRandom) autoReroll();
+            else { rerollPalette(); syncPane(); }
         },
         // The pointer's own line stays off unless the checkbox turns it on.
         pointerTrace: false,
     });
 
     // ------------------------------------------------------------------
-    // Palette. The first hue always follows the color choice; the rest reroll.
-    function newPalette(hue, { keepColorA = false } = {}) {
-        const hues = [hue, ...Array.from({ length: 3 }, () => Math.random() * 360)];
-        state.palette = Palette.fromHues(hues, {
-            nLum: 5, lumHigh: 0.9, lumLow: 0.3, vibHigh: 0.95, vibLow: 0.3,
-        });
-        const dark = state.palette.entries.filter(e => e.L < 0.68);
-        if (!keepColorA) {
-            const firstDark = state.palette.entries.slice(0, 5).filter(e => e.L < 0.68);
-            state.colorA = (firstDark[Math.floor(firstDark.length / 2)] ?? dark[0]).hex;
-        }
-        state.colorB = dark[Math.floor(Math.random() * dark.length)].hex;
-        state.colors = dark.map(e => e.hex);
+    // Palette: a themed palette from a key hue, a theme, and a seed. The key
+    // color (the first entry) follows the hue and theme exactly; the seed
+    // drives the jitter on the rest. Black stays a panel choice, not a roll.
+    const ROLL_THEMES = PALETTE_THEMES.filter(th => th.id !== 'black').map(th => th.id);
+    const paletteCfg = {
+        hue: Math.random() * 360, count: 5,
+        theme: ROLL_THEMES[Math.floor(Math.random() * ROLL_THEMES.length)],
+        seed: Math.floor(Math.random() * 1e9),
+    };
+
+    function regenPalette() {
+        state.palette = new ThemedPaletteMaker(paletteCfg).generate();
+        const entries = state.palette.entries;
+        state.colorA = entries[0].hex;
+        const rest = entries.slice(1);
+        state.colorB = (rest[Math.floor(Math.random() * rest.length)] ?? entries[0]).hex;
+        state.colors = entries.map(e => e.hex);
+        renderSwatches();
+        refreshPreview();
+    }
+
+    // Rerolls the jitter under the same hue, count, and theme.
+    function rerollPalette() {
+        paletteCfg.seed = Math.floor(Math.random() * 1e9);
+        regenPalette();
+    }
+
+    // One step of the floating hue dial: the key hue moves by about ten
+    // degrees, and the theme rerolls.
+    function paletteStep(steps) {
+        paletteCfg.hue = (paletteCfg.hue + steps * (7 + Math.random() * 7) + 360) % 360;
+        paletteCfg.theme = ROLL_THEMES[Math.floor(Math.random() * ROLL_THEMES.length)];
+        paletteCfg.seed = Math.floor(Math.random() * 1e9);
+        regenPalette();
     }
 
     const toolValues = {};
     let toolIndex = 0;
-
-    // On a tool change, every color the tool uses besides the main one
-    // re-picks from the palette, so a new tool arrives with a fresh pairing
-    // while the chosen color holds.
-    function rerollSecondaryColors() {
-        const dark = state.palette?.entries.filter(e => e.L < 0.68) ?? [];
-        if (!dark.length) return;
-        state.colorB = dark[Math.floor(Math.random() * dark.length)].hex;
-        state.colors = [...dark].sort(() => Math.random() - 0.5).map(e => e.hex);
-    }
 
     // The tool dial walks a trail of rolled tools: the current one with ten
     // remembered on each side, so passing a tool over and dialing back finds
@@ -323,18 +338,19 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
 
     // ------------------------------------------------------------------
     // Dials, frame-latched: input only stores the value, the update runs once
-    // on the next frame. The hue dial rolls the chroma too, biased toward the
-    // vivid end; exact chroma and lightness stay on the panel's own dials.
-    function setDialColor(hueValue) {
-        adv.h = Math.round(hueValue / 127 * 360);
-        adv.c = Math.round(100 * (1 - Math.random() * Math.random()));
-        dialH.set(adv.h, false);
-        dialC.set(adv.c, false);
-        applyAdvancedColor();
-    }
-    const hueLatch = new FrameLatch(v => setDialColor(v));
-    // The dial's range is quantized into buckets; crossing into a new bucket
-    // steps the trail by the difference, so turning back retraces the same tools.
+    // on the next frame. Both dials' ranges are quantized into buckets;
+    // crossing into a new bucket steps by the difference. A hue dial step
+    // moves the key hue by about ten degrees and rerolls the theme.
+    const HUE_STEP = 6;
+    let hueBucket = null;
+    const hueLatch = new FrameLatch(v => {
+        const bucket = Math.round(v / HUE_STEP);
+        if (hueBucket === null) hueBucket = bucket;
+        if (bucket === hueBucket) return;
+        paletteStep(bucket - hueBucket);
+        hueBucket = bucket;
+        syncPane();
+    });
     const TOOL_STEP = 6;
     let toolBucket = Math.round(48 / TOOL_STEP);
     const toolLatch = new FrameLatch(v => {
@@ -342,13 +358,14 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
         if (bucket === toolBucket) return;
         stepTrail(bucket - toolBucket);
         toolBucket = bucket;
-        rerollSecondaryColors();
+        rerollPalette();
         refreshPreview();
         syncPane();
     });
 
     const dialHue = new Dial($('dial-hue'),
         { label: 'Hue', value: Math.floor(Math.random() * 128), onInput: v => hueLatch.set(v) });
+    hueBucket = Math.round(dialHue.value / HUE_STEP);
     const dialTool = new Dial($('dial-tool'),
         { label: 'Tool', value: 48, onInput: v => toolLatch.set(v) });
 
@@ -370,18 +387,17 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     // palette and all recorded, so a replay reproduces them too.
     function clearAll() {
         // A gradient background, as plain data so the recorder can reproduce
-        // it. The two colors come from different hue groups (entries are
-        // hue-major, five luminance steps per hue), so the gradient actually
-        // reads as one.
-        const groupLight = g => {
-            const group = state.palette.entries.slice(g * 5, g * 5 + 5).filter(e => e.L > 0.55);
-            return (group[Math.floor(Math.random() * group.length)] ?? state.palette.entries[g * 5]).hex;
+        // it. The two colors are paper-light tints of two palette hues, so any
+        // theme (a dark cluster included) clears to a drawable ground.
+        const paperTint = entry => {
+            const L = 0.86 + Math.random() * 0.08;
+            return oklchToHex(L, Math.min(maxChromaAt(L, entry.H) * 0.5, 0.03 + Math.random() * 0.04), entry.H);
         };
-        const gi = Math.floor(Math.random() * 4);
-        const gj = (gi + 1 + Math.floor(Math.random() * 3)) % 4;
+        const es = state.palette.entries;
         const background = {
             type: Math.random() < 0.5 ? 'linear' : 'radial',
-            colorA: groupLight(gi), colorB: groupLight(gj),
+            colorA: paperTint(es[Math.floor(Math.random() * es.length)]),
+            colorB: paperTint(es[Math.floor(Math.random() * es.length)]),
             angle: Math.random() * Math.PI * 2,
             center: [0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.6],
         };
@@ -395,9 +411,9 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
             state.colorB = dark[Math.floor(Math.random() * dark.length)];
             cycle.feed(scatterPath(stage.extentX, stage.extentY), true);
         }
-        // Back to what the dials say: the color from the panel's dials, the
-        // tool from the trail's current entry.
-        applyAdvancedColor();
+        // Back to what the panel says: the palette from its config, the tool
+        // from the trail's current entry.
+        regenPalette();
         applyRoll(trail[TRAIL_SIDE]);
         refreshPreview();
         syncPane();
@@ -479,23 +495,13 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     });
 
     // ------------------------------------------------------------------
-    // The settings panel: exact HCL color by three dials, the tool by dial or
-    // dropdown, every parameter of the current tool as sliders, and every
-    // button but the floating dials. Open by default; the top left icon
-    // toggles it.
+    // The settings panel: the palette by a hue dial, a theme dropdown, and a
+    // reroll button, the tool by dial or dropdown, every parameter of the
+    // current tool as sliders, and every button but the floating dials. Open
+    // by default; the top right icon toggles it.
     const advBtn = $('adv-btn');
     const sidePane = $('side-pane');
     let panelOpen = true;
-    const adv = { h: 0, c: 100, l: 45 };
-
-    function applyAdvancedColor() {
-        const L = adv.l / 100;
-        const C = maxChromaAt(L, adv.h) * adv.c / 100;
-        state.colorA = oklchToHex(L, C, adv.h);
-        newPalette(adv.h, { keepColorA: true });
-        renderSwatches();
-        refreshPreview();
-    }
 
     function selectToolByIndex(index) {
         toolIndex = Math.max(0, Math.min(registry.length - 1, index));
@@ -585,11 +591,21 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
     }
 
     const dialH = new Dial($('dial-h'),
-        { label: 'H', min: 0, max: 360, value: adv.h, onInput: v => { adv.h = v; applyAdvancedColor(); } });
-    const dialC = new Dial($('dial-c'),
-        { label: 'C', min: 0, max: 100, value: adv.c, onInput: v => { adv.c = v; applyAdvancedColor(); } });
-    const dialL = new Dial($('dial-l'),
-        { label: 'L', min: 5, max: 95, value: adv.l, onInput: v => { adv.l = v; applyAdvancedColor(); } });
+        { label: 'H', min: 0, max: 360, value: Math.round(paletteCfg.hue),
+          onInput: v => { paletteCfg.hue = v; regenPalette(); } });
+    const themeSelect = $('theme-select');
+    for (const th of PALETTE_THEMES) {
+        const o = document.createElement('option');
+        o.value = th.id;
+        o.textContent = th.label;
+        themeSelect.appendChild(o);
+    }
+    themeSelect.value = paletteCfg.theme;
+    themeSelect.addEventListener('change', () => {
+        paletteCfg.theme = themeSelect.value;
+        regenPalette();
+    });
+    $('palette-reroll').addEventListener('click', rerollPalette);
 
     const toolSelect = $('tool-select');
     registry.forEach((entry, i) => {
@@ -599,18 +615,20 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
         toolSelect.appendChild(o);
     });
     toolSelect.addEventListener('change', () => {
-        rerollSecondaryColors();
+        rerollPalette();
         selectToolByIndex(parseInt(toolSelect.value, 10));
         dialToolAdv.set(toolIndex, false);
     });
     // The dial is a shortcut through the same order as the dropdown, not a reroll.
     const dialToolAdv = new Dial($('dial-tool-adv'),
         { label: 'Tool', min: 0, max: registry.length - 1, value: 0,
-          onInput: i => { rerollSecondaryColors(); selectToolByIndex(i); toolSelect.value = String(toolIndex); } });
+          onInput: i => { rerollPalette(); selectToolByIndex(i); toolSelect.value = String(toolIndex); } });
 
     function syncPane() {
         toolSelect.value = String(toolIndex);
         dialToolAdv.set(toolIndex, false);
+        dialH.set(Math.round(paletteCfg.hue), false);
+        themeSelect.value = paletteCfg.theme;
         renderParams();
         renderSwatches();
     }
@@ -797,7 +815,7 @@ export function setupDrawingTool({ registry, root = document.body, square = fals
 
     // ------------------------------------------------------------------
     applyRoll(trail[TRAIL_SIDE]);
-    setDialColor(dialHue.value);
+    regenPalette();
     setPanelOpen(true);
     positionPreview();
     // The first layout pass can land after init, when the stage still has no

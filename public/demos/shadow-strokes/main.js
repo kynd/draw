@@ -2,7 +2,7 @@ import { StrokeDef } from '../../lib/StrokeDef.js';
 import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
 import { DebossStrokeRenderer } from '../../lib/renderers/DebossStrokeRenderer.js';
 import { StrokeHalo } from '../../lib/StrokeHalo.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -38,24 +38,11 @@ let colors = [];
 let glowColor = '#7fd0ff';
 
 function randomizeColors() {
-    const palette = Palette.fromHues(
-        Array.from({ length: 4 }, () => Math.random() * 360),
-        { nLum: 5, lumHigh: 0.93, lumLow: 0.28, vibHigh: 0.95, vibLow: 0.30 }
-    );
-    const pick = list => list[Math.floor(Math.random() * list.length)];
-    stage.setBackground(pick(palette.entries.filter(e => e.L > 0.85)).hex);
-
-    // The glow wants the most saturated bright entry, not any bright entry.
-    const bright = palette.entries.filter(e => e.L > 0.55);
-    glowColor = bright.reduce((best, e) => (e.C > best.C ? e : best), bright[0]).hex;
-
-    const byHue = new Map();
-    palette.entries.filter(e => e.L < 0.6).forEach(e => {
-        if (!byHue.has(e.H)) byHue.set(e.H, []);
-        byHue.get(e.H).push(e);
-    });
-    const groups = [...byHue.values()].sort(() => Math.random() - 0.5);
-    return Array.from({ length: ROWS }, (_, i) => pick(groups[i % groups.length]).hex);
+    const palette = randomThemedPalette('vivid-dark');
+    stage.setBackground(paperColor(palette.entries[0].H));
+    // The glow wants the most saturated entry, not any bright entry.
+    glowColor = palette.entries.reduce((best, e) => (e.C > best.C ? e : best), palette.entries[0]).hex;
+    return Array.from({ length: ROWS }, (_, i) => palette.entries[i % palette.length].hex);
 }
 
 function rebuild() {

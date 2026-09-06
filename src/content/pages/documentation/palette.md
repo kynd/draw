@@ -13,7 +13,7 @@ Picking colors by hand produces sets that look chosen. Picking them by rule prod
 <div class="jp">`Palette` は色のリストであり、そこから制御された形で色を取り出すための補助メソッドを備えています。色はOKLCHで生成されるため、明度を固定すればどの色相でも同じ明るさに見えます。</div>
 
 <div class="page-note">
-<p><code>public/lib/Palette.js</code>, <code>public/lib/color.js</code> — copied from the stroke_designer project.</p>
+<p><code>public/lib/Palette.js</code>, <code>public/lib/color.js</code> — copied from the stroke_designer project. <code>public/lib/ThemedPaletteMaker.js</code> builds on them.</p>
 </div>
 
 ## Gamut
@@ -58,6 +58,31 @@ The multiplier rises with `maxC`, so the entry with the most headroom stays the 
 
 Two other constructors take colors that already exist: `fromHexArray(hexes)` for plain strings, and `fromEntries(entries)` for objects that already carry `L`, `C`, and `H`.
 <div class="jp">既存の色を受け取るコンストラクタも2つあります。単純な文字列の配列には `fromHexArray(hexes)`、`L`・`C`・`H` をすでに持つオブジェクトには `fromEntries(entries)` を使います。</div>
+
+## ThemedPaletteMaker
+
+`ThemedPaletteMaker` generates a `Palette` from three inputs: a key hue, a color count, and a theme. The theme decides everything else: which hues are used, and how light and how saturated each color is. `new ThemedPaletteMaker({ hue, count, theme, seed }).generate()` returns a regular `Palette`, with the key color first.
+<div class="jp">`ThemedPaletteMaker`は、3つの入力から`Palette`を生成します。基準の色相、色数、テーマです。それ以外はすべてテーマが決めます。どの色相を使うか、そして各色の明るさと彩度です。`new ThemedPaletteMaker({ hue, count, theme, seed }).generate()`は通常の`Palette`を返し、基準の色が先頭に来ます。</div>
+
+<div class="page-note">
+<ul>
+<li><code>mono</code> — every color at the key hue. The first at the hue's most vibrant point, the rest dividing L as evenly as that fixed first color allows, each at the largest chroma available.<br /><span class="jp">すべての色が基準の色相。最初の色は最も鮮やかになる点に置かれ、残りはその固定された色が許すかぎり均等に明度を分割します。彩度は各明度で使える最大値です。</span></li>
+<li><code>vivid-dark</code> — the whole wheel divided evenly from the key hue; the half nearest the key hue vivid at each hue's representative lightness, the far half dark.<br /><span class="jp">基準の色相から色相環全体を均等に分割。基準に近い半分は各色相の代表的な明度で鮮やかに、遠い半分は暗くなります。</span></li>
+<li><code>pastel-cluster</code> — hues clustered around the key hue, all light and low in chroma.<br /><span class="jp">基準の色相のまわりに集まった色相。すべて明るく、彩度は低くなります。</span></li>
+<li><code>dark-cluster</code> — the same clustering, tighter, every color dark.<br /><span class="jp">同じクラスタをより狭くし、すべての色を暗くしたものです。</span></li>
+<li><code>vivid-wheel</code> — the whole wheel divided evenly, every color at its own hue's most vibrant point.<br /><span class="jp">色相環全体を均等に分割し、すべての色をそれぞれの色相が最も鮮やかになる点に置きます。</span></li>
+<li><code>black</code> — every color black.<br /><span class="jp">すべての色が黒です。</span></li>
+</ul>
+</div>
+
+Every theme except `black` jitters the hue and lightness of the colors other than the key color. The jitter derives from `seed`, so the same settings reproduce the same palette. `PALETTE_THEMES` lists the themes with display labels.
+<div class="jp">`black`を除くすべてのテーマは、基準の色以外の色相と明度を揺らします。揺らぎは`seed`から導かれるため、同じ設定からは同じパレットが再現されます。`PALETTE_THEMES`は表示名付きのテーマの一覧です。</div>
+
+`representativeL(H)` is the lightness at which a hue looks like the paint its name would be on: yellow only reads as yellow when bright, while green and blue read as their names well below their max-chroma points. It is anchored per hue name (red 0.58, yellow 0.90, green 0.50, blue 0.45) and interpolated around the wheel.
+<div class="jp">`representativeL(H)`は、色相が名前どおりの絵の具に見える明度です。黄色は明るいときだけ黄色に見え、緑や青は最大彩度の点よりずっと下で名前どおりに見えます。色相の名前ごとの基準値（赤0.58、黄0.90、緑0.50、青0.45）を色相環に沿って補間します。</div>
+
+Two helpers support the demos: `paperColor(hue)` returns a near-white paper tint of a hue for a background, and `randomThemedPalette(theme, count)` returns a themed palette at a random key hue and seed.
+<div class="jp">デモのための補助が2つあります。`paperColor(hue)`は背景用の、色相をわずかに帯びた紙のような色を返します。`randomThemedPalette(theme, count)`は、ランダムな基準色相とシードでテーマ付きパレットを返します。</div>
 
 ## Selecting
 

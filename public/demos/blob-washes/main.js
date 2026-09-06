@@ -2,6 +2,7 @@ import { WashBlobRenderer } from '../../lib/renderers/WashBlobRenderer.js';
 import { setupBlobShowcase } from '../../lib/demo/blobShowcase.js';
 
 setupBlobShowcase({
+    theme: 'mono',
     background: true,
     controls: {},
     makeRow: (i, ctx) => {

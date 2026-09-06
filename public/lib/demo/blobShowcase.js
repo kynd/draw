@@ -1,4 +1,4 @@
-import { Palette } from '../Palette.js';
+import { randomThemedPalette, paperColor } from '../ThemedPaletteMaker.js';
 import { blobOutline } from '../pathEffects.js';
 import { StrokeStage } from './stage.js';
 import { TestBackground } from './testBackground.js';
@@ -12,7 +12,7 @@ import { seededScribble } from './strokePaths.js';
  * `makeRow(i, ctx)` returns the row's renderer; ctx carries colors, the background
  * textures when the demo asked for one, and the row seed.
  */
-export function setupBlobShowcase({ makeRow, background = false, controls = {} }) {
+export function setupBlobShowcase({ makeRow, background = false, controls = {}, theme = 'vivid-dark' }) {
     const SEEDS = [3, 8, 21];
     const stage = new StrokeStage(document.getElementById('canvas'), {
         fit: { width: 1.70, height: 1.75 },
@@ -34,27 +34,16 @@ export function setupBlobShowcase({ makeRow, background = false, controls = {} }
     let colors = [];
 
     function newPalette() {
-        return Palette.fromHues(
-            Array.from({ length: 4 }, () => Math.random() * 360),
-            { nLum: 5, lumHigh: 0.92, lumLow: 0.3, vibHigh: 0.95, vibLow: 0.3 }
-        );
+        return randomThemedPalette(theme);
     }
 
     function randomizeColors() {
         palette = newPalette();
         if (testBg) testBg.paint(palette, stage.viewport.pixelWidth, stage.viewport.pixelHeight);
-        else stage.setBackground(palette.entries.filter(e => e.L > 0.85)[0]?.hex ?? '#f0ede6');
-        const mid = palette.entries.filter(e => e.L > 0.35 && e.L < 0.72);
-        const byHue = new Map();
-        mid.forEach(e => {
-            if (!byHue.has(e.H)) byHue.set(e.H, []);
-            byHue.get(e.H).push(e);
-        });
-        const groups = [...byHue.values()].sort(() => Math.random() - 0.5);
-        const pick = list => list[Math.floor(Math.random() * list.length)].hex;
+        else stage.setBackground(paperColor(palette.entries[0].H));
         return SEEDS.map((_, i) => [
-            pick(groups[i % groups.length]),
-            pick(groups[(i + 1) % groups.length]),
+            palette.entries[i % palette.length].hex,
+            palette.entries[(i + 1) % palette.length].hex,
         ]);
     }
 

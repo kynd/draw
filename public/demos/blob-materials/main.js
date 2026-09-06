@@ -2,6 +2,7 @@ import { MaterialBlobRenderer } from '../../lib/renderers/MaterialBlobRenderer.j
 import { setupBlobShowcase } from '../../lib/demo/blobShowcase.js';
 
 setupBlobShowcase({
+    theme: 'vivid-wheel',
     background: true,
     controls: { bend: 3, relief: 2 },
     makeRow: (i, ctx) => {

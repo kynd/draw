@@ -1,6 +1,6 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -24,24 +24,13 @@ const stage = new StrokeStage(document.getElementById('canvas'));
 let entries = [];
 let colors = [];
 
-/** Two pigments per stroke, taken from two different hues of one palette. */
+/** Two pigments per stroke, adjacent slots of one themed palette. */
 function randomizeColors() {
-    const hues = Array.from({ length: 4 }, () => Math.random() * 360);
-    const palette = Palette.fromHues(hues, {
-        nLum: 5, lumHigh: 0.93, lumLow: 0.30, vibHigh: 0.95, vibLow: 0.28,
-    });
-    const pick = list => list[Math.floor(Math.random() * list.length)];
-    stage.setBackground(pick(palette.entries.filter(e => e.L > 0.82)).hex);
-
-    const byHue = new Map();
-    palette.entries.filter(e => e.L < 0.66).forEach(e => {
-        if (!byHue.has(e.H)) byHue.set(e.H, []);
-        byHue.get(e.H).push(e);
-    });
-    const groups = [...byHue.values()].sort(() => Math.random() - 0.5);
+    const palette = randomThemedPalette('dark-cluster');
+    stage.setBackground(paperColor(palette.entries[0].H));
     return Array.from({ length: COUNT }, (_, i) => [
-        pick(groups[i % groups.length]).hex,
-        pick(groups[(i + 1) % groups.length]).hex,
+        palette.entries[i % palette.length].hex,
+        palette.entries[(i + 1) % palette.length].hex,
     ]);
 }
 

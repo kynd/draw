@@ -1,6 +1,6 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { WetPatternStrokeRenderer } from '../../lib/renderers/WetPatternStrokeRenderer.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -17,10 +17,7 @@ const ctrl = {
 };
 
 const stage = new StrokeStage(document.getElementById('canvas'));
-let palette = Palette.fromHues(
-    Array.from({ length: 4 }, () => Math.random() * 360),
-    { nLum: 5, lumHigh: 0.93, lumLow: 0.28, vibHigh: 0.95, vibLow: 0.30 }
-);
+let palette = randomThemedPalette('mono');
 const background = new TestBackground(palette);
 const plane = background.createPlane(stage.extentX, stage.extentY);
 stage.add(plane);
@@ -29,14 +26,10 @@ let entries = [];
 let colors = ['#46608a', '#8a4630', '#3a6b46'];
 
 function randomizeColors() {
-    palette = Palette.fromHues(
-        Array.from({ length: 4 }, () => Math.random() * 360),
-        { nLum: 5, lumHigh: 0.93, lumLow: 0.28, vibHigh: 0.95, vibLow: 0.30 }
-    );
-    const pick = list => list[Math.floor(Math.random() * list.length)];
+    palette = randomThemedPalette('mono');
     background.paint(palette, stage.viewport.pixelWidth, stage.viewport.pixelHeight);
-    const dark = palette.entries.filter(e => e.L < 0.6);
-    return MODES.map(() => pick(dark).hex);
+    const dark = [...palette.entries].sort((a, b) => a.L - b.L).slice(0, 3);
+    return MODES.map((_, i) => dark[i % dark.length].hex);
 }
 
 function rebuild() {

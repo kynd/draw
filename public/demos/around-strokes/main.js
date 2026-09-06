@@ -1,7 +1,7 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { spiralPath, entangledPaths, scatteredPaths } from '../../lib/pathEffects.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -21,21 +21,11 @@ let entries = [];
 let colorGroups = [];
 
 function randomizeColors() {
-    const palette = Palette.fromHues(
-        Array.from({ length: 4 }, () => Math.random() * 360),
-        { nLum: 5, lumHigh: 0.93, lumLow: 0.28, vibHigh: 0.95, vibLow: 0.30 }
-    );
-    const pick = list => list[Math.floor(Math.random() * list.length)];
-    stage.setBackground(pick(palette.entries.filter(e => e.L > 0.85)).hex);
-
-    const byHue = new Map();
-    palette.entries.filter(e => e.L < 0.62).forEach(e => {
-        if (!byHue.has(e.H)) byHue.set(e.H, []);
-        byHue.get(e.H).push(e);
-    });
-    const groups = [...byHue.values()].sort(() => Math.random() - 0.5);
+    const palette = randomThemedPalette('vivid-wheel');
+    stage.setBackground(paperColor(palette.entries[0].H));
+    const hexes = palette.toHexArray();
     return Array.from({ length: ROWS }, (_, i) =>
-        groups[i % groups.length].map(e => e.hex));
+        hexes.map((_, k) => hexes[(i + k) % hexes.length]));
 }
 
 /**

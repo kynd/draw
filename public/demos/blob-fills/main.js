@@ -2,6 +2,7 @@ import { ShapedBlobRenderer } from '../../lib/renderers/ShapedBlobRenderer.js';
 import { setupBlobShowcase } from '../../lib/demo/blobShowcase.js';
 
 setupBlobShowcase({
+    theme: 'vivid-wheel',
     controls: { spikeAmp: 2, sharp: 1, wobble: 3 },
     makeRow: (i, ctx) => {
         if (i === 0) return new ShapedBlobRenderer({ color: ctx.color });

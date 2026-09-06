@@ -2,7 +2,7 @@ import { StrokeDef } from '../../lib/StrokeDef.js';
 import { PixelStrokeRenderer } from '../../lib/renderers/PixelStrokeRenderer.js';
 import { PolygonStrokeRenderer } from '../../lib/renderers/PolygonStrokeRenderer.js';
 import { LineStrokeRenderer } from '../../lib/renderers/LineStrokeRenderer.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -27,17 +27,11 @@ const stage = new StrokeStage(document.getElementById('canvas'));
 let entries = [];
 let colors = [];
 
-/** One palette per redraw; every stroke draws its cells from the same set. */
+/** One themed palette per redraw; every stroke draws its cells from the same set. */
 function randomizeColors() {
-    const palette = Palette.fromHues(
-        Array.from({ length: 5 }, () => Math.random() * 360),
-        { nLum: 4, lumHigh: 0.88, lumLow: 0.30, vibHigh: 0.95, vibLow: 0.35 }
-    );
-    const light = palette.entries.filter(e => e.L > 0.80);
-    stage.setBackground(light.length
-        ? light[Math.floor(Math.random() * light.length)].hex
-        : '#f4f4f4');
-    return palette.entries.filter(e => e.L < 0.72).map(e => e.hex);
+    const palette = randomThemedPalette('vivid-wheel');
+    stage.setBackground(paperColor(palette.entries[0].H));
+    return palette.toHexArray();
 }
 
 function makeRenderer(index) {

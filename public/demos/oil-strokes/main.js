@@ -1,6 +1,6 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { OilStrokeRenderer } from '../../lib/renderers/OilStrokeRenderer.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { TestBackground } from '../../lib/demo/testBackground.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
@@ -31,16 +31,13 @@ let entries = [];
 let colors = [];
 
 function newPalette() {
-    return Palette.fromHues(
-        Array.from({ length: 5 }, () => Math.random() * 360),
-        { nLum: 4, lumHigh: 0.88, lumLow: 0.32, vibHigh: 0.95, vibLow: 0.35 }
-    );
+    return randomThemedPalette('vivid-dark');
 }
 
 function randomizeColors() {
     palette = newPalette();
     background.paint(palette, stage.viewport.pixelWidth, stage.viewport.pixelHeight);
-    const dark = palette.entries.filter(e => e.L < 0.62);
+    const dark = [...palette.entries].sort((a, b) => a.L - b.L).slice(0, 3);
     const pick = () => dark[Math.floor(Math.random() * dark.length)].hex;
     return Array.from({ length: COUNT }, pick);
 }

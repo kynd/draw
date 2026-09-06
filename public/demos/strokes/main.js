@@ -3,7 +3,7 @@ import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strok
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
 import { CanvasBuffer, PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { Viewport } from '../../lib/demo/viewport.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 
@@ -62,25 +62,11 @@ let entries = [];
 let showSpine = false;
 let showWire = false;
 
-/** Picks a light background and three darker stroke colors from one generated palette. */
+/** A themed palette per redraw: paper from the key hue, one slot per stroke. */
 function randomizeColors() {
-    const hues = Array.from({ length: 4 }, () => Math.random() * 360);
-    const palette = Palette.fromHues(hues, {
-        nLum: 5, lumHigh: 0.93, lumLow: 0.32, vibHigh: 0.95, vibLow: 0.28,
-    });
-
-    const pick = list => list[Math.floor(Math.random() * list.length)];
-    buffer.background.set(pick(palette.entries.filter(e => e.L > 0.80)).hex);
-
-    // Group the dark end by hue and give each stroke a different group, so two strokes
-    // never come back as near-identical shades of one hue.
-    const byHue = new Map();
-    palette.entries.filter(e => e.L < 0.62).forEach(e => {
-        if (!byHue.has(e.H)) byHue.set(e.H, []);
-        byHue.get(e.H).push(e);
-    });
-    const groups = [...byHue.values()].sort(() => Math.random() - 0.5);
-    return STROKES.map((_, i) => pick(groups[i % groups.length]).hex);
+    const palette = randomThemedPalette('vivid-dark');
+    buffer.background.set(paperColor(palette.entries[0].H));
+    return STROKES.map((_, i) => palette.entries[i % palette.length].hex);
 }
 
 function rebuild(colors) {

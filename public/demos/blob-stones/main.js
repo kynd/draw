@@ -2,6 +2,7 @@ import { StoneBlobRenderer } from '../../lib/renderers/StoneBlobRenderer.js';
 import { setupBlobShowcase } from '../../lib/demo/blobShowcase.js';
 
 setupBlobShowcase({
+    theme: 'dark-cluster',
     controls: { relief: 2 },
     makeRow: (i, ctx) => {
         const relief = ctx.values.relief;

@@ -1,6 +1,6 @@
-import { Palette } from '../../lib/Palette.js';
-import { hueSwatchColor } from '../../lib/color.js';
-import { applyEmbeddedLayout } from '../../lib/demo/viewport.js';
+import { Palette } from '../../../lib/Palette.js';
+import { hueSwatchColor } from '../../../lib/color.js';
+import { applyEmbeddedLayout } from '../../../lib/demo/viewport.js';
 
 applyEmbeddedLayout();
 

@@ -1,6 +1,6 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { TriangleStrokeRenderer } from '../../lib/renderers/TriangleStrokeRenderer.js';
-import { Palette } from '../../lib/Palette.js';
+import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -18,10 +18,7 @@ const ctrl = {
 };
 
 const stage = new StrokeStage(document.getElementById('canvas'));
-let palette = Palette.fromHues(
-    Array.from({ length: 4 }, () => Math.random() * 360),
-    { nLum: 5, lumHigh: 0.93, lumLow: 0.28, vibHigh: 0.95, vibLow: 0.30 }
-);
+let palette = randomThemedPalette('vivid-dark');
 const background = new TestBackground(palette, { blur: 6 });
 const plane = background.createPlane(stage.extentX, stage.extentY);
 stage.add(plane);
@@ -30,19 +27,14 @@ let entries = [];
 let colors = { stripes: [], a: '#803050', b: '#2a5080', tint: '#e8d8c8' };
 
 function randomizeColors() {
-    palette = Palette.fromHues(
-        Array.from({ length: 4 }, () => Math.random() * 360),
-        { nLum: 5, lumHigh: 0.93, lumLow: 0.28, vibHigh: 0.95, vibLow: 0.30 }
-    );
-    const pick = list => list[Math.floor(Math.random() * list.length)];
+    palette = randomThemedPalette('vivid-dark');
     background.paint(palette, stage.viewport.pixelWidth, stage.viewport.pixelHeight);
-    const vivid = palette.entries.filter(e => e.L > 0.35 && e.L < 0.8);
-    const dark = palette.entries.filter(e => e.L < 0.62);
+    const sorted = [...palette.entries].sort((a, b) => a.L - b.L);
     return {
-        stripes: Array.from({ length: 4 }, () => pick(vivid).hex),
-        a: pick(dark).hex,
-        b: pick(dark).hex,
-        tint: pick(palette.entries.filter(e => e.L > 0.6)).hex,
+        stripes: Array.from({ length: 4 }, () => palette.pick().hex),
+        a: sorted[0].hex,
+        b: sorted[1 % sorted.length].hex,
+        tint: sorted[sorted.length - 1].hex,
     };
 }
 
