@@ -124,15 +124,23 @@ public/lib/                            library code
   demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js
                 drawingBoard.js  drawCycle.js  blobShowcase.js
                 pressure.js  testBackground.js  midi.js  dial.js  latch.js
-                strokeRecorder.js  toolRegistry.js  drawingTool.js
-                markBuilder.js  strokePlayer.js
-                                       shared demo support, still library code
-                                       drawingTool.js is the reusable instrument:
-                                       it takes any tool registry and builds the
-                                       whole interface; every try-drawing demo and
-                                       the drawing tool demo are thin harnesses
-                                       over it, with toolRegistry.js as the master
-                                       tool catalog
+                strokeRecorder.js  toolRegistry.js  toolConfigs.js
+                markBuilder.js  drawingPlayer.js
+                drawingTool/  DrawingTool.js  DrawingToolConfig.js
+                              ui.js  midi.js  index.js
+                                       shared demo support, still library code.
+                                       DrawingTool is the headless engine: state,
+                                       strokes, palette, and playback behind a
+                                       public API, no DOM but its canvas. ui.js
+                                       is the default UI, a client of that API;
+                                       toolConfigs.js has one argument-free
+                                       config class per page; index.js's
+                                       setupDrawingTool assembles the whole
+                                       instrument, and every try-drawing demo is
+                                       that one call. drawingPlayer.js is the
+                                       standalone playback transport; the Player
+                                       page runs the engine headless with
+                                       PlaybackConfig.
 public/demos/<name>/                   index.html + main.js per demo
 src/pages/experimental/<name>.astro    experimental pages, local only
 public/demos/experimental/<name>/      demos for experimental pages, local only

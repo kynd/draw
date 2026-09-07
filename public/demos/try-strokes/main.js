@@ -1,7 +1,4 @@
-import { setupDrawingTool } from '../../lib/demo/drawingTool.js';
-import { pickTools } from '../../lib/demo/toolRegistry.js';
+import { setupDrawingTool } from '../../lib/demo/drawingTool/index.js';
+import { StrokesDemoConfig } from '../../lib/demo/toolConfigs.js';
 
-setupDrawingTool({ registry: pickTools([
-    'ribbon', 'ribbon-ragged', 'ribbon-square', 'brush', 'brush-rounded', 'brush-square',
-    'shadow', 'deboss', 'glow',
-]), square: true });
+setupDrawingTool(new StrokesDemoConfig(), { square: true });

@@ -1,7 +1,4 @@
-import { setupDrawingTool } from '../../lib/demo/drawingTool.js';
-import { pickTools } from '../../lib/demo/toolRegistry.js';
+import { setupDrawingTool } from '../../lib/demo/drawingTool/index.js';
+import { ShapedDemoConfig } from '../../lib/demo/toolConfigs.js';
 
-setupDrawingTool({ registry: pickTools([
-    'cloud', 'squares', 'spikes', 'tube-candy', 'tube-wobble', 'tube-metal',
-    'tri-facets', 'tri-grain', 'tri-metal',
-]), square: true });
+setupDrawingTool(new ShapedDemoConfig(), { square: true });

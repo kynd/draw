@@ -91,6 +91,18 @@ export class StrokeStage {
         this._pending = true;
         requestAnimationFrame(() => {
             this._pending = false;
+            this._renderFrame();
+        });
+    }
+
+    /** Renders one frame immediately, for a caller that must read the canvas
+     * in the same task (a snapshot). The throttled `draw` is the normal path. */
+    drawNow() {
+        this._renderFrame();
+    }
+
+    _renderFrame() {
+        {
             this.syncScreenUniforms(this.buffer.scene);
             this.buffer.scene.traverse(child => {
                 if (!child.isMesh) return;
@@ -179,7 +191,7 @@ export class StrokeStage {
             }
 
             this.buffer.present(this.renderer);
-        });
+        }
     }
 }
 

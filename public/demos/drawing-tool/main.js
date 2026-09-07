@@ -1,4 +1,4 @@
-import { setupDrawingTool } from '../../lib/demo/drawingTool.js';
-import { toolRegistry } from '../../lib/demo/toolRegistry.js';
+import { setupDrawingTool } from '../../lib/demo/drawingTool/index.js';
+import { DrawingToolDemoConfig } from '../../lib/demo/toolConfigs.js';
 
-setupDrawingTool({ registry: toolRegistry });
+setupDrawingTool(new DrawingToolDemoConfig());

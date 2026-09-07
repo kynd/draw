@@ -29,7 +29,7 @@ import { DrawInput } from './drawInput.js';
  * `setPointerTrace` changes it later.
  */
 export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCommit, onRelease,
-    split = { angle: Math.PI * 0.55, span: 0.05 }, pointerTrace = true }) {
+    split = { angle: Math.PI * 0.55, span: 0.05 }, pointerTrace = true, bindInput = true }) {
     let seed = 1;
 
     let live = null;
@@ -160,7 +160,9 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         stage.draw();
     }
 
-    const input = new DrawInput(canvas, stage, { minDistance, onChange: feed });
+    // `bindInput: false` runs the cycle without pointer listeners of its own,
+    // for a host that feeds events through its API instead.
+    const input = bindInput ? new DrawInput(canvas, stage, { minDistance, onChange: feed }) : null;
 
     return { disposeGhost, input, feed, setPointerTrace };
 }
