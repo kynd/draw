@@ -8,8 +8,9 @@ interface Props {
 
 interface NavItem {
   label: string;
-  href: string;
-  slug: string;
+  href?: string;
+  slug?: string;
+  heading?: boolean;
   sketch?: boolean;
   children?: NavItem[];
   subLinks?: { label: string; href: string }[];
@@ -19,6 +20,7 @@ const { title, slug } = Astro.props;
 
 const navItems: NavItem[] = [
   { label: 'Intro', href: `${base}/`, slug: '' },
+  { label: 'Techniques', heading: true },
   { label: 'Palette maker', href: `${base}/palette-maker`, slug: 'palette-maker',
     subLinks: [
       { label: 'Themed palette',          href: '#themed-palette' },
@@ -27,6 +29,29 @@ const navItems: NavItem[] = [
       { label: 'Randomness',              href: '#randomness' },
     ]
   },
+  { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
+    subLinks: [
+      { label: 'Curve smoothing', href: '#smoothing' },
+      { label: 'Local smoothing', href: '#local-smoothing' },
+      { label: 'Stroke splitting', href: '#splitting' },
+      { label: 'Smoothed brush',  href: '#smoothed-brush' },
+      { label: 'Split brush',     href: '#split-brush' },
+      { label: 'Held start',      href: '#held-start' },
+      { label: 'Width smoothing', href: '#width-smoothing' },
+      { label: 'Blob drawing',    href: '#blobs' },
+      { label: 'Tight blob',      href: '#tight-blobs' },
+    ]
+  },
+  { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer' },
+  { label: 'Pen pressure', href: `${base}/pen-pressure`, slug: 'pen-pressure',
+    subLinks: [
+      { label: 'Scaled width', href: '#scale' },
+      { label: 'Added width',  href: '#additive' },
+    ]
+  },
+  { label: 'Drawing Tool Demo', href: `${base}/drawing-tool`, slug: 'drawing-tool' },
+  { label: 'Player', href: `${base}/player`, slug: 'player' },
+  { label: 'Strokes & fills', heading: true },
   { label: 'Strokes', href: `${base}/strokes`, slug: 'strokes',
     subLinks: [
       { label: 'Common to every demo', href: '#common-to-every-demo' },
@@ -79,28 +104,6 @@ const navItems: NavItem[] = [
       { label: 'Try drawing',    href: '#try' },
     ]
   },
-  { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
-    subLinks: [
-      { label: 'Curve smoothing', href: '#smoothing' },
-      { label: 'Local smoothing', href: '#local-smoothing' },
-      { label: 'Stroke splitting', href: '#splitting' },
-      { label: 'Smoothed brush',  href: '#smoothed-brush' },
-      { label: 'Split brush',     href: '#split-brush' },
-      { label: 'Held start',      href: '#held-start' },
-      { label: 'Width smoothing', href: '#width-smoothing' },
-      { label: 'Blob drawing',    href: '#blobs' },
-      { label: 'Tight blob',      href: '#tight-blobs' },
-    ]
-  },
-  { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer' },
-  { label: 'Pen pressure', href: `${base}/pen-pressure`, slug: 'pen-pressure',
-    subLinks: [
-      { label: 'Scaled width', href: '#scale' },
-      { label: 'Added width',  href: '#additive' },
-    ]
-  },
-  { label: 'Drawing Tool Demo', href: `${base}/drawing-tool`, slug: 'drawing-tool' },
-  { label: 'Player', href: `${base}/player`, slug: 'player' },
   { label: 'Documentation', href: `${base}/documentation`, slug: 'documentation',
     children: [
       { label: 'Stroke Definition', href: `${base}/documentation/stroke-definition`, slug: 'documentation/stroke-definition',
@@ -193,7 +196,7 @@ const navItems: NavItem[] = [
       },
     ]
   },
-  // Experimental pages: visible only in the dev server. The deploy workflow also
+// Experimental pages: visible only in the dev server. The deploy workflow also
   // removes their built pages and demos, so they never reach the published site.
   ...(import.meta.env.DEV ? [
     { label: '[Experimental] MIDI control', href: `${base}/experimental/midi-control`, slug: 'experimental/midi-control', sketch: true },
@@ -215,7 +218,7 @@ function withDepth(items: NavItem[], depth = 0): { item: NavItem; depth: number 
 }
 const renderItems = withDepth(navItems);
 
-const publicItems = flatten(navItems).filter(item => !item.sketch);
+const publicItems = flatten(navItems).filter(item => !item.sketch && !item.heading);
 const currentIdx  = publicItems.findIndex(item => item.slug === slug);
 const nextItem    = currentIdx >= 0 && currentIdx < publicItems.length - 1 ? publicItems[currentIdx + 1] : null;
 const isPublic    = currentIdx >= 0;
@@ -365,6 +368,12 @@ const isPublic    = currentIdx >= 0;
     .sidebar-nav a.child { padding-left: 2rem; }
     .sidebar-nav a.child-sub { padding-left: 2.85rem; }
     .sidebar-nav a.sketch { opacity: 0.45; font-size: 0.74rem; }
+    .sidebar-nav .nav-heading {
+      font-family: 'Sora', sans-serif; font-size: 0.66rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--fg-muted); opacity: 0.7;
+      padding: 1.1rem 1.25rem 0.3rem;
+    }
 
     .main-wrap {
       margin-top: var(--header-height);
@@ -591,6 +600,9 @@ const isPublic    = currentIdx >= 0;
       <ul class="sidebar-nav">
         {renderItems.map(({ item, depth }) => (
           <>
+            {item.heading ? (
+              <li class="nav-heading">{item.label}</li>
+            ) : (
             <li>
               <a
                 href={item.href}
@@ -603,6 +615,7 @@ const isPublic    = currentIdx >= 0;
                 {item.label}
               </a>
             </li>
+            )}
             {item.slug === slug && item.subLinks && item.subLinks.map(sub => (
               <li><a href={sub.href} class={depth > 0 ? 'sub child-sub' : 'sub'}>{sub.label}</a></li>
             ))}

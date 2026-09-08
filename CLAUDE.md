@@ -167,7 +167,8 @@ after the build, so the published site carries neither the pages nor the demos.
 ## Nav
 
 `src/layouts/PageLayout.astro` holds the whole nav tree. `children` are real child pages;
-`subLinks` are in-page anchors for the current page only. Every new page must be added
+`subLinks` are in-page anchors for the current page only; `heading: true` rows are
+unlinked group labels (Techniques, Strokes & fills). Every new page must be added
 there — nothing is discovered automatically.
 
 ## Writing Style
