@@ -138,16 +138,16 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/hold-start/index.html?embedded`} title="Held start" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The first few points of a stroke swing the tangent with every sample, so a mark drawn from the first point flickers through directions before it settles. The mark is held until the gesture carries enough arc for a stable direction, then appears already settled; the thin black line shows the pointer meanwhile.</p>
-      <div class="jp">ストロークの最初の数点では、サンプルが増えるたびに接線が振れます。そのため、最初の点から描かれる印は、落ち着くまで向きが揺れてちらつきます。印は、身振りが安定した向きを持てるだけの弧長になるまで保留され、落ち着いた状態で現れます。その間、細い黒線がポインタの位置を示します。</div>
+      <p>The first few points of a stroke swing the tangent with every sample, so a mark drawn from the first point flickers through directions before it settles. Each piece is held until it carries enough arc for a stable direction, then appears already settled; the thin black line shows the pointer meanwhile. The stroke splits at sharp turns as in the drawing demos, and a fresh piece after a split waits the same way its stroke did.</p>
+      <div class="jp">ストロークの最初の数点では、サンプルが増えるたびに接線が振れます。そのため、最初の点から描かれる印は、落ち着くまで向きが揺れてちらつきます。各断片は、安定した向きを持てるだけの弧長になるまで保留され、落ち着いた状態で現れます。その間、細い黒線がポインタの位置を示します。ストロークは描画デモと同じく鋭い曲がりで分割され、分割後の新しい断片も、ストロークの始まりと同じように待ちます。</div>
 
       <details>
         <summary>Details</summary>
         <p><strong>The gate:</strong> <code>hasSettledStart</code> walks the drawn points and passes once the accumulated arc reaches a threshold. Distance, not a point count: a slow hand piles points onto one spot without adding direction.</p>
         <div class="jp"><strong>ゲート：</strong><code>hasSettledStart</code>は描かれた点をたどり、積算した弧長がしきい値に達したら通します。点の数ではなく距離で判定します。ゆっくり動く手は、向きの情報を足さないまま、一点に点を積み上げるからです。</div>
 
-        <p>A gesture released below the threshold draws nothing. The same gate applies after a split, where a new piece starts with the same few unstable points.</p>
-        <div class="jp">しきい値に届かないまま離した身振りは、何も描きません。同じゲートは分割の後にも当てはまります。新しい断片も、同じ数点の不安定な点から始まるからです。</div>
+        <p>A gesture released below the threshold draws nothing, and a piece split off below it stays hidden until its own arc passes.</p>
+        <div class="jp">しきい値に届かないまま離した身振りは、何も描きません。分割で生まれた断片も、自身の弧長がしきい値を超えるまでは現れません。</div>
       </details>
     </div>
   </section>

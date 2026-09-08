@@ -22,7 +22,7 @@ document.getElementById('span-val').textContent = DEFAULT_SPAN.toFixed(2);
 const stage = new StrokeStage(document.getElementById('canvas'));
 
 let drawn = [];
-let curve = 'natural';
+let curve = 'catmull';
 let entry = null;
 let colors = ['#2c3a5e', '#7a4a2f'];
 
