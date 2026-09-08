@@ -12,20 +12,20 @@
       font: 13px/1.5 -apple-system, 'Helvetica Neue', sans-serif;
     }
     h1 { font-size: 16px; margin: 0 0 16px; font-weight: 600; }
-    .columns { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
-    .column { flex: 1; min-width: 360px; }
+    .columns { display: flex; flex-direction: column; gap: 32px; align-items: flex-start; }
+    .column { width: 960px; max-width: 100%; }
     .column h2 {
       font-size: 12px; font-weight: 600; text-transform: uppercase;
       letter-spacing: 0.06em; margin: 0 0 8px; color: #555;
     }
     .surface {
-      width: 100%; aspect-ratio: 16 / 10; background: #fff;
+      width: 960px; height: 540px; max-width: 100%; background: #fff;
       border: 1px solid #d5d2cb; overflow: hidden;
     }
     .controls { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
     .row { display: flex; align-items: center; gap: 8px; }
     .row label { width: 90px; color: #555; }
-    .row input[type="range"] { flex: 1; }
+    .row input[type="range"] { flex: 1; max-width: 400px; }
     button {
       font: inherit; padding: 5px 14px; border: 1px solid #b9b5ac;
       background: #fff; border-radius: 4px; cursor: pointer;
