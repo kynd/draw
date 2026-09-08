@@ -25,3 +25,6 @@ Thumbs.db
 # Local scratch
 *.log
 scratchpad/
+
+# Hidden documentation, never uploaded
+ignored/
