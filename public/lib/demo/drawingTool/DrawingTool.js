@@ -16,6 +16,10 @@ import { randomValues } from '../toolRegistry.js';
 import { DrawingToolConfig } from './DrawingToolConfig.js';
 
 const TRAIL_SIDE = 10;
+
+function plainPoint(p) {
+    return { x: p.x, y: p.y, pressure: p.pressure ?? 0 };
+}
 const MIN_DISTANCE = 0.008;
 const WIDTH_SPEC = { key: 'width', min: 2, max: 60, step: 1 };
 const PRESSURE_SPEC = { key: 'pressure', min: 0, max: 2, step: 0.05 };
@@ -30,6 +34,13 @@ const PRESSURE_SPEC = { key: 'pressure', min: 0, max: 2, step: 0.05 };
  * parameter), 'palette' (config or colors), 'stroke-start' / 'stroke-end',
  * 'clear' (with the background), 'replay-start' / 'replay-end',
  * 'record-start' / 'record-end', 'resize' (with { width, height }).
+ *
+ * 'live' streams the drawing as resolved outcomes for a mirror: the engine
+ * rolls randomness internally (per-stroke seeds, palette rerolls, clear's
+ * background and scatter), so a mirror fed raw input would diverge. Each
+ * event instead carries what was actually used — the tool, values, colors,
+ * and the cycle seed — and `applyLive` on another instance uses them
+ * verbatim, rolling no randomness of its own.
  */
 export class DrawingTool {
     /**
@@ -57,6 +68,8 @@ export class DrawingTool {
         this._points = [];
         this._uiHidden = false;
         this._clearOnResize = false;
+        this._applyingLive = false;
+        this._livePoints = [];
 
         this.stage = new StrokeStage(canvas);
         this.board = new DrawingBoard(this.stage);
@@ -67,7 +80,7 @@ export class DrawingTool {
             build: makeMarkBuilder({ state: this._state, board: this.board }),
             bindInput: false,
             onCommit: (points, seed) => {
-                if (this._replaying || this._playerFeeding) return;
+                if (this._replaying || this._playerFeeding || this._applyingLive) return;
                 this.recorder.add({
                     toolId: this._state.tool.id, values: { ...this._state.values },
                     widthPx: this._state.widthPx, sens: this._state.sens,
@@ -81,7 +94,7 @@ export class DrawingTool {
             // the palette's jitter under the same hue and theme; auto mode
             // also rolls the tool.
             onRelease: () => {
-                if (this._replaying || this._playerFeeding) return;
+                if (this._replaying || this._playerFeeding || this._applyingLive) return;
                 if (this._autoRandom) {
                     this.stepPalette(Math.random() < 0.5 ? -1 : 1);
                     this._stepTrail(1);
@@ -172,6 +185,28 @@ export class DrawingTool {
 
     _emit(event, payload) {
         this._listeners.get(event)?.forEach(fn => fn(payload));
+        if ((event === 'tool' || event === 'palette') && !this._applyingLive) {
+            this._emitLiveState();
+        }
+    }
+
+    _liveActive() { return (this._listeners.get('live')?.size ?? 0) > 0; }
+
+    _emitLive(type, data = {}) {
+        if (this._liveActive()) this._emit('live', { type, ...data });
+    }
+
+    // The resolved selection, everything a mirror needs to build the same
+    // marks from the same points.
+    _emitLiveState() {
+        if (!this._liveActive()) return;
+        const s = this._state;
+        this._emitLive('state', {
+            toolId: s.tool.id, values: { ...s.values },
+            widthPx: s.widthPx, sens: s.sens,
+            colorA: s.colorA, colorB: s.colorB, colors: [...s.colors],
+            cycleSeed: this.cycle.getSeed(),
+        });
     }
 
     // ------------------------------------------------------------------
@@ -220,7 +255,10 @@ export class DrawingTool {
         this._drawing = true;
         this._setUiHidden(true);
         this._emit('stroke-start');
-        this._points = [this._toWorld(x, y, pressure)];
+        const p = this._toWorld(x, y, pressure);
+        this._points = [p];
+        this._emitLiveState();
+        this._emitLive('points', { points: [plainPoint(p)] });
         this.cycle.feed(this._points, false);
     }
 
@@ -230,6 +268,7 @@ export class DrawingTool {
         const last = this._points[this._points.length - 1];
         if (!last || p.distanceTo(last) >= MIN_DISTANCE) {
             this._points.push(p);
+            this._emitLive('points', { points: [plainPoint(p)] });
             this.cycle.feed(this._points, false);
         }
     }
@@ -237,12 +276,59 @@ export class DrawingTool {
     pointerUp() {
         if (!this._drawing) return;
         this._drawing = false;
+        this._emitLive('end');
         this.cycle.feed(this._points, true);
         this._setUiHidden(false);
         this._emit('stroke-end');
     }
 
     pointerCancel() { this.pointerUp(); }
+
+    /**
+     * Applies one 'live' event from another instance, verbatim: the resolved
+     * state replaces this instance's dice, so the two drawings stay
+     * identical. Nothing applied here records or rerolls.
+     */
+    applyLive(event) {
+        this._applyingLive = true;
+        try {
+            switch (event.type) {
+                case 'state': {
+                    const tool = this._registry.find(entry => entry.id === event.toolId);
+                    if (tool) this._state.tool = tool;
+                    this._state.values = { ...event.values };
+                    this._state.widthPx = event.widthPx;
+                    this._state.sens = event.sens;
+                    this._state.colorA = event.colorA;
+                    this._state.colorB = event.colorB;
+                    this._state.colors = [...event.colors];
+                    if (event.cycleSeed != null) this.cycle.setSeed(event.cycleSeed);
+                    break;
+                }
+                case 'points': {
+                    for (const q of event.points) {
+                        const p = new THREE.Vector3(q.x, q.y, 0);
+                        p.pressure = q.pressure ?? 0;
+                        this._livePoints.push(p);
+                    }
+                    this.cycle.feed(this._livePoints, false);
+                    break;
+                }
+                case 'end':
+                    if (this._livePoints.length) this.cycle.feed(this._livePoints, true);
+                    this._livePoints = [];
+                    break;
+                case 'clear':
+                    this._livePoints = [];
+                    this.cycle.disposeGhost();
+                    this.board.clear(event.background);
+                    this.stage.draw();
+                    break;
+            }
+        } finally {
+            this._applyingLive = false;
+        }
+    }
 
     // ------------------------------------------------------------------
     // Dial control: the two relative steps.
@@ -332,12 +418,20 @@ export class DrawingTool {
         this.cycle.disposeGhost();
         this.board.clear(bg);
         this.recorder.begin(bg);
+        this._emitLive('clear', { background: bg });
         for (let i = 0; i < this.config.scatterCount; i++) {
             this._applyRoll(this._rollEntry());
             const colors = this._state.colors;
             this._state.colorA = colors[Math.floor(Math.random() * colors.length)];
             this._state.colorB = colors[Math.floor(Math.random() * colors.length)];
-            this.cycle.feed(scatterPath(this.stage.extentX, this.stage.extentY), true);
+            const points = scatterPath(this.stage.extentX, this.stage.extentY);
+            this._emitLiveState();
+            this._emitLive('points', { points: points.map(plainPoint) });
+            // 'end' goes out before the feed: the feed's release rerolls the
+            // palette, which streams a fresh state, and that state must not
+            // land on a mirror before this stroke has committed.
+            this._emitLive('end');
+            this.cycle.feed(points, true);
         }
         // Back to the live selection: the palette from its config, the tool
         // from the trail's current entry.

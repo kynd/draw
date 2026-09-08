@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Packaging demo — engine, live view, player</title>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px; background: #f2f0ec; color: #1a1a1a;
+      font: 13px/1.5 -apple-system, 'Helvetica Neue', sans-serif;
+    }
+    h1 { font-size: 16px; margin: 0 0 16px; font-weight: 600; }
+    .columns { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+    .column { flex: 1; min-width: 360px; }
+    .column h2 {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; margin: 0 0 8px; color: #555;
+    }
+    .surface {
+      width: 100%; aspect-ratio: 16 / 10; background: #fff;
+      border: 1px solid #d5d2cb; overflow: hidden;
+    }
+    .controls { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .row label { width: 90px; color: #555; }
+    .row input[type="range"] { flex: 1; }
+    button {
+      font: inherit; padding: 5px 14px; border: 1px solid #b9b5ac;
+      background: #fff; border-radius: 4px; cursor: pointer;
+    }
+    button:hover { background: #f6f4f0; }
+    button:disabled { opacity: 0.45; cursor: default; }
+    .note { color: #777; }
+    #player-controls[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Packaging demo</h1>
+  <div class="columns">
+    <div class="column">
+      <h2>DrawingEngine</h2>
+      <div class="surface" id="engine-surface"></div>
+      <div class="controls">
+        <div class="row"><label>Color</label><input id="dial-color" type="range" min="0" max="1" step="0.001" value="0.5" /></div>
+        <div class="row"><label>Stroke width</label><input id="dial-width" type="range" min="0" max="1" step="0.001" value="0.4" /></div>
+        <div class="row"><label>Tool</label><input id="dial-tool" type="range" min="0" max="1" step="0.001" value="0.5" /></div>
+        <div class="row">
+          <button id="clear-btn">Clear</button>
+          <button id="send-btn">Send to playback</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="column">
+      <h2>DrawingLiveView</h2>
+      <div class="surface" id="live-surface"></div>
+      <div class="controls"><span class="note">Receives the engine's live events (JSON round-tripped) and mirrors it exactly.</span></div>
+    </div>
+
+    <div class="column">
+      <h2>DrawingPlayer</h2>
+      <div class="surface" id="player-surface"></div>
+      <div class="controls" id="player-controls" hidden>
+        <div class="row">
+          <button id="play-btn">Play</button>
+          <label class="row" style="width:auto"><input id="loop-check" type="checkbox" />loop</label>
+        </div>
+        <div class="row"><label>Seek</label><input id="seek" type="range" min="0" max="1" step="0.001" value="0" /></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createDrawingEngine, createDrawingLiveView, createDrawingPlayer, ParameterId }
+        from './lib/contract/index.js';
+
+    const engine = createDrawingEngine();
+    engine.mount(document.getElementById('engine-surface'));
+
+    const liveView = createDrawingLiveView();
+    liveView.mount(document.getElementById('live-surface'));
+
+    // The transport boundary: everything crosses as JSON, as it would over a
+    // network.
+    engine.onLiveEvent(event => liveView.apply(JSON.parse(JSON.stringify(event))));
+
+    const player = createDrawingPlayer();
+    player.mount(document.getElementById('player-surface'));
+
+    // A fresh session, now that the live view is listening.
+    engine.clear();
+
+    document.getElementById('dial-color').addEventListener('input', e =>
+        engine.setParameter(ParameterId.COLOR, parseFloat(e.target.value)));
+    document.getElementById('dial-width').addEventListener('input', e =>
+        engine.setParameter(ParameterId.STROKE_WIDTH, parseFloat(e.target.value)));
+    document.getElementById('dial-tool').addEventListener('input', e =>
+        engine.setParameter(ParameterId.TOOL, parseFloat(e.target.value)));
+
+    document.getElementById('clear-btn').addEventListener('click', () => engine.clear());
+
+    const controls = document.getElementById('player-controls');
+    const playBtn = document.getElementById('play-btn');
+    const loopCheck = document.getElementById('loop-check');
+    const seek = document.getElementById('seek');
+    let playing = false;
+
+    document.getElementById('send-btn').addEventListener('click', async () => {
+      const recording = await engine.exportRecording();
+      await player.load(recording);
+      controls.hidden = false;
+      playing = false;
+      playBtn.textContent = 'Play';
+      seek.value = '0';
+    });
+
+    playBtn.addEventListener('click', () => {
+      if (playing) {
+        player.pause();
+        playing = false;
+        playBtn.textContent = 'Play';
+      } else {
+        player.play({ loop: loopCheck.checked });
+        playing = true;
+        playBtn.textContent = 'Pause';
+      }
+    });
+
+    seek.addEventListener('input', () => {
+      player.pause();
+      playing = false;
+      playBtn.textContent = 'Play';
+      player.seek(parseFloat(seek.value));
+    });
+
+    player.onEnded(() => {
+      playing = false;
+      playBtn.textContent = 'Play';
+      seek.value = '1';
+    });
+  </script>
+</body>
+</html>

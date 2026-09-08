@@ -164,5 +164,10 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     // for a host that feeds events through its API instead.
     const input = bindInput ? new DrawInput(canvas, stage, { minDistance, onChange: feed }) : null;
 
-    return { disposeGhost, input, feed, setPointerTrace };
+    // The seed counter, exposed so a mirror fed the same points can sync it
+    // and build identical marks.
+    const getSeed = () => seed;
+    const setSeed = value => { seed = value; };
+
+    return { disposeGhost, input, feed, setPointerTrace, getSeed, setSeed };
 }

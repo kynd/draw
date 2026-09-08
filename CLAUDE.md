@@ -141,6 +141,11 @@ public/lib/                            library code
                                        standalone playback transport; the Player
                                        page runs the engine headless with
                                        PlaybackConfig.
+  contract/     index.js               the packaging layer: engine, live view,
+                                       and player wrapped behind a minimal
+                                       interface for embedding in another
+                                       application. public/packaging_demo.html
+                                       is its single-file demo page
 public/demos/<name>/                   index.html + main.js per demo
 src/pages/experimental/<name>.astro    experimental pages, local only
 public/demos/experimental/<name>/      demos for experimental pages, local only
