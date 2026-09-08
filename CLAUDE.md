@@ -234,6 +234,34 @@ add it to the writing-style page, and apply it from then on.
 
 - Never `git push` unless the user explicitly asks.
 
+## Package release
+
+The packaging layer ships as the npm package `@kynd/drawing-engine` on GitHub
+Packages, built from this repo. The scaffolding lives in `package/`: its
+`package.json` (name, version, `publishConfig` pinned to
+`https://npm.pkg.github.com`), `vite.config.ts` (ESM lib build with bundled
+`.d.ts`, `three` external, no sourcemaps), and `src/` (`contract.ts` holds the
+public TypeScript interfaces, `index.ts` wraps `public/lib/contract/index.js`
+with those types). `.github/workflows/publish.yml` publishes on any `v*` tag
+using the workflow's own `GITHUB_TOKEN`; no secrets need configuring.
+
+To release an update:
+
+1. Verify the build: `cd package && npm ci && npm run build`, then
+   `npm pack --dry-run` to confirm the tarball is dist-only.
+2. Bump `version` in `package/package.json` (semver).
+3. Commit, then tag and push:
+   `git tag vX.Y.Z && git push && git push origin vX.Y.Z`.
+4. Confirm the publish workflow succeeded:
+   `gh run list --workflow publish.yml --limit 1`.
+5. Tell the user the new version number; the consuming side pins it
+   exactly, so they update on their end.
+
+The contract in `package/src/contract.ts` is frozen once in production use:
+never rename its members or change `format`/`version` semantics of recordings
+and live events without being asked. Keep the package and its build free of
+any client, event, or venue names.
+
 ## Video: hold the last frame
 
 When asked to edit a video to hold the last frame, prepend the video's last frame

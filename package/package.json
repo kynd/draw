@@ -1,0 +1,35 @@
+{
+  "name": "@kynd/drawing-engine",
+  "version": "0.1.0",
+  "description": "A drawing engine, live view, and player behind a minimal embedding interface",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kynd/draw.git"
+  },
+  "license": "CC-BY-SA-4.0",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "prepublishOnly": "vite build"
+  },
+  "dependencies": {
+    "three": "0.169.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.3",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^4.3.0"
+  }
+}
