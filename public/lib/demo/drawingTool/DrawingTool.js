@@ -117,6 +117,10 @@ export class DrawingTool {
             seed: Math.floor(Math.random() * 1e9),
             ...(config.palette ?? {}),
         };
+        // The palette trail mirrors the tool trail: the current config with
+        // ten remembered on each side, so dialing back retrieves the exact
+        // palette (hue, theme, and seed) that was there.
+        this._paletteTrail = this._buildPaletteTrail();
 
         // The tool trail: the current entry with ten remembered on each side,
         // so dialing past a tool and back finds it as it was left.
@@ -344,15 +348,48 @@ export class DrawingTool {
         this._emit('tool');
     }
 
-    /** ±n: the key hue moves about ten degrees per step, the theme rerolls. */
+    /**
+     * ±n along the palette trail: each new entry moves the key hue by about
+     * ten degrees and rolls a fresh theme and seed, and ten entries stay
+     * remembered on each side, so stepping back retrieves the exact palette.
+     */
     stepPalette(steps) {
         if (!steps) return;
-        this._paletteCfg.hue = (this._paletteCfg.hue
-            + steps * (7 + Math.random() * 7) + 360) % 360;
-        this._paletteCfg.theme =
-            this._rollThemes[Math.floor(Math.random() * this._rollThemes.length)];
-        this._paletteCfg.seed = Math.floor(Math.random() * 1e9);
+        // The current config, rerolls and panel edits included, stays with
+        // its trail slot.
+        this._paletteTrail[TRAIL_SIDE] = { ...this._paletteCfg };
+        for (let i = 0; i < Math.abs(steps); i++) {
+            if (steps > 0) {
+                this._paletteTrail.shift();
+                this._paletteTrail.push(this._rollPaletteStep(
+                    this._paletteTrail[this._paletteTrail.length - 1].hue, 1));
+            } else {
+                this._paletteTrail.pop();
+                this._paletteTrail.unshift(this._rollPaletteStep(this._paletteTrail[0].hue, -1));
+            }
+        }
+        Object.assign(this._paletteCfg, this._paletteTrail[TRAIL_SIDE]);
         this._regenPalette();
+    }
+
+    _rollPaletteStep(fromHue, direction) {
+        return {
+            hue: (fromHue + direction * (7 + Math.random() * 7) + 360) % 360,
+            theme: this._rollThemes[Math.floor(Math.random() * this._rollThemes.length)],
+            seed: Math.floor(Math.random() * 1e9),
+        };
+    }
+
+    _buildPaletteTrail() {
+        const trail = new Array(TRAIL_SIDE * 2 + 1);
+        trail[TRAIL_SIDE] = { ...this._paletteCfg };
+        for (let i = TRAIL_SIDE + 1; i < trail.length; i++) {
+            trail[i] = this._rollPaletteStep(trail[i - 1].hue, 1);
+        }
+        for (let i = TRAIL_SIDE - 1; i >= 0; i--) {
+            trail[i] = this._rollPaletteStep(trail[i + 1].hue, -1);
+        }
+        return trail;
     }
 
     // ------------------------------------------------------------------
@@ -645,15 +682,18 @@ export class DrawingTool {
             widthPx: 2 + Math.random() * 58,
             // Pressure can widen the stroke up to three times at full sensitivity.
             sens: Math.random() * 2,
+            // Rolled lazily on the first preview, then remembered with the
+            // entry, so stepping back shows the exact same preview.
+            previewShape: null,
         };
     }
 
     _applyRoll(entry) {
-        if (entry.tool !== this._state.tool) this._previewShape = null;
         this._state.tool = entry.tool;
         this._state.values = entry.values;
         this._state.widthPx = entry.widthPx;
         this._state.sens = entry.sens;
+        this._previewShape = entry.previewShape ?? null;
         this._toolValues[entry.tool.id] = entry.values;
     }
 
@@ -663,6 +703,7 @@ export class DrawingTool {
         this._trail[TRAIL_SIDE] = {
             tool: this._state.tool, values: this._state.values,
             widthPx: this._state.widthPx, sens: this._state.sens,
+            previewShape: this._previewShape,
         };
         for (let i = 0; i < Math.abs(steps); i++) {
             if (steps > 0) { this._trail.shift(); this._trail.push(this._rollEntry()); }

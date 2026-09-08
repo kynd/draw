@@ -134,17 +134,17 @@ export function attachDrawingToolUi(tool, layout) {
     tool.on('stroke-end', () => layout.classList.remove('dp-ui-hidden'));
 
     // ------------------------------------------------------------------
-    // The floating dials, frame-latched. Hue and tool are bucketed: crossing
-    // into a new bucket steps by the difference, so turning back retraces.
-    // Width maps the dial position onto the width directly.
+    // The floating dials, frame-latched. The hue dial steps the palette on
+    // every value change; the tool dial is bucketed, crossing into a new
+    // bucket steps by the difference. Both walk trails, so turning back
+    // retrieves what was there. Width maps the dial position directly.
     const STEP = 6;
-    let hueBucket = null;
+    let hueValue = null;
     const hueLatch = new FrameLatch(v => {
-        const bucket = Math.round(v / STEP);
-        if (hueBucket === null) hueBucket = bucket;
-        if (bucket === hueBucket) return;
-        tool.stepPalette(bucket - hueBucket);
-        hueBucket = bucket;
+        if (hueValue === null) hueValue = v;
+        if (v === hueValue) return;
+        tool.stepPalette(v - hueValue);
+        hueValue = v;
     });
     let toolBucket = Math.round(48 / STEP);
     const toolLatch = new FrameLatch(v => {
@@ -155,7 +155,7 @@ export function attachDrawingToolUi(tool, layout) {
     });
     const dialHue = new Dial($('dial-hue'),
         { label: 'Hue', value: Math.floor(Math.random() * 128), onInput: v => hueLatch.set(v) });
-    hueBucket = Math.round(dialHue.value / STEP);
+    hueValue = dialHue.value;
     const WIDTH_MIN = 2, WIDTH_MAX = 60;
     const widthToDial = w => Math.round((w - WIDTH_MIN) / (WIDTH_MAX - WIDTH_MIN) * 127);
     const widthLatch = new FrameLatch(v =>

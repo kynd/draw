@@ -21,8 +21,8 @@ export const ParameterId = {
 const FORMAT = 'kynd-draw-strokes';
 const VERSION = 2;
 // Dial values arrive as 0..1 positions; they are read as 0..127 integers
-// (one MIDI controller's range) and stepped by the difference, the same
-// bucketing the tool's own dials use.
+// (one MIDI controller's range). Color steps by the raw difference, one step
+// per value change; tool is bucketed the way the tool's own dial is.
 const DIAL_MAX = 127;
 const DIAL_STEP = 6;
 const WIDTH_MIN = 2;
@@ -114,12 +114,18 @@ class DrawingEngineWrapper {
             this._tool.setParams({ width: WIDTH_MIN + (v / DIAL_MAX) * (WIDTH_MAX - WIDTH_MIN) });
             return;
         }
+        if (id === ParameterId.COLOR) {
+            const previous = this._buckets[id];
+            this._buckets[id] = v;
+            if (previous === undefined || v === previous) return;
+            this._tool.stepPalette(v - previous);
+            return;
+        }
         const bucket = Math.round(v / DIAL_STEP);
         const previous = this._buckets[id];
         this._buckets[id] = bucket;
         if (previous === undefined || bucket === previous) return;
-        if (id === ParameterId.COLOR) this._tool.stepPalette(bucket - previous);
-        else if (id === ParameterId.TOOL) this._tool.stepTool(bucket - previous);
+        if (id === ParameterId.TOOL) this._tool.stepTool(bucket - previous);
     }
 
     /** @returns {Promise<Blob>} the drawing as a PNG. */
