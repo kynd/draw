@@ -5,7 +5,7 @@ import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.j
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawingBoard } from '../../lib/demo/drawingBoard.js';
 import { setupDrawCycle } from '../../lib/demo/drawCycle.js';
-import { pressureAlong, pressureResponse, limitWidthSlope } from '../../lib/demo/pressure.js';
+import { pressureAlong, pressureRatio, limitWidthSlope } from '../../lib/demo/pressure.js';
 
 const controls = {};
 ['base', 'scale', 'threshold', 'curve', 'limit', 'minmove'].forEach(id => {
@@ -37,7 +37,7 @@ const cycle = setupDrawCycle({
         const def = new StrokeDef({
             points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
             widthLeft: limitWidthSlope(path,
-                s => base * (1 + (scale - 1) * pressureResponse(pressureAt(s), gamma, threshold)), limit),
+                s => base * pressureRatio(pressureAt(s), { range: scale, gamma, floor: threshold }), limit),
             renderer,
             seed,
         });

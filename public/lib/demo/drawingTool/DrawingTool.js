@@ -694,7 +694,7 @@ export class DrawingTool {
             tool,
             values: randomValues(tool),
             widthPx: min + Math.random() * (max - min),
-            // Pressure can widen the stroke up to three times at full sensitivity.
+            // Sensitivity scales the tool's pressure swing around the width.
             sens: Math.random() * 2,
             // Rolled lazily on the first preview, then remembered with the
             // entry, so stepping back shows the exact same preview.

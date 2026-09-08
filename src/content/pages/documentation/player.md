@@ -5,7 +5,7 @@ title: Player
 <div class="prose">
 
 Recording and playback for drawings. A drawing's log is data, not raster: the canvas size, the starting background, and one record per committed mark. `StrokeRecorder` collects the log while drawing, and `DrawingPlayer` runs a full transport over one — play, pause, seek, step, rewind, finish — records the playback to a video, and serializes the log to and from a file.
-<div class="jp">描画の記録と再生です。描画のログはラスタではなくデータで、キャンバスのサイズ、開始時の背景、確定した印ごとの記録からなります。`StrokeRecorder`は描いている間にログを集めます。`DrawingPlayer`は、ひとつのログの上でトランスポート全体（再生、一時停止、シーク、コマ送り、巻き戻し、最後まで進める）を動かし、再生をビデオに録画し、ログをファイルへ直列化し、ファイルから読み戻します。</div>
+<div class="jp">描画の記録と再生です。描画のログはラスタではなくデータで、キャンバスのサイズ、開始時の背景、確定した筆跡ごとの記録からなります。`StrokeRecorder`は描いている間にログを集めます。`DrawingPlayer`は、ひとつのログの上でトランスポート全体（再生、一時停止、シーク、コマ送り、巻き戻し、最後まで進める）を動かし、再生をビデオに録画し、ログをファイルへ直列化し、ファイルから読み戻します。</div>
 
 <div class="page-note">
 <p><code>public/lib/demo/strokeRecorder.js</code>, <code>public/lib/demo/drawingPlayer.js</code></p>
@@ -14,12 +14,12 @@ Recording and playback for drawings. A drawing's log is data, not raster: the ca
 ## The record
 
 A record carries everything needed to rebuild one mark: `toolId`, the parameter `values`, `widthPx`, `sens`, `colorA`, `colorB`, `colors`, `seed`, and the drawn `points` with their pressures. Only drawn points are stored, so blank time costs nothing and a playback skips it by construction. The `toolId` names an entry in a registry, so the log stays valid as long as the ids do.
-<div class="jp">記録には、ひとつの印を作り直すのに必要なすべてが入っています。`toolId`、パラメータの`values`、`widthPx`、`sens`、`colorA`、`colorB`、`colors`、`seed`、そして筆圧付きの描かれた`points`です。保存されるのは描かれた点だけなので、何も描いていない時間にはコストがかからず、再生では構造上スキップされます。`toolId`はレジストリのエントリを指すため、idが変わらない限りログは有効です。</div>
+<div class="jp">記録には、ひとつの筆跡を作り直すのに必要なすべてが入っています。`toolId`、パラメータの`values`、`widthPx`、`sens`、`colorA`、`colorB`、`colors`、`seed`、そして筆圧付きの描かれた`points`です。保存されるのは描かれた点だけなので、何も描いていない時間にはコストがかからず、再生では構造上スキップされます。`toolId`はレジストリのエントリを指すため、idが変わらない限りログは有効です。</div>
 
 ## StrokeRecorder
 
 `begin(background)` starts a new take, as a clear does, storing the background spec (a color or a gradient description). `add(record, points)` appends one committed mark, copying the points as plain `{ x, y, pressure }`. The recorder's `{ background, records }` is the log.
-<div class="jp">`begin(background)`は、クリアと同じように新しいテイクを始め、背景の指定（色かグラデーションの記述）を保存します。`add(record, points)`は確定した印をひとつ追加し、点を素の`{ x, y, pressure }`としてコピーします。レコーダーの`{ background, records }`がログです。</div>
+<div class="jp">`begin(background)`は、クリアと同じように新しいテイクを始め、背景の指定（色かグラデーションの記述）を保存します。`add(record, points)`は確定した筆跡をひとつ追加し、点を素の`{ x, y, pressure }`としてコピーします。レコーダーの`{ background, records }`がログです。</div>
 
 ## DrawingPlayer
 

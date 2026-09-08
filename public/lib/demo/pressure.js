@@ -70,6 +70,19 @@ export function pressureAlong(points, smooth = 2) {
     };
 }
 
+/**
+ * The multiplicative pressure mapping: middle pressure draws the set width,
+ * light pressure below it and heavy pressure above, symmetric as a ratio.
+ * `range` is the swing (2 runs from half to double at sensitivity 1) and
+ * `sens` scales the exponent. Zero raw pressure (a mouse) maps to exactly 1,
+ * so a device without pressure draws at the set width.
+ */
+export function pressureRatio(raw, { range = 2, sens = 1, gamma = 1, floor = 0 } = {}) {
+    if (raw <= 0 || range <= 1 || sens <= 0) return 1;
+    const response = pressureResponse(raw, gamma, floor);
+    return Math.pow(range, sens * (2 * response - 1));
+}
+
 /** The mean recorded pressure, for marks that take one value for the whole. */
 export function averagePressure(points) {
     if (points.length === 0) return 0;

@@ -60,7 +60,7 @@
         <span class="dp-label">Width</span>
         <span class="dp-val" id="stat-width">0.0</span>
       </div>
-      <div class="dp-note">Width runs from the base at zero pressure to base times the scale at full pressure. Threshold is a dead zone: pressure below it counts as zero, and the rest is stretched back to the full range, so a resting pen draws like a mouse. Curve is the response exponent applied after: above 1 spreads out light touches, below 1 compresses them. Limit caps how fast the width may rise or fall per unit of length. Min move is how far the pen must travel before a new point is recorded; below it, nothing is added and the width cannot grow in place. Lengths here are CSS pixels.</div>
+      <div class="dp-note">Middle pressure draws the base width; the width runs from base over the scale at a light touch to base times the scale at full pressure. Threshold is a dead zone: pressure below it counts as the lightest touch. A mouse, reporting no pressure, draws the base width. Curve is the response exponent applied after: above 1 spreads out light touches, below 1 compresses them. Limit caps how fast the width may rise or fall per unit of length. Min move is how far the pen must travel before a new point is recorded; below it, nothing is added and the width cannot grow in place. Lengths here are CSS pixels.</div>
 
       <hr class="dp-divider" />
 

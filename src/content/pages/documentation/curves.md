@@ -47,7 +47,7 @@ Splits a point list into separate runs wherever the direction turns more than `a
 ## hasSettledStart
 
 Whether a growing gesture carries enough arc for a stable direction. Walks the points and passes once the accumulated arc reaches `minArc`; a mark held until then appears already settled, instead of flickering through the tangent swings of the first few samples. Distance rather than a point count, since a slow hand piles points onto one spot without adding direction.
-<div class="jp">伸びていく身振りが、安定した向きを持てるだけの弧長を持ったかどうかを返します。点をたどり、積算した弧長が`minArc`に達したら通します。それまで保留された印は、最初の数サンプルで接線が振れてちらつく代わりに、落ち着いた状態で現れます。点の数ではなく距離で判定するのは、ゆっくり動く手が、向きの情報を足さないまま一点に点を積み上げるからです。</div>
+<div class="jp">伸びていく身振りが、安定した向きを持てるだけの弧長を持ったかどうかを返します。点をたどり、積算した弧長が`minArc`に達したら通します。それまで保留された筆跡は、最初の数サンプルで接線が振れてちらつく代わりに、落ち着いた状態で現れます。点の数ではなく距離で判定するのは、ゆっくり動く手が、向きの情報を足さないまま一点に点を積み上げるからです。</div>
 
 ## smoothByWidth
 

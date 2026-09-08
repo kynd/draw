@@ -2,7 +2,10 @@
 // parameters it randomizes. The drawing tool component takes a registry in this
 // shape; this file is the shared master list, and a demo picks the subset for
 // its page with `pickTools`. `width: [min, max]` is a tool's canonical width
-// range in pixels; entries without one take the default, 2 to 64.
+// range in pixels; entries without one take the default, 2 to 64. `pressure`
+// is the tool's pressure swing as a ratio around the set width (2 runs from
+// half to double at full pressure); the default is 2, a pencil barely moves,
+// a watercolor swings wide.
 
 import { RibbonStrokeRenderer } from '../renderers/RibbonStrokeRenderer.js';
 import { BrushStrokeRenderer } from '../renderers/BrushStrokeRenderer.js';
@@ -60,14 +63,14 @@ export const toolRegistry = [
             cap: 'square', colorA: ctx.colorA, colorB: ctx.colorB,
             bristles: v.bristles, rough: v.rough, dry: v.dry,
         }) },
-    { id: 'watercolor', kind: 'stroke',
+    { id: 'watercolor', kind: 'stroke', pressure: 3,
         params: [{ key: 'pigment', min: 0.2, max: 1 }, { key: 'rim', min: 0, max: 1 },
             { key: 'bleed', min: 0, max: 1 }],
         make: (v, ctx) => new WatercolorStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, background: ctx.texture, blurred: ctx.texture,
             pigment: v.pigment, rim: v.rim, bleed: v.bleed,
         }) },
-    { id: 'wet-brush', kind: 'stroke',
+    { id: 'wet-brush', kind: 'stroke', pressure: 2.5,
         params: [{ key: 'drag', min: 10, max: 160 }, { key: 'pigment', min: 0.2, max: 1 }],
         make: (v, ctx) => new WetBrushStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, background: ctx.texture, blurred: ctx.texture,
@@ -173,7 +176,7 @@ export const toolRegistry = [
         make: (v, ctx) => new RibbonStrokeRenderer({
             cap: 'square', color: ctx.colorA, gradient: ctx.colorB, gradientAxis: v.axis,
         }) },
-    { id: 'smear', kind: 'stroke',
+    { id: 'smear', kind: 'stroke', pressure: 2.5,
         params: [{ key: 'drag', min: 20, max: 220 }, { key: 'variation', min: 0, max: 1 }],
         make: (v, ctx) => new SmearStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, background: ctx.texture,
@@ -196,39 +199,39 @@ export const toolRegistry = [
     { id: 'lanes', kind: 'stroke',
         params: [{ key: 'lanes', min: 2, max: 20, step: 1 }, { key: 'duty', min: 0.15, max: 1 }],
         make: (v, ctx) => new LineStrokeRenderer({ lanes: v.lanes, duty: v.duty, colors: ctx.colors }) },
-    { id: 'pencil', kind: 'stroke', width: [1, 8],
+    { id: 'pencil', kind: 'stroke', pressure: 1.25, width: [1, 8],
         params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
         }) },
-    { id: 'charcoal', kind: 'stroke', width: [2, 28],
+    { id: 'charcoal', kind: 'stroke', pressure: 1.5, width: [2, 28],
         params: [{ key: 'grain', min: 0.4, max: 0.9 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 4.5, softness: 0.5, edge: 0.3, opacity: 0.92,
         }) },
-    { id: 'pastel', kind: 'stroke', width: [3, 32],
+    { id: 'pastel', kind: 'stroke', pressure: 1.5, width: [3, 32],
         params: [{ key: 'grain', min: 0.5, max: 1 }, { key: 'pressure', min: 0.2, max: 0.6 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 7.0, softness: 0.65, edge: 0.55, opacity: 0.95,
         }) },
-    { id: 'pencil-rainbow', kind: 'stroke', width: [1, 8],
+    { id: 'pencil-rainbow', kind: 'stroke', pressure: 1.25, width: [1, 8],
         params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'along',
             grain: v.grain, pressure: v.pressure,
             tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
         }) },
-    { id: 'charcoal-multi', kind: 'stroke', width: [2, 28],
+    { id: 'charcoal-multi', kind: 'stroke', pressure: 1.5, width: [2, 28],
         params: [{ key: 'grain', min: 0.4, max: 0.9 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',
             grain: v.grain, pressure: v.pressure,
             tooth: 4.5, softness: 0.5, edge: 0.3, opacity: 0.92,
         }) },
-    { id: 'pastel-multi', kind: 'stroke', width: [3, 32],
+    { id: 'pastel-multi', kind: 'stroke', pressure: 1.5, width: [3, 32],
         params: [{ key: 'grain', min: 0.5, max: 1 }, { key: 'pressure', min: 0.2, max: 0.6 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',

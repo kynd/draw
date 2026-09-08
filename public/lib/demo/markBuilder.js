@@ -3,9 +3,10 @@ import { StrokeDef } from '../StrokeDef.js';
 import { PIXELS_PER_UNIT } from '../CanvasBuffer.js';
 import { blobOutline } from '../pathEffects.js';
 import { taperByArc } from './strokePaths.js';
-import { pressureAlong, pressureResponse, limitWidthSlope, averagePressure, pathArcLength } from './pressure.js';
+import { pressureAlong, pressureRatio, limitWidthSlope, averagePressure, pathArcLength } from './pressure.js';
 
 export const PRESSURE_FLOOR = 0.15;
+const DEFAULT_PRESSURE_RANGE = 2;
 
 /**
  * The bridge from a tool state to a drawn mark, shared by the drawing tool and
@@ -26,8 +27,13 @@ export function makeMarkBuilder({ state, board }) {
         };
         const width = state.widthPx / PIXELS_PER_UNIT;
         const pressureAt = pressureAlong(points);
+        // Pressure scales around the set width as a ratio: middle pressure
+        // draws it as set, light below, heavy above, with the swing set per
+        // tool by its registry entry.
+        const range = state.tool.pressure ?? DEFAULT_PRESSURE_RANGE;
         if (state.tool.kind === 'blob') {
-            const scale = 1 + state.sens * pressureResponse(averagePressure(points), 1, PRESSURE_FLOOR);
+            const scale = pressureRatio(averagePressure(points),
+                { range, sens: state.sens, floor: PRESSURE_FLOOR });
             const radius = Math.min(Math.max(width * 1.3 * scale, 0.05), 0.45);
             const contour = blobOutline(path, { span: 0.12, radius });
             if (!contour) return null;
@@ -41,7 +47,8 @@ export function makeMarkBuilder({ state, board }) {
         const def = new StrokeDef({
             points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
             widthLeft: limitWidthSlope(path,
-                s => base(s) * (1 + state.sens * pressureResponse(pressureAt(s), 1, PRESSURE_FLOOR))),
+                s => base(s) * pressureRatio(pressureAt(s),
+                    { range, sens: state.sens, floor: PRESSURE_FLOOR })),
             renderer,
             seed: useSeed,
         });
