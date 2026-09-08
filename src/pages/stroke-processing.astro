@@ -129,6 +129,52 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
+  <section class="demo-section" id="held-start">
+    <div class="demo-header">
+      <h2>Held start</h2>
+      <a href={`${base}/demos/hold-start/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/hold-start/index.html?embedded`} title="Held start" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The first few points of a stroke swing the tangent with every sample, so a mark drawn from the first point flickers through directions before it settles. The mark is held until the gesture carries enough arc for a stable direction, then appears already settled; the thin black line shows the pointer meanwhile.</p>
+      <div class="jp">ストロークの最初の数点では、サンプルが増えるたびに接線が振れます。そのため、最初の点から描かれる印は、落ち着くまで向きが揺れてちらつきます。印は、身振りが安定した向きを持てるだけの弧長になるまで保留され、落ち着いた状態で現れます。その間、細い黒線がポインタの位置を示します。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>The gate:</strong> <code>hasSettledStart</code> walks the drawn points and passes once the accumulated arc reaches a threshold. Distance, not a point count: a slow hand piles points onto one spot without adding direction.</p>
+        <div class="jp"><strong>ゲート：</strong><code>hasSettledStart</code>は描かれた点をたどり、積算した弧長がしきい値に達したら通します。点の数ではなく距離で判定します。ゆっくり動く手は、向きの情報を足さないまま、一点に点を積み上げるからです。</div>
+
+        <p>A gesture released below the threshold draws nothing. The same gate applies after a split, where a new piece starts with the same few unstable points.</p>
+        <div class="jp">しきい値に届かないまま離した身振りは、何も描きません。同じゲートは分割の後にも当てはまります。新しい断片も、同じ数点の不安定な点から始まるからです。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="width-smoothing">
+    <div class="demo-header">
+      <h2>Width smoothing</h2>
+      <a href={`${base}/demos/width-smoothing/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/width-smoothing/index.html?embedded`} title="Width smoothing" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Smoothing that follows the stroke's width: a narrow stroke follows the hand directly, and a wide one rounds its turns. A sharp turn folds a wide ribbon over itself, so the wider the stroke, the earlier the turns are rounded away; drawn thin, the same gesture keeps its corners.</p>
+      <div class="jp">ストロークの幅に従う平滑化です。細いストロークは手の動きにそのまま従い、太いストロークは曲がりを丸めます。鋭い曲がりは太いリボンを自分の上に折り重ねてしまうため、ストロークが太いほど、曲がりは早めに丸められます。同じ身振りでも、細く描けば角はそのまま残ります。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>The rule:</strong> <code>smoothByWidth</code> spaces the smoothing knots at width × gain, clamped to a working range, and interpolates them with the local Catmull-Rom, so the settled part of a growing stroke holds still.</p>
+        <div class="jp"><strong>規則：</strong><code>smoothByWidth</code>は、平滑化のノットを幅×gainの間隔で置き（動作レンジに収めます）、局所的なCatmull-Romで補間します。そのため、伸びていくストロークのすでに描かれた部分は動きません。</div>
+
+        <p>The black pointer line stays unsmoothed, so the gap between the hand and the mark shows the smoothing at work: none when thin, wide arcs when thick.</p>
+        <div class="jp">黒いポインタの線は平滑化されないため、手と印のずれがそのまま平滑化の働きを見せます。細いときはずれがなく、太いときは大きな弧になります。</div>
+      </details>
+    </div>
+  </section>
+
   <section class="demo-section" id="blobs">
     <div class="demo-header">
       <h2>Blob drawing</h2>

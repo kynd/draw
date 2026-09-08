@@ -44,4 +44,14 @@ It swings wider through corners than the natural spline. The natural spline mini
 Splits a point list into separate runs wherever the direction turns more than `angle` radians. The turn at a point compares the incoming and outgoing directions, each measured over `span` of arc rather than one segment, so the jitter of dense points does not trigger cuts. A cut cannot follow another within `span` of arc, so one corner yields one cut, and each run shares its boundary point with the next, so the pieces stay connected end to end.
 <div class="jp">向きが`angle`ラジアンを超えて変わる場所で、点の列を別々の連なりに分割します。ある点での回転は、入る方向と出る方向を比べて求めます。どちらも1セグメントではなく`span`の弧長で測るため、密集した点のジッタでは分割は起きません。分割の直後、`span`の弧長のあいだは次の分割が起きないため、ひとつの角で分割されるのは1回だけです。各連なりは境界の点を次の連なりと共有するので、断片は端と端でつながったままです。</div>
 
+## hasSettledStart
+
+Whether a growing gesture carries enough arc for a stable direction. Walks the points and passes once the accumulated arc reaches `minArc`; a mark held until then appears already settled, instead of flickering through the tangent swings of the first few samples. Distance rather than a point count, since a slow hand piles points onto one spot without adding direction.
+<div class="jp">伸びていく身振りが、安定した向きを持てるだけの弧長を持ったかどうかを返します。点をたどり、積算した弧長が`minArc`に達したら通します。それまで保留された印は、最初の数サンプルで接線が振れてちらつく代わりに、落ち着いた状態で現れます。点の数ではなく距離で判定するのは、ゆっくり動く手が、向きの情報を足さないまま一点に点を積み上げるからです。</div>
+
+## smoothByWidth
+
+Smoothing that follows the stroke's width: the knot spacing is width × `gain`, clamped to [`minSpan`, `maxSpan`], interpolated with the local Catmull-Rom so the settled part of a growing stroke holds still. A narrow stroke follows the hand directly; a wide one rounds its turns before they can fold the geometry over itself.
+<div class="jp">ストロークの幅に従う平滑化です。ノットの間隔は幅×`gain`で、[`minSpan`, `maxSpan`]に収められ、局所的なCatmull-Romで補間されます。そのため、伸びていくストロークのすでに描かれた部分は動きません。細いストロークは手の動きにそのまま従い、太いストロークは、ジオメトリが自分の上に折り重なる前に曲がりを丸めます。</div>
+
 </div>

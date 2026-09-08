@@ -308,3 +308,33 @@ function thomas(A, B, C, D) {
     for (let i = n - 1; i >= 0; i--) X[i] = Dp[i] - Cp[i] * X[i + 1];
     return X;
 }
+
+/**
+ * Whether a growing gesture has enough arc to carry a stable direction. The
+ * first few points of a stroke swing the tangent with every sample, so a mark
+ * held until this passes appears already settled instead of flickering
+ * through the jitter.
+ */
+export function hasSettledStart(points, minArc = 0.06) {
+    let arc = 0;
+    for (let i = 1; i < points.length; i++) {
+        arc += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+        if (arc >= minArc) return true;
+    }
+    return false;
+}
+
+/**
+ * Smoothing that follows the stroke's width: the knot spacing grows with the
+ * width, so a narrow stroke follows the hand directly while a wide one rounds
+ * its turns before they can fold the geometry over itself. `gain` scales the
+ * spacing per unit of width, clamped to [minSpan, maxSpan]; the spline is the
+ * local Catmull-Rom, so the settled part of a growing stroke holds still.
+ */
+export function smoothByWidth(points, width, {
+    gain = 1.6, minSpan = 0.02, maxSpan = 0.3, samplesPerSegment = 6,
+} = {}) {
+    const span = Math.min(Math.max(width * gain, minSpan), maxSpan);
+    const knots = resampleEvery(points, span);
+    return knots.length >= 3 ? catmullRomSpline(knots, samplesPerSegment) : points.slice();
+}
