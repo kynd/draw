@@ -70,6 +70,9 @@ export class DrawingTool {
         this._clearOnResize = false;
         this._applyingLive = false;
         this._livePoints = [];
+        // The preview's wiggle and mark seed, held so color and parameter
+        // changes redraw the same shape; a tool change rolls a fresh one.
+        this._previewShape = null;
 
         this.stage = new StrokeStage(canvas);
         this.board = new DrawingBoard(this.stage);
@@ -366,6 +369,7 @@ export class DrawingTool {
     _selectToolSilent(id) {
         const tool = this._registry.find(entry => entry.id === id);
         if (!tool) return;
+        if (tool !== this._state.tool) this._previewShape = null;
         this._state.tool = tool;
         this._state.values = this._toolValues[tool.id] ??= randomValues(tool);
     }
@@ -645,6 +649,7 @@ export class DrawingTool {
     }
 
     _applyRoll(entry) {
+        if (entry.tool !== this._state.tool) this._previewShape = null;
         this._state.tool = entry.tool;
         this._state.values = entry.values;
         this._state.widthPx = entry.widthPx;
@@ -715,8 +720,12 @@ export class DrawingTool {
         const c = this._previewCenter();
         const state = this._state;
         const width = Math.min(state.widthPx / PIXELS_PER_UNIT, 0.15);
-        const phase = Math.random() * Math.PI * 2;
-        const freq = 4 + Math.random() * 4;
+        this._previewShape ??= {
+            phase: Math.random() * Math.PI * 2,
+            freq: 4 + Math.random() * 4,
+            seed: Math.floor(Math.random() * 1000),
+        };
+        const { phase, freq, seed } = this._previewShape;
         const path = [];
         const n = 28;
         for (let i = 0; i < n; i++) {
@@ -729,7 +738,7 @@ export class DrawingTool {
         }
         const ctx = {
             colorA: state.colorA, colorB: state.colorB, colors: state.colors,
-            texture: this.board.texture, seed: Math.floor(Math.random() * 1000),
+            texture: this.board.texture, seed,
             start: path[0], end: path[path.length - 1],
             tintLight: new THREE.Color(state.colorA).lerp(new THREE.Color('#ffffff'), 0.55).getStyle(),
         };
