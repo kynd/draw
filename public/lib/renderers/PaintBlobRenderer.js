@@ -163,14 +163,14 @@ export class PaintBlobRenderer extends BlobRenderer {
                 // Height: a wide quintic dome. The quintic's second derivative is
                 // also zero at both ends, so neither the rim nor the junction with
                 // the flat interior shows a corner in the shading.
-                float domeW = 0.3;
+                float domeW = min(0.3, uInset);
                 float rimVar = 1.0;
                 if (uKnife == 1) {
                     // Knife paint's rim does not trace the edge: a noise varies it
                     // around the boundary, tall and steep in some stretches,
                     // scraped nearly flat in others.
                     float rimN = fbm(vWorld * 1.4 + uSeed * 61.0);
-                    domeW = mix(0.3, 0.06, rimN);
+                    domeW = min(mix(0.3, 0.06, rimN), uInset);
                     rimVar = smoothstep(0.25, 0.65, rimN);
                 }
                 float t = clamp(-d / domeW, 0.0, 1.0);

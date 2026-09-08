@@ -65,7 +65,7 @@ export class StoneBlobRenderer extends BlobRenderer {
                 float alpha = 1.0 - smoothstep(-0.006, 0.0, d);
                 if (alpha <= 0.003) discard;
 
-                float domeW = 0.3;
+                float domeW = min(0.3, uInset);
                 float t = clamp(-d / domeW, 0.0, 1.0);
                 float dome = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
                 float domeSlope = 30.0 * t * t * (t - 1.0) * (t - 1.0) / domeW;

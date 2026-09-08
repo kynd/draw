@@ -61,6 +61,7 @@ export class BlobRenderer {
 
         const material = new THREE.ShaderMaterial({
             uniforms: {
+                uInset: { value: insetRadius(pts) },
                 uContour: { value: contourArr },
                 uArc: { value: arc },
                 uCount: { value: n },
@@ -107,6 +108,7 @@ const PRELUDE = /* glsl */`
     uniform float uArc[${MAX_CONTOUR}];
     uniform int uCount;
     uniform float uPerimeter;
+    uniform float uInset;
     uniform float uSeed;
     uniform vec2 uScreen;
 
@@ -173,3 +175,57 @@ const PRELUDE = /* glsl */`
         return d;
     }
 `;
+
+/**
+ * The deepest interior point's distance to the contour, found by a coarse
+ * grid over the bounds refined around its best cell. The dome profiles cap
+ * their depth at this, so a narrow region's slopes flatten before they meet
+ * at the middle instead of creasing along it.
+ */
+function insetRadius(pts) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const p of pts) {
+        minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+    }
+    const depth = (x, y) => {
+        let d2 = Infinity;
+        let inside = false;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+            const a = pts[j], b = pts[i];
+            const ex = b.x - a.x, ey = b.y - a.y;
+            const wx = x - a.x, wy = y - a.y;
+            const s = Math.min(Math.max((wx * ex + wy * ey) / ((ex * ex + ey * ey) || 1), 0), 1);
+            const dx = wx - ex * s, dy = wy - ey * s;
+            d2 = Math.min(d2, dx * dx + dy * dy);
+            if ((a.y > y) !== (b.y > y) && x < a.x + ((y - a.y) / (b.y - a.y)) * (b.x - a.x)) {
+                inside = !inside;
+            }
+        }
+        return inside ? Math.sqrt(d2) : 0;
+    };
+    const N = 20;
+    let best = 0;
+    let bx = (minX + maxX) / 2, by = (minY + maxY) / 2;
+    for (let iy = 0; iy <= N; iy++) {
+        for (let ix = 0; ix <= N; ix++) {
+            const x = minX + ((maxX - minX) * ix) / N;
+            const y = minY + ((maxY - minY) * iy) / N;
+            const d = depth(x, y);
+            if (d > best) { best = d; bx = x; by = y; }
+        }
+    }
+    let step = Math.max(maxX - minX, maxY - minY) / N;
+    for (let pass = 0; pass < 3; pass++) {
+        step /= 3;
+        let nx = bx, ny = by;
+        for (let iy = -2; iy <= 2; iy++) {
+            for (let ix = -2; ix <= 2; ix++) {
+                const d = depth(bx + ix * step, by + iy * step);
+                if (d > best) { best = d; nx = bx + ix * step; ny = by + iy * step; }
+            }
+        }
+        bx = nx; by = ny;
+    }
+    return Math.max(best, 0.02);
+}

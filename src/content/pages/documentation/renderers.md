@@ -328,6 +328,9 @@ Paths derived from the drawn path, each drawn with the brush renderer. Three mod
 Renderers that fill a closed region rather than a stroke. The geometry is only a quad over the contour's bounds; the shape lives in the fragment shader as the signed distance to the contour polygon, so a renderer can push the boundary, texture the interior, or shade it as a surface without new geometry. `BlobRenderer` is the base; contours come from `blobOutline` on the Path Effects page.
 <div class="jp">ストロークではなく閉じた領域を塗るレンダラです。ジオメトリは輪郭の範囲を覆う四角形だけで、形はフラグメントシェーダの中の、輪郭ポリゴンへの符号付き距離として存在します。そのためレンダラは、新しいジオメトリなしに境界を押したり、内部にテクスチャを与えたり、面として陰影付けしたりできます。基底クラスは`BlobRenderer`で、輪郭はPath Effectsページの`blobOutline`から得られます。</div>
 
+The renderers that shade a height field build it from the distance to the edge, and the edge dome's depth caps at the contour's inradius, measured once at build. Without the cap, a region narrower than the dome would carry the distance field's crease along its middle into the lighting as a sharp ridge; with it, the slopes flatten before they meet.
+<div class="jp">高さフィールドを陰影付けするレンダラは、高さを輪郭からの距離で作ります。縁のドームの深さは、構築時に一度測った輪郭の内接半径で頭打ちになります。この上限がないと、ドームより狭い領域では、距離場が中央に持つ折り目がそのまま照明に鋭い稜線として現れます。上限があれば、斜面は出会う前に平らになります。</div>
+
 <div class="page-note">
 <ul>
 <li><code>ShapedBlobRenderer</code> — a flat fill whose boundary grows spikes (an integer count around the loop, so the profile meets itself in a valley) and bumps (a noise of world position, so no seam). Each spike hashes its height and lean, and each valley hashes its depth, dipping inside the shape. With <code>colorB</code> and two world points (<code>gradientFrom</code>, <code>gradientTo</code>) the fill becomes a linear gradient between them.<br /><span class="jp">境界にトゲ（ループ全体で整数本なので、プロファイルは谷で自分自身と出会います）とうねり（ワールド座標のノイズなので継ぎ目がありません）を生やす平坦な塗りです。各トゲは高さと傾きを、各谷は深さをハッシュから決め、谷は形の内側に食い込みます。<code>colorB</code>と2つのワールド座標（<code>gradientFrom</code>、<code>gradientTo</code>）を与えると、塗りはその間の線形グラデーションになります。</span></li>
