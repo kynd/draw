@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { resampleEvery, catmullRomSpline, splitByTurn } from '../curves.js';
+import { resampleEvery, catmullRomSpline, splitByTurn, hasSettledStart, smoothByWidth } from '../curves.js';
 import { DrawInput } from './drawInput.js';
 
 /**
@@ -18,6 +18,13 @@ import { DrawInput } from './drawInput.js';
  * points (which carry pressure), and the piece's seed, and returns
  * `{ mesh, renderer }` or null.
  *
+ * Each piece is held until it carries `holdArc` of arc, so a mark appears
+ * with its direction already settled instead of flickering through the first
+ * few samples; a piece still below the gate at release draws nothing. With a
+ * `widthFor` callback the smoothing follows the width (`smoothByWidth`): a
+ * narrow stroke tracks the hand, a wide one rounds its turns before they can
+ * fold the geometry.
+ *
  * The pointer is one source of strokes, not the only one: the returned `feed`
  * takes (points, done) exactly as the pointer produces them, so a replay or a
  * generated stroke runs through the same cycle. `onCommit(points, seed)` fires
@@ -29,7 +36,8 @@ import { DrawInput } from './drawInput.js';
  * `setPointerTrace` changes it later.
  */
 export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCommit, onRelease,
-    split = { angle: Math.PI * 0.55, span: 0.05 }, pointerTrace = true, bindInput = true }) {
+    split = { angle: Math.PI * 0.55, span: 0.05 }, holdArc = 0.06, widthFor = null,
+    pointerTrace = true, bindInput = true }) {
     let seed = 1;
 
     let live = null;
@@ -100,11 +108,18 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
 
     function smoothPiece(points) {
         if (points.length < 2) return null;
-        // Light smoothing, so the mark follows the hand without recording its
-        // jitter. The spline is local: a new point reshapes only the last few
-        // segments, so the drawn part holds still while the stroke grows.
-        const knots = resampleEvery(points, 0.06);
-        const path = knots.length >= 3 ? catmullRomSpline(knots, 6) : points;
+        // Smoothing follows the width where the host supplies one; otherwise
+        // a light fixed pass. Either spline is local: a new point reshapes
+        // only the last few segments, so the drawn part holds still while
+        // the stroke grows.
+        const width = widthFor?.();
+        let path;
+        if (width != null) {
+            path = smoothByWidth(points, width);
+        } else {
+            const knots = resampleEvery(points, 0.06);
+            path = knots.length >= 3 ? catmullRomSpline(knots, 6) : points;
+        }
         if (path.length < 2) return null;
         // A path with no extent (all points coincident, as a replay's first few
         // points can be) would make the renderers' arc-length sampling divide
@@ -124,6 +139,8 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         const pieces = [];
         const committed = [];
         runs.forEach((run, k) => {
+            // Held until the piece carries enough arc for a stable direction.
+            if (holdArc && !hasSettledStart(run, holdArc)) return;
             const path = smoothPiece(run);
             if (!path) return;
             const mark = build(path, run, seed + k);

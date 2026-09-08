@@ -86,6 +86,7 @@ export class DrawingTool {
         this.cycle = setupDrawCycle({
             stage: this.stage, board: this.board, canvas,
             build: makeMarkBuilder({ state: this._state, board: this.board }),
+            widthFor: () => this._state.widthPx / PIXELS_PER_UNIT,
             bindInput: false,
             onCommit: (points, seed) => {
                 if (this._replaying || this._playerFeeding || this._applyingLive) return;

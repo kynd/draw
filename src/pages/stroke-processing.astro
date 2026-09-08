@@ -138,8 +138,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/hold-start/index.html?embedded`} title="Held start" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The first few points of a stroke swing the tangent with every sample, so a mark drawn from the first point flickers through directions before it settles. Each piece is held until it carries enough arc for a stable direction, then appears already settled; the thin black line shows the pointer meanwhile. The stroke splits at sharp turns as in the drawing demos, and a fresh piece after a split waits the same way its stroke did.</p>
-      <div class="jp">ストロークの最初の数点では、サンプルが増えるたびに接線が振れます。そのため、最初の点から描かれる印は、落ち着くまで向きが揺れてちらつきます。各断片は、安定した向きを持てるだけの弧長になるまで保留され、落ち着いた状態で現れます。その間、細い黒線がポインタの位置を示します。ストロークは描画デモと同じく鋭い曲がりで分割され、分割後の新しい断片も、ストロークの始まりと同じように待ちます。</div>
+      <p>The first few points of a stroke swing the tangent with every sample, so a mark drawn from the first point flickers through directions before it settles. Each piece is held until it carries enough arc for a stable direction, then appears already settled; the thin black line shows the pointer meanwhile. The stroke splits at sharp turns as in the drawing demos, and a fresh piece after a split waits the same way its stroke did. Every drawing demo now runs this gate.</p>
+      <div class="jp">ストロークの最初の数点では、サンプルが増えるたびに接線が振れます。そのため、最初の点から描かれる印は、落ち着くまで向きが揺れてちらつきます。各断片は、安定した向きを持てるだけの弧長になるまで保留され、落ち着いた状態で現れます。その間、細い黒線がポインタの位置を示します。ストロークは描画デモと同じく鋭い曲がりで分割され、分割後の新しい断片も、ストロークの始まりと同じように待ちます。今ではすべての描画デモがこのゲートを通しています。</div>
 
       <details>
         <summary>Details</summary>
@@ -161,8 +161,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/width-smoothing/index.html?embedded`} title="Width smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Smoothing that follows the stroke's width: a narrow stroke follows the hand directly, and a wide one rounds its turns. A sharp turn folds a wide ribbon over itself, so the wider the stroke, the earlier the turns are rounded away; drawn thin, the same gesture keeps its corners.</p>
-      <div class="jp">ストロークの幅に従う平滑化です。細いストロークは手の動きにそのまま従い、太いストロークは曲がりを丸めます。鋭い曲がりは太いリボンを自分の上に折り重ねてしまうため、ストロークが太いほど、曲がりは早めに丸められます。同じ身振りでも、細く描けば角はそのまま残ります。</div>
+      <p>Smoothing that follows the stroke's width: a narrow stroke follows the hand directly, and a wide one rounds its turns. A sharp turn folds a wide ribbon over itself, so the wider the stroke, the earlier the turns are rounded away; drawn thin, the same gesture keeps its corners. Every drawing demo now smooths this way.</p>
+      <div class="jp">ストロークの幅に従う平滑化です。細いストロークは手の動きにそのまま従い、太いストロークは曲がりを丸めます。鋭い曲がりは太いリボンを自分の上に折り重ねてしまうため、ストロークが太いほど、曲がりは早めに丸められます。同じ身振りでも、細く描けば角はそのまま残ります。今ではすべての描画デモがこの方法で平滑化しています。</div>
 
       <details>
         <summary>Details</summary>
