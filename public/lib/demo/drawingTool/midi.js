@@ -33,7 +33,10 @@ export function bindMidi(tool, dials = null) {
                 else stepFrom(cc, value, steps => tool.stepTool(steps));
             } else if (cc === 18) {
                 if (dials?.dialWidth) dials.dialWidth.set(value);
-                else tool.setParams({ width: Math.round(2 + (value / 127) * 58) });
+                else {
+                    const spec = tool.paramSpec[0];
+                    tool.setParams({ width: Math.round(spec.min + (value / 127) * (spec.max - spec.min)) });
+                }
             }
         },
         onDevices: inputs => console.log('[midi] inputs:',

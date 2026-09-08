@@ -21,8 +21,13 @@ function plainPoint(p) {
     return { x: p.x, y: p.y, pressure: p.pressure ?? 0 };
 }
 const MIN_DISTANCE = 0.008;
-const WIDTH_SPEC = { key: 'width', min: 2, max: 60, step: 1 };
+const DEFAULT_WIDTH_RANGE = [2, 64];
 const PRESSURE_SPEC = { key: 'pressure', min: 0, max: 2, step: 0.05 };
+
+/** A tool's canonical width range, from its registry entry. */
+function widthRangeOf(tool) {
+    return tool.width ?? DEFAULT_WIDTH_RANGE;
+}
 
 /**
  * The drawing tool engine: state, strokes, palette, and playback behind a
@@ -221,9 +226,11 @@ export class DrawingTool {
 
     get registry() { return this._registry; }
 
-    /** The current tool's adjustable parameters, width and pressure first. */
+    /** The current tool's adjustable parameters, width and pressure first.
+     * The width spec carries the tool's canonical range. */
     get paramSpec() {
-        return [WIDTH_SPEC, PRESSURE_SPEC, ...this._state.tool.params];
+        const [min, max] = widthRangeOf(this._state.tool);
+        return [{ key: 'width', min, max, step: 1 }, PRESSURE_SPEC, ...this._state.tool.params];
     }
 
     /** A read-only snapshot of the live selection. */
@@ -409,12 +416,17 @@ export class DrawingTool {
         if (tool !== this._state.tool) this._previewShape = null;
         this._state.tool = tool;
         this._state.values = this._toolValues[tool.id] ??= randomValues(tool);
+        const [min, max] = widthRangeOf(tool);
+        this._state.widthPx = Math.min(Math.max(this._state.widthPx, min), max);
     }
 
     /** Partial parameter update; `width` and `pressure` are reserved keys. */
     setParams(partial) {
         for (const [key, value] of Object.entries(partial)) {
-            if (key === 'width') this._state.widthPx = value;
+            if (key === 'width') {
+                const [min, max] = widthRangeOf(this._state.tool);
+                this._state.widthPx = Math.min(Math.max(value, min), max);
+            }
             else if (key === 'pressure') this._state.sens = value;
             else this._state.values[key] = value;
         }
@@ -676,10 +688,11 @@ export class DrawingTool {
 
     _rollEntry() {
         const tool = this._registry[Math.floor(Math.random() * this._registry.length)];
+        const [min, max] = widthRangeOf(tool);
         return {
             tool,
             values: randomValues(tool),
-            widthPx: 2 + Math.random() * 58,
+            widthPx: min + Math.random() * (max - min),
             // Pressure can widen the stroke up to three times at full sensitivity.
             sens: Math.random() * 2,
             // Rolled lazily on the first preview, then remembered with the

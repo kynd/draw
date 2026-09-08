@@ -1,7 +1,8 @@
 // The catalog of drawing tools: every stroke and fill on the site, wired to the
 // parameters it randomizes. The drawing tool component takes a registry in this
 // shape; this file is the shared master list, and a demo picks the subset for
-// its page with `pickTools`.
+// its page with `pickTools`. `width: [min, max]` is a tool's canonical width
+// range in pixels; entries without one take the default, 2 to 64.
 
 import { RibbonStrokeRenderer } from '../renderers/RibbonStrokeRenderer.js';
 import { BrushStrokeRenderer } from '../renderers/BrushStrokeRenderer.js';
@@ -195,39 +196,39 @@ export const toolRegistry = [
     { id: 'lanes', kind: 'stroke',
         params: [{ key: 'lanes', min: 2, max: 20, step: 1 }, { key: 'duty', min: 0.15, max: 1 }],
         make: (v, ctx) => new LineStrokeRenderer({ lanes: v.lanes, duty: v.duty, colors: ctx.colors }) },
-    { id: 'pencil', kind: 'stroke',
+    { id: 'pencil', kind: 'stroke', width: [1, 8],
         params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
         }) },
-    { id: 'charcoal', kind: 'stroke',
+    { id: 'charcoal', kind: 'stroke', width: [2, 28],
         params: [{ key: 'grain', min: 0.4, max: 0.9 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 4.5, softness: 0.5, edge: 0.3, opacity: 0.92,
         }) },
-    { id: 'pastel', kind: 'stroke',
+    { id: 'pastel', kind: 'stroke', width: [3, 32],
         params: [{ key: 'grain', min: 0.5, max: 1 }, { key: 'pressure', min: 0.2, max: 0.6 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 7.0, softness: 0.65, edge: 0.55, opacity: 0.95,
         }) },
-    { id: 'pencil-rainbow', kind: 'stroke',
+    { id: 'pencil-rainbow', kind: 'stroke', width: [1, 8],
         params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'along',
             grain: v.grain, pressure: v.pressure,
             tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
         }) },
-    { id: 'charcoal-multi', kind: 'stroke',
+    { id: 'charcoal-multi', kind: 'stroke', width: [2, 28],
         params: [{ key: 'grain', min: 0.4, max: 0.9 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',
             grain: v.grain, pressure: v.pressure,
             tooth: 4.5, softness: 0.5, edge: 0.3, opacity: 0.92,
         }) },
-    { id: 'pastel-multi', kind: 'stroke',
+    { id: 'pastel-multi', kind: 'stroke', width: [3, 32],
         params: [{ key: 'grain', min: 0.5, max: 1 }, { key: 'pressure', min: 0.2, max: 0.6 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',
@@ -298,17 +299,17 @@ export const toolRegistry = [
         make: (v, ctx) => new WetPatternStrokeRenderer({
             mode: 'fringe', color: ctx.colorA, colorB: ctx.colorB, size: v.size, angle: v.angle,
             drag: v.drag, background: ctx.texture }) },
-    { id: 'around-spiral', kind: 'stroke',
+    { id: 'around-spiral', kind: 'stroke', width: [2, 6],
         params: [{ key: 'turns', min: 8, max: 30, step: 1 }, { key: 'reach', min: 4, max: 10 }],
         make: (v, ctx) => new AroundStrokeRenderer({
             mode: 'spiral', colorA: ctx.colorA, colorB: ctx.colorB, turns: v.turns, reach: v.reach,
         }) },
-    { id: 'around-entangled', kind: 'stroke',
+    { id: 'around-entangled', kind: 'stroke', width: [2, 6],
         params: [{ key: 'reach', min: 4, max: 10 }],
         make: (v, ctx) => new AroundStrokeRenderer({
             mode: 'entangled', colorA: ctx.colorA, colorB: ctx.colorB, reach: v.reach,
         }) },
-    { id: 'around-scattered', kind: 'stroke',
+    { id: 'around-scattered', kind: 'stroke', width: [2, 6],
         params: [{ key: 'reach', min: 4, max: 10 }],
         make: (v, ctx) => new AroundStrokeRenderer({
             mode: 'scattered', colorA: ctx.colorA, colorB: ctx.colorB, reach: v.reach,

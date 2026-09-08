@@ -25,8 +25,6 @@ const VERSION = 2;
 // per value change; tool is bucketed the way the tool's own dial is.
 const DIAL_MAX = 127;
 const DIAL_STEP = 6;
-const WIDTH_MIN = 2;
-const WIDTH_MAX = 60;
 
 class ProductionConfig extends DrawingToolConfig {
     constructor() {
@@ -111,7 +109,9 @@ class DrawingEngineWrapper {
     setParameter(id, value) {
         const v = Math.round(Math.min(Math.max(value, 0), 1) * DIAL_MAX);
         if (id === ParameterId.STROKE_WIDTH) {
-            this._tool.setParams({ width: WIDTH_MIN + (v / DIAL_MAX) * (WIDTH_MAX - WIDTH_MIN) });
+            // Mapped onto the current tool's canonical width range.
+            const spec = this._tool.paramSpec[0];
+            this._tool.setParams({ width: spec.min + (v / DIAL_MAX) * (spec.max - spec.min) });
             return;
         }
         if (id === ParameterId.COLOR) {

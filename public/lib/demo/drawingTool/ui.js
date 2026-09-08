@@ -156,10 +156,16 @@ export function attachDrawingToolUi(tool, layout) {
     const dialHue = new Dial($('dial-hue'),
         { label: 'Hue', value: Math.floor(Math.random() * 128), onInput: v => hueLatch.set(v) });
     hueValue = dialHue.value;
-    const WIDTH_MIN = 2, WIDTH_MAX = 60;
-    const widthToDial = w => Math.round((w - WIDTH_MIN) / (WIDTH_MAX - WIDTH_MIN) * 127);
-    const widthLatch = new FrameLatch(v =>
-        tool.setParams({ width: Math.round(WIDTH_MIN + (v / 127) * (WIDTH_MAX - WIDTH_MIN)) }));
+    // The dial's 0..127 maps onto the current tool's canonical width range.
+    const widthSpec = () => tool.paramSpec[0];
+    const widthToDial = w => {
+        const s = widthSpec();
+        return Math.round((w - s.min) / (s.max - s.min) * 127);
+    };
+    const widthLatch = new FrameLatch(v => {
+        const s = widthSpec();
+        tool.setParams({ width: Math.round(s.min + (v / 127) * (s.max - s.min)) });
+    });
     const dialWidth = new Dial($('dial-width'),
         { label: 'Width', value: widthToDial(tool.state.values.width),
           onInput: v => widthLatch.set(v) });
