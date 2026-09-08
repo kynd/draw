@@ -14,6 +14,7 @@ const TEMPLATE = /* html */`
     <canvas id="canvas"></canvas>
     <div class="dp-dials">
       <div id="dial-hue"></div>
+      <div id="dial-width"></div>
       <div id="dial-tool"></div>
     </div>
   </div>
@@ -92,8 +93,8 @@ export function buildDrawingToolLayout({ root = document.body, square = false } 
 }
 
 /**
- * The default UI: the settings panel, the two floating dials, and the overlay
- * button, wired as a client of the engine's API. Every handler is an API call
+ * The default UI: the settings panel, the three floating dials, and the
+ * overlay button, wired as a client of the engine's API. Every handler is an API call
  * and every display update a subscription; nothing in the engine references
  * this file. Returns the floating dials, so an input adapter (MIDI) can drive
  * them.
@@ -133,8 +134,9 @@ export function attachDrawingToolUi(tool, layout) {
     tool.on('stroke-end', () => layout.classList.remove('dp-ui-hidden'));
 
     // ------------------------------------------------------------------
-    // The floating dials, frame-latched and bucketed: crossing into a new
-    // bucket steps the tool by the difference, so turning back retraces.
+    // The floating dials, frame-latched. Hue and tool are bucketed: crossing
+    // into a new bucket steps by the difference, so turning back retraces.
+    // Width maps the dial position onto the width directly.
     const STEP = 6;
     let hueBucket = null;
     const hueLatch = new FrameLatch(v => {
@@ -154,6 +156,13 @@ export function attachDrawingToolUi(tool, layout) {
     const dialHue = new Dial($('dial-hue'),
         { label: 'Hue', value: Math.floor(Math.random() * 128), onInput: v => hueLatch.set(v) });
     hueBucket = Math.round(dialHue.value / STEP);
+    const WIDTH_MIN = 2, WIDTH_MAX = 60;
+    const widthToDial = w => Math.round((w - WIDTH_MIN) / (WIDTH_MAX - WIDTH_MIN) * 127);
+    const widthLatch = new FrameLatch(v =>
+        tool.setParams({ width: Math.round(WIDTH_MIN + (v / 127) * (WIDTH_MAX - WIDTH_MIN)) }));
+    const dialWidth = new Dial($('dial-width'),
+        { label: 'Width', value: widthToDial(tool.state.values.width),
+          onInput: v => widthLatch.set(v) });
     const dialTool = new Dial($('dial-tool'),
         { label: 'Tool', value: 48, onInput: v => toolLatch.set(v) });
 
@@ -349,7 +358,10 @@ export function attachDrawingToolUi(tool, layout) {
         renderParams();
         renderSwatches();
     }
-    tool.on('tool', () => { if (!fromUi) syncPane(); });
+    tool.on('tool', () => {
+        dialWidth.set(widthToDial(tool.state.values.width), false);
+        if (!fromUi) syncPane();
+    });
     tool.on('palette', () => {
         if (fromUi) { renderSwatches(); return; }
         dialH.set(Math.round(tool.state.palette.hue), false);
@@ -413,5 +425,5 @@ export function attachDrawingToolUi(tool, layout) {
     });
 
     setPanelOpen(true);
-    return { dialHue, dialTool, setPanelOpen };
+    return { dialHue, dialWidth, dialTool, setPanelOpen };
 }
