@@ -8,9 +8,8 @@ interface Props {
 
 interface NavItem {
   label: string;
-  href?: string;
-  slug?: string;
-  heading?: boolean;
+  href: string;
+  slug: string;
   sketch?: boolean;
   children?: NavItem[];
   subLinks?: { label: string; href: string }[];
@@ -20,88 +19,94 @@ const { title, slug } = Astro.props;
 
 const navItems: NavItem[] = [
   { label: 'Intro', href: `${base}/`, slug: '' },
-  { label: 'Techniques', heading: true },
-  { label: 'Palette maker', href: `${base}/palette-maker`, slug: 'palette-maker',
-    subLinks: [
-      { label: 'Themed palette',          href: '#themed-palette' },
-      { label: 'Themes',                  href: '#themes' },
-      { label: 'Representative lightness', href: '#representative-lightness' },
-      { label: 'Randomness',              href: '#randomness' },
+  { label: 'Techniques', href: `${base}/techniques`, slug: 'techniques',
+    children: [
+      { label: 'Palette maker', href: `${base}/palette-maker`, slug: 'palette-maker',
+        subLinks: [
+          { label: 'Themed palette',          href: '#themed-palette' },
+          { label: 'Themes',                  href: '#themes' },
+          { label: 'Representative lightness', href: '#representative-lightness' },
+          { label: 'Randomness',              href: '#randomness' },
+        ]
+      },
+      { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
+        subLinks: [
+          { label: 'Curve smoothing', href: '#smoothing' },
+          { label: 'Local smoothing', href: '#local-smoothing' },
+          { label: 'Stroke splitting', href: '#splitting' },
+          { label: 'Smoothed brush',  href: '#smoothed-brush' },
+          { label: 'Split brush',     href: '#split-brush' },
+          { label: 'Held start',      href: '#held-start' },
+          { label: 'Width smoothing', href: '#width-smoothing' },
+          { label: 'Blob drawing',    href: '#blobs' },
+          { label: 'Tight blob',      href: '#tight-blobs' },
+        ]
+      },
+      { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer' },
+      { label: 'Pen pressure', href: `${base}/pen-pressure`, slug: 'pen-pressure',
+        subLinks: [
+          { label: 'Scaled width', href: '#scale' },
+          { label: 'Added width',  href: '#additive' },
+        ]
+      },
+      { label: 'Drawing Tool Demo', href: `${base}/drawing-tool`, slug: 'drawing-tool' },
+      { label: 'Player', href: `${base}/player`, slug: 'player' },
     ]
   },
-  { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
-    subLinks: [
-      { label: 'Curve smoothing', href: '#smoothing' },
-      { label: 'Local smoothing', href: '#local-smoothing' },
-      { label: 'Stroke splitting', href: '#splitting' },
-      { label: 'Smoothed brush',  href: '#smoothed-brush' },
-      { label: 'Split brush',     href: '#split-brush' },
-      { label: 'Held start',      href: '#held-start' },
-      { label: 'Width smoothing', href: '#width-smoothing' },
-      { label: 'Blob drawing',    href: '#blobs' },
-      { label: 'Tight blob',      href: '#tight-blobs' },
-    ]
-  },
-  { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer' },
-  { label: 'Pen pressure', href: `${base}/pen-pressure`, slug: 'pen-pressure',
-    subLinks: [
-      { label: 'Scaled width', href: '#scale' },
-      { label: 'Added width',  href: '#additive' },
-    ]
-  },
-  { label: 'Drawing Tool Demo', href: `${base}/drawing-tool`, slug: 'drawing-tool' },
-  { label: 'Player', href: `${base}/player`, slug: 'player' },
-  { label: 'Strokes & fills', heading: true },
-  { label: 'Strokes', href: `${base}/strokes`, slug: 'strokes',
-    subLinks: [
-      { label: 'Common to every demo', href: '#common-to-every-demo' },
-      { label: 'Basic strokes',    href: '#basic-strokes' },
-      { label: 'Brush strokes',    href: '#brush-strokes' },
-      { label: 'Shadow strokes',   href: '#shadow-strokes' },
-      { label: 'Try drawing',      href: '#try' },
-    ]
-  },
-  { label: 'Wet & material strokes', href: `${base}/wet-material-strokes`, slug: 'wet-material-strokes',
-    subLinks: [
-      { label: 'Wet strokes',      href: '#wet-strokes' },
-      { label: 'Oil strokes',      href: '#oil-strokes' },
-      { label: 'Material strokes', href: '#material-strokes' },
-      { label: 'Try drawing',      href: '#try' },
-    ]
-  },
-  { label: 'Dry media strokes', href: `${base}/dry-media-strokes`, slug: 'dry-media-strokes',
-    subLinks: [
-      { label: 'Dry media strokes',   href: '#dry-strokes' },
-      { label: 'Multicolor dry media', href: '#multicolor' },
-      { label: 'Try drawing',          href: '#try' },
-    ]
-  },
-  { label: 'Shaped strokes', href: `${base}/shaped-strokes`, slug: 'shaped-strokes',
-    subLinks: [
-      { label: 'Cloud, squares, spikes', href: '#shapes' },
-      { label: 'Tube strokes',           href: '#tubes' },
-      { label: 'Triangle strokes',       href: '#triangles' },
-      { label: 'Try drawing',            href: '#try' },
-    ]
-  },
-  { label: 'Patterned strokes', href: `${base}/patterned-strokes`, slug: 'patterned-strokes',
-    subLinks: [
-      { label: 'Dashes, dots, strips', href: '#patterns' },
-      { label: 'Wet patterns',         href: '#wet-patterns' },
-      { label: 'Fringe',               href: '#fringe' },
-      { label: 'Around strokes',       href: '#around-strokes' },
-      { label: 'Graphic strokes',      href: '#graphic-strokes' },
-      { label: 'Try drawing',          href: '#try' },
-    ]
-  },
-  { label: 'Fills', href: `${base}/fills`, slug: 'fills',
-    subLinks: [
-      { label: 'Blob fills',     href: '#fills' },
-      { label: 'Textured paint', href: '#paints' },
-      { label: 'Washes',         href: '#washes' },
-      { label: 'Materials',      href: '#materials' },
-      { label: 'Stones',         href: '#stones' },
-      { label: 'Try drawing',    href: '#try' },
+  { label: 'Strokes & fills', href: `${base}/strokes-and-fills`, slug: 'strokes-and-fills',
+    children: [
+      { label: 'Strokes', href: `${base}/strokes`, slug: 'strokes',
+        subLinks: [
+          { label: 'Common to every demo', href: '#common-to-every-demo' },
+          { label: 'Basic strokes',    href: '#basic-strokes' },
+          { label: 'Brush strokes',    href: '#brush-strokes' },
+          { label: 'Shadow strokes',   href: '#shadow-strokes' },
+          { label: 'Try drawing',      href: '#try' },
+        ]
+      },
+      { label: 'Wet & material strokes', href: `${base}/wet-material-strokes`, slug: 'wet-material-strokes',
+        subLinks: [
+          { label: 'Wet strokes',      href: '#wet-strokes' },
+          { label: 'Oil strokes',      href: '#oil-strokes' },
+          { label: 'Material strokes', href: '#material-strokes' },
+          { label: 'Try drawing',      href: '#try' },
+        ]
+      },
+      { label: 'Dry media strokes', href: `${base}/dry-media-strokes`, slug: 'dry-media-strokes',
+        subLinks: [
+          { label: 'Dry media strokes',   href: '#dry-strokes' },
+          { label: 'Multicolor dry media', href: '#multicolor' },
+          { label: 'Try drawing',          href: '#try' },
+        ]
+      },
+      { label: 'Shaped strokes', href: `${base}/shaped-strokes`, slug: 'shaped-strokes',
+        subLinks: [
+          { label: 'Cloud, squares, spikes', href: '#shapes' },
+          { label: 'Tube strokes',           href: '#tubes' },
+          { label: 'Triangle strokes',       href: '#triangles' },
+          { label: 'Try drawing',            href: '#try' },
+        ]
+      },
+      { label: 'Patterned strokes', href: `${base}/patterned-strokes`, slug: 'patterned-strokes',
+        subLinks: [
+          { label: 'Dashes, dots, strips', href: '#patterns' },
+          { label: 'Wet patterns',         href: '#wet-patterns' },
+          { label: 'Fringe',               href: '#fringe' },
+          { label: 'Around strokes',       href: '#around-strokes' },
+          { label: 'Graphic strokes',      href: '#graphic-strokes' },
+          { label: 'Try drawing',          href: '#try' },
+        ]
+      },
+      { label: 'Fills', href: `${base}/fills`, slug: 'fills',
+        subLinks: [
+          { label: 'Blob fills',     href: '#fills' },
+          { label: 'Textured paint', href: '#paints' },
+          { label: 'Washes',         href: '#washes' },
+          { label: 'Materials',      href: '#materials' },
+          { label: 'Stones',         href: '#stones' },
+          { label: 'Try drawing',    href: '#try' },
+        ]
+      },
     ]
   },
   { label: 'Documentation', href: `${base}/documentation`, slug: 'documentation',
@@ -218,7 +223,7 @@ function withDepth(items: NavItem[], depth = 0): { item: NavItem; depth: number 
 }
 const renderItems = withDepth(navItems);
 
-const publicItems = flatten(navItems).filter(item => !item.sketch && !item.heading);
+const publicItems = flatten(navItems).filter(item => !item.sketch);
 const currentIdx  = publicItems.findIndex(item => item.slug === slug);
 const nextItem    = currentIdx >= 0 && currentIdx < publicItems.length - 1 ? publicItems[currentIdx + 1] : null;
 const isPublic    = currentIdx >= 0;
@@ -368,12 +373,6 @@ const isPublic    = currentIdx >= 0;
     .sidebar-nav a.child { padding-left: 2rem; }
     .sidebar-nav a.child-sub { padding-left: 2.85rem; }
     .sidebar-nav a.sketch { opacity: 0.45; font-size: 0.74rem; }
-    .sidebar-nav .nav-heading {
-      font-family: 'Sora', sans-serif; font-size: 0.66rem;
-      letter-spacing: 0.09em; text-transform: uppercase;
-      color: var(--fg-muted); opacity: 0.7;
-      padding: 1.1rem 1.25rem 0.3rem;
-    }
 
     .main-wrap {
       margin-top: var(--header-height);
@@ -600,9 +599,6 @@ const isPublic    = currentIdx >= 0;
       <ul class="sidebar-nav">
         {renderItems.map(({ item, depth }) => (
           <>
-            {item.heading ? (
-              <li class="nav-heading">{item.label}</li>
-            ) : (
             <li>
               <a
                 href={item.href}
@@ -615,7 +611,6 @@ const isPublic    = currentIdx >= 0;
                 {item.label}
               </a>
             </li>
-            )}
             {item.slug === slug && item.subLinks && item.subLinks.map(sub => (
               <li><a href={sub.href} class={depth > 0 ? 'sub child-sub' : 'sub'}>{sub.label}</a></li>
             ))}
