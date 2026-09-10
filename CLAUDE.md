@@ -124,7 +124,7 @@ public/lib/                            library code
                 Stroke3DRenderer.js  TubeStrokeRenderer.js
                 TriangleStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js
-                drawingBoard.js  drawCycle.js  blobShowcase.js  shapeBoard.js
+                drawingBoard.js  drawCycle.js  blobShowcase.js
                 pressure.js  testBackground.js  midi.js  dial.js  latch.js
                 strokeRecorder.js  toolRegistry.js  toolConfigs.js
                 markBuilder.js  drawingPlayer.js
@@ -202,6 +202,12 @@ add it to the writing-style page, and apply it from then on.
 ## Demos
 
 - Three.js via the import map in each demo's `index.html`, pinned to one version.
+- **Every stroke/fill page has one structure.** A monologue and a short prose intro,
+  then one `demo-section` per topic embedding a fixed showcase demo (seeded content,
+  no freehand drawing) at the standard embed size, and a final `Try drawing` section
+  (`id="try"`, listed in the nav's subLinks) embedding a drawing-tool demo at 860×620.
+  The try demo is always `setupDrawingTool` with an argument-free config class from
+  `toolConfigs.js`; its tools live in the master `toolRegistry`, never in the demo.
 - **One page per topic, not per demo.** Related demos live as sections on one page, each
   with a short visible description and the rest inside a `<details>` collapsible. Do not
   give a demo its own page just because it has its own renderer.

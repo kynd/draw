@@ -35,6 +35,9 @@ import { PatternStrokeRenderer } from '../renderers/PatternStrokeRenderer.js';
 import { WetPatternStrokeRenderer } from '../renderers/WetPatternStrokeRenderer.js';
 import { AroundStrokeRenderer } from '../renderers/AroundStrokeRenderer.js';
 import { HaloStrokeRenderer } from '../renderers/HaloStrokeRenderer.js';
+import { SlitScanBlobRenderer, slitLineFromEnds } from '../renderers/SlitScanBlobRenderer.js';
+import { circleFromEnds, ovalFromEnds, rectFromEnds, diamondFromEnds, triangleFromEnds }
+    from '../pathEffects.js';
 
 export const toolRegistry = [
     { id: 'ribbon', kind: 'stroke', params: [{ key: 'axis', pick: ['along', 'across'] }],
@@ -368,7 +371,42 @@ export const toolRegistry = [
         make: (v, ctx) => new StoneBlobRenderer({
             mode: 'sand', color: ctx.colorA, colorB: ctx.colorB, relief: v.relief,
         }) },
+
+    // Endpoint shapes: the contour comes from the gesture's start and end
+    // alone, through the entry's `contour(a, b, seed)`. All share the
+    // slit-scan fill; `mix` runs from the flat base color to the pure sample.
+    { id: 'circle-fill', kind: 'shape',
+        params: [{ key: 'mix', min: 0.3, max: 0.9 }],
+        contour: (a, b) => circleFromEnds(a, b),
+        make: shapeFill },
+    { id: 'oval-fill', kind: 'shape',
+        params: [{ key: 'mix', min: 0.3, max: 0.9 }],
+        contour: (a, b) => ovalFromEnds(a, b),
+        make: shapeFill },
+    { id: 'rect-fill', kind: 'shape',
+        params: [{ key: 'mix', min: 0.3, max: 0.9 }],
+        contour: (a, b) => rectFromEnds(a, b),
+        make: shapeFill },
+    { id: 'diamond-fill', kind: 'shape',
+        params: [{ key: 'mix', min: 0.3, max: 0.9 }],
+        contour: (a, b) => diamondFromEnds(a, b),
+        make: shapeFill },
+    { id: 'triangle-30-60', kind: 'shape',
+        params: [{ key: 'mix', min: 0.3, max: 0.9 }],
+        contour: (a, b, seed) => triangleFromEnds(a, b, { angles: [30, 60, 90], seed }),
+        make: shapeFill },
+    { id: 'triangle-45', kind: 'shape',
+        params: [{ key: 'mix', min: 0.3, max: 0.9 }],
+        contour: (a, b, seed) => triangleFromEnds(a, b, { angles: [45, 45, 90], seed }),
+        make: shapeFill },
 ];
+
+function shapeFill(v, ctx) {
+    return new SlitScanBlobRenderer({
+        color: ctx.colorA, background: ctx.texture, mix: v.mix,
+        ...slitLineFromEnds(ctx.start, ctx.end, ctx.seed),
+    });
+}
 
 
 /** The registry entries with the given ids, in the given order. */

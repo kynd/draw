@@ -25,6 +25,16 @@ export function makeMarkBuilder({ state, board }) {
             start: path[0], end: path[path.length - 1],
             tintLight: new THREE.Color(state.colorA).lerp(new THREE.Color('#ffffff'), 0.55).getStyle(),
         };
+        // A shape tool ignores the path between the endpoints, and its size
+        // comes from them, so neither width nor pressure applies.
+        if (state.tool.kind === 'shape') {
+            const contour = state.tool.contour(path[0], path[path.length - 1], useSeed);
+            if (!contour) return null;
+            const renderer = state.tool.make(state.values, ctx);
+            const mesh = renderer.build(contour, useSeed);
+            mesh.position.z = 0.05;
+            return { mesh, renderer };
+        }
         const width = state.widthPx / PIXELS_PER_UNIT;
         const pressureAt = pressureAlong(points);
         // Pressure scales around the set width as a ratio: middle pressure

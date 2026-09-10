@@ -805,6 +805,16 @@ export class DrawingTool {
                 const renderer = state.tool.make(state.values, ctx);
                 mark = { mesh: renderer.build(contour, ctx.seed), renderer };
             }
+        } else if (state.tool.kind === 'shape') {
+            // Short endpoints, so even the circle (whose radius is their full
+            // span, drawn around the first) stays inside the preview paper.
+            const a = new THREE.Vector3(c.x - 0.08, c.y - 0.06, 0);
+            const b = new THREE.Vector3(c.x + 0.1, c.y + 0.08, 0);
+            const contour = state.tool.contour(a, b, ctx.seed);
+            if (contour) {
+                const renderer = state.tool.make(state.values, { ...ctx, start: a, end: b });
+                mark = { mesh: renderer.build(contour, ctx.seed), renderer };
+            }
         } else {
             const renderer = state.tool.make(state.values, ctx);
             const def = new StrokeDef({

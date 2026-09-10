@@ -60,6 +60,15 @@ export class PaintingDemoConfig extends DrawingToolConfig {
     }
 }
 
+export class ShapeFillsDemoConfig extends DrawingToolConfig {
+    constructor() {
+        super({ tools: [
+            'circle-fill', 'oval-fill', 'rect-fill',
+            'diamond-fill', 'triangle-30-60', 'triangle-45',
+        ] });
+    }
+}
+
 /** The combined instrument: the whole master registry. */
 export class DrawingToolDemoConfig extends DrawingToolConfig {
     constructor() {

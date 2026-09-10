@@ -89,12 +89,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <h2>Try drawing</h2>
       <a href={`${base}/demos/try-shape-fills/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
-    <div class="demo-embed">
-      <iframe src={`${base}/demos/try-shape-fills/index.html?embedded`} title="Try drawing" scrolling="no"></iframe>
+    <div class="demo-embed" data-w="860" data-h="620" style="width:860px;height:620px">
+      <iframe src={`${base}/demos/try-shape-fills/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
     </div>
     <div class="prose">
-      <p>Draw with every shape on this page. The gesture's start and end place and size the shape, shown live while drawing and baked on release; the shape select pins one shape or cycles through all six per stroke. Every fill is the slit-scan, so shapes sample the canvas itself and stretch what is already drawn; the mix slider runs from the flat base color at 0 to the pure slit-scan at 1.</p>
-      <div class="jp">このページのすべての形で描いてみてください。身振りの始点と終点が形の位置と大きさを決めます。形は描いている間ライブで表示され、離すと焼き込まれます。形のセレクトでひとつの形に固定するか、筆跡ごとに6つの形を順に切り替えられます。塗りはすべてスリットスキャンなので、形はキャンバスそのものをサンプリングし、すでに描かれたものを引き伸ばします。mixのスライダーは、0で平坦なベースの色、1で純粋なスリットスキャンになります。</div>
+      <p>Draw with every shape on this page, in the drawing tool: the settings panel picks the shape and its sample mix exactly, the floating dials reroll the palette and walk a trail of rolled shapes, and Clear, Replay, and recording work as on the Drawing Tool Demo page. Each released gesture becomes one shape from its endpoints (a turn sharper than a threshold splits the gesture, and each piece's endpoints make their own shape). Every fill is the slit-scan, so shapes sample the canvas itself and stretch what is already drawn. The shape's size comes from the gesture, so the width dial and pen pressure leave it alone.</p>
+      <div class="jp">このページのすべての形を使って、描画ツールの中で描いてみてください。設定パネルでは、形とサンプルの混合を正確に選べます。浮かぶダイヤルでは、パレットを引き直したり、ロールしてきた形の列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。描き終えた身振りは、その端点からひとつの形になります（しきい値より鋭く曲がると身振りは分割され、各断片の端点がそれぞれの形を作る）。塗りはすべてスリットスキャンなので、形はキャンバスそのものをサンプリングし、すでに描かれたものを引き伸ばします。形の大きさは身振りから決まるため、幅のダイヤルと筆圧は形を変えません。</div>
     </div>
   </section>
 </PageLayout>
