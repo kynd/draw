@@ -274,3 +274,107 @@ export function blobOutline(points, { span = 0.15, radius = 0.14 } = {}) {
     if (perimeter.length < 3) return null;
     return bSpline(perimeter, 6, true);
 }
+
+// ---------------------------------------------------------------------------
+// Shapes from endpoints: contours placed and sized by a gesture's start and
+// end alone; the path between them is ignored. All return a closed
+// counterclockwise contour, or null when the endpoints are too close to span
+// one.
+
+const MIN_SPAN = 0.02;
+
+const v = (x, y) => new THREE.Vector3(x, y, 0);
+
+/** Corner polygon to a dense contour: each edge subdivided by `span`, the
+ * corners kept exactly. */
+function densifyEdges(corners, span = 0.06) {
+    let perimeter = 0;
+    for (let i = 0; i < corners.length; i++) {
+        const a = corners[i], b = corners[(i + 1) % corners.length];
+        perimeter += Math.hypot(b.x - a.x, b.y - a.y);
+    }
+    const step = Math.max(span, perimeter / 150);
+    const out = [];
+    for (let i = 0; i < corners.length; i++) {
+        const a = corners[i], b = corners[(i + 1) % corners.length];
+        const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / step));
+        for (let k = 0; k < steps; k++) {
+            const t = k / steps;
+            out.push(v(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t));
+        }
+    }
+    return out;
+}
+
+function orientCCW(pts) {
+    let area = 0;
+    for (let i = 0; i < pts.length; i++) {
+        const p = pts[i], q = pts[(i + 1) % pts.length];
+        area += p.x * q.y - q.x * p.y;
+    }
+    return area >= 0 ? pts : pts.reverse();
+}
+
+/** A circle from center `a` to edge `b`. */
+export function circleFromEnds(a, b, { segments = 96 } = {}) {
+    const r = Math.hypot(b.x - a.x, b.y - a.y);
+    if (r < MIN_SPAN) return null;
+    return Array.from({ length: segments }, (_, i) => {
+        const t = (i / segments) * Math.PI * 2;
+        return v(a.x + Math.cos(t) * r, a.y + Math.sin(t) * r);
+    });
+}
+
+/** An axis-aligned ellipse inscribed in the box with diagonal `a`-`b`. */
+export function ovalFromEnds(a, b, { segments = 96 } = {}) {
+    const rx = Math.abs(b.x - a.x) / 2, ry = Math.abs(b.y - a.y) / 2;
+    if (rx < MIN_SPAN || ry < MIN_SPAN) return null;
+    const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+    return Array.from({ length: segments }, (_, i) => {
+        const t = (i / segments) * Math.PI * 2;
+        return v(cx + Math.cos(t) * rx, cy + Math.sin(t) * ry);
+    });
+}
+
+/** An axis-aligned rectangle with diagonal `a`-`b`. */
+export function rectFromEnds(a, b) {
+    const x0 = Math.min(a.x, b.x), x1 = Math.max(a.x, b.x);
+    const y0 = Math.min(a.y, b.y), y1 = Math.max(a.y, b.y);
+    if (x1 - x0 < MIN_SPAN || y1 - y0 < MIN_SPAN) return null;
+    return densifyEdges([v(x0, y0), v(x1, y0), v(x1, y1), v(x0, y1)]);
+}
+
+/** A rhombus with long diagonal `a`-`b`; the short diagonal is `ratio` of it. */
+export function diamondFromEnds(a, b, { ratio = 0.6 } = {}) {
+    const hx = (b.x - a.x) / 2, hy = (b.y - a.y) / 2;
+    if (Math.hypot(hx, hy) * 2 < MIN_SPAN) return null;
+    const mx = a.x + hx, my = a.y + hy;
+    const px = -hy * ratio, py = hx * ratio;
+    return densifyEdges([v(a.x, a.y), v(mx - px, my - py), v(b.x, b.y), v(mx + px, my + py)]);
+}
+
+/**
+ * A triangle on the edge `a`-`b` with the given interior angles. Which corner
+ * takes which angle is seeded: the endpoints draw two of the three, the third
+ * lands at the apex, and the apex's side of the edge is seeded too.
+ */
+export function triangleFromEnds(a, b, { angles = [45, 45, 90], seed = 1 } = {}) {
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    if (len < MIN_SPAN) return null;
+    const rand = seededRandom(seed * 5.13 + 7.7);
+    const pool = [...angles];
+    const alpha = pool.splice(Math.floor(rand() * pool.length), 1)[0] * Math.PI / 180;
+    const beta = pool.splice(Math.floor(rand() * pool.length), 1)[0] * Math.PI / 180;
+    const side = rand() < 0.5 ? 1 : -1;
+    const ux = (b.x - a.x) / len, uy = (b.y - a.y) / len;
+    const rot = (x, y, t) =>
+        [x * Math.cos(t) - y * Math.sin(t), x * Math.sin(t) + y * Math.cos(t)];
+    // The apex is where the two corner rays meet.
+    const [rax, ray] = rot(ux, uy, side * alpha);
+    const [rbx, rby] = rot(-ux, -uy, -side * beta);
+    const denom = rax * rby - ray * rbx;
+    if (Math.abs(denom) < 1e-9) return null;
+    const t = ((b.x - a.x) * rby - (b.y - a.y) * rbx) / denom;
+    const apex = v(a.x + rax * t, a.y + ray * t);
+    return densifyEdges(orientCCW([v(a.x, a.y), v(b.x, b.y), apex]));
+}

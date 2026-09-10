@@ -15,6 +15,8 @@ export const MAX_CONTOUR = 160;
  *   sdBlob(p, arc, outward)  signed distance at world point p, negative inside,
  *                            with the arc position of the nearest boundary point
  *                            and the outward unit direction.
+ *   uvAt(p)                  the background uv of an arbitrary world point, not
+ *                            just this fragment's own.
  *   uPerimeter, uCount, uSeed, uScreen (synced by the stage), fbm and hashes.
  */
 export class BlobRenderer {
@@ -94,9 +96,13 @@ export class BlobRenderer {
 
 const VERTEX = /* glsl */`
     varying vec2 vWorld;
+    varying vec2 vUvPerWorld;
     void main() {
         vec4 world = modelMatrix * vec4(position, 1.0);
         vWorld = world.xy;
+        // The orthographic projection's scale, so the fragment shader can turn
+        // a world offset into a background uv offset.
+        vUvPerWorld = 0.5 * vec2(projectionMatrix[0][0], projectionMatrix[1][1]);
         gl_Position = projectionMatrix * viewMatrix * world;
     }
 `;
@@ -113,6 +119,11 @@ const PRELUDE = /* glsl */`
     uniform vec2 uScreen;
 
     vec2 screenUv() { return gl_FragCoord.xy / uScreen; }
+
+    varying vec2 vUvPerWorld;
+    // The background uv of an arbitrary world point, so a shader can read the
+    // canvas somewhere other than under its own fragment.
+    vec2 uvAt(vec2 p) { return screenUv() + (p - vWorld) * vUvPerWorld; }
 
     float hash11(float p) {
         p = fract(p * 0.1031);

@@ -93,7 +93,8 @@ src/pages/
   palette-maker.astro                  demo/log pages, written as .astro for embeds
   strokes.astro  wet-material-strokes.astro  dry-media-strokes.astro
   shaped-strokes.astro  patterned-strokes.astro
-  fills.astro  stroke-processing.astro  pen-pressure.astro             every stroke demo, one section each
+  fills.astro  shape-fills.astro
+  stroke-processing.astro  pen-pressure.astro             every stroke demo, one section each
   coverage-layer.astro                  explains the single-coverage buffer live
   drawing-tool.astro                    the combined instrument demo
   player.astro                          plays back a downloaded drawing log
@@ -117,12 +118,13 @@ public/lib/                            library code
                 WetPatternStrokeRenderer.js
                 BlobRenderer.js  ShapedBlobRenderer.js  PaintBlobRenderer.js
                 WashBlobRenderer.js  MaterialBlobRenderer.js  StoneBlobRenderer.js
+                SlitScanBlobRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js
                 LineStrokeRenderer.js
                 Stroke3DRenderer.js  TubeStrokeRenderer.js
                 TriangleStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js
-                drawingBoard.js  drawCycle.js  blobShowcase.js
+                drawingBoard.js  drawCycle.js  blobShowcase.js  shapeBoard.js
                 pressure.js  testBackground.js  midi.js  dial.js  latch.js
                 strokeRecorder.js  toolRegistry.js  toolConfigs.js
                 markBuilder.js  drawingPlayer.js

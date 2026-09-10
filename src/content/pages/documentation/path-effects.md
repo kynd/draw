@@ -44,4 +44,12 @@ The outline of everything within `radius` of the polyline: an offset of the path
 The full blob pipeline: a gesture in, a smooth closed contour out. The path is resampled to knots, closed into a smooth loop, offset by `radius`, and the contour smoothed again. Closing first keeps the result a mass rather than a tube, and the offset field does not care when the closure crosses the stroke. Takes `span` and `radius`.
 <div class="jp">ブロブのパイプライン全体です。身振りを入れると、滑らかな閉じた輪郭が出てきます。パスはノットに再サンプリングされ、滑らかなループとして閉じられ、`radius`でオフセットされ、輪郭が再び滑らかにされます。先に閉じておくことで、結果はチューブではなくかたまりになります。閉じ目がストロークと交差しても、オフセットの距離場には影響しません。`span`と`radius`を受け取ります。</div>
 
+## Shapes from endpoints
+
+Contours placed and sized by a gesture's start and end alone; the path between them is ignored. Every generator returns a closed counterclockwise contour with its corners kept exactly, or null when the endpoints are too close to span a shape.
+<div class="jp">身振りの始点と終点だけで位置と大きさが決まる輪郭です。その間のパスは無視されます。すべての生成器は、角をそのまま保った閉じた反時計回りの輪郭を返します。端点が近すぎて形にならないときはnullを返します。</div>
+
+`circleFromEnds(a, b)` is a circle from center `a` to edge `b`. `ovalFromEnds(a, b)` is the axis-aligned ellipse inscribed in the box with diagonal `a`-`b`, and `rectFromEnds(a, b)` is that box itself. `diamondFromEnds(a, b)` is a rhombus with long diagonal `a`-`b`; `ratio` sets the short diagonal against it. `triangleFromEnds(a, b, { angles, seed })` stands a triangle on the edge `a`-`b` with the given interior angles; which corner takes which angle, and which side of the edge the apex lands on, derive from the seed.
+<div class="jp">`circleFromEnds(a, b)`は中心`a`から縁`b`までの円です。`ovalFromEnds(a, b)`は対角線`a`-`b`の箱に内接する軸平行の楕円で、`rectFromEnds(a, b)`はその箱そのものです。`diamondFromEnds(a, b)`は長い対角線が`a`-`b`のひし形で、`ratio`が短い対角線の比を決めます。`triangleFromEnds(a, b, { angles, seed })`は、与えられた内角を持つ三角形を辺`a`-`b`の上に立てます。どの角にどの角度が割り当てられるか、頂点が辺のどちら側に立つかはシードから導かれます。</div>
+
 </div>
