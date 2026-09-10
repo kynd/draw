@@ -31,14 +31,22 @@ import { DrawInput } from './drawInput.js';
  * once per piece after it bakes, with the raw points that made it, so a
  * recorded piece replays as its own stroke; `onRelease()` fires once after all
  * of a gesture's pieces have committed. `split` sets the turn threshold and
- * measurement window ({ angle, span }), or `false` to draw unsplit.
+ * measurement window ({ angle, span }), `true` for the default threshold,
+ * `false` to draw unsplit, or a function returning any of those, read per
+ * gesture, for a host whose current tool decides.
  * `pointerTrace` shows or hides the pointer's own line; the returned
  * `setPointerTrace` changes it later.
  */
 export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCommit, onRelease,
-    split = { angle: Math.PI * 0.55, span: 0.05 }, holdArc = 0.06, widthFor = null,
+    split = true, holdArc = 0.06, widthFor = null,
     pointerTrace = true, bindInput = true }) {
     let seed = 1;
+
+    const DEFAULT_SPLIT = { angle: Math.PI * 0.55, span: 0.05 };
+    function splitConfig() {
+        const s = typeof split === 'function' ? split() : split;
+        return s === true ? DEFAULT_SPLIT : s;
+    }
 
     let live = null;
     function disposeLive() {
@@ -134,7 +142,8 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
 
     function buildFromPoints(points) {
         if (points.length < 2) return null;
-        const runs = split ? splitByTurn(points, split) : [points];
+        const cfg = splitConfig();
+        const runs = cfg ? splitByTurn(points, cfg) : [points];
         const group = new THREE.Group();
         const pieces = [];
         const committed = [];

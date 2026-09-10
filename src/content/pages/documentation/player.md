@@ -13,8 +13,8 @@ Recording and playback for drawings. A drawing's log is data, not raster: the ca
 
 ## The record
 
-A record carries everything needed to rebuild one mark: `toolId`, the parameter `values`, `widthPx`, `sens`, `colorA`, `colorB`, `colors`, `seed`, and the drawn `points` with their pressures. Only drawn points are stored, so blank time costs nothing and a playback skips it by construction. The `toolId` names an entry in a registry, so the log stays valid as long as the ids do. A sharp turn splits one gesture into several records; the one the pen lifted after carries `release: true`.
-<div class="jp">記録には、ひとつの筆跡を作り直すのに必要なすべてが入っています。`toolId`、パラメータの`values`、`widthPx`、`sens`、`colorA`、`colorB`、`colors`、`seed`、そして筆圧付きの描かれた`points`です。保存されるのは描かれた点だけなので、何も描いていない時間にはコストがかからず、再生では構造上スキップされます。`toolId`はレジストリのエントリを指すため、idが変わらない限りログは有効です。急な方向転換はひとつのジェスチャを複数の記録に分割します。ペンが離れた直前の記録が`release: true`を持ちます。</div>
+A record carries everything needed to rebuild one mark: `toolId`, the parameter `values`, `widthPx`, `sens`, `colorA`, `colorB`, `colors`, `seed`, and the drawn `points` with their pressures. Only drawn points are stored, so blank time costs nothing and a playback skips it by construction. The `toolId` names an entry in a registry, so the log stays valid as long as the ids do. A sharp turn splits a stroke gesture into several records (fills draw one record per gesture); the one the pen lifted after carries `release: true`.
+<div class="jp">記録には、ひとつの筆跡を作り直すのに必要なすべてが入っています。`toolId`、パラメータの`values`、`widthPx`、`sens`、`colorA`、`colorB`、`colors`、`seed`、そして筆圧付きの描かれた`points`です。保存されるのは描かれた点だけなので、何も描いていない時間にはコストがかからず、再生では構造上スキップされます。`toolId`はレジストリのエントリを指すため、idが変わらない限りログは有効です。急な方向転換はストロークのジェスチャを複数の記録に分割します（塗りはひと筆でひとつの記録です）。ペンが離れた直前の記録が`release: true`を持ちます。</div>
 
 ## StrokeRecorder
 

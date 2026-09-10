@@ -5,7 +5,8 @@
 // range in pixels; entries without one take the default, 2 to 64. `pressure`
 // is the tool's pressure swing as a ratio around the set width (2 runs from
 // half to double at full pressure); the default is 2, a pencil barely moves,
-// a watercolor swings wide.
+// a watercolor swings wide. `split` overrides whether a tool's gestures split
+// at sharp turns; by kind, strokes do and fills (blobs and shapes) do not.
 
 import { RibbonStrokeRenderer } from '../renderers/RibbonStrokeRenderer.js';
 import { BrushStrokeRenderer } from '../renderers/BrushStrokeRenderer.js';
@@ -408,6 +409,15 @@ function shapeFill(v, ctx) {
     });
 }
 
+
+/**
+ * Whether a tool's gestures split at sharp turns: strokes do, fills (blobs
+ * and shapes) draw one mark per gesture. An entry's `split` overrides the
+ * kind's default.
+ */
+export function toolSplits(entry) {
+    return entry.split ?? entry.kind === 'stroke';
+}
 
 /** The registry entries with the given ids, in the given order. */
 export function pickTools(ids) {

@@ -12,7 +12,7 @@ import { pathArcLength } from '../pressure.js';
 import { StrokeRecorder } from '../strokeRecorder.js';
 import { DrawingPlayer, downloadDrawingZip } from '../drawingPlayer.js';
 import { makeMarkBuilder, applyRecordTo } from '../markBuilder.js';
-import { randomValues } from '../toolRegistry.js';
+import { randomValues, toolSplits } from '../toolRegistry.js';
 import { DrawingToolConfig } from './DrawingToolConfig.js';
 
 const TRAIL_SIDE = 10;
@@ -87,6 +87,8 @@ export class DrawingTool {
             stage: this.stage, board: this.board, canvas,
             build: makeMarkBuilder({ state: this._state, board: this.board }),
             widthFor: () => this._state.widthPx / PIXELS_PER_UNIT,
+            // Strokes split at sharp turns; fills draw one mark per gesture.
+            split: () => toolSplits(this._state.tool),
             bindInput: false,
             onCommit: (points, seed) => {
                 if (this._replaying || this._playerFeeding || this._applyingLive) return;

@@ -90,8 +90,8 @@ export class DrawingPlayer {
     /**
      * Animates from the current position, a few points per frame, resting
      * `strokeWaitMs` after each record marked `release` (a sharp turn splits
-     * one gesture into several records; only the last is a release, so the
-     * rest falls where the pen actually lifted). Returns whether playback
+     * a stroke gesture into several records; only the last is a release, so
+     * the rest falls where the pen actually lifted). Returns whether playback
      * started; `onDone` fires when the end is reached.
      */
     play({ pointsPerFrame = 4, strokeWaitMs = 0, onDone } = {}) {

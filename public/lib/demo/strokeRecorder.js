@@ -27,8 +27,9 @@ export class StrokeRecorder {
         });
     }
 
-    /** Marks the last record as a release. A sharp turn splits one gesture
-     * into several records; only the one the pen lifted after carries this. */
+    /** Marks the last record as a release. A sharp turn splits a stroke
+     * gesture into several records; only the one the pen lifted after
+     * carries this. */
     markRelease() {
         const last = this.records[this.records.length - 1];
         if (last) last.release = true;
