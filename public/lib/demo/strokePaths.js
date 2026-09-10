@@ -101,6 +101,21 @@ export function seededScribble(seed, { cx = 0, cy = 0, scale = 1 } = {}) {
 }
 
 /**
+ * A seeded segment for endpoint shapes: two points symmetric about the center,
+ * half-length `r`, at a seeded diagonal angle (kept away from the axes, so the
+ * box shapes never collapse).
+ */
+export function seededSegment(seed, { cx = 0, cy = 0, r = 0.6 } = {}) {
+    const rand = seededRandom(seed);
+    const angle = (0.3 + rand() * 1.0) * (rand() < 0.5 ? 1 : -1);
+    const dx = Math.cos(angle) * r, dy = Math.sin(angle) * r;
+    return [
+        new THREE.Vector3(cx - dx, cy - dy, 0),
+        new THREE.Vector3(cx + dx, cy + dy, 0),
+    ];
+}
+
+/**
  * A random wandering stroke for scattering marks on a fresh canvas: a wiggling
  * run at a random position and direction inside the extents, with a pressure
  * that swells through the middle. Uses Math.random; a caller that needs

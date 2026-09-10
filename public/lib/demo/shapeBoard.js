@@ -138,7 +138,7 @@ export function setupShapeBoard({ shapes, makeRenderer, controls = {}, theme = '
     /** One starting shape of each kind, so the page never opens empty. */
     function seedShapes() {
         shapes.forEach((shape, i) => {
-            const cx = (i - (shapes.length - 1) / 2) * stage.extentX * 0.62;
+            const cx = ((i + 0.5) / shapes.length - 0.5) * stage.extentX * 1.5;
             const cy = (rand() - 0.5) * stage.extentY * 0.6;
             const angle = rand() * Math.PI * 2;
             const r = 0.35 + rand() * 0.25;

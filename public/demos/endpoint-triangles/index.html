@@ -16,18 +16,30 @@
 
     <div class="dp-panel">
       <div class="dp-hd"><span class="dp-title">Shapes</span></div>
-      <div class="dp-note">Draw anywhere. The gesture's endpoints form the diamond's long diagonal or one triangle edge; which corner takes which angle is seeded per stroke.</div>
-      <div class="dp-row">
-        <span class="dp-label">Shape</span>
-        <select id="shape-select" class="dp-select"><option value="cycle">Cycle per stroke</option></select>
+      <div class="dp-note">Diamond, a 30-60-90 triangle, and a 45-45-90 triangle. Which corner takes which angle is seeded.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Color</span></div>
+      <div class="dp-btn-row">
+        <button id="random-btn" class="dp-btn secondary">Randomize colors</button>
       </div>
 
       <hr class="dp-divider" />
 
-      <div class="dp-hd"><span class="dp-title">Canvas</span></div>
+      <div class="dp-hd"><span class="dp-title">Overlays</span></div>
       <div class="dp-btn-row">
-        <button id="random-btn" class="dp-btn secondary">Randomize colors</button>
-        <button id="clear-btn" class="dp-btn secondary">Clear</button>
+        <button id="wire-btn" class="dp-toggle">Wireframe</button>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-section collapsed">
+        <div class="dp-section-hd">
+          <span class="dp-chevron"></span>
+          <span class="dp-title">Geometry</span>
+        </div>
+        <div class="dp-section-body"><div id="readout"></div></div>
       </div>
     </div>
   </div>

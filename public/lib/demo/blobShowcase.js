@@ -10,9 +10,12 @@ import { seededScribble } from './strokePaths.js';
  * blob pipeline, each row filled by a renderer the demo supplies.
  *
  * `makeRow(i, ctx)` returns the row's renderer; ctx carries colors, the background
- * textures when the demo asked for one, and the row seed.
+ * textures when the demo asked for one, and the row seed. `makeShape(i, seed, slot)`
+ * (optional) replaces the scribble-and-outline step: it returns `{ contour, start,
+ * end }` for the slot's center, and the endpoints ride into ctx for renderers that
+ * need them.
  */
-export function setupBlobShowcase({ makeRow, background = false, controls = {}, theme = 'vivid-dark' }) {
+export function setupBlobShowcase({ makeRow, makeShape = null, background = false, controls = {}, theme = 'vivid-dark' }) {
     const SEEDS = [3, 8, 21];
     const stage = new StrokeStage(document.getElementById('canvas'), {
         fit: { width: 1.70, height: 1.75 },
@@ -65,14 +68,23 @@ export function setupBlobShowcase({ makeRow, background = false, controls = {}, 
         let samples = 0;
 
         SEEDS.forEach((seed, i) => {
-            const gesture = seededScribble(seed, { cx: centers[i][0], cy: centers[i][1], scale: 0.82 });
-            const contour = blobOutline(gesture, { span: 0.12, radius: 0.11 });
+            let contour, start = null, end = null;
+            if (makeShape) {
+                const shape = makeShape(i, seed, { cx: centers[i][0], cy: centers[i][1] });
+                if (!shape) return;
+                ({ contour, start, end } = shape);
+            } else {
+                const gesture = seededScribble(seed, { cx: centers[i][0], cy: centers[i][1], scale: 0.82 });
+                contour = blobOutline(gesture, { span: 0.12, radius: 0.11 });
+            }
             if (!contour) return;
             const renderer = makeRow(i, {
                 color: colors[i][0],
                 color2: colors[i][1],
                 background: testBg?.texture ?? null,
                 blurred: testBg?.blurred ?? null,
+                start,
+                end,
                 seed,
                 values: v,
             });

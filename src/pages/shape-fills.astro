@@ -22,8 +22,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/endpoint-shapes/index.html?embedded`} title="Circle, oval, rectangle" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Three flat fills from two points. The circle runs from its center to its edge; the oval and the rectangle read the endpoints as the corners of their bounding box.</p>
-      <div class="jp">2点から作られる3つの平坦な塗りです。円は中心から縁まで。楕円と長方形は、端点を外接する箱の角として読みます。</div>
+      <p>Three flat fills from two points, each built from one seeded segment. The circle runs from its center to its edge; the oval and the rectangle read the endpoints as the corners of their bounding box.</p>
+      <div class="jp">2点から作られる3つの平坦な塗りです。それぞれシード付きの1本の線分から作られます。円は中心から縁まで。楕円と長方形は、端点を外接する箱の角として読みます。</div>
 
       <details>
         <summary>Details</summary>
@@ -42,8 +42,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/endpoint-triangles/index.html?embedded`} title="Diamond and triangles" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The diamond takes the endpoints as its long diagonal. The triangles stand on the drawn edge with fixed interior angles (30-60-90 and 45-45-90); which corner takes which angle, and which side of the edge the apex lands on, are seeded per stroke.</p>
-      <div class="jp">ひし形は端点を長い対角線として取ります。三角形は描かれた辺の上に、決まった内角（30-60-90と45-45-90）で立ちます。どの角にどの角度が割り当てられるか、頂点が辺のどちら側に立つかは、筆跡ごとにシードで決まります。</div>
+      <p>The diamond takes the endpoints as its long diagonal. The triangles stand on the segment with fixed interior angles (30-60-90 and 45-45-90); which corner takes which angle, and which side of the segment the apex lands on, are seeded.</p>
+      <div class="jp">ひし形は端点を長い対角線として取ります。三角形は線分の上に、決まった内角（30-60-90と45-45-90）で立ちます。どの角にどの角度が割り当てられるか、頂点が線分のどちら側に立つかはシードで決まります。</div>
     </div>
   </section>
 
@@ -56,13 +56,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/slit-scan-shapes/index.html?embedded`} title="Slit-scan shapes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The same shapes, colored by <code>SlitScanBlobRenderer</code>: the canvas is sampled along one seeded line, every fragment reads the sample at its projection onto that line, and the result mixes with a flat base color. Each line of samples stretches into bands orthogonal to it, the way a slit-scan photograph stretches one slit over time.</p>
-      <div class="jp">同じ形を<code>SlitScanBlobRenderer</code>が塗ります。キャンバスはシードで決まる1本の線に沿ってサンプリングされ、各フラグメントはその線への射影の位置にあるサンプルを読み、結果は平坦なベースの色と混ぜられます。サンプルの列はその線と直交する帯として引き伸ばされます。スリットスキャン写真が1本のスリットを時間方向に引き伸ばすのと同じです。</div>
+      <p>The same shapes over the patterned test background, colored by <code>SlitScanBlobRenderer</code>: the background is sampled along one seeded line, every fragment reads the sample at its projection onto that line, and the result mixes with a flat base color. Each line of samples stretches into bands orthogonal to it, the way a slit-scan photograph stretches one slit over time.</p>
+      <div class="jp">同じ形をパターン化されたテスト背景の上に置き、<code>SlitScanBlobRenderer</code>が塗ります。背景はシードで決まる1本の線に沿ってサンプリングされ、各フラグメントはその線への射影の位置にあるサンプルを読み、結果は平坦なベースの色と混ぜられます。サンプルの列はその線と直交する帯として引き伸ばされます。スリットスキャン写真が1本のスリットを時間方向に引き伸ばすのと同じです。</div>
 
       <details>
         <summary>Details</summary>
-        <p><strong>The sampling line:</strong> Seeded per stroke, through the midpoint of the endpoints, so it always crosses the shape and the sampled colors come from under it.</p>
-        <div class="jp"><strong>サンプリングの線：</strong>筆跡ごとにシードで決まり、端点の中点を通ります。そのため線はつねに形を横切り、サンプリングされる色はその下から来ます。</div>
+        <p><strong>The sampling line:</strong> Seeded per shape, through the midpoint of the endpoints, so it always crosses the shape and the sampled colors come from under it.</p>
+        <div class="jp"><strong>サンプリングの線：</strong>形ごとにシードで決まり、端点の中点を通ります。そのため線はつねに形を横切り、サンプリングされる色はその下から来ます。</div>
 
         <p><strong>The mix:</strong> The sample weight is a parameter; 0 is the flat base color, 1 is the pure slit-scan.</p>
         <div class="jp"><strong>混合：</strong>サンプルの重みはパラメータです。0で平坦なベースの色、1で純粋なスリットスキャンになります。</div>
@@ -79,8 +79,22 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/slit-scan-triangles/index.html?embedded`} title="Slit-scan triangles" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The diamond and the triangles under the same slit-scan coloring. Overlapping shapes read each other's fills through the sampling line, so the canvas builds up its own texture as it is drawn on.</p>
-      <div class="jp">ひし形と三角形に、同じスリットスキャンの塗りを適用したものです。重なった形はサンプリングの線を通してお互いの塗りを読むため、描くほどにキャンバスは自身のテクスチャを重ねていきます。</div>
+      <p>The diamond and the triangles under the same slit-scan coloring, over the same patterned background.</p>
+      <div class="jp">ひし形と三角形に、同じスリットスキャンの塗りを適用したものです。同じパターン化された背景の上に置かれています。</div>
+    </div>
+  </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-shape-fills/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/try-shape-fills/index.html?embedded`} title="Try drawing" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw with every shape on this page. The gesture's start and end place and size the shape, shown live while drawing and baked on release; the shape select pins one shape or cycles through all six per stroke. Every fill is the slit-scan, so shapes sample the canvas itself and stretch what is already drawn; the mix slider runs from the flat base color at 0 to the pure slit-scan at 1.</p>
+      <div class="jp">このページのすべての形で描いてみてください。身振りの始点と終点が形の位置と大きさを決めます。形は描いている間ライブで表示され、離すと焼き込まれます。形のセレクトでひとつの形に固定するか、筆跡ごとに6つの形を順に切り替えられます。塗りはすべてスリットスキャンなので、形はキャンバスそのものをサンプリングし、すでに描かれたものを引き伸ばします。mixのスライダーは、0で平坦なベースの色、1で純粋なスリットスキャンになります。</div>
     </div>
   </section>
 </PageLayout>
