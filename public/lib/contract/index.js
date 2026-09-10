@@ -194,7 +194,10 @@ class DrawingPlayerWrapper {
         this._canvas = null;
         this._tool = null;
         this._loop = false;
-        this._speed = 1;
+        this._speed = 0.5;
+        this._strokeWait = 0.3;
+        this._endWait = 1.0;
+        this._loopTimer = 0;
         this._ended = new Set();
     }
 
@@ -206,8 +209,12 @@ class DrawingPlayerWrapper {
         this._tool.applyLive({ type: 'clear', background: '#ffffff' });
         this._tool.player.on('end', () => {
             if (this._loop) {
-                this._tool.player.rewind();
-                this._tool.player.play({ pointsPerFrame: this._pointsPerFrame() });
+                // The rest after the finished drawing, then again from blank.
+                clearTimeout(this._loopTimer);
+                this._loopTimer = setTimeout(() => {
+                    this._tool.player.rewind();
+                    this._tool.player.play(this._playOptions());
+                }, this._endWait * 1000);
                 return;
             }
             this._ended.forEach(fn => fn());
@@ -216,25 +223,42 @@ class DrawingPlayerWrapper {
 
     /** Loads a recording, ready to play from the start. */
     async load(recording) {
+        clearTimeout(this._loopTimer);
         const log = JSON.parse(await recording.data.text());
         this._tool.setDrawingData(log);
         this._tool.player.setData(log);
     }
 
-    _pointsPerFrame() {
-        return Math.max(1, Math.round(4 * this._speed));
+    _playOptions() {
+        return {
+            pointsPerFrame: Math.max(1, Math.round(4 * this._speed)),
+            strokeWaitMs: this._strokeWait * 1000,
+        };
     }
 
-    play({ speed = 1, loop = false } = {}) {
+    /**
+     * `speed` scales the animation (1 is the fastest drawing pace, 0.5 the
+     * default); `strokeWait` rests that many seconds after each pen release
+     * (not after the pieces a sharp turn splits a stroke into); `endWait`
+     * rests after the finished drawing before a loop restarts. Without
+     * `loop`, playback simply ends at the last stroke.
+     */
+    play({ speed = 0.5, loop = false, strokeWait = 0.3, endWait = 1.0 } = {}) {
         this._speed = speed;
         this._loop = loop;
-        this._tool.player.play({ pointsPerFrame: this._pointsPerFrame() });
+        this._strokeWait = strokeWait;
+        this._endWait = endWait;
+        this._tool.player.play(this._playOptions());
     }
 
-    pause() { this._tool.player.pause(); }
+    pause() {
+        clearTimeout(this._loopTimer);
+        this._tool.player.pause();
+    }
 
     /** Shows the state at `progress` (0..1); 1 is the finished drawing. */
     seek(progress) {
+        clearTimeout(this._loopTimer);
         const player = this._tool.player;
         player.seek(Math.round(Math.min(Math.max(progress, 0), 1) * player.length));
     }
@@ -246,6 +270,7 @@ class DrawingPlayerWrapper {
     }
 
     destroy() {
+        clearTimeout(this._loopTimer);
         this._ended.clear();
         this._tool?.dispose();
         this._canvas?.remove();

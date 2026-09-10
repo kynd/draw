@@ -104,6 +104,7 @@ export class DrawingTool {
             // also rolls the tool.
             onRelease: () => {
                 if (this._replaying || this._playerFeeding || this._applyingLive) return;
+                this.recorder.markRelease();
                 if (this._autoRandom) {
                     this.stepPalette(Math.random() < 0.5 ? -1 : 1);
                     this._stepTrail(1);

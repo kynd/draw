@@ -26,4 +26,11 @@ export class StrokeRecorder {
             points: points.map(p => ({ x: p.x, y: p.y, pressure: p.pressure ?? 0 })),
         });
     }
+
+    /** Marks the last record as a release. A sharp turn splits one gesture
+     * into several records; only the one the pen lifted after carries this. */
+    markRelease() {
+        const last = this.records[this.records.length - 1];
+        if (last) last.release = true;
+    }
 }

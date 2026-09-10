@@ -48,11 +48,15 @@ export interface DrawingLiveView {
     destroy(): void;
 }
 
-// The player that replays a recording.
+// The player that replays a recording. `speed` scales the animation (0.5 by
+// default); `strokeWait` rests that many seconds after each pen release, not
+// after the pieces a sharp turn splits a stroke into (0.3 by default);
+// `endWait` rests after the finished drawing before a loop restarts (1 by
+// default). Without `loop`, playback simply ends at the last stroke.
 export interface DrawingPlayer {
     mount(container: HTMLElement): void;
     load(recording: DrawingRecording): Promise<void>;
-    play(options?: { speed?: number; loop?: boolean }): void;
+    play(options?: { speed?: number; loop?: boolean; strokeWait?: number; endWait?: number }): void;
     pause(): void;
     seek(progress: number): void;
     onEnded(listener: () => void): () => void;

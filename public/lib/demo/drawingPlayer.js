@@ -33,6 +33,8 @@ export class DrawingPlayer {
         this._raf = 0;
         this._playing = false;
         this._recording = false;
+        this._waitUntil = 0;
+        this._strokeWaitMs = 0;
         // Whether the canvas raster matches the data up to `position`. False
         // until the first reset, and after new data arrives.
         this._primed = false;
@@ -77,6 +79,7 @@ export class DrawingPlayer {
     }
 
     _reset() {
+        this._waitUntil = 0;
         if (this.data.size) this.resize?.(this.data.size[0], this.data.size[1]);
         this.clear(this.data.background);
         this._pos = 0;
@@ -85,13 +88,17 @@ export class DrawingPlayer {
     }
 
     /**
-     * Animates from the current position, a few points per frame. Returns
-     * whether playback started; `onDone` fires when the end is reached.
+     * Animates from the current position, a few points per frame, resting
+     * `strokeWaitMs` after each record marked `release` (a sharp turn splits
+     * one gesture into several records; only the last is a release, so the
+     * rest falls where the pen actually lifted). Returns whether playback
+     * started; `onDone` fires when the end is reached.
      */
-    play({ pointsPerFrame = 4, onDone } = {}) {
+    play({ pointsPerFrame = 4, strokeWaitMs = 0, onDone } = {}) {
         if (this._playing || !this.hasData) return false;
         if (!this._primed || this._pos >= this.length) this._reset();
         this._ppf = pointsPerFrame;
+        this._strokeWaitMs = strokeWaitMs;
         this._onDone = onDone ?? null;
         this._playing = true;
         // Resuming mid-record: the record's state may not be current anymore.
@@ -114,6 +121,13 @@ export class DrawingPlayer {
 
     _frame() {
         if (!this._playing) return;
+        // The rest between records, measured in wall time so a pause during
+        // it simply holds.
+        if (this._waitUntil && performance.now() < this._waitUntil) {
+            this._raf = requestAnimationFrame(() => this._frame());
+            return;
+        }
+        this._waitUntil = 0;
         if (this._pos >= this.length) {
             this._playing = false;
             this._emit('end');
@@ -131,6 +145,9 @@ export class DrawingPlayer {
             this._pos++;
             this._pi = 0;
             this._emit('step');
+            if (this._strokeWaitMs > 0 && this._pos < this.length && record.release) {
+                this._waitUntil = performance.now() + this._strokeWaitMs;
+            }
         }
         this._raf = requestAnimationFrame(() => this._frame());
     }
@@ -145,6 +162,7 @@ export class DrawingPlayer {
         const target = Math.max(0, Math.min(this.length, Math.round(index)));
         const wasPlaying = this._playing;
         this.pause();
+        this._waitUntil = 0;
         if (!this._primed || target < this._pos) this._reset();
         // A partially fed record past the target is undone with an empty feed.
         if (this._pi > 0 && target <= this._pos) {
@@ -159,7 +177,9 @@ export class DrawingPlayer {
             this._pi = 0;
         }
         this._emit('step');
-        if (wasPlaying && this._pos < this.length) this.play({ pointsPerFrame: this._ppf, onDone: this._onDone });
+        if (wasPlaying && this._pos < this.length) {
+            this.play({ pointsPerFrame: this._ppf, strokeWaitMs: this._strokeWaitMs, onDone: this._onDone });
+        }
     }
 
     /** One record forward, drawn instantly. */
