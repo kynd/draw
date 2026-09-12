@@ -2,37 +2,42 @@ import * as THREE from 'three';
 import { seededRandom } from '../random.js';
 import { Stroke3DRenderer, STROKE3D_GLSL, SHOW_NORMALS_GLSL } from './Stroke3DRenderer.js';
 
+// A tetrahedron over alternating cube corners; each face's outward side is
+// fixed by the orientation check at build time.
+const CORNERS = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]];
+const FACES = [[0, 1, 2], [0, 3, 1], [0, 2, 3], [1, 3, 2]];
+
 /**
- * A chain of 3D triangles along the spine, flat-shaded, in one of three looks.
+ * A chain of 3D tetrahedrons along the spine, flat-shaded, in one of three
+ * looks.
  *
- *   facets  each triangle takes a random size and tilt, and a random color that
- *           keeps the base color's hue while its lightness and chroma vary.
- *   grain   the faces carry a wood-like band pattern: a stripe field of world
- *           position warped by noise, between two colors.
- *   metal   each face reflects the current canvas, and the flat normals break
- *           the reflection per triangle.
+ *   facets  every face takes a random color that keeps the base color's hue
+ *           while its lightness and chroma vary.
+ *   colors  every face takes one flat random color from the `colors` list.
+ *   metal   every face reflects the current canvas, and the flat normals
+ *           break the reflection per face.
  *
- * Placement, size, and tilt all derive from the stroke's seed, so the same seed
- * scatters the same triangles. Sizes range from far below the stroke width to
- * well past it, and the spacing follows the size: small triangles crowd
- * together, big ones stand apart.
+ * Placement, size, and orientation all derive from the stroke's seed, so the
+ * same seed scatters the same tetrahedrons. Sizes range from far below the
+ * stroke width to well past it, and the step between neighbors is their two
+ * circumradii plus `spacing` of their sum, so they cannot touch.
  */
-export class TriangleStrokeRenderer extends Stroke3DRenderer {
-    /** @param {'facets'|'grain'|'metal'} [opts.mode] */
+export class TetrahedronStrokeRenderer extends Stroke3DRenderer {
+    /** @param {'facets'|'colors'|'metal'} [opts.mode] */
     constructor({
         mode = 'facets',
         colorA = '#46608a',
-        colorB = '#8a6a46',
+        colors = ['#c22a4a', '#f0e6da', '#2a7a5a', '#f0c040'],
         tint = '#d8d8e2',
         background = null,
-        spacing = 0.55,    // triangle spacing, in half-widths
+        spacing = 0.15,    // the gap between neighbors, as a fraction of their summed circumradii
         bend = 0.4,
         ...rest
     } = {}) {
         super(rest);
         this.mode = mode;
         this.colorA = colorA;
-        this.colorB = colorB;
+        this.colors = colors;
         this.tint = tint;
         this.background = background;
         this.spacing = spacing;
@@ -42,13 +47,13 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
     build(def) {
         const { centers, normals, tangents, ts, length, phaseAt, seed } = this.frames(def);
         const rand = seededRandom(seed * 17.3);
-        const B = new THREE.Vector3(0, 0, 1);
 
         const positions = [], normalsA = [], colors = [], along = [];
         const baseColor = new THREE.Color(this.colorA);
         const hsl = {};
         baseColor.getHSL(hsl);
         const faceColor = new THREE.Color();
+        const palette = this.colors.map(c => new THREE.Color(c));
 
         // Interpolators over the sampled spine, by arc position.
         const atArc = s => {
@@ -65,49 +70,74 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
             };
         };
 
+        const bx = new THREE.Vector3(), by = new THREE.Vector3(), bz = new THREE.Vector3();
+        const p2 = new THREE.Vector3();
         const e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), fn = new THREE.Vector3();
-        const p1 = new THREE.Vector3(), p2 = new THREE.Vector3(), q = new THREE.Vector3();
-        let s = 0, face = 0;
+        const tetCenter = new THREE.Vector3(), mid = new THREE.Vector3();
+        let s = 0, prevRadius = 0, tet = 0;
         while (s <= length) {
-            const { t, center, normal, tangent } = atArc(s);
-            // Sizes range from far below the width to well past it, skewed small,
-            // and the step to the next triangle follows the size: small triangles
-            // crowd, big ones stand apart.
+            // Sizes range from far below the width to well past it, skewed
+            // small.
             const roll = rand();
-            const size = Math.max(def.widthLeftAt(t), 0.01) * (0.3 + roll * roll * 2.6);
-            // The face's plane: one axis perpendicular to the spine, rotated
-            // around it by the phase (so the chain turns as the stroke grows),
-            // the other mostly along the spine with a random tilt out of it.
+            const size = Math.max(def.widthLeftAt(Math.min(s / length, 1)), 0.01)
+                * (0.3 + roll * roll * 2.6);
+            if (tet > 0) {
+                // The step keeps the circumspheres apart: the two radii plus
+                // the spacing gap.
+                s += (prevRadius + size) * (1 + this.spacing);
+                if (s > length) break;
+            }
+            const { t, center, normal, tangent } = atArc(s);
+            // The frame: one axis perpendicular to the spine, rotated around
+            // it by the phase (so the chain turns as the stroke grows), one
+            // mostly along the spine with a random tilt out of it, and their
+            // cross product.
             const rot = phaseAt(s) + rand() * Math.PI * 2;
-            p1.copy(normal).multiplyScalar(Math.cos(rot)).setZ(Math.sin(rot));
+            bx.copy(normal).multiplyScalar(Math.cos(rot)).setZ(Math.sin(rot));
             p2.copy(normal).multiplyScalar(-Math.sin(rot)).setZ(Math.cos(rot));
             const tilt = (rand() - 0.5) * 1.6;
-            q.copy(tangent).multiplyScalar(Math.cos(tilt)).addScaledVector(p2, Math.sin(tilt));
-            const verts = [];
-            for (let j = 0; j < 3; j++) {
-                const a = (j / 3 + (rand() - 0.5) * 0.12) * Math.PI * 2;
-                verts.push(new THREE.Vector3(
-                    center.x + (p1.x * Math.cos(a) + q.x * Math.sin(a)) * size,
-                    center.y + (p1.y * Math.cos(a) + q.y * Math.sin(a)) * size,
-                    center.z + (p1.z * Math.cos(a) + q.z * Math.sin(a)) * size
-                ));
-            }
-            e1.copy(verts[1]).sub(verts[0]);
-            e2.copy(verts[2]).sub(verts[0]);
-            fn.copy(e1).cross(e2).normalize();
-            if (fn.z < 0) fn.negate();
+            by.copy(tangent).multiplyScalar(Math.cos(tilt)).addScaledVector(p2, Math.sin(tilt));
+            bz.copy(bx).cross(by).normalize();
+            by.copy(bz).cross(bx).normalize();
+            // Corners jitter inward only, so the circumradius never exceeds
+            // `size` and the spacing guarantee holds.
+            const verts = CORNERS.map(([x, y, z]) => {
+                const r = size * (0.75 + rand() * 0.25) / Math.sqrt(3);
+                return new THREE.Vector3(
+                    center.x + (bx.x * x + by.x * y + bz.x * z) * r,
+                    center.y + (bx.y * x + by.y * y + bz.y * z) * r,
+                    center.z + (bx.z * x + by.z * y + bz.z * z) * r
+                );
+            });
+            tetCenter.set(0, 0, 0);
+            verts.forEach(v => tetCenter.add(v));
+            tetCenter.multiplyScalar(1 / 4);
 
-            // Facets vary lightness and chroma but keep the hue.
-            faceColor.setHSL(hsl.h, Math.min(1, hsl.s * (0.6 + rand() * 0.8)),
-                Math.min(0.9, Math.max(0.12, hsl.l * (0.55 + rand() * 1.1))));
-            for (const v of verts) {
-                positions.push(v.x, v.y, v.z);
-                normalsA.push(fn.x, fn.y, fn.z);
-                colors.push(faceColor.r, faceColor.g, faceColor.b);
-                along.push(t);
+            for (const [a, b, c] of FACES) {
+                e1.copy(verts[b]).sub(verts[a]);
+                e2.copy(verts[c]).sub(verts[a]);
+                fn.copy(e1).cross(e2).normalize();
+                mid.copy(verts[a]).add(verts[b]).add(verts[c]).multiplyScalar(1 / 3).sub(tetCenter);
+                if (fn.dot(mid) < 0) fn.negate();
+                // Two rolls per face whatever the mode, so the placement
+                // sequence stays identical across the looks.
+                const r1 = rand(), r2 = rand();
+                if (this.mode === 'colors') {
+                    faceColor.copy(palette[Math.floor(r1 * palette.length) % palette.length]);
+                } else {
+                    // Facets vary lightness and chroma but keep the hue.
+                    faceColor.setHSL(hsl.h, Math.min(1, hsl.s * (0.6 + r1 * 0.8)),
+                        Math.min(0.9, Math.max(0.12, hsl.l * (0.55 + r2 * 1.1))));
+                }
+                for (const j of [a, b, c]) {
+                    positions.push(verts[j].x, verts[j].y, verts[j].z);
+                    normalsA.push(fn.x, fn.y, fn.z);
+                    colors.push(faceColor.r, faceColor.g, faceColor.b);
+                    along.push(t);
+                }
             }
-            s += Math.max(size * this.spacing * 1.6, 0.02);
-            face++;
+            prevRadius = size;
+            tet++;
         }
 
         const geometry = new THREE.BufferGeometry();
@@ -117,7 +147,7 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
         geometry.setAttribute('aAlong', new THREE.Float32BufferAttribute(along, 1));
         geometry.computeBoundingSphere();
 
-        const mesh = new THREE.Mesh(geometry, this._material(seed));
+        const mesh = new THREE.Mesh(geometry, this._material());
         mesh.userData.samples = centers;
         mesh.userData.stats = {
             sampleCount: centers.length,
@@ -128,19 +158,16 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
         return mesh;
     }
 
-    _material(seed) {
-        const modes = { facets: 0, grain: 1, metal: 2 };
+    _material() {
+        const modes = { facets: 0, colors: 1, metal: 2 };
         return new THREE.ShaderMaterial({
             side: THREE.DoubleSide,
             vertexColors: true,
             uniforms: {
                 uMode: { value: modes[this.mode] ?? 0 },
-                uColorA: { value: new THREE.Color(this.colorA) },
-                uColorB: { value: new THREE.Color(this.colorB) },
                 uTint: { value: new THREE.Color(this.tint) },
                 uBg: { value: this.background },
                 uBend: { value: this.bend },
-                uSeed: { value: seed },
                 uShowNormal: { value: this.showNormals ? 1 : 0 },
                 uScreen: { value: new THREE.Vector2(1, 1) },
             },
@@ -148,40 +175,25 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
                 attribute float aAlong;
                 varying vec3 vNormal;
                 varying vec3 vColor;
-                varying vec3 vWorld;
                 varying float vAlong;
                 void main() {
                     vNormal = normal;
                     vColor = color;
-                    vWorld = position;
                     vAlong = aAlong;
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                 }
             `,
             fragmentShader: /* glsl */`
                 uniform int uMode;
-                uniform vec3 uColorA;
-                uniform vec3 uColorB;
                 uniform vec3 uTint;
                 uniform sampler2D uBg;
                 uniform float uBend;
-                uniform float uSeed;
                 varying vec3 vNormal;
                 varying vec3 vColor;
-                varying vec3 vWorld;
                 varying float vAlong;
                 uniform int uShowNormal;
                 ${STROKE3D_GLSL}
                 ${SHOW_NORMALS_GLSL}
-                float hash21(vec2 p) {
-                    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-                }
-                float noise2(vec2 p) {
-                    vec2 i = floor(p), f = fract(p);
-                    vec2 u = f * f * (3.0 - 2.0 * f);
-                    return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), u.x),
-                               mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), u.x), u.y);
-                }
                 void main() {
                     if (uShowNormal == 1) { gl_FragColor = normalDebug(vNormal); return; }
                     vec3 n = normalize(vNormal) * (gl_FrontFacing ? 1.0 : -1.0);
@@ -190,12 +202,8 @@ export class TriangleStrokeRenderer extends Stroke3DRenderer {
                     if (uMode == 0) {
                         color = vColor * (0.25 + 0.9 * diff) + vec3(specularAt(n, 30.0)) * 0.4;
                     } else if (uMode == 1) {
-                        // Grain: a stripe field warped by noise, like cut wood.
-                        float warp = noise2(vWorld.xy * 3.0 + uSeed);
-                        float band = 0.5 + 0.5 * sin(vWorld.x * 26.0 + vWorld.y * 9.0 + warp * 10.0 + uSeed * 3.0);
-                        band = pow(band, 1.6);
-                        color = mix(uColorA, uColorB, band) * (0.25 + 0.9 * diff)
-                              + vec3(specularAt(n, 20.0)) * 0.3;
+                        // Flat palette colors, one per face.
+                        color = vColor * (0.3 + 0.85 * diff) + vec3(specularAt(n, 30.0)) * 0.25;
                     } else {
                         vec3 r = reflect(vec3(0.0, 0.0, -1.0), n);
                         vec2 suv = clamp(screenUv() + r.xy * uBend, 0.001, 0.999);

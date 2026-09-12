@@ -21,7 +21,7 @@ import { WashBlobRenderer } from '../renderers/WashBlobRenderer.js';
 import { MaterialBlobRenderer } from '../renderers/MaterialBlobRenderer.js';
 import { StoneBlobRenderer } from '../renderers/StoneBlobRenderer.js';
 import { TubeStrokeRenderer } from '../renderers/TubeStrokeRenderer.js';
-import { TriangleStrokeRenderer } from '../renderers/TriangleStrokeRenderer.js';
+import { TetrahedronStrokeRenderer } from '../renderers/TetrahedronStrokeRenderer.js';
 import { SmearStrokeRenderer } from '../renderers/SmearStrokeRenderer.js';
 import { MirrorStrokeRenderer } from '../renderers/MirrorStrokeRenderer.js';
 import { GlassStrokeRenderer } from '../renderers/GlassStrokeRenderer.js';
@@ -158,21 +158,21 @@ export const toolRegistry = [
             mode: 'metal', background: ctx.texture, tint: ctx.tintLight,
             twist: v.twist, bend: v.bend, depth: v.depth,
         }) },
-    { id: 'tri-facets', kind: 'stroke',
-        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: 0.35, max: 1.2 }, { key: 'depth', min: 0.04, max: 0.24 }],
-        make: (v, ctx) => new TriangleStrokeRenderer({
+    { id: 'tetra-facets', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: 0, max: 0.8 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new TetrahedronStrokeRenderer({
             mode: 'facets', colorA: ctx.colorA,
             twist: v.twist, spacing: v.spacing, depth: v.depth,
         }) },
-    { id: 'tri-grain', kind: 'stroke',
-        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: 0.35, max: 1.2 }, { key: 'depth', min: 0.04, max: 0.24 }],
-        make: (v, ctx) => new TriangleStrokeRenderer({
-            mode: 'grain', colorA: ctx.colorA, colorB: ctx.colorB,
+    { id: 'tetra-colors', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: 0, max: 0.8 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new TetrahedronStrokeRenderer({
+            mode: 'colors', colors: ctx.colors,
             twist: v.twist, spacing: v.spacing, depth: v.depth,
         }) },
-    { id: 'tri-metal', kind: 'stroke',
+    { id: 'tetra-metal', kind: 'stroke',
         params: [{ key: 'twist', min: 1, max: 12 }, { key: 'bend', min: 0.2, max: 0.6 }, { key: 'depth', min: 0.04, max: 0.24 }],
-        make: (v, ctx) => new TriangleStrokeRenderer({
+        make: (v, ctx) => new TetrahedronStrokeRenderer({
             mode: 'metal', background: ctx.texture, tint: ctx.tintLight,
             twist: v.twist, bend: v.bend, depth: v.depth,
         }) },

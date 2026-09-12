@@ -5,6 +5,7 @@ import { oklchToHex, maxChromaAt } from '../../color.js';
 import { PIXELS_PER_UNIT } from '../../CanvasBuffer.js';
 import { blobOutline } from '../../pathEffects.js';
 import { StrokeStage } from '../stage.js';
+import { CoverageLayer } from '../coverageLayer.js';
 import { DrawingBoard } from '../drawingBoard.js';
 import { setupDrawCycle } from '../drawCycle.js';
 import { taperByArc, scatterPath } from '../strokePaths.js';
@@ -616,7 +617,6 @@ export class DrawingTool {
             object.visible = false;
         };
         hide(this._preview);
-        hide(this._previewMark?.mesh);
         hide(this._guideMesh);
         // The canvas must be read in the same task as the render, so this
         // draws immediately and copies before yielding.
@@ -663,13 +663,13 @@ export class DrawingTool {
     // its recording, so both hide while one runs.
     _setSceneFurnitureVisible(on) {
         if (this._preview) this._preview.visible = on && !this._uiHidden;
-        if (this._previewMark) this._previewMark.mesh.visible = on && !this._uiHidden;
         this._updateGuideVisibility();
     }
 
     dispose() {
         this.player.pause();
         this._listeners.clear();
+        this._previewTarget?.dispose();
         this.stage.renderer.dispose();
     }
 
@@ -736,19 +736,63 @@ export class DrawingTool {
 
     _buildPreview() {
         this._preview = null;
-        this._previewMark = null;
         if (!this.config.preview) return;
         this._preview = new THREE.Group();
         this._preview.position.z = 0.2;
         // Overlays render above the coverage-layer composites.
         this._preview.userData.overlay = true;
         this.stage.add(this._preview);
-        // Semi-transparent black, so drawing behind the preview shows through.
-        const paper = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
-            new THREE.MeshBasicMaterial({ color: '#000000', transparent: true, opacity: 0.4, depthWrite: false }));
-        this._preview.add(paper);
         this._previewSize = { w: 1.1, h: 0.62 };
-        paper.scale.set(this._previewSize.w, this._previewSize.h, 1);
+        // The mark renders into the preview's own target, so the box crops
+        // it; the quad shows the target under a rounded-corner mask. The
+        // semi-transparent black paper is the target's clear color, so
+        // drawing behind the preview shows through.
+        const px = PIXELS_PER_UNIT * 2;
+        this._previewTarget = new THREE.WebGLRenderTarget(
+            Math.round(this._previewSize.w * px), Math.round(this._previewSize.h * px),
+            { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, samples: 4 });
+        this._previewTarget.texture.colorSpace = THREE.SRGBColorSpace;
+        // The preview's own coverage layer, so a flagged mark keeps single
+        // coverage inside the crop the way it does on the canvas.
+        this._previewCoverage = new CoverageLayer();
+        this._previewCoverage.resize(this._previewTarget.width, this._previewTarget.height);
+        this._previewScene = new THREE.Scene();
+        this._previewCamera = new THREE.OrthographicCamera(
+            -this._previewSize.w / 2, this._previewSize.w / 2,
+            this._previewSize.h / 2, -this._previewSize.h / 2, 0.1, 20);
+        const quad = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShaderMaterial({
+            transparent: true,
+            depthWrite: false,
+            uniforms: {
+                uMap: { value: this._previewTarget.texture },
+                uSize: { value: new THREE.Vector2(this._previewSize.w, this._previewSize.h) },
+                uRadius: { value: 0.06 },
+            },
+            vertexShader: /* glsl */`
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: /* glsl */`
+                varying vec2 vUv;
+                uniform sampler2D uMap;
+                uniform vec2 uSize;
+                uniform float uRadius;
+                void main() {
+                    vec2 p = (vUv - 0.5) * uSize;
+                    vec2 q = abs(p) - (uSize * 0.5 - vec2(uRadius));
+                    float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRadius;
+                    float mask = 1.0 - smoothstep(-0.004, 0.004, d);
+                    vec4 c = texture2D(uMap, vUv);
+                    gl_FragColor = vec4(c.rgb, c.a * mask);
+                    if (gl_FragColor.a <= 0.003) discard;
+                }
+            `,
+        }));
+        quad.scale.set(this._previewSize.w, this._previewSize.h, 1);
+        this._preview.add(quad);
     }
 
     _previewCenter() {
@@ -767,14 +811,9 @@ export class DrawingTool {
 
     _refreshPreview() {
         if (!this._preview) return;
-        if (this._previewMark) {
-            this.stage.remove(this._previewMark.mesh);
-            this._previewMark.renderer.dispose(this._previewMark.mesh);
-            this._previewMark = null;
-        }
-        // The mark is built at its world position rather than inside the
-        // offset group: a blob's distance field lives in world space, so a
-        // translated parent would separate the quad from its own contour.
+        // The mark is built at the box's world position and rendered into the
+        // preview target by a camera framing the box, so whatever spills past
+        // the edges is cropped away.
         const c = this._previewCenter();
         const state = this._state;
         const width = Math.min(state.widthPx / PIXELS_PER_UNIT, 0.15);
@@ -825,12 +864,43 @@ export class DrawingTool {
             });
             mark = { mesh: def.build(), renderer };
         }
+        const renderer = this.stage.renderer;
+        const prevTarget = renderer.getRenderTarget();
+        const prevAuto = renderer.autoClear;
+        const prevColor = new THREE.Color();
+        renderer.getClearColor(prevColor);
+        const prevAlpha = renderer.getClearAlpha();
         if (mark) {
-            mark.mesh.position.z = 0.21;
-            mark.mesh.visible = !this._uiHidden && !this._replaying;
-            mark.mesh.userData.overlay = true;
-            this.stage.add(mark.mesh);
-            this._previewMark = mark;
+            // The mark's own screen is the preview target, not the canvas.
+            const screen = new THREE.Vector2(this._previewTarget.width, this._previewTarget.height);
+            mark.mesh.traverse(child => {
+                const u = child.material?.uniforms;
+                if (u?.uScreen) u.uScreen.value.copy(screen);
+            });
+            this._previewScene.add(mark.mesh);
+        }
+        this._previewCamera.position.set(c.x, c.y, 5);
+        renderer.autoClear = false;
+        renderer.setRenderTarget(this._previewTarget);
+        renderer.setClearColor('#000000', 0.4);
+        renderer.clear(true, true, false);
+        if (mark) {
+            const flagged = [];
+            mark.mesh.traverse(child => {
+                if (child.isMesh && child.userData.coverageLayer) flagged.push(child);
+            });
+            flagged.forEach(m => { m.visible = false; });
+            renderer.render(this._previewScene, this._previewCamera);
+            flagged.forEach(m => { m.visible = true; });
+            flagged.forEach(m =>
+                this._previewCoverage.draw(renderer, this._previewCamera, m, this._previewTarget));
+        }
+        renderer.setRenderTarget(prevTarget);
+        renderer.setClearColor(prevColor, prevAlpha);
+        renderer.autoClear = prevAuto;
+        if (mark) {
+            this._previewScene.remove(mark.mesh);
+            mark.renderer.dispose(mark.mesh);
         }
         this._preview.visible = !this._uiHidden && !this._replaying;
         this.stage.draw();
@@ -839,7 +909,6 @@ export class DrawingTool {
     _setUiHidden(hidden) {
         this._uiHidden = hidden;
         if (this._preview) this._preview.visible = !hidden && !this._replaying;
-        if (this._previewMark) this._previewMark.mesh.visible = !hidden && !this._replaying;
         this.stage.draw();
     }
 

@@ -3,7 +3,7 @@ import { TubeStrokeRenderer } from '../../lib/renderers/TubeStrokeRenderer.js';
 import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
-import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, taper, AMPLITUDE } from '../../lib/demo/strokePaths.js';
 import { TestBackground } from '../../lib/demo/testBackground.js';
 
 const ROWS = 3;
@@ -70,13 +70,18 @@ function rebuild() {
     entries = [];
 
     const width = parseFloat(ctrl.width.value);
-    const { spread } = layout(stage.extentY, width * 1.3);
+    // The wiggle grows with the width, so a wide tube keeps the same drawn
+    // shape instead of folding through its own wave, capped so three rows
+    // still fit the canvas.
+    const wiggleScale = Math.min(width / 0.075,
+        Math.max((stage.extentY / ROWS - width * 1.3) / AMPLITUDE, 0.6));
+    const { spread } = layout(stage.extentY, width * 1.3, ROWS, AMPLITUDE * wiggleScale);
     let samples = 0, vertices = 0, triangles = 0;
 
     for (let i = 0; i < ROWS; i++) {
         const renderer = makeRenderer(i);
         const def = new StrokeDef({
-            points: straightThenWiggle(centerY(i, ROWS, spread), { z0: 0 }),
+            points: straightThenWiggle(centerY(i, ROWS, spread), { z0: 0, wiggleScale }),
             widthLeft: taper(width),
             renderer,
             seed: SEEDS[i],

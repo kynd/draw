@@ -1,5 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
-import { TriangleStrokeRenderer } from '../../lib/renderers/TriangleStrokeRenderer.js';
+import { TetrahedronStrokeRenderer } from '../../lib/renderers/TetrahedronStrokeRenderer.js';
 import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
@@ -48,14 +48,14 @@ function makeRenderer(index) {
         spacing: parseFloat(ctrl.spacing.value),
     };
     if (index === 0) {
-        return new TriangleStrokeRenderer({ ...common, mode: 'facets', colorA: colors.a });
+        return new TetrahedronStrokeRenderer({ ...common, mode: 'facets', colorA: colors.a });
     }
     if (index === 1) {
-        return new TriangleStrokeRenderer({
-            ...common, mode: 'grain', colorA: colors.a, colorB: colors.b,
+        return new TetrahedronStrokeRenderer({
+            ...common, mode: 'colors', colors: colors.stripes,
         });
     }
-    return new TriangleStrokeRenderer({
+    return new TetrahedronStrokeRenderer({
         ...common, mode: 'metal', tint: colors.tint, background: background.texture,
     });
 }

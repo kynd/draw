@@ -63,31 +63,31 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
-  <section class="demo-section" id="triangles">
+  <section class="demo-section" id="tetrahedrons">
     <div class="demo-header">
-      <h2>Triangle strokes</h2>
-      <a href={`${base}/demos/triangle-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+      <h2>Tetrahedron strokes</h2>
+      <a href={`${base}/demos/tetra-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
     <div class="demo-embed">
-      <iframe src={`${base}/demos/triangle-strokes/index.html?embedded`} title="Triangle strokes" scrolling="no"></iframe>
+      <iframe src={`${base}/demos/tetra-strokes/index.html?embedded`} title="Tetrahedron strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Chains of 3D triangles along the spine, flat-shaded: same-hue facets, a wood-like grain, and metal that reflects the canvas.</p>
-      <div class="jp">スパインに沿った3Dの三角形の連なりで、フラットに陰影付けされます。同じ色相のファセット、木材を思わせる木目、そしてキャンバスを反射する金属。</div>
+      <p>Chains of 3D tetrahedrons along the spine, flat-shaded: same-hue facets, flat palette colors, and metal that reflects the canvas.</p>
+      <div class="jp">スパインに沿った3Dの四面体の連なりで、フラットに陰影付けされます。同じ色相のファセット、パレットからの平坦な色、そしてキャンバスを反射する金属。</div>
 
       <details>
         <summary>Details</summary>
-        <p><strong>Placement:</strong> Each triangle takes a random size, rotation, and tilt from the stroke's seed, on the same deepened, rotating spine as the tubes, so the chain turns as the stroke grows.</p>
-        <div class="jp"><strong>配置：</strong>各三角形は、ストロークのシードからランダムな大きさ、回転、傾きを取ります。チューブと同じ、深さがつき回転するスパインの上に置かれるため、連なりはストロークが伸びるにつれて回ります。</div>
+        <p><strong>Placement:</strong> Each tetrahedron takes a random size and orientation from the stroke's seed, on the same deepened, rotating spine as the tubes, so the chain turns as the stroke grows. The step between neighbors is their two circumradii plus <code>spacing</code> of their sum, so they cannot touch.</p>
+        <div class="jp"><strong>配置：</strong>各四面体は、ストロークのシードからランダムな大きさと向きを取ります。チューブと同じ、深さがつき回転するスパインの上に置かれるため、連なりはストロークが伸びるにつれて回ります。隣どうしの間隔は、2つの外接半径にその和の<code>spacing</code>倍を足したものなので、四面体どうしが触れることはありません。</div>
 
-        <p><strong>Facets:</strong> Each triangle's color keeps the base color's hue while its lightness and chroma vary, so the chain reads as one material in many cuts.</p>
-        <div class="jp"><strong>ファセット：</strong>各三角形の色は基本色の色相を保ちながら、明度と彩度が変わります。そのため連なりは、さまざまに切り出されたひとつの素材として読めます。</div>
+        <p><strong>Facets:</strong> Every face's color keeps the base color's hue while its lightness and chroma vary, so the chain reads as one material in many cuts.</p>
+        <div class="jp"><strong>ファセット：</strong>各面の色は基本色の色相を保ちながら、明度と彩度が変わります。そのため連なりは、さまざまに切り出されたひとつの素材として読めます。</div>
 
-        <p><strong>Grain:</strong> The faces carry a band pattern of world position warped by noise, between two colors, like cut wood.</p>
-        <div class="jp"><strong>木目：</strong>面には、ワールド座標をノイズでゆがめた、2色の間を行き来する帯模様が乗り、切り出した木材のように見えます。</div>
+        <p><strong>Colors:</strong> Every face takes one flat random color from the palette.</p>
+        <div class="jp"><strong>カラー：</strong>各面はパレットから、平坦なランダムの色をひとつ取ります。</div>
 
-        <p><strong>Metal:</strong> The same canvas reflection as the tubes, but the flat normals break it per triangle.</p>
-        <div class="jp"><strong>金属：</strong>チューブと同じキャンバスの反射ですが、法線がフラットなため、反射は三角形ごとに分断されます。</div>
+        <p><strong>Metal:</strong> The same canvas reflection as the tubes, but the flat normals break it per face.</p>
+        <div class="jp"><strong>金属：</strong>チューブと同じキャンバスの反射ですが、法線がフラットなため、反射は面ごとに分断されます。</div>
       </details>
     </div>
   </section>

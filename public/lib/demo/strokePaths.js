@@ -16,17 +16,19 @@ const WIGGLE_END = 0.62;
  *
  * The amplitude is held at zero until STRAIGHT_UNTIL and eased in with a smoothstep, so
  * the straight run and the curve belong to one continuous path rather than meeting at a
- * corner.
+ * corner. `wiggleScale` scales the wiggle's amplitude and wavelength together, so a
+ * demo can grow the wave with its stroke width and keep the drawn shape similar.
  */
-export function straightThenWiggle(yBase, { z0 = 0.002, zRise = 0.004, halfWidthX = 1.52 } = {}) {
+export function straightThenWiggle(yBase, { z0 = 0.002, zRise = 0.004, halfWidthX = 1.52,
+    wiggleScale = 1 } = {}) {
     const points = [];
     for (let i = 0; i < CONTROL_POINTS; i++) {
         const t = i / (CONTROL_POINTS - 1);
         const ramp = THREE.MathUtils.smoothstep(t, STRAIGHT_UNTIL, WIGGLE_END);
-        const phase = (t - STRAIGHT_UNTIL) * Math.PI * 4.4;
+        const phase = (t - STRAIGHT_UNTIL) * Math.PI * 4.4 / wiggleScale;
         points.push(new THREE.Vector3(
             THREE.MathUtils.lerp(-halfWidthX, halfWidthX, t),
-            yBase + ramp * AMPLITUDE * Math.sin(phase),
+            yBase + ramp * AMPLITUDE * wiggleScale * Math.sin(phase),
             z0 + zRise * t
         ));
     }
@@ -48,8 +50,8 @@ export function straightThenWiggle(yBase, { z0 = 0.002, zRise = 0.004, halfWidth
  * @returns {{ spread: number, margin: number, boxHeight: number }} `spread` is the
  *          distance from the centre to the outermost stroke's centre line.
  */
-export function layout(halfHeight, width, count = 3) {
-    const boxHeight = 2 * (AMPLITUDE + width);
+export function layout(halfHeight, width, count = 3, amplitude = AMPLITUDE) {
+    const boxHeight = 2 * (amplitude + width);
     const margin = Math.max(0, (2 * halfHeight - count * boxHeight) / (count + 3));
     // Adjacent centres sit one box plus one margin apart.
     const step = boxHeight + margin;
