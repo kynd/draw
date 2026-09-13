@@ -102,6 +102,8 @@ export class DrawingBoard {
             this._copyPlane.scale.set(covered.x * 2, covered.y * 2, 1);
             this._bakeScene.clear();
             this._bakeScene.add(this._backgroundPlane());
+            const regions = this._regionsGroup();
+            if (regions) this._bakeScene.add(regions);
             this._bakeScene.add(this._copyPlane);
             renderer.setRenderTarget(this._targets[this._front]);
             renderer.clear(true, true, false);
@@ -143,23 +145,58 @@ export class DrawingBoard {
     /**
      * The quad that paints the current background: the flat plane for a color,
      * the gradient plane for a spec `{ type: 'linear'|'radial', colorA, colorB,
-     * angle, center: [x, y] }`. The spec is plain data, so a recorder can store
-     * it and a replay reproduce the same fill.
+     * angle, center: [x, y] }`. A `{ type: 'regions', base, regions }` spec
+     * paints `base` (a color or gradient spec) under flat color polygons, each
+     * `{ points: [[x, y], ...], color }` in world units (`_regionsGroup`).
+     * The specs are plain data, so a recorder can store one and a replay
+     * reproduce the same fill.
      */
     _backgroundPlane() {
         const spec = this._clearSpec;
-        if (typeof spec === 'string' || spec.isColor) {
-            this._clearPlane.material.color.set(spec);
+        const base = spec?.type === 'regions' ? spec.base : spec;
+        if (typeof base === 'string' || base.isColor) {
+            this._clearPlane.material.color.set(base);
             return this._clearPlane;
         }
         const u = this._gradPlane.material.uniforms;
-        u.uA.value.set(spec.colorA);
-        u.uB.value.set(spec.colorB);
-        const angle = spec.angle ?? 0;
+        u.uA.value.set(base.colorA);
+        u.uB.value.set(base.colorB);
+        const angle = base.angle ?? 0;
         u.uDir.value.set(Math.cos(angle), Math.sin(angle));
-        u.uCenter.value.set(spec.center?.[0] ?? 0.5, spec.center?.[1] ?? 0.5);
-        u.uRadial.value = spec.type === 'radial' ? 1 : 0;
+        u.uCenter.value.set(base.center?.[0] ?? 0.5, base.center?.[1] ?? 0.5);
+        u.uRadial.value = base.type === 'radial' ? 1 : 0;
         return this._gradPlane;
+    }
+
+    /** The current spec's color polygons, cached per spec, or null. */
+    _regionsGroup() {
+        const spec = this._clearSpec;
+        if (spec?.type !== 'regions') return null;
+        if (this._regionSpec !== spec) {
+            this._regionGroup?.children.forEach(m => {
+                m.geometry.dispose();
+                m.material.dispose();
+            });
+            this._regionSpec = spec;
+            this._regionGroup = new THREE.Group();
+            spec.regions.forEach(r => {
+                const shape = new THREE.Shape();
+                shape.moveTo(r.points[0][0], r.points[0][1]);
+                r.points.slice(1).forEach(p => shape.lineTo(p[0], p[1]));
+                shape.closePath();
+                const mesh = new THREE.Mesh(
+                    new THREE.ShapeGeometry(shape),
+                    new THREE.MeshBasicMaterial({
+                        color: r.color, side: THREE.DoubleSide,
+                        depthTest: false, depthWrite: false,
+                    })
+                );
+                // Over the base plane, under the resize blit's copy.
+                mesh.renderOrder = -1.5;
+                this._regionGroup.add(mesh);
+            });
+        }
+        return this._regionGroup;
     }
 
     /**
@@ -172,8 +209,9 @@ export class DrawingBoard {
      */
     clear(background) {
         this._clearSpec = background;
-        this._clearColor.set(typeof background === 'string' || background.isColor
-            ? background : background.colorA);
+        const base = background?.type === 'regions' ? background.base : background;
+        this._clearColor.set(typeof base === 'string' || base.isColor
+            ? base : base.colorA);
         const renderer = this.stage.renderer;
         const previous = renderer.getRenderTarget();
         const previousAuto = renderer.autoClear;
@@ -181,6 +219,8 @@ export class DrawingBoard {
 
         this._bakeScene.clear();
         this._bakeScene.add(this._backgroundPlane());
+        const regions = this._regionsGroup();
+        if (regions) this._bakeScene.add(regions);
         renderer.setRenderTarget(this._targets[this._front]);
         renderer.setClearColor(this._clearColor, 1);
         renderer.clear(true, true, false);

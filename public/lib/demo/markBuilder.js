@@ -44,7 +44,10 @@ export function makeMarkBuilder({ state, board }) {
         if (state.tool.kind === 'blob') {
             const scale = pressureRatio(averagePressure(points),
                 { range, sens: state.sens, floor: PRESSURE_FLOOR });
-            const radius = Math.min(Math.max(width * 1.3 * scale, 0.05), 0.45);
+            // The cap yields to the set width, so an initializer's fat fills
+            // keep their radius while pressure stays bounded.
+            const radius = Math.min(Math.max(width * 1.3 * scale, 0.05),
+                Math.max(width * 1.3, 0.45));
             const contour = blobOutline(path, { span: 0.12, radius });
             if (!contour) return null;
             const renderer = state.tool.make(state.values, ctx);

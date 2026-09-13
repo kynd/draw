@@ -16,8 +16,9 @@ export class DrawingToolConfig {
      * @param {object}  [opts.palette]      Initial { hue, count, theme, seed }.
      * @param {string}  [opts.toolId]       Initial tool (rolled when omitted).
      * @param {boolean} [opts.preview]      The in-scene preview box.
-     * @param {number}  [opts.scatterCount] Random strokes a clear lays down;
-     *                                      0 for a blank canvas.
+     * @param {string[]} [opts.initializers] Initializer ids a clear picks from
+     *                                      at random (see initializers.js);
+     *                                      [] clears to bare paper.
      * @param {boolean} [opts.pointerTrace] The pointer's own line while drawing.
      */
     constructor({
@@ -25,7 +26,7 @@ export class DrawingToolConfig {
         palette = null,
         toolId = null,
         preview = true,
-        scatterCount = 3,
+        initializers = ['scatter'],
         pointerTrace = false,
     } = {}) {
         this.registry = tools === null
@@ -40,7 +41,7 @@ export class DrawingToolConfig {
         this.palette = palette;
         this.toolId = toolId;
         this.preview = Boolean(preview);
-        this.scatterCount = Math.max(0, Math.round(scatterCount));
+        this.initializers = [...initializers];
         this.pointerTrace = Boolean(pointerTrace);
     }
 }

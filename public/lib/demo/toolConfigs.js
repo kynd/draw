@@ -69,16 +69,17 @@ export class ShapeFillsDemoConfig extends DrawingToolConfig {
     }
 }
 
-/** The combined instrument: the whole master registry. */
+/** The combined instrument: the whole master registry, and a clear that
+ * picks from every initializer. */
 export class DrawingToolDemoConfig extends DrawingToolConfig {
     constructor() {
-        super();
+        super({ initializers: ['scatter', 'pattern', 'split', 'fills'] });
     }
 }
 
 /** Playback only: any log's tools resolve, and nothing draws over the replay. */
 export class PlaybackConfig extends DrawingToolConfig {
     constructor() {
-        super({ preview: false, scatterCount: 0 });
+        super({ preview: false, initializers: [] });
     }
 }

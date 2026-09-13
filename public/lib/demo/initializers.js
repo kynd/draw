@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../CanvasBuffer.js';
 import { randomThemedPalette, paperGradient, PALETTE_THEMES } from '../ThemedPaletteMaker.js';
 import { blobOutline } from '../pathEffects.js';
 import { StrokeStage } from './stage.js';
@@ -10,66 +11,66 @@ import { pathArcLength } from './pressure.js';
 
 /**
  * Canvas initializers: compositions that fill a fresh canvas, so a drawing
- * never starts from blank paper. Each initializer is one function taking
- * `{ stage, board, palette }`: it clears the board to a paper gradient and
- * bakes its composition, rolling everything else (tools, colors, placement)
- * itself. Placement uses Math.random, like the scatter it grew from; a host
- * that needs determinism records what the strokes drew.
+ * never starts from blank paper. Each initializer rolls a plan, plain data:
+ *
+ *   { background, colors, marks: [{ toolId, values, colorA, colorB,
+ *     widthPx, path }] }
+ *
+ * `background` is a board clear spec (the split initializer's color regions
+ * ride it as a `regions` spec); each mark is one stroke or fill for the tool
+ * named by `toolId`, with the path in world units. A fill's radius rides its
+ * `widthPx`: both executors draw the blob's contour at 1.3 times the width.
+ *
+ * Two executors run a plan. `runInitializer` bakes it straight onto a board,
+ * for the demos here. The drawing tool runs one on every clear through its
+ * own cycle, picked at random from its config's `initializers`, so the
+ * result records, replays, and mirrors like anything drawn. Rolling uses
+ * Math.random; a host that needs determinism records what the marks drew.
+ *
+ * Rolls pick from the given tool set (a page's registry subset); where a
+ * roll's preferred kind is missing from the set, any tool stands in.
  */
 
-const strokeTools = () => toolRegistry.filter(e => e.kind === 'stroke');
-const blobTools = () => toolRegistry.filter(e => e.kind === 'blob');
 const pick = list => list[Math.floor(Math.random() * list.length)];
 
-function markContext(board, palette, colorA, colorB, path) {
+function strokesOf(tools) {
+    const s = tools.filter(e => e.kind === 'stroke');
+    return s.length ? s : tools;
+}
+
+function blobsOf(tools) {
+    const b = tools.filter(e => e.kind === 'blob');
+    return b.length ? b : tools;
+}
+
+function rollStrokeMark(extentX, extentY, tools, colors, { length } = {}) {
+    const entry = pick(strokesOf(tools));
     return {
-        colorA, colorB,
-        colors: palette.entries.map(e => e.hex),
-        texture: board.texture,
-        seed: Math.random() * 1000,
-        start: path[0], end: path[path.length - 1],
-        tintLight: new THREE.Color(colorA).lerp(new THREE.Color('#ffffff'), 0.55).getStyle(),
+        toolId: entry.id, values: randomValues(entry),
+        colorA: pick(colors), colorB: pick(colors),
+        widthPx: 10 + Math.random() * 20,
+        path: scatterPath(extentX, extentY, { length }),
     };
 }
 
-function bakeStroke(board, entry, values, path, width, ctx) {
-    const renderer = entry.make(values, ctx);
-    const def = new StrokeDef({
-        points: path,
-        widthLeft: taperByArc(width, pathArcLength(path)),
-        renderer,
-        seed: ctx.seed,
-    });
-    const mesh = def.build();
-    board.bake([mesh]);
-    renderer.dispose(mesh);
-}
-
-/** One random stroke with a random stroke tool and palette colors. */
-function bakeRandomStroke(board, palette, path) {
-    const entry = pick(strokeTools());
-    const colors = palette.entries.map(e => e.hex);
-    const ctx = markContext(board, palette, pick(colors), pick(colors), path);
-    bakeStroke(board, entry, randomValues(entry), path,
-        (10 + Math.random() * 20) / 200, ctx);
-}
-
-/** One to four random strokes; the first runs long, the rest stay short. */
-function bakeRandomStrokes(stage, board, palette) {
+/** One to four scattered strokes; the first runs long, the rest stay short. */
+function rollScatterMarks(extentX, extentY, tools, colors) {
     const count = 1 + Math.floor(Math.random() * 4);
-    for (let i = 0; i < count; i++) {
-        const length = i === 0 ? 2.0 + Math.random() * 1.2 : undefined;
-        bakeRandomStroke(board, palette, scatterPath(stage.extentX, stage.extentY, { length }));
-    }
+    return Array.from({ length: count }, (_, i) => rollStrokeMark(extentX, extentY, tools, colors,
+        { length: i === 0 ? 2.0 + Math.random() * 1.2 : undefined }));
 }
 
 // ---------------------------------------------------------------------------
 // Scatter: the drawing tool's own start.
 
 /** A paper gradient and one to four scattered strokes, the first one long. */
-export function scatterInit({ stage, board, palette }) {
-    board.clear(paperGradient(palette));
-    bakeRandomStrokes(stage, board, palette);
+function rollScatter({ extentX, extentY, palette, tools = toolRegistry }) {
+    const colors = palette.entries.map(e => e.hex);
+    return {
+        background: paperGradient(palette),
+        colors,
+        marks: rollScatterMarks(extentX, extentY, tools, colors),
+    };
 }
 
 // ---------------------------------------------------------------------------
@@ -123,18 +124,17 @@ const PATTERNS = [
     },
 ];
 
-function drawPattern(stage, board, palette) {
-    const entry = pick(strokeTools());
+function rollPatternMarks(extentX, extentY, tools, colors) {
+    const entry = pick(strokesOf(tools));
     const values = randomValues(entry);
-    const colors = palette.entries.map(e => e.hex);
     const a = pick(colors), b = pick(colors);
     // Narrow, so the pattern reads as lines rather than bands.
-    const width = (3 + Math.random() * 5) / 200;
-    const paths = pick(PATTERNS)(stage.extentX, stage.extentY);
-    paths.forEach((path, i) => {
-        const ctx = markContext(board, palette, i % 2 ? b : a, i % 2 ? a : b, path);
-        bakeStroke(board, entry, values, path, width, ctx);
-    });
+    const widthPx = 3 + Math.random() * 5;
+    return pick(PATTERNS)(extentX, extentY).map((path, i) => ({
+        toolId: entry.id, values,
+        colorA: i % 2 ? b : a, colorB: i % 2 ? a : b,
+        widthPx, path,
+    }));
 }
 
 /**
@@ -142,10 +142,11 @@ function drawPattern(stage, board, palette) {
  * grid, or wave rows) in two alternating palette colors, with even odds of a
  * second composition overlapping the first.
  */
-export function patternInit({ stage, board, palette }) {
-    board.clear(paperGradient(palette));
-    drawPattern(stage, board, palette);
-    if (Math.random() < 0.5) drawPattern(stage, board, palette);
+function rollPattern({ extentX, extentY, palette, tools = toolRegistry }) {
+    const colors = palette.entries.map(e => e.hex);
+    const marks = rollPatternMarks(extentX, extentY, tools, colors);
+    if (Math.random() < 0.5) marks.push(...rollPatternMarks(extentX, extentY, tools, colors));
+    return { background: paperGradient(palette), colors, marks };
 }
 
 // ---------------------------------------------------------------------------
@@ -195,69 +196,67 @@ function maybeSplit(region, depth) {
 /**
  * The canvas divided by a random straight line, each part divided again at
  * even odds a few levels deep, every region filled with a flat palette
- * color, and one to four random strokes on top.
+ * color, and one to four random strokes on top. The regions ride the
+ * background spec, so a recording reproduces them with its clear.
  */
-export function splitInit({ stage, board, palette }) {
-    board.clear(paperGradient(palette));
-    const ex = stage.extentX + 0.05, ey = stage.extentY + 0.05;
+function rollSplit({ extentX, extentY, palette, tools = toolRegistry }) {
+    const colors = palette.entries.map(e => e.hex);
+    const ex = extentX + 0.05, ey = extentY + 0.05;
     const canvas = [
         new THREE.Vector3(-ex, -ey, 0), new THREE.Vector3(ex, -ey, 0),
         new THREE.Vector3(ex, ey, 0), new THREE.Vector3(-ex, ey, 0),
     ];
     const regions = splitOnce(canvas).flatMap(r => maybeSplit(r, 1));
-    const colors = [...palette.entries.map(e => e.hex)]
-        .sort(() => Math.random() - 0.5);
-    const meshes = regions.map((region, i) => {
-        const shape = new THREE.Shape();
-        shape.moveTo(region[0].x, region[0].y);
-        region.slice(1).forEach(p => shape.lineTo(p.x, p.y));
-        shape.closePath();
-        return new THREE.Mesh(
-            new THREE.ShapeGeometry(shape),
-            new THREE.MeshBasicMaterial({ color: colors[i % colors.length], side: THREE.DoubleSide })
-        );
-    });
-    board.bake(meshes);
-    meshes.forEach(m => { m.geometry.dispose(); m.material.dispose(); });
-    bakeRandomStrokes(stage, board, palette);
+    const shuffled = [...colors].sort(() => Math.random() - 0.5);
+    return {
+        background: {
+            type: 'regions',
+            base: paperGradient(palette),
+            regions: regions.map((region, i) => ({
+                points: region.map(p => [p.x, p.y]),
+                color: shuffled[i % shuffled.length],
+            })),
+        },
+        colors,
+        marks: rollScatterMarks(extentX, extentY, tools, colors),
+    };
 }
 
 // ---------------------------------------------------------------------------
-// Fills: a few very big fills over the edges.
+// Fills: a few very big fills across the canvas.
 
 /**
  * One to three very big fills with random fill tools. Each fill's spine runs
  * from a point past one edge into the far half of the canvas, so the fill
  * always crosses the midline without having to cover the center.
  */
-export function fillsInit({ stage, board, palette }) {
-    board.clear(paperGradient(palette));
+function rollFills({ extentX, extentY, palette, tools = toolRegistry }) {
     const colors = palette.entries.map(e => e.hex);
     const count = 1 + Math.floor(Math.random() * 3);
+    const marks = [];
     for (let i = 0; i < count; i++) {
-        const entry = pick(blobTools());
+        const entry = pick(blobsOf(tools));
         const edge = Math.floor(Math.random() * 4);
         const t = () => Math.random() * 2 - 1;
-        const ex = stage.extentX, ey = stage.extentY;
         // How far into the far half the spine reaches: from just past the
         // midline to past the opposite edge.
         const across = 0.1 + Math.random() * 1.1;
         let ax, ay, bx, by;
         if (edge < 2) {
             const side = edge === 0 ? -1 : 1;
-            ax = side * ex * 1.05; ay = t() * ey;
-            bx = -side * ex * across; by = t() * ey;
+            ax = side * extentX * 1.05; ay = t() * extentY;
+            bx = -side * extentX * across; by = t() * extentY;
         } else {
             const side = edge === 2 ? -1 : 1;
-            ay = side * ey * 1.05; ax = t() * ex;
-            by = -side * ey * across; bx = t() * ex;
+            ay = side * extentY * 1.05; ax = t() * extentX;
+            by = -side * extentY * across; bx = t() * extentX;
         }
         const wobble = 0.15 + Math.random() * 0.3;
         const phase = Math.random() * Math.PI * 2;
         const len = Math.hypot(bx - ax, by - ay) || 1;
         const nx = -(by - ay) / len, ny = (bx - ax) / len;
         const n = 32;
-        const gesture = Array.from({ length: n }, (_, k) => {
+        const path = Array.from({ length: n }, (_, k) => {
             const s = k / (n - 1);
             const w = Math.sin(s * Math.PI * 2 + phase) * wobble;
             return new THREE.Vector3(
@@ -267,18 +266,71 @@ export function fillsInit({ stage, board, palette }) {
             );
         });
         // A fat radius against the spine's length, so the fill reads as a
-        // rounded mass rather than a thin band.
-        const contour = blobOutline(gesture, { span: 0.15, radius: 0.55 + Math.random() * 0.35 });
-        if (!contour) continue;
-        const ctx = markContext(board, palette, pick(colors), pick(colors), gesture);
-        const renderer = entry.make(randomValues(entry), ctx);
-        const mesh = renderer.build(contour, ctx.seed);
-        board.bake([mesh]);
-        renderer.dispose(mesh);
+        // rounded mass; the width carries it to the executors.
+        const radius = 0.55 + Math.random() * 0.35;
+        marks.push({
+            toolId: entry.id, values: randomValues(entry),
+            colorA: pick(colors), colorB: pick(colors),
+            widthPx: radius / 1.3 * PIXELS_PER_UNIT,
+            path,
+        });
     }
+    return { background: paperGradient(palette), colors, marks };
 }
 
 // ---------------------------------------------------------------------------
+
+/** The initializers by id, each rolling a plan from
+ * `{ extentX, extentY, palette, tools }`. */
+export const INITIALIZERS = {
+    scatter: rollScatter,
+    pattern: rollPattern,
+    split: rollSplit,
+    fills: rollFills,
+};
+
+/** Bakes a plan straight onto a board, for the initializer demos. */
+export function runInitializer({ stage, board }, plan) {
+    board.clear(plan.background);
+    for (const mark of plan.marks) {
+        const entry = toolRegistry.find(e => e.id === mark.toolId);
+        if (!entry) continue;
+        const width = mark.widthPx / PIXELS_PER_UNIT;
+        const ctx = {
+            colorA: mark.colorA, colorB: mark.colorB, colors: plan.colors,
+            texture: board.texture, seed: Math.random() * 1000,
+            start: mark.path[0], end: mark.path[mark.path.length - 1],
+            tintLight: new THREE.Color(mark.colorA)
+                .lerp(new THREE.Color('#ffffff'), 0.55).getStyle(),
+        };
+        const renderer = entry.make(mark.values, ctx);
+        let mesh = null;
+        if (entry.kind === 'blob') {
+            const contour = blobOutline(mark.path, { span: 0.12, radius: width * 1.3 });
+            if (contour) mesh = renderer.build(contour, ctx.seed);
+        } else {
+            mesh = new StrokeDef({
+                points: mark.path,
+                widthLeft: taperByArc(width, pathArcLength(mark.path)),
+                renderer,
+                seed: ctx.seed,
+            }).build();
+        }
+        if (mesh) {
+            board.bake([mesh]);
+            renderer.dispose(mesh);
+        }
+    }
+}
+
+const onBoard = roll => ({ stage, board, palette }) =>
+    runInitializer({ stage, board },
+        roll({ extentX: stage.extentX, extentY: stage.extentY, palette }));
+
+export const scatterInit = onBoard(rollScatter);
+export const patternInit = onBoard(rollPattern);
+export const splitInit = onBoard(rollSplit);
+export const fillsInit = onBoard(rollFills);
 
 const ROLL_THEMES = PALETTE_THEMES.filter(th => th.id !== 'black').map(th => th.id);
 

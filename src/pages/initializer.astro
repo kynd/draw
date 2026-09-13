@@ -9,8 +9,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   </div>
 
   <div class="prose">
-    <p>Each initializer clears the board to a paper gradient and bakes one composition, rolling its tools, colors, and placement itself. The button on the canvas corner runs it again with a fresh palette. The initializers live as one group in the library (<code>scatterInit</code>, <code>patternInit</code>, <code>splitInit</code>, <code>fillsInit</code>), sharing one contract.</p>
-    <div class="jp">それぞれのイニシャライザは、ボードを紙のグラデーションにクリアし、ひとつの構成を焼き込みます。ツール、色、配置は自分でロールします。キャンバスの角のボタンで、新しいパレットでもう一度実行できます。イニシャライザはライブラリの中にひとつのグループとして置かれ（<code>scatterInit</code>、<code>patternInit</code>、<code>splitInit</code>、<code>fillsInit</code>）、ひとつの契約を共有します。</div>
+    <p>Each initializer rolls one composition (its tools, colors, and placement) and bakes it over a paper gradient. The button on the canvas corner runs it again with a fresh palette. The initializers live as one group in the library, and the drawing tool runs them too: every clear picks one at random from its config's list, so the try-drawing demos start with the scatter, and the Drawing Tool Demo and the packaging layer start with any of the four.</p>
+    <div class="jp">それぞれのイニシャライザは、ひとつの構成（ツール、色、配置）をロールし、紙のグラデーションの上に焼き込みます。キャンバスの角のボタンで、新しいパレットでもう一度実行できます。イニシャライザはライブラリの中にひとつのグループとして置かれ、描画ツールもこれを使います。クリアのたびに設定のリストからランダムにひとつが選ばれるため、Try drawingのデモはスキャッタから始まり、Drawing Tool Demoとパッケージング層は4つのどれかから始まります。</div>
   </div>
 
   <section class="demo-section" id="scatter">

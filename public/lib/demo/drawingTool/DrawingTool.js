@@ -7,7 +7,8 @@ import { StrokeStage } from '../stage.js';
 import { CoverageLayer } from '../coverageLayer.js';
 import { DrawingBoard } from '../drawingBoard.js';
 import { setupDrawCycle } from '../drawCycle.js';
-import { taperByArc, scatterPath } from '../strokePaths.js';
+import { taperByArc } from '../strokePaths.js';
+import { INITIALIZERS } from '../initializers.js';
 import { pathArcLength } from '../pressure.js';
 import { StrokeRecorder } from '../strokeRecorder.js';
 import { DrawingPlayer, downloadDrawingZip } from '../drawingPlayer.js';
@@ -471,29 +472,41 @@ export class DrawingTool {
     // Canvas
 
     /**
-     * A fresh canvas: the background (rolled from the palette when omitted),
-     * the configured scatter strokes, and a new take for the recorder.
+     * A fresh canvas: one of the config's initializers, picked at random,
+     * rolls the background and the starting marks, and the marks feed the
+     * cycle, so they record, replay, and mirror like anything drawn. An
+     * explicit `background` overrides the initializer's; with no configured
+     * initializers the canvas clears to bare paper.
      */
     clear({ background = null } = {}) {
-        const bg = background ?? this._rollBackground();
         this.cycle.disposeGhost();
+        const ids = this.config.initializers;
+        const plan = ids.length
+            ? INITIALIZERS[ids[Math.floor(Math.random() * ids.length)]]({
+                extentX: this.stage.extentX, extentY: this.stage.extentY,
+                palette: this._state.palette, tools: this._registry,
+            })
+            : { marks: [] };
+        const bg = background ?? plan.background ?? this._rollBackground();
         this.board.clear(bg);
         this.recorder.begin(bg);
         this._emitLive('clear', { background: bg });
         this._initializing = true;
-        for (let i = 0; i < this.config.scatterCount; i++) {
-            this._applyRoll(this._rollEntry());
-            const colors = this._state.colors;
-            this._state.colorA = colors[Math.floor(Math.random() * colors.length)];
-            this._state.colorB = colors[Math.floor(Math.random() * colors.length)];
-            const points = scatterPath(this.stage.extentX, this.stage.extentY);
+        for (const mark of plan.marks) {
+            const entry = this._registry.find(e => e.id === mark.toolId);
+            if (!entry) continue;
+            this._state.tool = entry;
+            this._state.values = { ...mark.values };
+            this._state.widthPx = mark.widthPx;
+            this._state.colorA = mark.colorA;
+            this._state.colorB = mark.colorB;
             this._emitLiveState();
-            this._emitLive('points', { points: points.map(plainPoint) });
+            this._emitLive('points', { points: mark.path.map(plainPoint) });
             // 'end' goes out before the feed: the feed's release rerolls the
             // palette, which streams a fresh state, and that state must not
             // land on a mirror before this stroke has committed.
             this._emitLive('end');
-            this.cycle.feed(points, true);
+            this.cycle.feed(mark.path, true);
         }
         this._initializing = false;
         // Back to the live selection: the palette from its config, the tool

@@ -26,16 +26,17 @@ const VERSION = 2;
 const DIAL_MAX = 127;
 const DIAL_STEP = 6;
 
+/** The full registry, and a clear that picks from every initializer. */
 class ProductionConfig extends DrawingToolConfig {
     constructor() {
-        super();
+        super({ initializers: ['scatter', 'pattern', 'split', 'fills'] });
     }
 }
 
-/** A view that never draws on its own: no preview, no scatter, no input. */
+/** A view that never draws on its own: no preview, no initializer, no input. */
 class ViewConfig extends DrawingToolConfig {
     constructor() {
-        super({ preview: false, scatterCount: 0 });
+        super({ preview: false, initializers: [] });
     }
 }
 

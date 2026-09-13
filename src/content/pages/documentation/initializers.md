@@ -4,15 +4,18 @@ title: Initializers
 
 <div class="prose">
 
-Compositions that fill a fresh canvas, so a drawing never starts from blank paper. Each initializer is one function taking `{ stage, board, palette }`: it clears the board to a paper gradient (`paperGradient` on the Palette page) and bakes its composition, rolling everything else (tools, colors, placement) itself. The tools come from the master registry, so every stroke and fill an initializer lays down is one the drawing tool can draw.
-<div class="jp">まっさらなキャンバスを満たす構成です。描画が白紙から始まることはなくなります。それぞれのイニシャライザは`{ stage, board, palette }`を受け取るひとつの関数です。ボードを紙のグラデーション（Paletteページの`paperGradient`）にクリアし、構成を焼き込みます。ツール、色、配置は自分でロールします。ツールはマスターレジストリから取られるため、イニシャライザが置くストロークと塗りはすべて、描画ツールが描けるものです。</div>
+Compositions that fill a fresh canvas, so a drawing never starts from blank paper. Each initializer rolls a plan, plain data: a background spec and a list of marks, each naming a registry tool with its values, colors, width, and path in world units. A fill's radius rides its width (the contour is drawn at 1.3 times it), and the split initializer's color regions ride the background spec, so a recording reproduces them with its clear.
+<div class="jp">まっさらなキャンバスを満たす構成です。描画が白紙から始まることはなくなります。それぞれのイニシャライザはプランをロールします。プランは素のデータで、背景の指定と筆跡のリストからなり、各筆跡はレジストリのツールを名前で指し、値、色、幅、ワールド座標のパスを持ちます。塗りの半径は幅に乗ります（輪郭は幅の1.3倍で描かれる）。分割イニシャライザの色の領域は背景の指定に乗るため、記録はクリアと一緒にそれを再現します。</div>
 
 <div class="page-note">
 <p><code>public/lib/demo/initializers.js</code></p>
 </div>
 
-Placement uses Math.random, like the scatter it grew from; a host that needs determinism records what the strokes drew.
-<div class="jp">配置はMath.randomを使います（元になったスキャッタと同じです）。決定性が必要なホストは、ストロークが描いたものを記録します。</div>
+Two executors run a plan. `runInitializer({ stage, board }, plan)` bakes it straight onto a board, for the initializer demos. The drawing tool runs one on every `clear`, picked at random from its config's `initializers` list and rolled from the page's own tool set, and feeds the marks through its cycle, so the result records, replays, and mirrors like anything drawn (the records carry `initial: true`, so a playback can place them instantly). The try-drawing demos use `['scatter']`, the default; the Drawing Tool Demo and the packaging layer pick from all four.
+<div class="jp">プランを実行するものは2つあります。`runInitializer({ stage, board }, plan)`はプランをそのままボードに焼き込みます（イニシャライザのデモ用）。描画ツールは`clear`のたびに、設定の`initializers`リストからランダムにひとつを選び、そのページのツールの集合からロールして、筆跡をサイクルに流します。そのため結果は描いたものと同じように記録され、再生され、ミラーされます（記録は`initial: true`を持つため、再生は一瞬で置けます）。Try drawingのデモは既定の`['scatter']`を使い、Drawing Tool Demoとパッケージング層は4つすべてから選びます。</div>
+
+Rolling uses Math.random; a host that needs determinism records what the marks drew. Where a roll's preferred tool kind is missing from the page's set, any tool stands in.
+<div class="jp">ロールはMath.randomを使います。決定性が必要なホストは、筆跡が描いたものを記録します。ロールが求めるツールの種類がページの集合にないときは、任意のツールが代わりに立ちます。</div>
 
 ## The initializers
 
