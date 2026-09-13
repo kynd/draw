@@ -5,7 +5,7 @@ import { blobOutline } from '../pathEffects.js';
 import { StrokeStage } from './stage.js';
 import { DrawingBoard } from './drawingBoard.js';
 import { toolRegistry, randomValues } from './toolRegistry.js';
-import { scatterPath, seededScribble, taperByArc } from './strokePaths.js';
+import { scatterPath, taperByArc } from './strokePaths.js';
 import { pathArcLength } from './pressure.js';
 
 /**
@@ -54,15 +54,22 @@ function bakeRandomStroke(board, palette, path) {
         (10 + Math.random() * 20) / 200, ctx);
 }
 
+/** One to four random strokes; the first runs long, the rest stay short. */
+function bakeRandomStrokes(stage, board, palette) {
+    const count = 1 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < count; i++) {
+        const length = i === 0 ? 2.0 + Math.random() * 1.2 : undefined;
+        bakeRandomStroke(board, palette, scatterPath(stage.extentX, stage.extentY, { length }));
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Scatter: the drawing tool's own start.
 
-/** A paper gradient and a few strokes scattered with random tools. */
+/** A paper gradient and one to four scattered strokes, the first one long. */
 export function scatterInit({ stage, board, palette }) {
     board.clear(paperGradient(palette));
-    for (let i = 0; i < 3; i++) {
-        bakeRandomStroke(board, palette, scatterPath(stage.extentX, stage.extentY));
-    }
+    bakeRandomStrokes(stage, board, palette);
 }
 
 // ---------------------------------------------------------------------------
@@ -86,13 +93,6 @@ function stripePaths(ex, ey, angle, spacing) {
     return paths;
 }
 
-function offCenter(ex, ey) {
-    return {
-        cx: (Math.random() - 0.5) * 1.4 * ex,
-        cy: (Math.random() - 0.5) * 1.4 * ey,
-    };
-}
-
 const PATTERNS = [
     // Stripes at a random angle.
     (ex, ey) => stripePaths(ex, ey, Math.random() * Math.PI, 0.3 + Math.random() * 0.35),
@@ -104,33 +104,6 @@ const PATTERNS = [
             ...stripePaths(ex, ey, angle, spacing),
             ...stripePaths(ex, ey, angle + Math.PI / 2, spacing),
         ];
-    },
-    // Concentric rings around a random center.
-    (ex, ey) => {
-        const { cx, cy } = offCenter(ex, ey);
-        const R = Math.hypot(ex, ey) + Math.hypot(cx, cy) + 0.3;
-        const spacing = 0.3 + Math.random() * 0.3;
-        const paths = [];
-        for (let r = spacing * (0.5 + Math.random() * 0.5); r <= R; r += spacing) {
-            const n = Math.max(32, Math.round(r * 40));
-            paths.push(Array.from({ length: n + 1 }, (_, i) => {
-                const a = (i / n) * Math.PI * 2;
-                return new THREE.Vector3(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 0);
-            }));
-        }
-        return paths;
-    },
-    // Rays from a random point.
-    (ex, ey) => {
-        const { cx, cy } = offCenter(ex, ey);
-        const R = Math.hypot(ex, ey) + Math.hypot(cx, cy) + 0.3;
-        const count = 9 + Math.floor(Math.random() * 10);
-        const r0 = 0.1 + Math.random() * 0.3;
-        return Array.from({ length: count }, (_, k) => {
-            const a = (k / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.25;
-            return line(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0,
-                cx + Math.cos(a) * R, cy + Math.sin(a) * R);
-        });
     },
     // Wave rows.
     (ex, ey) => {
@@ -150,22 +123,29 @@ const PATTERNS = [
     },
 ];
 
-/**
- * One random stroke tool drawing one composition over the paper: stripes, a
- * grid, rings, rays, or waves, in two alternating palette colors.
- */
-export function patternInit({ stage, board, palette }) {
-    board.clear(paperGradient(palette));
+function drawPattern(stage, board, palette) {
     const entry = pick(strokeTools());
     const values = randomValues(entry);
     const colors = palette.entries.map(e => e.hex);
     const a = pick(colors), b = pick(colors);
-    const width = (6 + Math.random() * 16) / 200;
+    // Narrow, so the pattern reads as lines rather than bands.
+    const width = (3 + Math.random() * 5) / 200;
     const paths = pick(PATTERNS)(stage.extentX, stage.extentY);
     paths.forEach((path, i) => {
         const ctx = markContext(board, palette, i % 2 ? b : a, i % 2 ? a : b, path);
         bakeStroke(board, entry, values, path, width, ctx);
     });
+}
+
+/**
+ * A random stroke tool drawing one composition over the paper (stripes, a
+ * grid, or wave rows) in two alternating palette colors, with even odds of a
+ * second composition overlapping the first.
+ */
+export function patternInit({ stage, board, palette }) {
+    board.clear(paperGradient(palette));
+    drawPattern(stage, board, palette);
+    if (Math.random() < 0.5) drawPattern(stage, board, palette);
 }
 
 // ---------------------------------------------------------------------------
@@ -215,7 +195,7 @@ function maybeSplit(region, depth) {
 /**
  * The canvas divided by a random straight line, each part divided again at
  * even odds a few levels deep, every region filled with a flat palette
- * color, and one random stroke on top.
+ * color, and one to four random strokes on top.
  */
 export function splitInit({ stage, board, palette }) {
     board.clear(paperGradient(palette));
@@ -239,15 +219,16 @@ export function splitInit({ stage, board, palette }) {
     });
     board.bake(meshes);
     meshes.forEach(m => { m.geometry.dispose(); m.material.dispose(); });
-    bakeRandomStroke(board, palette, scatterPath(stage.extentX, stage.extentY));
+    bakeRandomStrokes(stage, board, palette);
 }
 
 // ---------------------------------------------------------------------------
 // Fills: a few very big fills over the edges.
 
 /**
- * One to three very big fills with random fill tools, each centered on a
- * canvas edge so it stretches past it.
+ * One to three very big fills with random fill tools. Each fill's spine runs
+ * from the canvas center to a point past a random edge, so the fill always
+ * covers the center and reaches beyond at least one edge.
  */
 export function fillsInit({ stage, board, palette }) {
     board.clear(paperGradient(palette));
@@ -257,11 +238,21 @@ export function fillsInit({ stage, board, palette }) {
         const entry = pick(blobTools());
         const edge = Math.floor(Math.random() * 4);
         const t = Math.random() * 2 - 1;
-        const cx = edge === 0 ? -stage.extentX : edge === 1 ? stage.extentX : t * stage.extentX;
-        const cy = edge === 2 ? -stage.extentY : edge === 3 ? stage.extentY : t * stage.extentY;
-        const gesture = seededScribble(Math.random() * 1000,
-            { cx, cy, scale: 1.0 + Math.random() * 0.8 });
-        const contour = blobOutline(gesture, { span: 0.15, radius: 0.3 + Math.random() * 0.25 });
+        const px = edge === 0 ? -stage.extentX : edge === 1 ? stage.extentX : t * stage.extentX;
+        const py = edge === 2 ? -stage.extentY : edge === 3 ? stage.extentY : t * stage.extentY;
+        const reach = 1.15 + Math.random() * 0.2;
+        const wobble = 0.15 + Math.random() * 0.3;
+        const phase = Math.random() * Math.PI * 2;
+        const dx = px * reach, dy = py * reach;
+        const len = Math.hypot(dx, dy) || 1;
+        const nx = -dy / len, ny = dx / len;
+        const n = 32;
+        const gesture = Array.from({ length: n }, (_, k) => {
+            const s = k / (n - 1);
+            const w = Math.sin(s * Math.PI * 2 + phase) * wobble;
+            return new THREE.Vector3(dx * s + nx * w, dy * s + ny * w, 0);
+        });
+        const contour = blobOutline(gesture, { span: 0.15, radius: 0.35 + Math.random() * 0.25 });
         if (!contour) continue;
         const ctx = markContext(board, palette, pick(colors), pick(colors), gesture);
         const renderer = entry.make(randomValues(entry), ctx);

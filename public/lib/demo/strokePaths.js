@@ -123,12 +123,12 @@ export function seededSegment(seed, { cx = 0, cy = 0, r = 0.6 } = {}) {
  * that swells through the middle. Uses Math.random; a caller that needs
  * determinism records the points it gets back.
  */
-export function scatterPath(extentX, extentY) {
+export function scatterPath(extentX, extentY, { length = null } = {}) {
     const ex = extentX * 0.7, ey = extentY * 0.7;
     const x0 = (Math.random() * 2 - 1) * ex * 0.6;
     const y0 = (Math.random() * 2 - 1) * ey * 0.6;
     const angle = Math.random() * Math.PI * 2;
-    const len = 0.8 + Math.random() * 1.2;
+    const len = length ?? 0.8 + Math.random() * 1.2;
     const amp = 0.08 + Math.random() * 0.22;
     const freq = 3 + Math.random() * 5;
     const dir = new THREE.Vector2(Math.cos(angle), Math.sin(angle));
