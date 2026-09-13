@@ -236,8 +236,26 @@ export class PatternStrokeRenderer extends StrokeRenderer {
                 varying vec2 vDims;
                 varying float vSeed;
                 varying vec3 vColor;
+                float hash21(vec2 p) {
+                    vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+                    p3 += dot(p3, p3.yzx + 33.33);
+                    return fract((p3.x + p3.y) * p3.z);
+                }
+                float valueNoise(vec2 p) {
+                    vec2 i = floor(p), f = fract(p);
+                    f = f * f * (3.0 - 2.0 * f);
+                    return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x),
+                               mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x), f.y);
+                }
+                float fbm(vec2 p) {
+                    float v = 0.0, a = 0.5;
+                    for (int i = 0; i < 4; i++) { v += a * valueNoise(p); p *= 2.0; a *= 0.5; }
+                    return v;
+                }
                 void main() {
                     float d;
+                    float shade = 1.0;
+                    float dryMul = 1.0;
                     if (uMode == 1) {
                         // A disc wobbled by seeded harmonics of the angle, so
                         // it reads as a circle drawn by hand.
@@ -252,6 +270,15 @@ export class PatternStrokeRenderer extends StrokeRenderer {
                         float bow = sin(u * 3.14159 + vSeed) * vDims.y * 0.3;
                         float prof = pow(max(1.0 - u * u, 0.0), 0.65);
                         d = abs(vLocal.y - bow) - vDims.y * prof;
+                        // Brush texture: bristle streaks run the blade's
+                        // length, erode its edge, streak its color, and drop
+                        // dry patches where the brush lifted.
+                        float lane = (vLocal.y - bow) / max(vDims.y, 1e-5);
+                        float bristle = fbm(vec2(u * 2.5, lane * 5.0 + vSeed * 31.0));
+                        d += (bristle - 0.5) * vDims.y * 0.55;
+                        shade = mix(0.72, 1.18, bristle);
+                        float dry = fbm(vec2(u * 1.1 + vSeed * 7.0, lane * 1.5));
+                        dryMul = smoothstep(0.16, 0.42, dry + 0.18);
                     } else {
                         // A capsule, bowed by a seeded sine along its length so
                         // the edge is not ruler-straight.
@@ -259,9 +286,9 @@ export class PatternStrokeRenderer extends StrokeRenderer {
                         d = length(p) - vDims.y;
                         d += sin(vLocal.x / max(vDims.x, 1e-5) * 3.14159 + vSeed * 9.3) * vDims.y * 0.12;
                     }
-                    float alpha = 1.0 - smoothstep(-0.0025, 0.0025, d);
+                    float alpha = (1.0 - smoothstep(-0.0025, 0.0025, d)) * dryMul;
                     if (alpha <= 0.01) discard;
-                    gl_FragColor = vec4(vColor, alpha);
+                    gl_FragColor = vec4(vColor * shade, alpha);
                 }
             `,
             vertexColors: true,
