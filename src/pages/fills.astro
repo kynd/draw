@@ -35,8 +35,8 @@ const demos = [
 
       <details>
         <summary>Details</summary>
-        <p><strong>Spikes:</strong> An integer count of spikes runs around the boundary's arc, so the profile meets itself at the seam in a valley. Each spike hashes its height and lean from its index, and each valley hashes its depth from the boundary its two neighbors share, dipping inside the shape.</p>
-        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧をひと回りするため、プロファイルは継ぎ目でも谷でつながります。各トゲは高さと傾きを自身のインデックスのハッシュから決め、各谷は隣り合う2本が共有する境界のハッシュから深さを決めて、形の内側に食い込みます。</div>
+        <p><strong>Spikes:</strong> An integer count of spikes runs around the boundary's arc, so the profile meets itself at the seam in a valley. Each spike hashes its height and lean from its index. Spikes only stick out: every valley returns to the base contour, so the fill always covers its region.</p>
+        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧をひと回りするため、プロファイルは継ぎ目でも谷でつながります。各トゲは高さと傾きを自身のインデックスのハッシュから決めます。トゲは外側にだけ突き出します。谷は必ず元の輪郭まで戻るため、塗りはつねに自分の領域を覆います。</div>
 
         <p><strong>Wobble:</strong> The bump offset is a noise of world position rather than arc, so it cannot show a seam at all.</p>
         <div class="jp"><strong>うねり：</strong>ふくらみのオフセットは弧ではなくワールド座標のノイズなので、継ぎ目がそもそも現れません。</div>

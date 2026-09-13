@@ -8,10 +8,10 @@ import { BlobRenderer } from './BlobRenderer.js';
  *
  * Spikes follow the boundary's arc position with an integer count around the loop, so
  * the profile meets itself at the seam in a valley. Each spike hashes its height and
- * lean from its own index, and each valley hashes its depth from the boundary the two
- * neighboring spikes share, dipping inside the shape. The tips keep their corner under
- * any sharpness. The wobble is a noise of world position rather than arc, so it cannot
- * show a seam at all.
+ * lean from its own index. Spikes only stick out: every valley returns to the base
+ * contour, so the fill always covers its region and the seam meets itself at zero.
+ * The tips keep their corner under any sharpness. The wobble is a noise of world
+ * position rather than arc, so it cannot show a seam at all.
  */
 export class ShapedBlobRenderer extends BlobRenderer {
     constructor({
@@ -81,12 +81,10 @@ export class ShapedBlobRenderer extends BlobRenderer {
                     float tip = mix(0.25, 0.75, hash11(cell * 7.3 + uSeed * 17.0));
                     float tri = f < tip ? f / tip : (1.0 - f) / (1.0 - tip);
                     float profile = pow(max(tri, 0.0), uSharp);
-                    // Valleys dip inside the shape. Each depth is hashed from the
-                    // boundary the two neighboring spikes share, so the profile
-                    // stays continuous across cells.
-                    float vd = mix(hash11(cell * 5.1 + uSeed * 37.0),
-                                   hash11((cell + 1.0) * 5.1 + uSeed * 37.0), f);
-                    offset += uSpikeAmp * (h * profile - mix(0.3, 1.0, vd) * (1.0 - profile));
+                    // Spikes only stick out: every valley returns to the base
+                    // contour, so the fill always covers its region, and the
+                    // profile is zero at every cell edge, the seam included.
+                    offset += uSpikeAmp * h * profile;
                 }
                 if (uWobble > 0.0) {
                     offset += (fbm(vWorld * uWobbleFreq + uSeed * 11.0) - 0.5) * 2.0 * uWobble;
