@@ -223,12 +223,17 @@ class DrawingPlayerWrapper {
         });
     }
 
-    /** Loads a recording, ready to play from the start. */
+    /** Loads a recording. The background and what the initializer laid down
+     * show immediately, so play animates only the drawn strokes. */
     async load(recording) {
         clearTimeout(this._loopTimer);
         const log = JSON.parse(await recording.data.text());
         this._tool.setDrawingData(log);
         this._tool.player.setData(log);
+        const records = log.records ?? [];
+        let n = 0;
+        while (n < records.length && records[n].initial) n++;
+        this._tool.player.seek(n);
     }
 
     _playOptions() {

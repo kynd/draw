@@ -57,6 +57,8 @@ export interface DrawingLiveView {
 // at the start of the recording is placed instantly instead of animated.
 export interface DrawingPlayer {
     mount(container: HTMLElement): void;
+    // On load, the background and what the initializer laid down show
+    // immediately; play animates only the drawn strokes.
     load(recording: DrawingRecording): Promise<void>;
     play(options?: {
         speed?: number; loop?: boolean; strokeWait?: number; endWait?: number;
