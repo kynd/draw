@@ -24,7 +24,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         tint = '#e8d8c8',
         background = null,
         stripes = 5,       // stripe bands per unit of arc length
-        wobbleFreq = 12,
+        wobbleFreq = 12,   // wave rate relative to the width
         bend = 0.4,        // how far the reflection displaces the canvas lookup
         ...rest
     } = {}) {
@@ -43,9 +43,12 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
     _radiusAt(def, t, s, seed) {
         const base = def.widthLeftAt(t);
         if (this.mode !== 'wobble') return { r: Math.max(base, 1e-4), wob: 0.5 };
-        // Two bands, the second faster, so the width changes often and by a lot.
-        const wob = 0.5 + 0.32 * Math.sin(s * this.wobbleFreq + seed * 7.7)
-                        + 0.18 * Math.sin(s * this.wobbleFreq * 2.33 + seed * 3.1);
+        // The wave advances by arc measured in widths, so the swell keeps its
+        // shape as the tube grows instead of rippling faster than it is
+        // thick. Two bands, the second faster, so the width changes often.
+        const phase = s / Math.max(def.widthLeftAt(0.5), 1e-4) * this.wobbleFreq * 0.025;
+        const wob = 0.5 + 0.32 * Math.sin(phase + seed * 7.7)
+                        + 0.18 * Math.sin(phase * 2.33 + seed * 3.1);
         return { r: Math.max(base * (0.3 + 1.1 * wob), 1e-4), wob };
     }
 
