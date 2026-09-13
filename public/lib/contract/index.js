@@ -197,6 +197,7 @@ class DrawingPlayerWrapper {
         this._speed = 0.5;
         this._strokeWait = 0.3;
         this._endWait = 1.0;
+        this._instantInitial = true;
         this._loopTimer = 0;
         this._ended = new Set();
     }
@@ -233,6 +234,7 @@ class DrawingPlayerWrapper {
         return {
             pointsPerFrame: Math.max(1, Math.round(4 * this._speed)),
             strokeWaitMs: this._strokeWait * 1000,
+            instantInitial: this._instantInitial,
         };
     }
 
@@ -241,13 +243,16 @@ class DrawingPlayerWrapper {
      * default); `strokeWait` rests that many seconds after each pen release
      * (not after the pieces a sharp turn splits a stroke into); `endWait`
      * rests after the finished drawing before a loop restarts. Without
-     * `loop`, playback simply ends at the last stroke.
+     * `loop`, playback simply ends at the last stroke. With `instantInitial`
+     * (the default), what the canvas initializer laid down is placed
+     * instantly instead of animated.
      */
-    play({ speed = 0.5, loop = false, strokeWait = 0.3, endWait = 1.0 } = {}) {
+    play({ speed = 0.5, loop = false, strokeWait = 0.3, endWait = 1.0, instantInitial = true } = {}) {
         this._speed = speed;
         this._loop = loop;
         this._strokeWait = strokeWait;
         this._endWait = endWait;
+        this._instantInitial = instantInitial;
         this._tool.player.play(this._playOptions());
     }
 

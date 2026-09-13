@@ -252,7 +252,9 @@ export function fillsInit({ stage, board, palette }) {
             const w = Math.sin(s * Math.PI * 2 + phase) * wobble;
             return new THREE.Vector3(dx * s + nx * w, dy * s + ny * w, 0);
         });
-        const contour = blobOutline(gesture, { span: 0.15, radius: 0.35 + Math.random() * 0.25 });
+        // A fat radius against the spine's length, so the fill reads as a
+        // rounded mass rather than a thin band.
+        const contour = blobOutline(gesture, { span: 0.15, radius: 0.55 + Math.random() * 0.35 });
         if (!contour) continue;
         const ctx = markContext(board, palette, pick(colors), pick(colors), gesture);
         const renderer = entry.make(randomValues(entry), ctx);

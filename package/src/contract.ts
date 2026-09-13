@@ -52,11 +52,16 @@ export interface DrawingLiveView {
 // default); `strokeWait` rests that many seconds after each pen release, not
 // after the pieces a sharp turn splits a stroke into (0.3 by default);
 // `endWait` rests after the finished drawing before a loop restarts (1 by
-// default). Without `loop`, playback simply ends at the last stroke.
+// default). Without `loop`, playback simply ends at the last stroke. With
+// `instantInitial` (true by default), what the canvas initializer laid down
+// at the start of the recording is placed instantly instead of animated.
 export interface DrawingPlayer {
     mount(container: HTMLElement): void;
     load(recording: DrawingRecording): Promise<void>;
-    play(options?: { speed?: number; loop?: boolean; strokeWait?: number; endWait?: number }): void;
+    play(options?: {
+        speed?: number; loop?: boolean; strokeWait?: number; endWait?: number;
+        instantInitial?: boolean;
+    }): void;
     pause(): void;
     seek(progress: number): void;
     onEnded(listener: () => void): () => void;

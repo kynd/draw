@@ -35,6 +35,7 @@ export class DrawingPlayer {
         this._recording = false;
         this._waitUntil = 0;
         this._strokeWaitMs = 0;
+        this._instantInitial = true;
         // Whether the canvas raster matches the data up to `position`. False
         // until the first reset, and after new data arrives.
         this._primed = false;
@@ -91,14 +92,17 @@ export class DrawingPlayer {
      * Animates from the current position, a few points per frame, resting
      * `strokeWaitMs` after each record marked `release` (a sharp turn splits
      * a stroke gesture into several records; only the last is a release, so
-     * the rest falls where the pen actually lifted). Returns whether playback
-     * started; `onDone` fires when the end is reached.
+     * the rest falls where the pen actually lifted). With `instantInitial`
+     * (the default), records marked `initial` (what the clear's initializer
+     * laid down) are placed instantly instead of animated. Returns whether
+     * playback started; `onDone` fires when the end is reached.
      */
-    play({ pointsPerFrame = 4, strokeWaitMs = 0, onDone } = {}) {
+    play({ pointsPerFrame = 4, strokeWaitMs = 0, instantInitial = true, onDone } = {}) {
         if (this._playing || !this.hasData) return false;
         if (!this._primed || this._pos >= this.length) this._reset();
         this._ppf = pointsPerFrame;
         this._strokeWaitMs = strokeWaitMs;
+        this._instantInitial = instantInitial;
         this._onDone = onDone ?? null;
         this._playing = true;
         // Resuming mid-record: the record's state may not be current anymore.
@@ -128,6 +132,16 @@ export class DrawingPlayer {
             return;
         }
         this._waitUntil = 0;
+        // Initializer records are placed instantly, whole strokes at once, so
+        // playback starts from the drawing itself.
+        while (this._instantInitial && this._pi === 0
+            && this._pos < this.length && this.data.records[this._pos].initial) {
+            const record = this.data.records[this._pos];
+            this.applyRecord(record);
+            this.feed(toVectors(record.points), true);
+            this._pos++;
+            this._emit('step');
+        }
         if (this._pos >= this.length) {
             this._playing = false;
             this._emit('end');
@@ -178,7 +192,10 @@ export class DrawingPlayer {
         }
         this._emit('step');
         if (wasPlaying && this._pos < this.length) {
-            this.play({ pointsPerFrame: this._ppf, strokeWaitMs: this._strokeWaitMs, onDone: this._onDone });
+            this.play({
+                pointsPerFrame: this._ppf, strokeWaitMs: this._strokeWaitMs,
+                instantInitial: this._instantInitial, onDone: this._onDone,
+            });
         }
     }
 

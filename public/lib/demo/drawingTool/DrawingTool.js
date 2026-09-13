@@ -98,6 +98,9 @@ export class DrawingTool {
                     colorA: this._state.colorA, colorB: this._state.colorB,
                     colors: [...this._state.colors],
                     seed,
+                    // Marks what the clear's initializer laid down, so a
+                    // playback can place it instantly instead of animating it.
+                    ...(this._initializing ? { initial: true } : {}),
                 }, points);
             },
             // Once per gesture, after every piece has committed, so the reroll
@@ -149,6 +152,7 @@ export class DrawingTool {
         // and play — its feeds must not re-record, so the guard sits on the
         // feed itself rather than on the replay flow.
         this._playerFeeding = false;
+        this._initializing = false;
         this.player = new DrawingPlayer({
             feed: (points, done) => {
                 this._playerFeeding = true;
@@ -476,6 +480,7 @@ export class DrawingTool {
         this.board.clear(bg);
         this.recorder.begin(bg);
         this._emitLive('clear', { background: bg });
+        this._initializing = true;
         for (let i = 0; i < this.config.scatterCount; i++) {
             this._applyRoll(this._rollEntry());
             const colors = this._state.colors;
@@ -490,6 +495,7 @@ export class DrawingTool {
             this._emitLive('end');
             this.cycle.feed(points, true);
         }
+        this._initializing = false;
         // Back to the live selection: the palette from its config, the tool
         // from the trail's current entry.
         this._regenPalette();
