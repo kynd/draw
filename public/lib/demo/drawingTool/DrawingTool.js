@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../../StrokeDef.js';
-import { ThemedPaletteMaker, PALETTE_THEMES } from '../../ThemedPaletteMaker.js';
-import { oklchToHex, maxChromaAt } from '../../color.js';
+import { ThemedPaletteMaker, PALETTE_THEMES, paperGradient } from '../../ThemedPaletteMaker.js';
 import { PIXELS_PER_UNIT } from '../../CanvasBuffer.js';
 import { blobOutline } from '../../pathEffects.js';
 import { StrokeStage } from '../stage.js';
@@ -501,22 +500,7 @@ export class DrawingTool {
     }
 
     _rollBackground() {
-        // Paper-light tints of two palette hues, so any theme (a dark cluster
-        // included) clears to a drawable ground. Plain data, so the recorder
-        // reproduces it.
-        const paperTint = entry => {
-            const L = 0.86 + Math.random() * 0.08;
-            return oklchToHex(L,
-                Math.min(maxChromaAt(L, entry.H) * 0.5, 0.03 + Math.random() * 0.04), entry.H);
-        };
-        const es = this._state.palette.entries;
-        return {
-            type: Math.random() < 0.5 ? 'linear' : 'radial',
-            colorA: paperTint(es[Math.floor(Math.random() * es.length)]),
-            colorB: paperTint(es[Math.floor(Math.random() * es.length)]),
-            angle: Math.random() * Math.PI * 2,
-            center: [0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.6],
-        };
+        return paperGradient(this._state.palette);
     }
 
     /** Decoded image, or null to keep none. The file picking is a UI concern. */

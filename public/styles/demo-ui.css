@@ -156,6 +156,17 @@ html, body {
 .dp-btn-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .dp-btn-row:last-child { margin-bottom: 0; }
 
+/* A single floating action on the stage's corner, for a demo whose one
+   control is an action on the whole canvas */
+.dp-corner-btn {
+  position: absolute; top: 14px; right: 14px; z-index: 6;
+  font-family: var(--font-ui); font-size: 0.56rem; font-weight: 500;
+  border: 1px solid var(--demo-fg); background: rgba(255, 255, 255, 0.85);
+  color: var(--demo-fg); padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  transition: background 0.15s;
+}
+.dp-corner-btn:hover { background: #ffffff; }
+
 /* Color swatches — current selections, filled from script */
 .dp-swatch-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .dp-swatch {

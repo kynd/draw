@@ -1,0 +1,71 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Initializer" slug="initializer">
+  <div class="monologue">
+    Ways to start a canvas: compositions laid down before the first stroke, so a drawing never begins on blank paper
+  </div>
+
+  <div class="prose">
+    <p>Each initializer clears the board to a paper gradient and bakes one composition, rolling its tools, colors, and placement itself. The button on the canvas corner runs it again with a fresh palette. The initializers live as one group in the library (<code>scatterInit</code>, <code>patternInit</code>, <code>splitInit</code>, <code>fillsInit</code>), sharing one contract.</p>
+    <div class="jp">それぞれのイニシャライザは、ボードを紙のグラデーションにクリアし、ひとつの構成を焼き込みます。ツール、色、配置は自分でロールします。キャンバスの角のボタンで、新しいパレットでもう一度実行できます。イニシャライザはライブラリの中にひとつのグループとして置かれ（<code>scatterInit</code>、<code>patternInit</code>、<code>splitInit</code>、<code>fillsInit</code>）、ひとつの契約を共有します。</div>
+  </div>
+
+  <section class="demo-section" id="scatter">
+    <div class="demo-header">
+      <h2>Gradient and scatter</h2>
+      <a href={`${base}/demos/init-scatter/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/init-scatter/index.html?embedded`} title="Gradient and scatter" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The drawing tool's own start: a paper gradient and a few strokes scattered with random tools and palette colors.</p>
+      <div class="jp">描画ツール自身のスタートです。紙のグラデーションと、ランダムなツールとパレットの色で散らされた数本のストローク。</div>
+    </div>
+  </section>
+
+  <section class="demo-section" id="pattern">
+    <div class="demo-header">
+      <h2>Stroke patterns</h2>
+      <a href={`${base}/demos/init-pattern/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/init-pattern/index.html?embedded`} title="Stroke patterns" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>One random stroke tool draws one composition over the paper: stripes at a random angle, a grid, concentric rings, rays from a point, or wave rows, in two alternating palette colors.</p>
+      <div class="jp">ランダムなストロークのツールがひとつ、紙の上にひとつの構成を描きます。ランダムな角度のストライプ、グリッド、同心円、1点から伸びる放射、または波の列。2つのパレットの色を交互に使います。</div>
+    </div>
+  </section>
+
+  <section class="demo-section" id="split">
+    <div class="demo-header">
+      <h2>Split colors</h2>
+      <a href={`${base}/demos/init-split/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/init-split/index.html?embedded`} title="Split colors" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The canvas is divided by a random straight line, and each part is divided again at even odds, a few levels deep. Every region takes a flat palette color, and one random stroke lands on top.</p>
+      <div class="jp">キャンバスはランダムな直線で分割され、分かれたそれぞれの領域は五分五分の確率でさらに分割されます（数レベルまで）。各領域はパレットから平坦な色を取り、最後にランダムなストロークが1本乗ります。</div>
+    </div>
+  </section>
+
+  <section class="demo-section" id="fills">
+    <div class="demo-header">
+      <h2>Big fills</h2>
+      <a href={`${base}/demos/init-fills/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/init-fills/index.html?embedded`} title="Big fills" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>One to three very big fills with random fill tools, each centered on a canvas edge so it stretches past it.</p>
+      <div class="jp">ランダムな塗りのツールによる、1つから3つのとても大きな塗りです。それぞれキャンバスの縁を中心に置かれるため、必ず縁からはみ出します。</div>
+    </div>
+  </section>
+</PageLayout>

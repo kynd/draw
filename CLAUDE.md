@@ -96,6 +96,7 @@ src/pages/
   fills.astro  shape-fills.astro
   stroke-processing.astro  pen-pressure.astro             every stroke demo, one section each
   coverage-layer.astro                  explains the single-coverage buffer live
+  initializer.astro                     canvas initializer compositions
   drawing-tool.astro                    the combined instrument demo
   player.astro                          plays back a downloaded drawing log
 public/lib/                            library code
@@ -127,7 +128,7 @@ public/lib/                            library code
                 drawingBoard.js  drawCycle.js  blobShowcase.js
                 pressure.js  testBackground.js  midi.js  dial.js  latch.js
                 strokeRecorder.js  toolRegistry.js  toolConfigs.js
-                markBuilder.js  drawingPlayer.js
+                markBuilder.js  drawingPlayer.js  initializers.js
                 drawingTool/  DrawingTool.js  DrawingToolConfig.js
                               ui.js  midi.js  index.js
                                        shared demo support, still library code.

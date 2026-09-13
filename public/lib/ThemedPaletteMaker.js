@@ -178,6 +178,27 @@ export function paperColor(hue, rng = Math.random) {
     return oklchToHex(L, C, hue);
 }
 
+/**
+ * A paper-light two-color gradient spec for a board clear: tints of two
+ * palette hues, light enough that any theme (a dark cluster included) clears
+ * to a drawable ground. Plain data, so a recorder can store it.
+ */
+export function paperGradient(palette, rng = Math.random) {
+    const paperTint = entry => {
+        const L = 0.86 + rng() * 0.08;
+        return oklchToHex(L,
+            Math.min(maxChromaAt(L, entry.H) * 0.5, 0.03 + rng() * 0.04), entry.H);
+    };
+    const es = palette.entries;
+    return {
+        type: rng() < 0.5 ? 'linear' : 'radial',
+        colorA: paperTint(es[Math.floor(rng() * es.length)]),
+        colorB: paperTint(es[Math.floor(rng() * es.length)]),
+        angle: rng() * Math.PI * 2,
+        center: [0.2 + rng() * 0.6, 0.2 + rng() * 0.6],
+    };
+}
+
 // A themed palette at a random key hue and seed, for a demo's reroll button.
 export function randomThemedPalette(theme, count = 5) {
     return new ThemedPaletteMaker({

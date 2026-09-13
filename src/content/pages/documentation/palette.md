@@ -81,8 +81,8 @@ Every theme except `black` jitters the hue and lightness of the colors other tha
 `representativeL(H)` is the lightness of a hue's most prototypical color, the one people recognize by the simplest color term (red, green, blue, pink). That color sits at a particular lightness, not at the hue's max-chroma point: yellow is only yellow when bright, while green and blue are their names well below their chroma peaks. Anchored per color term (red 0.58, orange 0.72, yellow 0.90, yellow-green 0.82, green 0.50, cyan 0.70, blue 0.45, purple 0.45, magenta 0.58, pink 0.78) and interpolated around the wheel. The prototypes are cultural: which terms are basic, and where their colors sit, varies between cultures, and the anchors are one such choice.
 <div class="jp">`representativeL(H)`は、その色相の最も典型的な色の明度です。赤、緑、青、ピンクといった、いちばん単純な色名で誰もが思い浮かべる色です。その色は特定の明度にあり、色相の彩度が最大になる点とは一致しません。黄色は明るいときだけ黄色であり、緑や青は、彩度のピークよりずっと低い明度でその名前の色になります。色名ごとの基準値（赤0.58、橙0.72、黄0.90、黄緑0.82、緑0.50、シアン0.70、青0.45、紫0.45、マゼンタ0.58、ピンク0.78）を色相環に沿って補間します。この典型は文化に依存します。どの色名が基本になるか、その色がどこにあるかは文化によって異なり、この基準値はそのひとつの選択です。</div>
 
-Two helpers support the demos: `paperColor(hue)` returns a near-white paper tint of a hue for a background, and `randomThemedPalette(theme, count)` returns a themed palette at a random key hue and seed.
-<div class="jp">デモ用の補助が2つあります。`paperColor(hue)`は、背景用に、その色相をわずかに帯びた白に近い紙のような色を返します。`randomThemedPalette(theme, count)`は、ランダムな基準色相とシードでテーマ付きパレットを返します。</div>
+Three helpers support the demos: `paperColor(hue)` returns a near-white paper tint of a hue for a background, `paperGradient(palette)` returns a two-color paper-tint gradient spec for a board clear, and `randomThemedPalette(theme, count)` returns a themed palette at a random key hue and seed.
+<div class="jp">デモ用の補助が3つあります。`paperColor(hue)`は、背景用に、その色相をわずかに帯びた白に近い紙のような色を返します。`paperGradient(palette)`は、ボードのクリアに使う、2色の紙のようなグラデーションの指定を返します。`randomThemedPalette(theme, count)`は、ランダムな基準色相とシードでテーマ付きパレットを返します。</div>
 
 ## Selecting
 
