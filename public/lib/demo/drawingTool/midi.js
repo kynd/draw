@@ -4,10 +4,10 @@ const STEP = 6;
 
 /**
  * The MIDI adapter, an input source parallel to the UI: control change 16
- * steps the palette, 17 steps the tool, and 18 sets the width. Given the
- * default UI's floating dials it drives those, so the knobs and the dials
- * stay one control; without them it buckets the controller values itself and
- * calls the engine directly.
+ * steps the palette, 17 sets the width, and 18 steps the tool, matching the
+ * dials' own order. Given the default UI's floating dials it drives those,
+ * so the knobs and the dials stay one control; without them it buckets the
+ * controller values itself and calls the engine directly.
  */
 export function bindMidi(tool, dials = null) {
     const buckets = new Map();
@@ -29,14 +29,14 @@ export function bindMidi(tool, dials = null) {
                 if (dials?.dialHue) dials.dialHue.set(value);
                 else stepFrom(cc, value, steps => tool.stepPalette(steps));
             } else if (cc === 17) {
-                if (dials?.dialTool) dials.dialTool.set(value);
-                else stepFrom(cc, value, steps => tool.stepTool(steps));
-            } else if (cc === 18) {
                 if (dials?.dialWidth) dials.dialWidth.set(value);
                 else {
                     const spec = tool.paramSpec[0];
                     tool.setParams({ width: Math.round(spec.min + (value / 127) * (spec.max - spec.min)) });
                 }
+            } else if (cc === 18) {
+                if (dials?.dialTool) dials.dialTool.set(value);
+                else stepFrom(cc, value, steps => tool.stepTool(steps));
             }
         },
         onDevices: inputs => console.log('[midi] inputs:',
