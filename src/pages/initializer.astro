@@ -64,8 +64,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/init-fills/index.html?embedded`} title="Big fills" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>One to three very big fills with random fill tools. Each fill's spine runs from the canvas center to a point past a random edge, so it always covers the center and reaches beyond at least one edge.</p>
-      <div class="jp">ランダムな塗りのツールによる、1つから3つのとても大きな塗りです。それぞれの塗りの芯は、キャンバスの中心からランダムな縁の先まで走ります。そのため塗りはつねに中心を覆い、少なくともひとつの縁を越えます。</div>
+      <p>One to three very big fills with random fill tools. Each fill's spine runs from a point past one edge into the far half of the canvas, so it always crosses the midline without having to cover the center.</p>
+      <div class="jp">ランダムな塗りのツールによる、1つから3つのとても大きな塗りです。それぞれの塗りの芯は、ひとつの縁の先からキャンバスの反対側の半分まで走ります。そのため塗りはつねに中心線を越えますが、中心を覆うとは限りません。</div>
     </div>
   </section>
 </PageLayout>

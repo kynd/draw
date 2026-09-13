@@ -227,8 +227,8 @@ export function splitInit({ stage, board, palette }) {
 
 /**
  * One to three very big fills with random fill tools. Each fill's spine runs
- * from the canvas center to a point past a random edge, so the fill always
- * covers the center and reaches beyond at least one edge.
+ * from a point past one edge into the far half of the canvas, so the fill
+ * always crosses the midline without having to cover the center.
  */
 export function fillsInit({ stage, board, palette }) {
     board.clear(paperGradient(palette));
@@ -237,20 +237,34 @@ export function fillsInit({ stage, board, palette }) {
     for (let i = 0; i < count; i++) {
         const entry = pick(blobTools());
         const edge = Math.floor(Math.random() * 4);
-        const t = Math.random() * 2 - 1;
-        const px = edge === 0 ? -stage.extentX : edge === 1 ? stage.extentX : t * stage.extentX;
-        const py = edge === 2 ? -stage.extentY : edge === 3 ? stage.extentY : t * stage.extentY;
-        const reach = 1.15 + Math.random() * 0.2;
+        const t = () => Math.random() * 2 - 1;
+        const ex = stage.extentX, ey = stage.extentY;
+        // How far into the far half the spine reaches: from just past the
+        // midline to past the opposite edge.
+        const across = 0.1 + Math.random() * 1.1;
+        let ax, ay, bx, by;
+        if (edge < 2) {
+            const side = edge === 0 ? -1 : 1;
+            ax = side * ex * 1.05; ay = t() * ey;
+            bx = -side * ex * across; by = t() * ey;
+        } else {
+            const side = edge === 2 ? -1 : 1;
+            ay = side * ey * 1.05; ax = t() * ex;
+            by = -side * ey * across; bx = t() * ex;
+        }
         const wobble = 0.15 + Math.random() * 0.3;
         const phase = Math.random() * Math.PI * 2;
-        const dx = px * reach, dy = py * reach;
-        const len = Math.hypot(dx, dy) || 1;
-        const nx = -dy / len, ny = dx / len;
+        const len = Math.hypot(bx - ax, by - ay) || 1;
+        const nx = -(by - ay) / len, ny = (bx - ax) / len;
         const n = 32;
         const gesture = Array.from({ length: n }, (_, k) => {
             const s = k / (n - 1);
             const w = Math.sin(s * Math.PI * 2 + phase) * wobble;
-            return new THREE.Vector3(dx * s + nx * w, dy * s + ny * w, 0);
+            return new THREE.Vector3(
+                ax + (bx - ax) * s + nx * w,
+                ay + (by - ay) * s + ny * w,
+                0
+            );
         });
         // A fat radius against the spine's length, so the fill reads as a
         // rounded mass rather than a thin band.
