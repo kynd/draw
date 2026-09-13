@@ -29,6 +29,16 @@ Copies of the path, each offset by its own seeded low-frequency waves. Endpoints
 Short strokes that copy small segments of the base and move sideways by a seeded offset. Takes `count`, `length`, `offset`, and `seed`.
 <div class="jp">元のパスの短い区間を写し取り、シード付きのオフセットで横へずらした短いストロークです。`count`、`length`、`offset`、`seed`を受け取ります。</div>
 
+## mirroredPath
+
+The path mirrored across the vertical line through `x`, the path's own start when omitted. Pressures ride along, so a pen gesture mirrors with its dynamics.
+<div class="jp">`x`を通る垂直線に対して鏡映しにしたパスです。`x`を省略するとパス自身の始点になります。筆圧も一緒に写されるため、ペンの身振りは強弱ごと鏡映しになります。</div>
+
+## rotatedPaths
+
+`count - 1` copies of the path rotated evenly around `center`, the path's own start when omitted, so the path and its copies together divide the turn into `count`. Pressures ride along.
+<div class="jp">`center`（省略するとパス自身の始点）の周りに均等に回転させた、`count - 1`個の複製です。元のパスと複製を合わせると、一周が`count`等分されます。筆圧も一緒に写されます。</div>
+
 ## convexHull
 
 The convex hull of a set of points, counterclockwise, by Andrew's monotone chain. The hull is the smallest convex region containing every point.

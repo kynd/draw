@@ -1,0 +1,43 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Symmetric strokes" slug="symmetric-strokes">
+  <div class="monologue">
+    One gesture, several strokes: the drawn path comes back mirrored or rotated around its own starting point
+  </div>
+
+  <div class="prose">
+    <p>The symmetry is a path transform: <code>mirroredPath</code> and <code>rotatedPaths</code> (on the Path Effects page) derive the copies from the drawn path, and every copy is an ordinary path drawn by the same tool with the same seed sequence. Draw in either demo; the tool select cycles through pencil, brush, and watercolor per stroke, or pins one.</p>
+    <div class="jp">対称性はパスの変換です。<code>mirroredPath</code>と<code>rotatedPaths</code>（Path Effectsページ）が描かれたパスから複製を導き、各複製は同じツールで描かれる通常のパスです。どちらのデモでも描いてみてください。ツールのセレクトは筆跡ごとに鉛筆、筆、水彩を順に切り替えるか、ひとつに固定できます。</div>
+  </div>
+
+  <section class="demo-section" id="mirror">
+    <div class="demo-header">
+      <h2>Mirrored strokes</h2>
+      <a href={`${base}/demos/symmetric-mirror/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/symmetric-mirror/index.html?embedded`} title="Mirrored strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Each drawn stroke comes with its mirror across the vertical line through its starting point, live while drawing and baked together on release.</p>
+      <div class="jp">描かれたストロークには、その始点を通る垂直線に対して鏡映しになった複製が付きます。描いている間はライブで表示され、離すと一緒に焼き込まれます。</div>
+    </div>
+  </section>
+
+  <section class="demo-section" id="rotation">
+    <div class="demo-header">
+      <h2>Rotational strokes</h2>
+      <a href={`${base}/demos/symmetric-rotation/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/symmetric-rotation/index.html?embedded`} title="Rotational strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Each drawn stroke is repeated evenly around its starting point. The count (2 to 6) rolls when the stroke begins and holds while it grows.</p>
+      <div class="jp">描かれたストロークは、その始点の周りに均等に繰り返されます。繰り返しの数（2から6）はストロークの始まりにロールされ、描いている間は変わりません。</div>
+    </div>
+  </section>
+</PageLayout>

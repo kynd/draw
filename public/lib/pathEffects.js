@@ -275,6 +275,38 @@ export function blobOutline(points, { span = 0.15, radius = 0.14 } = {}) {
     return bSpline(perimeter, 6, true);
 }
 
+/** The path mirrored across the vertical line through `x` (the path's own
+ * start when omitted). Pressures ride along. */
+export function mirroredPath(points, x = points[0]?.x ?? 0) {
+    return points.map(p => {
+        const q = new THREE.Vector3(2 * x - p.x, p.y, p.z ?? 0);
+        if (p.pressure !== undefined) q.pressure = p.pressure;
+        return q;
+    });
+}
+
+/**
+ * `count - 1` copies of the path rotated evenly around `center` (the path's
+ * own start when omitted), so the path and the copies together divide the
+ * turn into `count`. Pressures ride along.
+ */
+export function rotatedPaths(points, { center = points[0], count = 3 } = {}) {
+    const paths = [];
+    for (let k = 1; k < count; k++) {
+        const a = (k / count) * Math.PI * 2;
+        const cos = Math.cos(a), sin = Math.sin(a);
+        paths.push(points.map(p => {
+            const dx = p.x - center.x, dy = p.y - center.y;
+            const q = new THREE.Vector3(
+                center.x + dx * cos - dy * sin,
+                center.y + dx * sin + dy * cos, p.z ?? 0);
+            if (p.pressure !== undefined) q.pressure = p.pressure;
+            return q;
+        }));
+    }
+    return paths;
+}
+
 // ---------------------------------------------------------------------------
 // Shapes from endpoints: contours placed and sized by a gesture's start and
 // end alone; the path between them is ignored. All return a closed
