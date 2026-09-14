@@ -182,6 +182,11 @@ export class DrawingTool {
         this._playerFeeding = false;
         this._initializing = false;
         this._symmetry = null;
+        // The symmetry roll the next stroke will use, resolved when the
+        // preview is built and consumed at pointer-down, so the preview and
+        // the drawn stroke agree on the copy count and colors. Cleared
+        // whenever the tool or palette changes, and after each stroke.
+        this._nextRoll = null;
         this.player = new DrawingPlayer({
             feed: (points, done) => {
                 this._playerFeeding = true;
@@ -304,16 +309,11 @@ export class DrawingTool {
     pointerDown({ x, y, pressure = 0 }) {
         if (!this._inputEnabled || this._drawing) return;
         this._drawing = true;
-        // Rolled at the stroke's start, so a rotation count or a set of
-        // offsets holds steady while the gesture grows. Every copy's colors
-        // resolve here too (the recolor pairs, or the stroke's own colors),
-        // so the release's palette reroll cannot shift them.
-        this._symmetry = this._state.tool.symmetry
-            ? {
-                ...rollSymmetry(this._state.tool.symmetry, this._state.colors),
-                base: { a: this._state.colorA, b: this._state.colorB },
-            }
-            : null;
+        // The stroke consumes the exact roll the preview last showed, so the
+        // drawing matches the preview's symmetry count and copy colors; a
+        // fresh roll is made for the next preview.
+        this._symmetry = this._ensureNextRoll();
+        this._nextRoll = null;
         this._setUiHidden(true);
         this._emit('stroke-start');
         const p = this._toWorld(x, y, pressure);
@@ -478,7 +478,7 @@ export class DrawingTool {
     _selectToolSilent(id) {
         const tool = this._registry.find(entry => entry.id === id);
         if (!tool) return;
-        if (tool !== this._state.tool) this._previewShape = null;
+        if (tool !== this._state.tool) { this._previewShape = null; this._nextRoll = null; }
         this._state.tool = tool;
         this._state.values = this._toolValues[tool.id] ??= randomValues(tool);
         const [min, max] = widthRangeOf(tool);
@@ -516,6 +516,7 @@ export class DrawingTool {
         if (colorA !== undefined) this._state.colorA = colorA;
         if (colorB !== undefined) this._state.colorB = colorB;
         if (colors !== undefined) this._state.colors = [...colors];
+        this._nextRoll = null;
         this._refreshPreview();
         this._emit('palette');
     }
@@ -742,8 +743,27 @@ export class DrawingTool {
         const rest = entries.slice(1);
         this._state.colorB = (rest[Math.floor(Math.random() * rest.length)] ?? entries[0]).hex;
         this._state.colors = entries.map(e => e.hex);
+        // The colors moved, so the next stroke's roll must re-resolve.
+        this._nextRoll = null;
         this._refreshPreview();
         this._emit('palette');
+    }
+
+    /**
+     * The symmetry roll the next stroke will use, resolved once and reused by
+     * both the preview and the drawn stroke. Null for a tool with no
+     * symmetry. Rolled from the current colors, so its recolor pairs and copy
+     * count match what the preview shows.
+     */
+    _ensureNextRoll() {
+        if (!this._state.tool.symmetry) { this._nextRoll = null; return null; }
+        if (!this._nextRoll) {
+            this._nextRoll = {
+                ...rollSymmetry(this._state.tool.symmetry, this._state.colors),
+                base: { a: this._state.colorA, b: this._state.colorB },
+            };
+        }
+        return this._nextRoll;
     }
 
     // ------------------------------------------------------------------
@@ -771,6 +791,9 @@ export class DrawingTool {
         this._state.sens = entry.sens;
         this._previewShape = entry.previewShape ?? null;
         this._toolValues[entry.tool.id] = entry.values;
+        // A new tool means a new symmetry (or none), so the next stroke's
+        // roll re-resolves.
+        this._nextRoll = null;
     }
 
     _stepTrail(steps) {
@@ -919,15 +942,17 @@ export class DrawingTool {
         // roll is held with the preview shape, so it survives color and
         // parameter changes.
         if (mark && state.tool.symmetry) {
-            this._previewShape.symmetry ??= rollSymmetry(state.tool.symmetry);
-            for (const copy of symmetricCopies(path, this._previewShape.symmetry, c)) {
-                const renderer = state.tool.make(state.values, ctx);
+            const roll = this._ensureNextRoll();
+            symmetricCopies(path, roll, c).forEach((copy, i) => {
+                const re = roll.recolors?.[i];
+                const cctx = re ? { ...ctx, colorA: re.a, colorB: re.b } : ctx;
+                const renderer = state.tool.make(state.values, cctx);
                 const def = new StrokeDef({
                     points: copy, widthLeft: taperByArc(width, pathArcLength(copy)),
                     renderer, seed: ctx.seed,
                 });
                 marks.push({ mesh: def.build(), renderer });
-            }
+            });
         }
         const renderer = this.stage.renderer;
         const prevTarget = renderer.getRenderTarget();
