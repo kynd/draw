@@ -97,7 +97,7 @@ export class DrawingTool {
                 ? points => symmetricCopies(points, this._symmetry)
                 : null,
             buildEcho: (path, run, seed, k) => {
-                const re = this._symmetry?.recolors?.[k];
+                const re = this._symmetry?.recolors?.[k] ?? this._symmetry?.base;
                 if (!re) return this._build(path, run, seed);
                 const { colorA, colorB } = this._state;
                 this._state.colorA = re.a;
@@ -299,9 +299,15 @@ export class DrawingTool {
         if (!this._inputEnabled || this._drawing) return;
         this._drawing = true;
         // Rolled at the stroke's start, so a rotation count or a set of
-        // offsets holds steady while the gesture grows.
+        // offsets holds steady while the gesture grows. Every copy's colors
+        // resolve here too (the recolor pairs, or the stroke's own colors),
+        // so the release's palette reroll cannot shift them.
         this._symmetry = this._state.tool.symmetry
-            ? rollSymmetry(this._state.tool.symmetry, this._state.colors) : null;
+            ? {
+                ...rollSymmetry(this._state.tool.symmetry, this._state.colors),
+                base: { a: this._state.colorA, b: this._state.colorB },
+            }
+            : null;
         this._setUiHidden(true);
         this._emit('stroke-start');
         const p = this._toWorld(x, y, pressure);
@@ -333,11 +339,9 @@ export class DrawingTool {
         if (this._symmetry && this._points.length >= 2) {
             const { colorA, colorB } = this._state;
             symmetricCopies(this._points, this._symmetry).forEach((copy, k) => {
-                const re = this._symmetry.recolors?.[k];
-                if (re) {
-                    this._state.colorA = re.a;
-                    this._state.colorB = re.b;
-                }
+                const re = this._symmetry.recolors?.[k] ?? this._symmetry.base;
+                this._state.colorA = re.a;
+                this._state.colorB = re.b;
                 this._emitLiveState();
                 this._emitLive('points', { points: copy.map(plainPoint) });
                 this._emitLive('end');
