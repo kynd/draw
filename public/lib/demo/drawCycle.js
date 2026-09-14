@@ -174,18 +174,23 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         // lands the real copies itself.
         if (!done) {
             const paths = echo?.()?.(points) ?? [];
+            // The echoes take the same seed sequence the landed copies will
+            // get (the gesture's runs advance the counter first, then each
+            // copy's), so nothing about their look changes at release.
+            let echoSeed = seed + runs.length;
             paths.forEach((copy, i) => {
                 const copyRuns = cfg ? splitByTurn(copy, cfg) : [copy];
                 copyRuns.forEach((run, k) => {
                     if (holdArc && !hasSettledStart(run, holdArc)) return;
                     const path = smoothPiece(run);
                     if (!path) return;
-                    const mark = (buildEcho ?? build)(path, run, seed + 50 + i * 8 + k, i);
+                    const mark = (buildEcho ?? build)(path, run, echoSeed + k, i);
                     if (!mark) return;
                     mark.mesh.position.z += 0.0001;
                     group.add(mark.mesh);
                     pieces.push(mark);
                 });
+                echoSeed += copyRuns.length;
             });
         }
         return { group, pieces, committed, seedSpan: runs.length };
