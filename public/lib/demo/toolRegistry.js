@@ -9,6 +9,9 @@
 // at sharp turns; by kind, strokes do and fills (blobs and shapes) do not.
 // `symmetry` names a stroke symmetry ('mirror', 'rotation', 'parallel',
 // 'screen'); the engine rolls it per stroke and lands the copies at release.
+// `previewPath` overrides the shape the tool preview draws ('line', 'mass',
+// 'span', 'radial'); the default follows the kind and symmetry (see
+// `previewPathOf`).
 
 import { RibbonStrokeRenderer } from '../renderers/RibbonStrokeRenderer.js';
 import { BrushStrokeRenderer } from '../renderers/BrushStrokeRenderer.js';
@@ -444,6 +447,20 @@ function shapeFill(v, ctx) {
  */
 export function toolSplits(entry) {
     return entry.split ?? entry.kind === 'stroke';
+}
+
+/**
+ * The gesture category the tool preview draws for an entry: a fill's outline
+ * reads best from a compact 'mass', an endpoint shape from a 'span', a
+ * rotational stroke from a 'radial' arm, and everything else from a 'line'.
+ * An entry's `previewPath` overrides it.
+ */
+export function previewPathOf(entry) {
+    if (entry.previewPath) return entry.previewPath;
+    if (entry.symmetry === 'rotation') return 'radial';
+    if (entry.kind === 'blob') return 'mass';
+    if (entry.kind === 'shape') return 'span';
+    return 'line';
 }
 
 /** The registry entries with the given ids, in the given order. */

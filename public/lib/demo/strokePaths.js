@@ -64,6 +64,52 @@ export function centerY(i, count, spread) {
     return count === 1 ? 0 : THREE.MathUtils.lerp(spread, -spread, i / (count - 1));
 }
 
+/**
+ * The gesture the tool preview draws, by category, centered on `c` inside a
+ * box of size `{ w, h }` and varied by a seeded `{ phase, freq }`:
+ *
+ *   line     a wiggling line across the box, for ordinary strokes.
+ *   mass     a compact oval loop, so a fill's outline reads as a rounded
+ *            mass rather than a long band.
+ *   span     the two endpoints of a short diagonal, for endpoint shapes that
+ *            take their form from the start and end alone.
+ *   radial   a line leaving the box center and curving out, so rotational
+ *            copies fan around the center.
+ */
+export function previewPath(category, c, { w, h }, { phase = 0, freq = 6 } = {}) {
+    if (category === 'span') {
+        return [
+            new THREE.Vector3(c.x - w * 0.07, c.y - h * 0.1, 0),
+            new THREE.Vector3(c.x + w * 0.09, c.y + h * 0.13, 0),
+        ];
+    }
+    const n = 28;
+    if (category === 'mass') {
+        return Array.from({ length: n }, (_, i) => {
+            const t = i / (n - 1);
+            const a = phase + t * Math.PI * 1.9;
+            return new THREE.Vector3(
+                c.x + Math.cos(a) * w * 0.2,
+                c.y + Math.sin(a) * h * 0.28, 0);
+        });
+    }
+    if (category === 'radial') {
+        return Array.from({ length: n }, (_, i) => {
+            const t = i / (n - 1);
+            return new THREE.Vector3(
+                c.x + t * w * 0.42,
+                c.y + Math.sin(phase + t * freq) * h * 0.18 * t, 0);
+        });
+    }
+    // line
+    return Array.from({ length: n }, (_, i) => {
+        const t = i / (n - 1);
+        return new THREE.Vector3(
+            c.x + (t - 0.5) * w * 0.72,
+            c.y + Math.sin(phase + t * freq) * h * 0.2, 0);
+    });
+}
+
 /** Widest across the middle, three quarters of that at either end. */
 export const taper = width => t => width * (0.75 + 0.25 * Math.sin(Math.PI * t));
 

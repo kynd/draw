@@ -7,14 +7,14 @@ import { StrokeStage } from '../stage.js';
 import { CoverageLayer } from '../coverageLayer.js';
 import { DrawingBoard } from '../drawingBoard.js';
 import { setupDrawCycle } from '../drawCycle.js';
-import { taperByArc } from '../strokePaths.js';
+import { taperByArc, previewPath } from '../strokePaths.js';
 import { INITIALIZERS } from '../initializers.js';
 import { rollSymmetry, symmetricCopies } from '../symmetries.js';
 import { pathArcLength } from '../pressure.js';
 import { StrokeRecorder } from '../strokeRecorder.js';
 import { DrawingPlayer, downloadDrawingZip } from '../drawingPlayer.js';
 import { makeMarkBuilder, applyRecordTo } from '../markBuilder.js';
-import { randomValues, toolSplits } from '../toolRegistry.js';
+import { randomValues, toolSplits, previewPathOf } from '../toolRegistry.js';
 import { DrawingToolConfig } from './DrawingToolConfig.js';
 
 const TRAIL_SIDE = 10;
@@ -881,17 +881,10 @@ export class DrawingTool {
             freq: 4 + Math.random() * 4,
             seed: Math.floor(Math.random() * 1000),
         };
-        const { phase, freq, seed } = this._previewShape;
-        const path = [];
-        const n = 28;
-        for (let i = 0; i < n; i++) {
-            const t = i / (n - 1);
-            path.push(new THREE.Vector3(
-                c.x + (t - 0.5) * this._previewSize.w * 0.72,
-                c.y + Math.sin(phase + t * freq) * this._previewSize.h * 0.2,
-                0
-            ));
-        }
+        const { seed } = this._previewShape;
+        // The preview gesture's shape follows the tool's category, so a fill
+        // reads as a rounded mass and an endpoint shape from a short span.
+        const path = previewPath(previewPathOf(state.tool), c, this._previewSize, this._previewShape);
         const ctx = {
             colorA: state.colorA, colorB: state.colorB, colors: state.colors,
             texture: this.board.texture, seed,
@@ -906,10 +899,7 @@ export class DrawingTool {
                 mark = { mesh: renderer.build(contour, ctx.seed), renderer };
             }
         } else if (state.tool.kind === 'shape') {
-            // Short endpoints, so even the circle (whose radius is their full
-            // span, drawn around the first) stays inside the preview paper.
-            const a = new THREE.Vector3(c.x - 0.08, c.y - 0.06, 0);
-            const b = new THREE.Vector3(c.x + 0.1, c.y + 0.08, 0);
+            const a = path[0], b = path[path.length - 1];
             const contour = state.tool.contour(a, b, ctx.seed);
             if (contour) {
                 const renderer = state.tool.make(state.values, { ...ctx, start: a, end: b });
