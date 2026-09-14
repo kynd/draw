@@ -41,8 +41,8 @@ The drawing tool as an engine with a public API. `DrawingTool` owns everything t
 
 ## The default UI and MIDI
 
-`ui.js` builds what the pages show: the settings panel on the right, the three floating dials (hue stepping the palette on every value change, tool bucketed into steps, width mapped directly), the overlay toggle, fullscreen and the canvas size, and the guide file picker. Every handler is an API call and every display update a subscription; nothing in the engine references it. `midi.js` maps control change 16 onto the palette step, 17 onto the width, and 18 onto the tool step, matching the dials' order, driving the UI's dials when they exist so the knobs and dials stay one control.
-<div class="jp">`ui.js`は、ページに見えているものを組み立てます。右側の設定パネル、3つの浮かぶダイヤル（色相は値が変わるたびにパレットを進め、ツールはステップに刻まれ、幅はそのまま換算されます）、オーバーレイの切り替え、フルスクリーンとキャンバスサイズ、ガイドのファイル選択です。すべてのハンドラはAPIの呼び出しで、すべての表示の更新は購読です。エンジンはこのファイルを参照しません。`midi.js`はコントロールチェンジの16をパレットのステップに、17を幅に、18をツールのステップに、ダイヤルの並びどおりに割り当てます。既定のUIのダイヤルがあればそれを動かすので、ノブとダイヤルはひとつのコントロールとして振る舞います。</div>
+`ui.js` builds what the pages show: the settings panel on the right, the three floating dials (hue stepping the palette on every value change, tool bucketed into steps, width a position mapped into the current tool's range, held across tool changes so the middle of the dial is the middle of any range), the overlay toggle, fullscreen and the canvas size, and the guide file picker. Every handler is an API call and every display update a subscription; nothing in the engine references it. `midi.js` maps control change 16 onto the palette step, 17 onto the width, and 18 onto the tool step, matching the dials' order, driving the UI's dials when they exist so the knobs and dials stay one control.
+<div class="jp">`ui.js`は、ページに見えているものを組み立てます。右側の設定パネル、3つの浮かぶダイヤル（色相は値が変わるたびにパレットを進め、ツールはステップに刻まれ、幅は現在のツールのレンジに写される位置です。位置はツールを変えても保たれるため、ダイヤルの中央はどのレンジでも中央になります）、オーバーレイの切り替え、フルスクリーンとキャンバスサイズ、ガイドのファイル選択です。すべてのハンドラはAPIの呼び出しで、すべての表示の更新は購読です。エンジンはこのファイルを参照しません。`midi.js`はコントロールチェンジの16をパレットのステップに、17を幅に、18をツールのステップに、ダイヤルの並びどおりに割り当てます。既定のUIのダイヤルがあればそれを動かすので、ノブとダイヤルはひとつのコントロールとして振る舞います。</div>
 
 ## The tool registry
 

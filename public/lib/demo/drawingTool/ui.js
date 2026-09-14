@@ -364,8 +364,27 @@ export function attachDrawingToolUi(tool, layout) {
         renderParams();
         renderSwatches();
     }
+    // The width dial is a position in the current tool's range, not an
+    // absolute width: a tool change keeps the dial where it is and remaps
+    // the width into the new range, so the middle of the dial is the middle
+    // of any tool's range. A width moved elsewhere (the panel's slider)
+    // moves the dial to its position instead.
+    let widthToolId = tool.state.toolId;
+    let widthRemap = false;
     tool.on('tool', () => {
-        dialWidth.set(widthToDial(tool.state.values.width), false);
+        if (tool.state.toolId !== widthToolId) {
+            widthToolId = tool.state.toolId;
+            const s = widthSpec();
+            const width = Math.round(s.min + (dialWidth.value / 127) * (s.max - s.min));
+            if (width !== tool.state.values.width) {
+                // The remap's own emit must not move the dial, or rounding
+                // would walk it by a step per tool change.
+                widthRemap = true;
+                try { tool.setParams({ width }); } finally { widthRemap = false; }
+            }
+        } else if (!widthRemap) {
+            dialWidth.set(widthToDial(tool.state.values.width), false);
+        }
         if (!fromUi) syncPane();
     });
     tool.on('palette', () => {
