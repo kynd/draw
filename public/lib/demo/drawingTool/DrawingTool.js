@@ -112,12 +112,18 @@ export class DrawingTool {
             // Strokes split at sharp turns; fills draw one mark per gesture.
             split: () => toolSplits(this._state.tool),
             bindInput: false,
-            onCommit: (points, seed) => {
+            onCommit: (points, seed, echo = null) => {
                 if (this._replaying || this._playerFeeding || this._applyingLive) return;
+                // An echo piece is a symmetry copy: it records with the
+                // copy's resolved colors, exactly as it was drawn.
+                const re = echo !== null
+                    ? this._symmetry?.recolors?.[echo] ?? this._symmetry?.base
+                    : null;
                 this.recorder.add({
                     toolId: this._state.tool.id, values: { ...this._state.values },
                     widthPx: this._state.widthPx, sens: this._state.sens,
-                    colorA: this._state.colorA, colorB: this._state.colorB,
+                    colorA: re ? re.a : this._state.colorA,
+                    colorB: re ? re.b : this._state.colorB,
                     colors: [...this._state.colors],
                     seed,
                     // Marks what the clear's initializer laid down, so a
@@ -332,10 +338,10 @@ export class DrawingTool {
         if (!this._drawing) return;
         this._drawing = false;
         this._emitLive('end');
-        this.cycle.feed(this._points, true);
-        // A symmetric tool's copies land at release, each fed as its own
-        // stroke, so they record, replay, and mirror like anything drawn.
-        // With `recolor`, every copy takes its own palette colors.
+        // A symmetric tool's copies stream to a mirror as their own strokes,
+        // each with its resolved colors, ahead of the feed (whose release
+        // reroll must not touch them). The feed itself bakes the live group,
+        // copies included, so the canvas keeps exactly what was shown.
         if (this._symmetry && this._points.length >= 2) {
             const { colorA, colorB } = this._state;
             symmetricCopies(this._points, this._symmetry).forEach((copy, k) => {
@@ -345,11 +351,11 @@ export class DrawingTool {
                 this._emitLiveState();
                 this._emitLive('points', { points: copy.map(plainPoint) });
                 this._emitLive('end');
-                this.cycle.feed(copy, true);
             });
             this._state.colorA = colorA;
             this._state.colorB = colorB;
         }
+        this.cycle.feed(this._points, true);
         this._symmetry = null;
         this._setUiHidden(false);
         this._emit('stroke-end');
@@ -917,31 +923,48 @@ export class DrawingTool {
             });
             mark = { mesh: def.build(), renderer };
         }
+        const marks = mark ? [mark] : [];
+        // A symmetric tool previews its symmetry too: copies of the wiggle,
+        // anchored on the box's center so they stay inside the crop. The
+        // roll is held with the preview shape, so it survives color and
+        // parameter changes.
+        if (mark && state.tool.symmetry) {
+            this._previewShape.symmetry ??= rollSymmetry(state.tool.symmetry);
+            for (const copy of symmetricCopies(path, this._previewShape.symmetry, c)) {
+                const renderer = state.tool.make(state.values, ctx);
+                const def = new StrokeDef({
+                    points: copy, widthLeft: taperByArc(width, pathArcLength(copy)),
+                    renderer, seed: ctx.seed,
+                });
+                marks.push({ mesh: def.build(), renderer });
+            }
+        }
         const renderer = this.stage.renderer;
         const prevTarget = renderer.getRenderTarget();
         const prevAuto = renderer.autoClear;
         const prevColor = new THREE.Color();
         renderer.getClearColor(prevColor);
         const prevAlpha = renderer.getClearAlpha();
-        if (mark) {
+        const screen = new THREE.Vector2(this._previewTarget.width, this._previewTarget.height);
+        marks.forEach((m, i) => {
             // The mark's own screen is the preview target, not the canvas.
-            const screen = new THREE.Vector2(this._previewTarget.width, this._previewTarget.height);
-            mark.mesh.traverse(child => {
+            m.mesh.traverse(child => {
                 const u = child.material?.uniforms;
                 if (u?.uScreen) u.uScreen.value.copy(screen);
             });
-            this._previewScene.add(mark.mesh);
-        }
+            m.mesh.position.z += i * 0.0002;
+            this._previewScene.add(m.mesh);
+        });
         this._previewCamera.position.set(c.x, c.y, 5);
         renderer.autoClear = false;
         renderer.setRenderTarget(this._previewTarget);
         renderer.setClearColor('#000000', 0.4);
         renderer.clear(true, true, false);
-        if (mark) {
+        if (marks.length) {
             const flagged = [];
-            mark.mesh.traverse(child => {
+            marks.forEach(m => m.mesh.traverse(child => {
                 if (child.isMesh && child.userData.coverageLayer) flagged.push(child);
-            });
+            }));
             flagged.forEach(m => { m.visible = false; });
             renderer.render(this._previewScene, this._previewCamera);
             flagged.forEach(m => { m.visible = true; });
@@ -951,10 +974,10 @@ export class DrawingTool {
         renderer.setRenderTarget(prevTarget);
         renderer.setClearColor(prevColor, prevAlpha);
         renderer.autoClear = prevAuto;
-        if (mark) {
-            this._previewScene.remove(mark.mesh);
-            mark.renderer.dispose(mark.mesh);
-        }
+        marks.forEach(m => {
+            this._previewScene.remove(m.mesh);
+            m.renderer.dispose(m.mesh);
+        });
         this._preview.visible = !this._uiHidden && !this._replaying;
         this.stage.draw();
     }

@@ -20,12 +20,14 @@ const KINDS = {
     mirror: {
         roll: () => ({}),
         countOf: () => 1,
-        copies: path => [mirroredPath(path)],
+        copies: (path, roll, anchor) =>
+            [mirroredPath(path, { x: anchor ? anchor.x : path[0]?.x ?? 0 })],
     },
     rotation: {
         roll: () => ({ count: 2 + Math.floor(Math.random() * 5) }),
         countOf: roll => roll.count - 1,
-        copies: (path, roll) => rotatedPaths(path, { count: roll.count }),
+        copies: (path, roll, anchor) =>
+            rotatedPaths(path, { center: anchor ?? path[0], count: roll.count }),
     },
     parallel: {
         roll: () => {
@@ -45,11 +47,12 @@ const KINDS = {
     screen: {
         roll: () => ({ axes: ['x', 'y', 'both'][Math.floor(Math.random() * 3)] }),
         countOf: roll => (roll.axes === 'both' ? 3 : 1),
-        copies: (path, roll) => {
+        copies: (path, roll, anchor) => {
+            const cx = anchor?.x ?? 0, cy = anchor?.y ?? 0;
             const paths = [];
-            if (roll.axes !== 'y') paths.push(mirroredPath(path, { x: 0 }));
-            if (roll.axes !== 'x') paths.push(mirroredPath(path, { y: 0 }));
-            if (roll.axes === 'both') paths.push(mirroredPath(path, { x: 0, y: 0 }));
+            if (roll.axes !== 'y') paths.push(mirroredPath(path, { x: cx }));
+            if (roll.axes !== 'x') paths.push(mirroredPath(path, { y: cy }));
+            if (roll.axes === 'both') paths.push(mirroredPath(path, { x: cx, y: cy }));
             return paths;
         },
     },
@@ -72,7 +75,9 @@ export function rollSymmetry(kind, colors = null) {
     return roll;
 }
 
-/** The extra paths symmetric to `path` under a roll. */
-export function symmetricCopies(path, roll) {
-    return KINDS[roll.kind].copies(path, roll);
+/** The extra paths symmetric to `path` under a roll. `anchor` recenters the
+ * symmetry (the mirror axis, the rotation center, the screen center) for a
+ * host drawing somewhere other than the canvas, such as the tool preview. */
+export function symmetricCopies(path, roll, anchor = null) {
+    return KINDS[roll.kind].copies(path, roll, anchor);
 }

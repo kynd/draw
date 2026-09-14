@@ -35,10 +35,11 @@ import { DrawInput } from './drawInput.js';
  * `false` to draw unsplit, or a function returning any of those, read per
  * gesture, for a host whose current tool decides.
  * `echo` (a function returning `points => paths[]` or null, read per feed)
- * draws extra paths derived from the gesture — a symmetry's copies — while
- * the gesture is live only; they are neither baked nor committed, so a host
- * that lands the real copies at release shows them ahead of time. `buildEcho
- * (path, run, seed, k)` builds an echo's mark (`build` when omitted).
+ * draws extra paths derived from the gesture — a symmetry's copies — as part
+ * of the gesture's own build, so what bakes at release is exactly what was
+ * on screen. Their pieces commit after the gesture's, each `onCommit` call
+ * carrying the copy's index as its third argument. `buildEcho(path, run,
+ * seed, k)` builds an echo's mark (`build` when omitted).
  * `pointerTrace` shows or hides the pointer's own line; the returned
  * `setPointerTrace` changes it later.
  */
@@ -169,31 +170,28 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
             committed.push({ points: run, seed: seed + k });
         });
         if (!pieces.length) return null;
-        // The echoes ride the live group only: at done they are left out, so
-        // the bake and the commits carry the gesture alone, and the host
-        // lands the real copies itself.
-        if (!done) {
-            const paths = echo?.()?.(points) ?? [];
-            // The echoes take the same seed sequence the landed copies will
-            // get (the gesture's runs advance the counter first, then each
-            // copy's), so nothing about their look changes at release.
-            let echoSeed = seed + runs.length;
-            paths.forEach((copy, i) => {
-                const copyRuns = cfg ? splitByTurn(copy, cfg) : [copy];
-                copyRuns.forEach((run, k) => {
-                    if (holdArc && !hasSettledStart(run, holdArc)) return;
-                    const path = smoothPiece(run);
-                    if (!path) return;
-                    const mark = (buildEcho ?? build)(path, run, echoSeed + k, i);
-                    if (!mark) return;
-                    mark.mesh.position.z += 0.0001;
-                    group.add(mark.mesh);
-                    pieces.push(mark);
-                });
-                echoSeed += copyRuns.length;
+        // The echoes build with the gesture, continuing its seed sequence
+        // and its z stagger, so the bake lands exactly what is on screen.
+        let echoSeed = seed + runs.length;
+        let zi = runs.length;
+        const paths = echo?.()?.(points) ?? [];
+        paths.forEach((copy, i) => {
+            const copyRuns = cfg ? splitByTurn(copy, cfg) : [copy];
+            copyRuns.forEach((run, k) => {
+                if (holdArc && !hasSettledStart(run, holdArc)) return;
+                const path = smoothPiece(run);
+                if (!path) return;
+                const mark = (buildEcho ?? build)(path, run, echoSeed + k, i);
+                if (!mark) return;
+                mark.mesh.position.z += Math.min(zi, 40) * 0.0002;
+                group.add(mark.mesh);
+                pieces.push(mark);
+                committed.push({ points: run, seed: echoSeed + k, echo: i });
             });
-        }
-        return { group, pieces, committed, seedSpan: runs.length };
+            echoSeed += copyRuns.length;
+            zi += copyRuns.length;
+        });
+        return { group, pieces, committed, seedSpan: echoSeed - seed };
     }
 
     function feed(points, done) {
@@ -209,7 +207,7 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
             // The bake scene borrowed the group; the overlay needs it back.
             stage.add(ghost.group);
             live = null;
-            for (const piece of ghost.committed) onCommit?.(piece.points, piece.seed);
+            for (const piece of ghost.committed) onCommit?.(piece.points, piece.seed, piece.echo ?? null);
             seed += ghost.seedSpan;
             onRelease?.();
         }
