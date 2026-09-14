@@ -12,12 +12,12 @@ import { taperByArc } from './strokePaths.js';
 import { pathArcLength } from './pressure.js';
 import { rollSymmetry, symmetricCopies } from './symmetries.js';
 
-const TOOL_IDS = ['pencil', 'brush', 'watercolor'];
+const TOOL_IDS = ['pencil', 'brush', 'ribbon-ragged'];
 const SEEDS = [3.1, 7.4, 11.9];
 
 /**
  * The harness the symmetric-stroke showcases share: three seeded gestures,
- * one per tool (pencil, brush, watercolor), each drawn together with its
+ * one per tool (pencil, brush, ragged ribbon), each drawn together with its
  * symmetric copies under one symmetry kind, smoothed the way the drawing
  * demos smooth. Randomizing rerolls the palette, the symmetry, and the
  * copies' colors; the gestures stay.

@@ -417,12 +417,10 @@ export const toolRegistry = [
             cap: 'rounded', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
         }) },
-    { id: 'parallel-watercolor', kind: 'stroke', symmetry: 'parallel', pressure: 3,
-        params: [{ key: 'pigment', min: 0.2, max: 1 }, { key: 'rim', min: 0, max: 1 },
-            { key: 'bleed', min: 0, max: 1 }],
-        make: (v, ctx) => new WatercolorStrokeRenderer({
-            cap: 'rounded', color: ctx.colorA, background: ctx.texture, blurred: ctx.texture,
-            pigment: v.pigment, rim: v.rim, bleed: v.bleed,
+    { id: 'parallel-ribbon', kind: 'stroke', symmetry: 'parallel',
+        params: [{ key: 'axis', pick: ['along', 'across'] }],
+        make: (v, ctx) => new RibbonStrokeRenderer({
+            cap: 'ragged', color: ctx.colorA, gradient: ctx.colorB, gradientAxis: v.axis,
         }) },
     { id: 'screen-ribbon', kind: 'stroke', symmetry: 'screen',
         params: [{ key: 'axis', pick: ['along', 'across'] }],

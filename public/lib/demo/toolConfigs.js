@@ -72,7 +72,7 @@ export class ShapeFillsDemoConfig extends DrawingToolConfig {
 export class SymmetricDemoConfig extends DrawingToolConfig {
     constructor() {
         super({ tools: [
-            'mirror-brush', 'rotation-pencil', 'parallel-watercolor', 'screen-ribbon',
+            'mirror-brush', 'rotation-pencil', 'parallel-ribbon', 'screen-ribbon',
         ] });
     }
 }
