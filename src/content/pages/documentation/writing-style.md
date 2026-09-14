@@ -117,6 +117,9 @@ Stop when the fact is stated. Do not append a clause explaining why the fact mat
 That example also shows the rhetorical repetition to avoid — "a fixed lightness reads as a fixed lightness", "hold together as a column". Repeating a word for effect reads as a flourish. Vary the second use, or cut the clause.
 <div class="jp">この例は、避けるべき修辞的な反復も示しています。"a fixed lightness reads as a fixed lightness"、"hold together as a column"。効果を狙った語の反復は、飾りとして読まれます。二度目の語を変えるか、その節を削ってください。</div>
 
+A brief reason for a foundational choice is content, not padding: "OKLCH is one of the most perceptually accurate and computationally performant color models." The rule above targets restating why an already-stated fact matters, not justifying a design decision.
+<div class="jp">基礎となる選択に対する短い理由づけは、飾りではなく情報です。「OKLCHは、知覚的に正確で計算上も効率的なカラーモデルのひとつです」。上の規則が禁じるのは、すでに述べた事実の重要性を言い換えることであって、設計上の判断を裏づけることではありません。</div>
+
 ## Openings
 
 Open a page with a plain description of what the thing is. Not an aphorism, not a hook, not a first-person musing.
@@ -132,21 +135,29 @@ Open a page with a plain description of what the thing is. Not an aphorism, not 
 The `monologue` at the top of a page is the working-log voice, not the documentation voice. It may use the first person and a reflective tone (the exception to the "no first-person musing" rule, which governs the prose body). Each monologue carries a Japanese counterpart in a nested `<div class="jp">`, following the Geom project's style.
 <div class="jp">ページ冒頭の`monologue`は、ドキュメントの声ではなく制作ログの声です。一人称や内省的な調子を使って構いません（本文に対する「一人称の独白を避ける」規則の例外です）。各モノローグには、Geomプロジェクトのスタイルにならって、入れ子の`<div class="jp">`で対応する日本語を添えます。</div>
 
-The opening monologue states the page's purpose, the problem the thing solves or why it exists, not a description of its inputs or mechanics. Those belong in the prose below.
-<div class="jp">冒頭のモノローグは、そのページの目的、つまりそれが解決する問題やなぜ存在するのかを述べます。入力や仕組みの説明ではありません。それらは下の本文に置きます。</div>
+The opening monologue says what we do on the page, in the first person: it opens with "On this page, we …" and a verb that names the action (build, explore, study, wire, replay). Not a bare description of the thing, and not its inputs or mechanics, which belong in the prose below.
+<div class="jp">冒頭のモノローグは、そのページで何をするのかを一人称で述べます。「On this page, we …」で始め、行為を名指す動詞（build、explore、study、wire、replay など）を続けます。もの自体の素の説明でも、入力や仕組みでもありません。それらは下の本文に置きます。</div>
 
 <div class="page-note">
-<p><strong>Not:</strong> A palette from three inputs: a key hue, a count, and a scheme<br />
-<strong>But:</strong> We can pick colors at random, but they rarely sit well together. So we build from a few strategies instead.</p>
+<p><strong>Not:</strong> A stroke class that turns a path and a width into drawable geometry<br />
+<strong>But:</strong> On this page, we build the stroke class that turns a path and a width into drawable geometry, and the renderers that shade it.</p>
 </div>
 
 The Japanese follows the Geom monologue register: written from the meaning, reflective, and free to break into short sentences (けれど, そこで) rather than tracking the English clause for clause.
 <div class="jp">日本語はGeomのモノローグの語り口にならいます。意味から書き起こし、内省的で、英語の節を逐一なぞるのではなく短い文に区切って構いません（けれど、そこで）。</div>
 
+## Intros
+
+An intro may motivate the approach by contrast, naming the naive option and what the library does instead ("Rather than relying on randomly chosen colors, we develop several strategies…"). Name the sibling project (Geom) when the logic carries over from it.
+<div class="jp">導入は、素朴な選択肢と、その代わりにライブラリが何をするのかを対比させて動機づけて構いません（「ランダムに選んだ色に頼るのではなく、いくつかの戦略を構築します」）。ロジックがGeomプロジェクトから引き継がれている場合は、その名前に触れます。</div>
+
 ## Headings
 
 A short noun phrase naming the topic. Not a question, not a clause, not an evocative phrase.
 <div class="jp">見出しは、主題を示す短い名詞句にします。疑問文でも、節でも、含みを持たせた表現でもありません。</div>
+
+Name the concept the reader recognizes, not the internal mechanism: "Representative colors", not "Representative lightness".
+<div class="jp">読者が認識する概念を名指し、内部の仕組みは名指しません。「Representative lightness」ではなく「Representative colors」。</div>
 
 <div class="page-note">
 <p><strong>Not:</strong> How the palette is built · Where the lightness steps land<br />
@@ -185,6 +196,9 @@ Gloss a technical term on first use: 16進数（hex）.
 
 For a color scheme, the Japanese is 配色, not テーマ.
 <div class="jp">カラースキームの日本語は、テーマではなく配色です。</div>
+
+Keep proper names and UI labels in English inside the Japanese text, not katakana: `**Monochrome：**`, `**Vivid &amp; dark：**`, not `**モノクローム：**`, `**ビビッド＆ダーク：**`. (This applies to the names; a general concept like 配色 stays Japanese.)
+<div class="jp">固有名やUIのラベルは、日本語のなかでもカタカナにせず英語のまま置きます。`**モノクローム：**`や`**ビビッド＆ダーク：**`ではなく`**Monochrome：**`、`**Vivid &amp; dark：**`。（対象は名前であって、配色のような一般概念は日本語のままにします。）</div>
 
 No spaces around inline markup in Japanese text: `Chromaの<strong>Most</strong>と<strong>Least</strong>は` — not `Chromaの <strong>Most</strong> と`.
 <div class="jp">日本語のなかのインライン要素の前後に空白を入れません。`Chromaの <strong>Most</strong> と` ではなく `Chromaの<strong>Most</strong>と<strong>Least</strong>は`。</div>
