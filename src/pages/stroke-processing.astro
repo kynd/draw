@@ -18,8 +18,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/stroke-processing/index.html?embedded`} title="Curve smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Draw on the canvas with the mouse. The gray line is the drawn path shown exactly, one pixel wide; the blue and red lines are its natural and Hobby smoothings. <strong>Span</strong> sets the resampling length.</p>
-      <div class="jp">キャンバスにマウスで描いてください。グレーの線は描いたパスをそのまま1ピクセル幅で表示したものです。青と赤の線は、それをnatural曲線とHobby曲線で滑らかにしたものです。<strong>Span</strong>は再サンプリングの間隔を決めます。</div>
+      <p>Raw pointer input is shaky, so a stroke is smoothed before it is drawn. Draw on the canvas with the mouse. The gray line is the drawn path shown exactly, one pixel wide; the blue and red lines are its natural and Hobby smoothings. <strong>Span</strong> sets the resampling length.</p>
+      <div class="jp">生のポインタ入力は手ぶれを含むため、ストロークは描く前に滑らかにします。キャンバスにマウスで描いてください。グレーの線は描いたパスをそのまま1ピクセル幅で表示したものです。青と赤の線は、それをnatural曲線とHobby曲線で滑らかにしたものです。<strong>Span</strong>は再サンプリングの間隔を決めます。</div>
 
       <details>
         <summary>Details</summary>
@@ -47,8 +47,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/local-smoothing/index.html?embedded`} title="Local smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Two curves that cannot move the settled part of a growing stroke: a Catmull-Rom spline (blue) and a cubic B-spline (green). The stability readout shows the largest movement of the settled part per added point; for both it is exactly zero.</p>
-      <div class="jp">伸びていくストロークの、すでに描かれた部分を動かさない2つの曲線です。Catmull-Romスプライン（青）と3次B-スプライン（緑）。Stabilityの表示は、点を1つ加えるごとの、確定した部分の最大移動量です。どちらも正確にゼロになります。</div>
+      <p>While a stroke is still being drawn, the part already down must not shift, or the whole line would wriggle as new points arrive. Two curves that cannot move the settled part of a growing stroke: a Catmull-Rom spline (blue) and a cubic B-spline (green). The stability readout shows the largest movement of the settled part per added point; for both it is exactly zero.</p>
+      <div class="jp">ストロークを描いている最中に、すでに描かれた部分が動くと、点が増えるたびに線全体がうねってしまいます。伸びていくストロークの、すでに描かれた部分を動かさない2つの曲線です。Catmull-Romスプライン（青）と3次B-スプライン（緑）。Stabilityの表示は、点を1つ加えるごとの、確定した部分の最大移動量です。どちらも正確にゼロになります。</div>
 
       <details>
         <summary>Details</summary>
@@ -73,8 +73,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/stroke-splitting/index.html?embedded`} title="Stroke splitting" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A drawn line split into separate strokes wherever its direction turns more than a threshold angle. Fast zigzag squiggling becomes a run of short strokes instead of one folded line. Each piece is smoothed on its own, so a corner ends one curve and starts the next instead of being rounded away.</p>
-      <div class="jp">向きがしきい値の角度を超えて変わる場所で、描かれた線を別々のストロークに分割します。速いジグザグの走り書きは、折りたたまれた1本の線ではなく、短いストロークの連なりになります。各断片は個別に平滑化されるため、角では、丸められて消えるのではなく、ひとつの曲線が終わり、次の曲線が始まります。</div>
+      <p>Quick back-and-forth marks should read as separate strokes, and a sharp corner should survive rather than round away. So a drawn line is split into separate strokes wherever its direction turns more than a threshold angle. Fast zigzag squiggling becomes a run of short strokes instead of one folded line. Each piece is smoothed on its own, so a corner ends one curve and starts the next.</p>
+      <div class="jp">素早い往復の筆は別々のストロークとして読めるべきで、鋭い角も丸められて消えるのではなく残るべきです。そこで、向きがしきい値の角度を超えて変わる場所で、描かれた線を別々のストロークに分割します。速いジグザグの走り書きは、折りたたまれた1本の線ではなく、短いストロークの連なりになります。各断片は個別に平滑化されるため、角ではひとつの曲線が終わり、次の曲線が始まります。</div>
 
       <details>
         <summary>Details</summary>
@@ -96,8 +96,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/smoothed-brush/index.html?embedded`} title="Smoothed brush" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The same smoothing, drawn as a stroke instead of a line: the smoothed path feeds the brush renderer with ragged ends. The dropdown selects among all four curves.</p>
-      <div class="jp">同じ平滑化を、線ではなくストロークとして描いたものです。滑らかにしたパスをbrushレンダラに渡し、端はraggedにしています。ドロップダウンで4つの曲線のどれでも選べます。</div>
+      <p>Smoothing is only useful if a real renderer can draw the result, not just a bare line. The same smoothing, drawn as a stroke: the smoothed path feeds the brush renderer with ragged ends. The dropdown selects among all four curves.</p>
+      <div class="jp">平滑化は、素の線ではなく実際のレンダラで結果を描けてこそ役に立ちます。同じ平滑化を、ストロークとして描いたものです。滑らかにしたパスをbrushレンダラに渡し、端はraggedにしています。ドロップダウンで4つの曲線のどれでも選べます。</div>
 
       <details>
         <summary>Details</summary>
@@ -119,8 +119,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/split-brush/index.html?embedded`} title="Split brush" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The stroke splitting, drawn as strokes instead of lines: each split piece feeds the brush renderer as its own stroke, with its own taper, ragged ends, and colors. Fast zigzag squiggling lays down a run of separate brush marks in one gesture. Every try-drawing demo and the drawing tool split strokes this way.</p>
-      <div class="jp">ストローク分割を、線ではなくストロークとして描いたものです。分割された各断片は、それぞれのテーパー、raggedな端、色を持つ独立したストロークとしてbrushレンダラに渡されます。速いジグザグの走り書きでは、ひとつの身振りで別々の筆の跡が連なって置かれます。すべてのTry drawingデモと描画ツールは、この方法でストロークを分割します。</div>
+      <p>Drawn as strokes rather than lines, the split lets a fast gesture read as distinct marks instead of one tangled ribbon: each split piece feeds the brush renderer as its own stroke, with its own taper, ragged ends, and colors. Fast zigzag squiggling lays down a run of separate brush marks in one gesture. Every try-drawing demo and the drawing tool split strokes this way.</p>
+      <div class="jp">線ではなくストロークとして描くと、分割は速い身振りを、もつれた1本のリボンではなく別々の筆の跡として見せます。分割された各断片は、それぞれのテーパー、raggedな端、色を持つ独立したストロークとしてbrushレンダラに渡されます。速いジグザグの走り書きでは、ひとつの身振りで別々の筆の跡が連なって置かれます。すべてのTry drawingデモと描画ツールは、この方法でストロークを分割します。</div>
 
       <details>
         <summary>Details</summary>
@@ -139,8 +139,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/hold-start/index.html?embedded`} title="Held start" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The first few points of a stroke swing the tangent with every sample, so a mark drawn from the first point flickers through directions before it settles. Each piece is held until it carries enough arc for a stable direction, then appears already settled; the thin black line shows the pointer meanwhile. The stroke splits at sharp turns as in the drawing demos, and a fresh piece after a split waits the same way its stroke did. Every drawing demo now runs this gate.</p>
-      <div class="jp">ストロークの最初の数点では、サンプルが増えるたびに接線が振れます。そのため、最初の点から描かれる筆跡は、落ち着くまで向きが揺れてちらつきます。各断片は、安定した向きを持てるだけの弧長になるまで保留され、落ち着いた状態で現れます。その間、細い黒線がポインタの位置を示します。ストロークは描画デモと同じく鋭い曲がりで分割され、分割後の新しい断片も、ストロークの始まりと同じように待ちます。今ではすべての描画デモがこのゲートを通しています。</div>
+      <p>A mark drawn from the very first point flickers through directions before the stroke is long enough to have one, which reads as broken, so each piece is held until it carries enough arc for a stable direction, then appears already settled. The thin black line shows the pointer meanwhile. The stroke splits at sharp turns as in the drawing demos, and a fresh piece after a split waits the same way its stroke did. Every drawing demo now runs this gate.</p>
+      <div class="jp">最初の点から描かれる筆跡は、ストロークが向きを持てるだけの長さになる前に向きが揺れてちらつき、壊れて見えます。そこで各断片は、安定した向きを持てるだけの弧長になるまで保留され、落ち着いた状態で現れます。その間、細い黒線がポインタの位置を示します。ストロークは描画デモと同じく鋭い曲がりで分割され、分割後の新しい断片も、ストロークの始まりと同じように待ちます。今ではすべての描画デモがこのゲートを通しています。</div>
 
       <details>
         <summary>Details</summary>
@@ -162,8 +162,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/width-smoothing/index.html?embedded`} title="Width smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Smoothing that follows the stroke's width: a narrow stroke follows the hand directly, and a wide one rounds its turns. A sharp turn folds a wide ribbon over itself, so the wider the stroke, the earlier the turns are rounded away; drawn thin, the same gesture keeps its corners. Every drawing demo now smooths this way.</p>
-      <div class="jp">ストロークの幅に従う平滑化です。細いストロークは手の動きにそのまま従い、太いストロークは曲がりを丸めます。鋭い曲がりは太いリボンを自分の上に折り重ねてしまうため、ストロークが太いほど、曲がりは早めに丸められます。同じ身振りでも、細く描けば角はそのまま残ります。今ではすべての描画デモがこの方法で平滑化しています。</div>
+      <p>A sharp turn folds a wide ribbon over itself into an overlap a thin line never shows, so the smoothing follows the stroke's width: a narrow stroke follows the hand directly, and a wide one rounds its turns. The wider the stroke, the earlier the turns are rounded away; drawn thin, the same gesture keeps its corners. Every drawing demo now smooths this way.</p>
+      <div class="jp">鋭い曲がりは太いリボンを自分の上に折り重ね、細い線には出ない重なりを作ってしまいます。そこで平滑化はストロークの幅に従います。細いストロークは手の動きにそのまま従い、太いストロークは曲がりを丸めます。ストロークが太いほど曲がりは早めに丸められ、同じ身振りでも細く描けば角はそのまま残ります。今ではすべての描画デモがこの方法で平滑化しています。</div>
 
       <details>
         <summary>Details</summary>
@@ -185,8 +185,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/blob-drawing/index.html?embedded`} title="Blob drawing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Draw a line and it becomes a filled blob that contains the whole gesture: the smallest convex region around every drawn point, smoothed and painted.</p>
-      <div class="jp">線を描くと、その身振り全体を含む塗りつぶされたブロブになります。描いたすべての点を囲む最小の凸領域を、滑らかにして塗ったものです。</div>
+      <p>A fill needs a closed region, but a drawn gesture is an open path. Draw a line and it becomes a filled blob that contains the whole gesture: the smallest convex region around every drawn point, smoothed and painted.</p>
+      <div class="jp">塗りには閉じた領域が必要ですが、描いた身振りは開いたパスです。線を描くと、その身振り全体を含む塗りつぶされたブロブになります。描いたすべての点を囲む最小の凸領域を、滑らかにして塗ったものです。</div>
 
       <details>
         <summary>Details</summary>
@@ -211,8 +211,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/tight-blob/index.html?embedded`} title="Tight blob" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A blob that stays a blob and still keeps its concavities: the drawn path is closed into a smooth loop, and the shape is everything within a radius of that loop.</p>
-      <div class="jp">ブロブであり続けながら、凹みも保つブロブです。描いたパスは滑らかなループとして閉じられ、そのループから一定の半径以内にある領域すべてが形になります。</div>
+      <p>The convex hull above fills in every concavity, so a crescent becomes a lump. This blob keeps the concavities: the drawn path is closed into a smooth loop, and the shape is everything within a radius of that loop.</p>
+      <div class="jp">上の凸包は凹みをすべて埋めてしまい、三日月のような形もかたまりになります。このブロブは凹みを保ちます。描いたパスは滑らかなループとして閉じられ、そのループから一定の半径以内にある領域すべてが形になります。</div>
 
       <details>
         <summary>Details</summary>

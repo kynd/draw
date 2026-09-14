@@ -103,7 +103,29 @@ function refresh() {
     stage.draw();
 }
 
-new DrawInput(document.getElementById('canvas'), stage, {
+// A seeded zigzag, so the page opens with an example: its sharp turns split
+// it into pieces, each gated the same way its stroke was.
+function zigzag() {
+    const points = [];
+    const n = 9;
+    for (let i = 0; i <= n; i++) {
+        const x0 = THREE.MathUtils.lerp(-1.4, 1.4, i / n);
+        const x1 = THREE.MathUtils.lerp(-1.4, 1.4, (i + 1) / n);
+        const y0 = i % 2 === 0 ? -0.5 : 0.5;
+        const y1 = i % 2 === 0 ? 0.5 : -0.5;
+        for (let k = 0; k < 12; k++) {
+            const t = k / 12;
+            points.push(new THREE.Vector3(
+                THREE.MathUtils.lerp(x0, x1, t),
+                THREE.MathUtils.lerp(y0, y1, t) + Math.sin((i + t) * 9.0) * 0.02,
+                0
+            ));
+        }
+    }
+    return points;
+}
+
+const input = new DrawInput(document.getElementById('canvas'), stage, {
     onChange: points => { drawn = points; refresh(); },
 });
 
@@ -123,4 +145,6 @@ document.getElementById('random-btn').addEventListener('click', () => {
 stage.onResize(() => refresh());
 wireCollapsibles();
 colors = randomizeColors();
+drawn = zigzag();
+input.set(drawn);
 refresh();

@@ -151,6 +151,14 @@ The Japanese follows the Geom monologue register: written from the meaning, refl
 An intro may motivate the approach by contrast, naming the naive option and what the library does instead ("Rather than relying on randomly chosen colors, we develop several strategies…"). Name the sibling project (Geom) when the logic carries over from it.
 <div class="jp">導入は、素朴な選択肢と、その代わりにライブラリが何をするのかを対比させて動機づけて構いません（「ランダムに選んだ色に頼るのではなく、いくつかの戦略を構築します」）。ロジックがGeomプロジェクトから引き継がれている場合は、その名前に触れます。</div>
 
+Open a section with the motivation, the problem it solves or why it is useful, before describing what it does. Lead with the problem, then the technique.
+<div class="jp">セクションは、それが解決する問題や役に立つ理由、つまり動機から始め、その後に何をするのかを述べます。まず問題を示し、次に手法を説明します。</div>
+
+<div class="page-note">
+<p><strong>Not:</strong> A blob that stays a blob and still keeps its concavities: the drawn path is closed into a smooth loop…<br />
+<strong>But:</strong> The convex hull above fills in every concavity, so a crescent becomes a lump. This blob keeps the concavities: the drawn path is closed into a smooth loop…</p>
+</div>
+
 ## Headings
 
 A short noun phrase naming the topic. Not a question, not a clause, not an evocative phrase.

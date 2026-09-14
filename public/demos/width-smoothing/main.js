@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { smoothByWidth } from '../../lib/curves.js';
+import { seededRandom } from '../../lib/random.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
@@ -95,7 +96,25 @@ function refresh() {
     stage.draw();
 }
 
-new DrawInput(document.getElementById('canvas'), stage, {
+// A seeded wavy line, so the page opens with an example even though the
+// smoothing reads best while drawing.
+function wavyLine() {
+    const rand = seededRandom(23);
+    const comps = Array.from({ length: 3 }, () => ({
+        f: 1 + rand() * 3, p: rand() * Math.PI * 2, a: rand() * 0.5 + 0.15,
+    }));
+    const points = [];
+    for (let i = 0; i < 160; i++) {
+        const t = i / 159;
+        let y = 0;
+        for (const w of comps) y += Math.sin(t * Math.PI * 2 * w.f + w.p) * w.a;
+        y += (rand() - 0.5) * 0.03;
+        points.push(new THREE.Vector3(THREE.MathUtils.lerp(-1.5, 1.5, t), y * 0.45, 0));
+    }
+    return points;
+}
+
+const input = new DrawInput(document.getElementById('canvas'), stage, {
     onChange: points => { drawn = points; refresh(); },
 });
 
@@ -113,4 +132,6 @@ document.getElementById('random-btn').addEventListener('click', () => {
 stage.onResize(() => refresh());
 wireCollapsibles();
 colors = randomizeColors();
+drawn = wavyLine();
+input.set(drawn);
 refresh();
