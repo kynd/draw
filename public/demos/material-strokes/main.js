@@ -2,7 +2,7 @@ import { StrokeDef } from '../../lib/StrokeDef.js';
 import { ChromeStrokeRenderer } from '../../lib/renderers/ChromeStrokeRenderer.js';
 import { MirrorStrokeRenderer } from '../../lib/renderers/MirrorStrokeRenderer.js';
 import { GlassStrokeRenderer } from '../../lib/renderers/GlassStrokeRenderer.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { TestBackground } from '../../lib/demo/testBackground.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
@@ -33,7 +33,7 @@ stage.add(plane);
 let entries = [];
 
 function newPalette() {
-    return randomThemedPalette('vivid-wheel');
+    return randomSchemePalette('vivid-wheel');
 }
 
 function makeRenderer(index) {

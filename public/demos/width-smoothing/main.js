@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { smoothByWidth } from '../../lib/curves.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawInput } from '../../lib/demo/drawInput.js';
@@ -19,7 +19,7 @@ let entry = null;
 let colors = ['#2c3a5e', '#7a4a2f'];
 
 function randomizeColors() {
-    const palette = randomThemedPalette('dark-cluster');
+    const palette = randomSchemePalette('dark-cluster');
     stage.setBackground(paperColor(palette.entries[0].H));
     return [palette.entries[0].hex, palette.entries[1 % palette.length].hex];
 }

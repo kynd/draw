@@ -2,7 +2,7 @@ import { StrokeDef } from '../../lib/StrokeDef.js';
 import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
 import { DebossStrokeRenderer } from '../../lib/renderers/DebossStrokeRenderer.js';
 import { StrokeHalo } from '../../lib/StrokeHalo.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -38,7 +38,7 @@ let colors = [];
 let glowColor = '#7fd0ff';
 
 function randomizeColors() {
-    const palette = randomThemedPalette('vivid-dark');
+    const palette = randomSchemePalette('vivid-dark');
     stage.setBackground(paperColor(palette.entries[0].H));
     // The glow wants the most saturated entry, not any bright entry.
     glowColor = palette.entries.reduce((best, e) => (e.C > best.C ? e : best), palette.entries[0]).hex;

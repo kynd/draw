@@ -5,25 +5,26 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Palette maker" slug="palette-maker">
   <div class="monologue">
-    A palette from three inputs: a key hue, a count, and a theme
+    We can pick colors at random, but they rarely sit well together. So we build from a few strategies instead.
+    <div class="jp">色はランダムに選ぶこともできます。けれど、それだけではうまく調和しません。そこで、いくつかの方策に沿って組み立てます。</div>
   </div>
 
-  <section class="demo-section" id="themed-palette">
+  <section class="demo-section" id="scheme-palette">
     <div class="demo-header">
-      <h2>Themed palette</h2>
-      <a href={`${base}/demos/themed-palette/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+      <h2>Scheme palette</h2>
+      <a href={`${base}/demos/scheme-palette/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
     <div class="demo-embed">
-      <iframe src={`${base}/demos/themed-palette/index.html?embedded`} title="Themed palette" scrolling="no"></iframe>
+      <iframe src={`${base}/demos/scheme-palette/index.html?embedded`} title="Scheme palette" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p><code>ThemedPaletteMaker</code> takes a key hue, a color count, and a theme, and the theme decides everything else: which hues are used, and how light and how saturated each color is. Drag the handle to move the key hue, set the count, and pick a theme. Click a swatch to copy its hex value.</p>
-      <div class="jp"><code>ThemedPaletteMaker</code>は、基準となる色相、色数、テーマを受け取ります。どの色相を使うか、各色をどれだけ明るく、どれだけ鮮やかにするかは、すべてテーマが決めます。ハンドルをドラッグして基準の色相を動かし、色数を決めて、テーマを選んでください。スウォッチをクリックすると16進値をコピーできます。</div>
+      <p><code>SchemePaletteMaker</code> takes a key hue, a color count, and a scheme, and the scheme decides everything else: which hues are used, and how light and how saturated each color is. Drag the handle to move the key hue, set the count, and pick a scheme. Click a swatch to copy its hex value.</p>
+      <div class="jp"><code>SchemePaletteMaker</code>は、基準となる色相、色数、配色を受け取ります。どの色相を使うか、各色をどれだけ明るく、どれだけ鮮やかにするかは、すべて配色が決めます。ハンドルをドラッグして基準の色相を動かし、色数を決めて、配色を選んでください。スウォッチをクリックすると16進値をコピーできます。</div>
 
       <p>Colors are generated in OKLCH (lightness, chroma, hue) rather than RGB or HSL, so a fixed lightness reads as a consistent lightness across hues, and every color is clamped to the largest chroma sRGB can display at its lightness and hue.</p>
       <div class="jp">色はRGBやHSLではなく、OKLCH（明度・彩度・色相）で生成されます。そのため、明度を固定すればどの色相でも同じ明るさに見え、すべての色はその明度と色相でsRGBが表示できる最大の彩度に収められます。</div>
 
-      <h2 id="themes">Themes</h2>
+      <h2 id="schemes">Schemes</h2>
       <p><strong>Monochrome:</strong> every color at the key hue. The first sits at the hue's most vibrant point, and the rest divide the lightness range as evenly as that fixed first color allows, each at the largest chroma available.</p>
       <div class="jp"><strong>Monochrome：</strong>すべての色は基準の色相に揃えられます。最初の色は、その色相が最も鮮やかになる点に配置され、残りの色は、その最初の色が許す範囲で明度の幅を均等に分割して配置します。彩度は、各明度で取りうる最大値です。</div>
 
@@ -47,8 +48,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <div class="jp">各色相には、最も典型的な色があります。赤、緑、青、ピンクといった、いちばん単純な色名で誰もが思い浮かべる色です。その色は特定の明度にあり、色相の彩度が最大になる明度とは一致しません。黄色は明るいときだけ黄色であり、緑や青は彩度のピークよりずっと下でその名前の色になります。Vivid &amp; darkの鮮やかな半分はこの明度を使います。色名ごとの基準値（赤0.58、黄0.90、黄緑0.82、緑0.50、青0.45、ピンク0.78）を色相環に沿って補間したものです。この典型は文化に依存します。どの色名が基本になるか、その色がどこにあるかは文化によって異なり、この基準値はそのひとつの選択です。</div>
 
       <h2 id="randomness">Randomness</h2>
-      <p>Every theme except Black jitters the hue and lightness of the colors other than the key color. The jitter comes from a seed, so the same settings reproduce the same palette; Reroll draws a new seed while the key color holds.</p>
-      <div class="jp">Blackを除くすべてのテーマは、基準の色以外の色相と明度を揺らします。揺らぎはシードから生成されるため、同じ設定からは同じパレットが再現されます。Rerollは新しいシードを引きますが、基準の色は変わりません。</div>
+      <p>Every scheme except Black jitters the hue and lightness of the colors other than the key color. The jitter comes from a seed, so the same settings reproduce the same palette; Reroll draws a new seed while the key color holds.</p>
+      <div class="jp">Blackを除くすべての配色は、基準の色以外の色相と明度を揺らします。揺らぎはシードから生成されるため、同じ設定からは同じパレットが再現されます。Rerollは新しいシードを引きますが、基準の色は変わりません。</div>
 
       <p>The class is documented on <a href={`${base}/documentation/palette`}>Palette</a>.</p>
       <div class="jp">クラスについては<a href={`${base}/documentation/palette`}>Palette</a>に記載しています。</div>

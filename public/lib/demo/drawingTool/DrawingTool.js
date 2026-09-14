@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../../StrokeDef.js';
-import { ThemedPaletteMaker, PALETTE_THEMES, paperGradient } from '../../ThemedPaletteMaker.js';
+import { SchemePaletteMaker, PALETTE_SCHEMES, paperGradient } from '../../SchemePaletteMaker.js';
 import { PIXELS_PER_UNIT } from '../../CanvasBuffer.js';
 import { blobOutline } from '../../pathEffects.js';
 import { StrokeStage } from '../stage.js';
@@ -133,7 +133,7 @@ export class DrawingTool {
             },
             // Once per gesture, after every piece has committed, so the reroll
             // cannot leak into a later piece's record. Every release rerolls
-            // the palette's jitter under the same hue and theme; auto mode
+            // the palette's jitter under the same hue and scheme; auto mode
             // also rolls the tool.
             onRelease: () => {
                 if (this._replaying || this._playerFeeding || this._applyingLive) return;
@@ -150,16 +150,16 @@ export class DrawingTool {
         });
 
         // Palette config. Black stays a direct choice, never a roll.
-        this._rollThemes = PALETTE_THEMES.filter(th => th.id !== 'black').map(th => th.id);
+        this._rollSchemes = PALETTE_SCHEMES.filter(th => th.id !== 'black').map(th => th.id);
         this._paletteCfg = {
             hue: Math.random() * 360, count: 5,
-            theme: this._rollThemes[Math.floor(Math.random() * this._rollThemes.length)],
+            scheme: this._rollSchemes[Math.floor(Math.random() * this._rollSchemes.length)],
             seed: Math.floor(Math.random() * 1e9),
             ...(config.palette ?? {}),
         };
         // The palette trail mirrors the tool trail: the current config with
         // ten remembered on each side, so dialing back retrieves the exact
-        // palette (hue, theme, and seed) that was there.
+        // palette (hue, scheme, and seed) that was there.
         this._paletteTrail = this._buildPaletteTrail();
 
         // The tool trail: the current entry with ten remembered on each side,
@@ -422,7 +422,7 @@ export class DrawingTool {
 
     /**
      * ±n along the palette trail: each new entry moves the key hue by about
-     * ten degrees and rolls a fresh theme and seed, and ten entries stay
+     * ten degrees and rolls a fresh scheme and seed, and ten entries stay
      * remembered on each side, so stepping back retrieves the exact palette.
      */
     stepPalette(steps) {
@@ -447,7 +447,7 @@ export class DrawingTool {
     _rollPaletteStep(fromHue, direction) {
         return {
             hue: (fromHue + direction * (7 + Math.random() * 7) + 360) % 360,
-            theme: this._rollThemes[Math.floor(Math.random() * this._rollThemes.length)],
+            scheme: this._rollSchemes[Math.floor(Math.random() * this._rollSchemes.length)],
             seed: Math.floor(Math.random() * 1e9),
         };
     }
@@ -499,13 +499,13 @@ export class DrawingTool {
         this._emit('tool');
     }
 
-    /** Partial palette update: any of hue, theme, seed, count. Regenerates. */
+    /** Partial palette update: any of hue, scheme, seed, count. Regenerates. */
     setPalette(partial) {
         Object.assign(this._paletteCfg, partial);
         this._regenPalette();
     }
 
-    /** New seed, same hue, count, and theme. */
+    /** New seed, same hue, count, and scheme. */
     rerollPalette() {
         this._paletteCfg.seed = Math.floor(Math.random() * 1e9);
         this._regenPalette();
@@ -737,7 +737,7 @@ export class DrawingTool {
     // Palette internals
 
     _regenPalette() {
-        this._state.palette = new ThemedPaletteMaker(this._paletteCfg).generate();
+        this._state.palette = new SchemePaletteMaker(this._paletteCfg).generate();
         const entries = this._state.palette.entries;
         this._state.colorA = entries[0].hex;
         const rest = entries.slice(1);

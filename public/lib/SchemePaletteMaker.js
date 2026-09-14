@@ -1,6 +1,6 @@
-// ThemedPaletteMaker — a palette from a key hue, a color count, and a theme.
-// The theme decides everything past those three inputs: which hues are used,
-// and how light and how saturated each color is. Every theme except black
+// SchemePaletteMaker — a palette from a key hue, a color count, and a scheme.
+// The scheme decides everything past those three inputs: which hues are used,
+// and how light and how saturated each color is. Every scheme except black
 // jitters the hue and lightness of the colors other than the key color, from
 // a seed, so the same settings reproduce the same palette. Experimental; the
 // Palette Maker's fromHues model is unchanged.
@@ -9,7 +9,7 @@ import { Palette } from './Palette.js';
 import { oklchToHex, maxChromaAt, mostVibrantL } from './color.js';
 import { seededRandom } from './random.js';
 
-export const PALETTE_THEMES = [
+export const PALETTE_SCHEMES = [
     { id: 'mono',           label: 'Monochrome' },
     { id: 'vivid-dark',     label: 'Vivid & dark' },
     { id: 'pastel-cluster', label: 'Pastel cluster' },
@@ -170,7 +170,7 @@ const GENERATORS = {
     'black': black,
 };
 
-// A near-white paper tint of a hue, for a demo's background behind a themed
+// A near-white paper tint of a hue, for a demo's background behind a schemed
 // palette.
 export function paperColor(hue, rng = Math.random) {
     const L = 0.9 + rng() * 0.05;
@@ -180,7 +180,7 @@ export function paperColor(hue, rng = Math.random) {
 
 /**
  * A paper-light two-color gradient spec for a board clear: tints of two
- * palette hues, light enough that any theme (a dark cluster included) clears
+ * palette hues, light enough that any scheme (a dark cluster included) clears
  * to a drawable ground. Plain data, so a recorder can store it.
  */
 export function paperGradient(palette, rng = Math.random) {
@@ -199,32 +199,32 @@ export function paperGradient(palette, rng = Math.random) {
     };
 }
 
-// A themed palette at a random key hue and seed, for a demo's reroll button.
-export function randomThemedPalette(theme, count = 5) {
-    return new ThemedPaletteMaker({
-        hue: Math.random() * 360, count, theme,
+// A schemed palette at a random key hue and seed, for a demo's reroll button.
+export function randomSchemePalette(scheme, count = 5) {
+    return new SchemePaletteMaker({
+        hue: Math.random() * 360, count, scheme,
         seed: Math.floor(Math.random() * 1e9),
     }).generate();
 }
 
-export class ThemedPaletteMaker {
+export class SchemePaletteMaker {
     /**
      * @param {object} opts
      * @param {number} [opts.hue]    The key hue, degrees.
      * @param {number} [opts.count]  How many colors.
-     * @param {string} [opts.theme]  A theme id from PALETTE_THEMES.
+     * @param {string} [opts.scheme]  A scheme id from PALETTE_SCHEMES.
      * @param {number} [opts.seed]   Drives the jitter; same seed, same palette.
      */
-    constructor({ hue = 24, count = 5, theme = 'mono', seed = 1 } = {}) {
+    constructor({ hue = 24, count = 5, scheme = 'mono', seed = 1 } = {}) {
         this.hue = hue;
         this.count = count;
-        this.theme = theme;
+        this.scheme = scheme;
         this.seed = seed;
     }
 
     /** @returns {Palette} */
     generate() {
-        const gen = GENERATORS[this.theme] ?? mono;
+        const gen = GENERATORS[this.scheme] ?? mono;
         const rng = seededRandom(this.seed);
         return Palette.fromEntries(gen(this.hue, Math.max(1, Math.round(this.count)), rng));
     }

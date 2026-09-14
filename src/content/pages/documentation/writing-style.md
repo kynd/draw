@@ -87,6 +87,9 @@ Drop the article on a noun that names the topic: "Strokes are 2D", "Sample count
 Gloss a term with a parenthetical on first use, in English as in Japanese: "sample count (number of vertices)".
 <div class="jp">日本語と同様、英語でも初出の用語には丸括弧で補足を添えます。"sample count (number of vertices)"。</div>
 
+Call a set of colors chosen to relate a "scheme", not a "theme". "Scheme" is the standard term (monochromatic, analogous); "theme" reads as a visual style.
+<div class="jp">互いに関係づけて選んだ色の集合は「theme」ではなく「scheme」と呼びます。「scheme」が標準的な用語で（モノクロマティック、アナログなど）、「theme」は視覚的なスタイルの意味に読まれます。</div>
+
 ## Scope
 
 Describe features of the library. Do not describe the arbitrary decisions of a demo: the shape of its test path, its taper constants, how its colors happen to be picked, or plumbing the reader does not act on. A demo decision is worth a sentence only when the demo would mislead without it.
@@ -123,6 +126,22 @@ Open a page with a plain description of what the thing is. Not an aphorism, not 
 <p><strong>Not:</strong> Before deciding what a mark looks like, decide what colors exist.<br />
 <strong>But:</strong> A reusable palette class that distributes colors using the OKLCH model</p>
 </div>
+
+## Monologues
+
+The `monologue` at the top of a page is the working-log voice, not the documentation voice. It may use the first person and a reflective tone (the exception to the "no first-person musing" rule, which governs the prose body). Each monologue carries a Japanese counterpart in a nested `<div class="jp">`, following the Geom project's style.
+<div class="jp">ページ冒頭の`monologue`は、ドキュメントの声ではなく制作ログの声です。一人称や内省的な調子を使って構いません（本文に対する「一人称の独白を避ける」規則の例外です）。各モノローグには、Geomプロジェクトのスタイルにならって、入れ子の`<div class="jp">`で対応する日本語を添えます。</div>
+
+The opening monologue states the page's purpose, the problem the thing solves or why it exists, not a description of its inputs or mechanics. Those belong in the prose below.
+<div class="jp">冒頭のモノローグは、そのページの目的、つまりそれが解決する問題やなぜ存在するのかを述べます。入力や仕組みの説明ではありません。それらは下の本文に置きます。</div>
+
+<div class="page-note">
+<p><strong>Not:</strong> A palette from three inputs: a key hue, a count, and a scheme<br />
+<strong>But:</strong> We can pick colors at random, but they rarely sit well together. So we build from a few strategies instead.</p>
+</div>
+
+The Japanese follows the Geom monologue register: written from the meaning, reflective, and free to break into short sentences (けれど, そこで) rather than tracking the English clause for clause.
+<div class="jp">日本語はGeomのモノローグの語り口にならいます。意味から書き起こし、内省的で、英語の節を逐一なぞるのではなく短い文に区切って構いません（けれど、そこで）。</div>
 
 ## Headings
 
@@ -163,6 +182,9 @@ Prefer the active or potential form over the passive when the reader acts. The p
 
 Gloss a technical term on first use: 16進数（hex）.
 <div class="jp">専門用語には初出時に原語を添えます。16進数（hex）。</div>
+
+For a color scheme, the Japanese is 配色, not テーマ.
+<div class="jp">カラースキームの日本語は、テーマではなく配色です。</div>
 
 No spaces around inline markup in Japanese text: `Chromaの<strong>Most</strong>と<strong>Least</strong>は` — not `Chromaの <strong>Most</strong> と`.
 <div class="jp">日本語のなかのインライン要素の前後に空白を入れません。`Chromaの <strong>Most</strong> と` ではなく `Chromaの<strong>Most</strong>と<strong>Least</strong>は`。</div>

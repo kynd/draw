@@ -1,3 +1,3 @@
 import { setupSymmetryShowcase } from '../../lib/demo/symmetryShowcase.js';
 
-setupSymmetryShowcase({ kind: 'screen', theme: 'pastel-cluster' });
+setupSymmetryShowcase({ kind: 'screen', scheme: 'pastel-cluster' });

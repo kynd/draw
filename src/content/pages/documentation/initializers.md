@@ -28,7 +28,7 @@ Rolling uses Math.random; a host that needs determinism records what the marks d
 
 ## The demo harness
 
-`setupInitializerDemo(initialize)` is what the initializer demos share: a stage, a board, and the corner button that runs the initializer again with a fresh palette and theme.
-<div class="jp">`setupInitializerDemo(initialize)`はイニシャライザのデモが共有する部分です。ステージ、ボード、そして新しいパレットとテーマでイニシャライザをもう一度実行する、角のボタン。</div>
+`setupInitializerDemo(initialize)` is what the initializer demos share: a stage, a board, and the corner button that runs the initializer again with a fresh palette and scheme.
+<div class="jp">`setupInitializerDemo(initialize)`はイニシャライザのデモが共有する部分です。ステージ、ボード、そして新しいパレットと配色でイニシャライザをもう一度実行する、角のボタン。</div>
 
 </div>

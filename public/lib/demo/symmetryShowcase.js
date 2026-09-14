@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../StrokeDef.js';
 import { PIXELS_PER_UNIT } from '../CanvasBuffer.js';
-import { randomThemedPalette } from '../ThemedPaletteMaker.js';
+import { randomSchemePalette } from '../SchemePaletteMaker.js';
 import { seededRandom } from '../random.js';
 import { resampleEvery, catmullRomSpline } from '../curves.js';
 import { StrokeStage } from './stage.js';
@@ -22,9 +22,9 @@ const SEEDS = [3.1, 7.4, 11.9];
  * demos smooth. Randomizing rerolls the palette, the symmetry, and the
  * copies' colors; the gestures stay.
  */
-export function setupSymmetryShowcase({ kind, theme = 'vivid-dark' }) {
+export function setupSymmetryShowcase({ kind, scheme = 'vivid-dark' }) {
     const stage = new StrokeStage(document.getElementById('canvas'));
-    let palette = randomThemedPalette(theme);
+    let palette = randomSchemePalette(scheme);
     const background = new TestBackground(palette, { blur: 6 });
     const plane = background.createPlane(stage.extentX, stage.extentY);
     stage.add(plane);
@@ -106,7 +106,7 @@ export function setupSymmetryShowcase({ kind, theme = 'vivid-dark' }) {
     }
 
     document.getElementById('random-btn').addEventListener('click', () => {
-        palette = randomThemedPalette(theme);
+        palette = randomSchemePalette(scheme);
         background.paint(palette, stage.viewport.pixelWidth, stage.viewport.pixelHeight);
         rebuild();
     });

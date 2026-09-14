@@ -1,6 +1,6 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -24,9 +24,9 @@ const stage = new StrokeStage(document.getElementById('canvas'));
 let entries = [];
 let colors = [];
 
-/** Two pigments per stroke, adjacent slots of one themed palette. */
+/** Two pigments per stroke, adjacent slots of one schemed palette. */
 function randomizeColors() {
-    const palette = randomThemedPalette('dark-cluster');
+    const palette = randomSchemePalette('dark-cluster');
     stage.setBackground(paperColor(palette.entries[0].H));
     return Array.from({ length: COUNT }, (_, i) => [
         palette.entries[i % palette.length].hex,

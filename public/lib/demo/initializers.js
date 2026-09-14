@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../StrokeDef.js';
 import { PIXELS_PER_UNIT } from '../CanvasBuffer.js';
-import { randomThemedPalette, paperGradient, PALETTE_THEMES } from '../ThemedPaletteMaker.js';
+import { randomSchemePalette, paperGradient, PALETTE_SCHEMES } from '../SchemePaletteMaker.js';
 import { blobOutline } from '../pathEffects.js';
 import { StrokeStage } from './stage.js';
 import { DrawingBoard } from './drawingBoard.js';
@@ -332,18 +332,18 @@ export const patternInit = onBoard(rollPattern);
 export const splitInit = onBoard(rollSplit);
 export const fillsInit = onBoard(rollFills);
 
-const ROLL_THEMES = PALETTE_THEMES.filter(th => th.id !== 'black').map(th => th.id);
+const ROLL_THEMES = PALETTE_SCHEMES.filter(th => th.id !== 'black').map(th => th.id);
 
 /**
  * The harness the initializer demos share: a stage, a board, and the corner
- * button that runs the initializer again with a fresh palette and theme.
+ * button that runs the initializer again with a fresh palette and scheme.
  */
 export function setupInitializerDemo(initialize) {
     const stage = new StrokeStage(document.getElementById('canvas'));
     const board = new DrawingBoard(stage);
 
     function run() {
-        const palette = randomThemedPalette(ROLL_THEMES[Math.floor(Math.random() * ROLL_THEMES.length)]);
+        const palette = randomSchemePalette(ROLL_THEMES[Math.floor(Math.random() * ROLL_THEMES.length)]);
         initialize({ stage, board, palette });
         stage.draw();
     }

@@ -1,3 +1,3 @@
 import { setupSymmetryShowcase } from '../../lib/demo/symmetryShowcase.js';
 
-setupSymmetryShowcase({ kind: 'rotation', theme: 'vivid-wheel' });
+setupSymmetryShowcase({ kind: 'rotation', scheme: 'vivid-wheel' });

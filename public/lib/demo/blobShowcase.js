@@ -1,4 +1,4 @@
-import { randomThemedPalette, paperColor } from '../ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../SchemePaletteMaker.js';
 import { blobOutline } from '../pathEffects.js';
 import { StrokeStage } from './stage.js';
 import { TestBackground } from './testBackground.js';
@@ -15,7 +15,7 @@ import { seededScribble } from './strokePaths.js';
  * end }` for the slot's center, and the endpoints ride into ctx for renderers that
  * need them.
  */
-export function setupBlobShowcase({ makeRow, makeShape = null, background = false, controls = {}, theme = 'vivid-dark' }) {
+export function setupBlobShowcase({ makeRow, makeShape = null, background = false, controls = {}, scheme = 'vivid-dark' }) {
     const SEEDS = [3, 8, 21];
     const stage = new StrokeStage(document.getElementById('canvas'), {
         fit: { width: 1.70, height: 1.75 },
@@ -37,7 +37,7 @@ export function setupBlobShowcase({ makeRow, makeShape = null, background = fals
     let colors = [];
 
     function newPalette() {
-        return randomThemedPalette(theme);
+        return randomSchemePalette(scheme);
     }
 
     function randomizeColors() {

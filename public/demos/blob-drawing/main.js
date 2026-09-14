@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { resampleEvery, catmullRomSpline, bSpline } from '../../lib/curves.js';
 import { convexHull } from '../../lib/pathEffects.js';
 import { seededRandom } from '../../lib/random.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireWireframeToggle } from '../../lib/demo/panel.js';
 import { DrawInput } from '../../lib/demo/drawInput.js';
@@ -45,7 +45,7 @@ function setLine(object, points) {
 }
 
 function randomizeColors() {
-    const palette = randomThemedPalette('vivid-dark');
+    const palette = randomSchemePalette('vivid-dark');
     stage.setBackground(paperColor(palette.entries[0].H));
     const sorted = [...palette.entries].sort((a, b) => a.L - b.L);
     colors = {

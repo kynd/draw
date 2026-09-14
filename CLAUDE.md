@@ -100,7 +100,7 @@ src/pages/
   drawing-tool.astro                    the combined instrument demo
   player.astro                          plays back a downloaded drawing log
 public/lib/                            library code
-  StrokeDef.js  Palette.js  ThemedPaletteMaker.js  color.js  CanvasBuffer.js
+  StrokeDef.js  Palette.js  SchemePaletteMaker.js  color.js  CanvasBuffer.js
   random.js  pathEffects.js
   StrokeHalo.js  curves.js
   renderers/    StrokeRenderer.js      base + shared resampling

@@ -1,7 +1,7 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { spiralPath, entangledPaths, scatteredPaths } from '../../lib/pathEffects.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -21,7 +21,7 @@ let entries = [];
 let colorGroups = [];
 
 function randomizeColors() {
-    const palette = randomThemedPalette('vivid-wheel');
+    const palette = randomSchemePalette('vivid-wheel');
     stage.setBackground(paperColor(palette.entries[0].H));
     const hexes = palette.toHexArray();
     return Array.from({ length: ROWS }, (_, i) =>

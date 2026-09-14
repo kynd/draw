@@ -13,7 +13,7 @@ Picking colors by hand produces sets that look chosen. Picking them by rule prod
 <div class="jp">`Palette`は色のリストで、そこから色を規則立てて取り出すための補助メソッドを備えています。色はOKLCHで生成されるため、明度を固定すればどの色相でも同じ明るさに見えます。</div>
 
 <div class="page-note">
-<p><code>public/lib/Palette.js</code>, <code>public/lib/color.js</code> — copied from the stroke_designer project. <code>public/lib/ThemedPaletteMaker.js</code> builds on them.</p>
+<p><code>public/lib/Palette.js</code>, <code>public/lib/color.js</code> — copied from the stroke_designer project. <code>public/lib/SchemePaletteMaker.js</code> builds on them.</p>
 </div>
 
 ## Gamut
@@ -59,10 +59,10 @@ The multiplier rises with `maxC`, so the entry with the most headroom stays the 
 Two other constructors take colors that already exist: `fromHexArray(hexes)` for plain strings, and `fromEntries(entries)` for objects that already carry `L`, `C`, and `H`.
 <div class="jp">既存の色を受け取るコンストラクタも2つあります。単純な文字列の配列には `fromHexArray(hexes)`、`L`・`C`・`H` をすでに持つオブジェクトには `fromEntries(entries)` を使います。</div>
 
-## ThemedPaletteMaker
+## SchemePaletteMaker
 
-`ThemedPaletteMaker` generates a `Palette` from three inputs: a key hue, a color count, and a theme. The theme decides everything else: which hues are used, and how light and how saturated each color is. `new ThemedPaletteMaker({ hue, count, theme, seed }).generate()` returns a regular `Palette`, with the key color first.
-<div class="jp">`ThemedPaletteMaker`は、3つの入力から`Palette`を生成します。基準の色相、色数、テーマです。それ以外はすべてテーマが決めます。どの色相を使うか、そして各色の明るさと彩度です。`new ThemedPaletteMaker({ hue, count, theme, seed }).generate()`は通常の`Palette`を返し、基準の色が先頭に来ます。</div>
+`SchemePaletteMaker` generates a `Palette` from three inputs: a key hue, a color count, and a scheme. The scheme decides everything else: which hues are used, and how light and how saturated each color is. `new SchemePaletteMaker({ hue, count, scheme, seed }).generate()` returns a regular `Palette`, with the key color first.
+<div class="jp">`SchemePaletteMaker`は、3つの入力から`Palette`を生成します。基準の色相、色数、配色です。それ以外はすべて配色が決めます。どの色相を使うか、そして各色の明るさと彩度です。`new SchemePaletteMaker({ hue, count, scheme, seed }).generate()`は通常の`Palette`を返し、基準の色が先頭に来ます。</div>
 
 <div class="page-note">
 <ul>
@@ -75,14 +75,14 @@ Two other constructors take colors that already exist: `fromHexArray(hexes)` for
 </ul>
 </div>
 
-Every theme except `black` jitters the hue and lightness of the colors other than the key color. The jitter derives from `seed`, so the same settings reproduce the same palette. `PALETTE_THEMES` lists the themes with display labels.
-<div class="jp">`black`を除くすべてのテーマは、基準の色以外の色相と明度を揺らします。揺らぎは`seed`から導かれるため、同じ設定からは同じパレットが再現されます。`PALETTE_THEMES`は表示名付きのテーマの一覧です。</div>
+Every scheme except `black` jitters the hue and lightness of the colors other than the key color. The jitter derives from `seed`, so the same settings reproduce the same palette. `PALETTE_SCHEMES` lists the schemes with display labels.
+<div class="jp">`black`を除くすべての配色は、基準の色以外の色相と明度を揺らします。揺らぎは`seed`から導かれるため、同じ設定からは同じパレットが再現されます。`PALETTE_SCHEMES`は表示名付きの配色の一覧です。</div>
 
 `representativeL(H)` is the lightness of a hue's most prototypical color, the one people recognize by the simplest color term (red, green, blue, pink). That color sits at a particular lightness, not at the hue's max-chroma point: yellow is only yellow when bright, while green and blue are their names well below their chroma peaks. Anchored per color term (red 0.58, orange 0.72, yellow 0.90, yellow-green 0.82, green 0.50, cyan 0.70, blue 0.45, purple 0.45, magenta 0.58, pink 0.78) and interpolated around the wheel. The prototypes are cultural: which terms are basic, and where their colors sit, varies between cultures, and the anchors are one such choice.
 <div class="jp">`representativeL(H)`は、その色相の最も典型的な色の明度です。赤、緑、青、ピンクといった、いちばん単純な色名で誰もが思い浮かべる色です。その色は特定の明度にあり、色相の彩度が最大になる点とは一致しません。黄色は明るいときだけ黄色であり、緑や青は、彩度のピークよりずっと低い明度でその名前の色になります。色名ごとの基準値（赤0.58、橙0.72、黄0.90、黄緑0.82、緑0.50、シアン0.70、青0.45、紫0.45、マゼンタ0.58、ピンク0.78）を色相環に沿って補間します。この典型は文化に依存します。どの色名が基本になるか、その色がどこにあるかは文化によって異なり、この基準値はそのひとつの選択です。</div>
 
-Three helpers support the demos: `paperColor(hue)` returns a near-white paper tint of a hue for a background, `paperGradient(palette)` returns a two-color paper-tint gradient spec for a board clear, and `randomThemedPalette(theme, count)` returns a themed palette at a random key hue and seed.
-<div class="jp">デモ用の補助が3つあります。`paperColor(hue)`は、背景用に、その色相をわずかに帯びた白に近い紙のような色を返します。`paperGradient(palette)`は、ボードのクリアに使う、2色の紙のようなグラデーションの指定を返します。`randomThemedPalette(theme, count)`は、ランダムな基準色相とシードでテーマ付きパレットを返します。</div>
+Three helpers support the demos: `paperColor(hue)` returns a near-white paper tint of a hue for a background, `paperGradient(palette)` returns a two-color paper-tint gradient spec for a board clear, and `randomSchemePalette(scheme, count)` returns a schemed palette at a random key hue and seed.
+<div class="jp">デモ用の補助が3つあります。`paperColor(hue)`は、背景用に、その色相をわずかに帯びた白に近い紙のような色を返します。`paperGradient(palette)`は、ボードのクリアに使う、2色の紙のようなグラデーションの指定を返します。`randomSchemePalette(scheme, count)`は、ランダムな基準色相とシードで配色付きパレットを返します。</div>
 
 ## Selecting
 

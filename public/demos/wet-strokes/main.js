@@ -2,7 +2,7 @@ import { StrokeDef } from '../../lib/StrokeDef.js';
 import { WatercolorStrokeRenderer } from '../../lib/renderers/WatercolorStrokeRenderer.js';
 import { SmearStrokeRenderer } from '../../lib/renderers/SmearStrokeRenderer.js';
 import { WetBrushStrokeRenderer } from '../../lib/renderers/WetBrushStrokeRenderer.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { TestBackground } from '../../lib/demo/testBackground.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
@@ -34,7 +34,7 @@ let entries = [];
 let colors = [];
 
 function newPalette() {
-    return randomThemedPalette('mono');
+    return randomSchemePalette('mono');
 }
 
 function randomizeColors() {

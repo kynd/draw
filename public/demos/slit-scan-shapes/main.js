@@ -10,7 +10,7 @@ const MAKERS = [
 ];
 
 setupBlobShowcase({
-    theme: 'vivid-dark',
+    scheme: 'vivid-dark',
     background: true,
     controls: { mix: 2 },
     makeShape: (i, seed, { cx, cy }) => {

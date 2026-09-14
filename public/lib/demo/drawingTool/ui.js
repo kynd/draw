@@ -1,6 +1,6 @@
 import { Dial } from '../dial.js';
 import { FrameLatch } from '../latch.js';
-import { PALETTE_THEMES } from '../../ThemedPaletteMaker.js';
+import { PALETTE_SCHEMES } from '../../SchemePaletteMaker.js';
 import { toolLabel } from '../toolRegistry.js';
 
 const TEMPLATE = /* html */`
@@ -62,7 +62,7 @@ const TEMPLATE = /* html */`
     <div class="dp-sub-label">Color</div>
     <div style="display:flex; gap:8px; align-items:center">
       <div id="dial-h" class="small"></div>
-      <select id="theme-select" class="dp-select"></select>
+      <select id="scheme-select" class="dp-select"></select>
     </div>
     <div class="dp-btn-row" style="margin-top:8px">
       <button id="palette-reroll" class="dp-btn secondary">Reroll palette</button>
@@ -253,16 +253,16 @@ export function attachDrawingToolUi(tool, layout) {
     const dialH = new Dial($('dial-h'),
         { label: 'H', min: 0, max: 360, value: Math.round(tool.state.palette.hue),
           onInput: v => mutate(() => tool.setPalette({ hue: v })) });
-    const themeSelect = $('theme-select');
-    for (const th of PALETTE_THEMES) {
+    const schemeSelect = $('scheme-select');
+    for (const th of PALETTE_SCHEMES) {
         const o = document.createElement('option');
         o.value = th.id;
         o.textContent = th.label;
-        themeSelect.appendChild(o);
+        schemeSelect.appendChild(o);
     }
-    themeSelect.value = tool.state.palette.theme;
-    themeSelect.addEventListener('change', () =>
-        mutate(() => tool.setPalette({ theme: themeSelect.value })));
+    schemeSelect.value = tool.state.palette.scheme;
+    schemeSelect.addEventListener('change', () =>
+        mutate(() => tool.setPalette({ scheme: schemeSelect.value })));
     $('palette-reroll').addEventListener('click', () => tool.rerollPalette());
 
     function renderSwatches() {
@@ -360,7 +360,7 @@ export function attachDrawingToolUi(tool, layout) {
         const index = tool.registry.findIndex(entry => entry.id === state.toolId);
         if (index >= 0) dialToolAdv.set(index, false);
         dialH.set(Math.round(state.palette.hue), false);
-        themeSelect.value = state.palette.theme;
+        schemeSelect.value = state.palette.scheme;
         renderParams();
         renderSwatches();
     }
@@ -390,7 +390,7 @@ export function attachDrawingToolUi(tool, layout) {
     tool.on('palette', () => {
         if (fromUi) { renderSwatches(); return; }
         dialH.set(Math.round(tool.state.palette.hue), false);
-        themeSelect.value = tool.state.palette.theme;
+        schemeSelect.value = tool.state.palette.scheme;
         renderSwatches();
     });
     tool.on('clear', () => { if (!fromUi) syncPane(); });

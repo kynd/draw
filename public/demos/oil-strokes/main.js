@@ -1,6 +1,6 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { OilStrokeRenderer } from '../../lib/renderers/OilStrokeRenderer.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { TestBackground } from '../../lib/demo/testBackground.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
@@ -31,7 +31,7 @@ let entries = [];
 let colors = [];
 
 function newPalette() {
-    return randomThemedPalette('vivid-dark');
+    return randomSchemePalette('vivid-dark');
 }
 
 function randomizeColors() {

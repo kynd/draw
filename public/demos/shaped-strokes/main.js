@@ -2,7 +2,7 @@ import { StrokeDef } from '../../lib/StrokeDef.js';
 import { CloudStrokeRenderer } from '../../lib/renderers/CloudStrokeRenderer.js';
 import { RoundedSquareStrokeRenderer } from '../../lib/renderers/RoundedSquareStrokeRenderer.js';
 import { SpikeStrokeRenderer } from '../../lib/renderers/SpikeStrokeRenderer.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -26,7 +26,7 @@ let entries = [];
 let colors = [];
 
 function randomizeColors() {
-    const palette = randomThemedPalette('pastel-cluster');
+    const palette = randomSchemePalette('pastel-cluster');
     stage.setBackground(paperColor(palette.entries[0].H));
     return Array.from({ length: ROWS }, (_, i) => palette.entries[i % palette.length].hex);
 }

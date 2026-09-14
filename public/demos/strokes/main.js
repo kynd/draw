@@ -3,7 +3,7 @@ import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strok
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
 import { CanvasBuffer, PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { Viewport } from '../../lib/demo/viewport.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 
@@ -62,9 +62,9 @@ let entries = [];
 let showSpine = false;
 let showWire = false;
 
-/** A themed palette per redraw: paper from the key hue, one slot per stroke. */
+/** A schemed palette per redraw: paper from the key hue, one slot per stroke. */
 function randomizeColors() {
-    const palette = randomThemedPalette('vivid-dark');
+    const palette = randomSchemePalette('vivid-dark');
     buffer.background.set(paperColor(palette.entries[0].H));
     return STROKES.map((_, i) => palette.entries[i % palette.length].hex);
 }

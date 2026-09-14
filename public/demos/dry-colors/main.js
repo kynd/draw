@@ -1,6 +1,6 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { DryMediaStrokeRenderer } from '../../lib/renderers/DryMediaStrokeRenderer.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -33,7 +33,7 @@ let entries = [];
 let colors = RAINBOW.map(list => [...list]);
 
 function randomizeColors() {
-    const palette = randomThemedPalette('vivid-wheel');
+    const palette = randomSchemePalette('vivid-wheel');
     stage.setBackground(paperColor(palette.entries[0].H));
     return MEDIA.map(() => Array.from({ length: 4 }, () => palette.pick().hex));
 }

@@ -1,18 +1,18 @@
-import { ThemedPaletteMaker, PALETTE_THEMES } from '../../lib/ThemedPaletteMaker.js';
+import { SchemePaletteMaker, PALETTE_SCHEMES } from '../../lib/SchemePaletteMaker.js';
 import { hueSwatchColor } from '../../lib/color.js';
 import { applyEmbeddedLayout } from '../../lib/demo/viewport.js';
 
 applyEmbeddedLayout();
 
-const state = { hue: 24, count: 5, theme: 'mono', seed: 1 };
+const state = { hue: 24, count: 5, scheme: 'mono', seed: 1 };
 
 const gridEl = document.getElementById('grid');
 const readout = document.getElementById('readout');
 const toast = document.getElementById('toast');
 const countEl = document.getElementById('count');
-const themeEl = document.getElementById('theme');
+const schemeEl = document.getElementById('scheme');
 
-themeEl.innerHTML = PALETTE_THEMES.map(t => `<option value="${t.id}">${t.label}</option>`).join('');
+schemeEl.innerHTML = PALETTE_SCHEMES.map(t => `<option value="${t.id}">${t.label}</option>`).join('');
 
 // ── Hue ring ─────────────────────────────────────────────────────────────────
 
@@ -110,7 +110,7 @@ window.addEventListener('touchend', endDrag);
 // ── Palette grid ─────────────────────────────────────────────────────────────
 
 function generate() {
-    const palette = new ThemedPaletteMaker(state).generate();
+    const palette = new SchemePaletteMaker(state).generate();
 
     gridEl.style.gridTemplateColumns = `repeat(${palette.length}, 1fr)`;
     gridEl.style.gridTemplateRows = '1fr';
@@ -124,7 +124,7 @@ function generate() {
     readout.innerHTML =
         `<span>hue<strong>${Math.round(state.hue)}</strong></span>` +
         `<span>colors<strong>${palette.length}</strong></span>` +
-        `<span>theme<strong>${state.theme}</strong></span>` +
+        `<span>scheme<strong>${state.scheme}</strong></span>` +
         `<span>seed<strong>${state.seed}</strong></span>`;
 
     drawRing();
@@ -150,8 +150,8 @@ countEl.addEventListener('input', () => {
     generate();
 });
 
-themeEl.addEventListener('change', () => {
-    state.theme = themeEl.value;
+schemeEl.addEventListener('change', () => {
+    state.scheme = schemeEl.value;
     generate();
 });
 

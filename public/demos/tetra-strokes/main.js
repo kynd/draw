@@ -1,6 +1,6 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { TetrahedronStrokeRenderer } from '../../lib/renderers/TetrahedronStrokeRenderer.js';
-import { randomThemedPalette, paperColor } from '../../lib/ThemedPaletteMaker.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
@@ -18,7 +18,7 @@ const ctrl = {
 };
 
 const stage = new StrokeStage(document.getElementById('canvas'));
-let palette = randomThemedPalette('vivid-dark');
+let palette = randomSchemePalette('vivid-dark');
 const background = new TestBackground(palette, { blur: 6 });
 const plane = background.createPlane(stage.extentX, stage.extentY);
 stage.add(plane);
@@ -27,7 +27,7 @@ let entries = [];
 let colors = { stripes: [], a: '#803050', b: '#2a5080', tint: '#e8d8c8' };
 
 function randomizeColors() {
-    palette = randomThemedPalette('vivid-dark');
+    palette = randomSchemePalette('vivid-dark');
     background.paint(palette, stage.viewport.pixelWidth, stage.viewport.pixelHeight);
     const sorted = [...palette.entries].sort((a, b) => a.L - b.L);
     return {

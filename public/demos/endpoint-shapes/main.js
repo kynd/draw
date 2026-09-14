@@ -10,7 +10,7 @@ const MAKERS = [
 ];
 
 setupBlobShowcase({
-    theme: 'vivid-dark',
+    scheme: 'vivid-dark',
     makeShape: (i, seed, { cx, cy }) => {
         const [a, b] = seededSegment(seed, { cx, cy, r: i === 0 ? 0.58 : 0.72 });
         // The circle runs center to edge, so its start is the slot's center.

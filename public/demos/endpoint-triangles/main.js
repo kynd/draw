@@ -10,7 +10,7 @@ const MAKERS = [
 ];
 
 setupBlobShowcase({
-    theme: 'vivid-wheel',
+    scheme: 'vivid-wheel',
     makeShape: (i, seed, { cx, cy }) => {
         const [a, b] = seededSegment(seed, { cx, cy, r: 0.72 });
         const contour = MAKERS[i](a, b, seed);

@@ -13,7 +13,7 @@ export class DrawingToolConfig {
      * @param {string[]|object[]} [opts.tools]  Ids from the master registry, or
      *                                          registry entries directly. The
      *                                          whole registry when omitted.
-     * @param {object}  [opts.palette]      Initial { hue, count, theme, seed }.
+     * @param {object}  [opts.palette]      Initial { hue, count, scheme, seed }.
      * @param {string}  [opts.toolId]       Initial tool (rolled when omitted).
      * @param {boolean} [opts.preview]      The in-scene preview box.
      * @param {string[]} [opts.initializers] Initializer ids a clear picks from
