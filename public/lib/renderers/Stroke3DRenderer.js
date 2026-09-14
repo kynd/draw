@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
 
+// The half-width (world units) at which the undulation rates match the
+// originals; wider strokes undulate proportionally more slowly.
+const WIDTH_REF = 0.08;
+
 /**
  * Base for strokes built from 3D shapes around the spine.
  *
@@ -46,17 +50,22 @@ export class Stroke3DRenderer extends StrokeRenderer {
     frames(def) {
         const { samples, normals, tangents, length, ts } = resampleSpine(def, this.samplesPerUnit, 8, 1024);
         const seed = def.seed ?? 1;
+        // The depth and wander undulations advance by arc measured in widths,
+        // so their wavelength tracks the stroke's thickness: a wide tube
+        // snakes as gently as a thin one instead of rippling faster than it is
+        // thick. WIDTH_REF is the width at which the rates match the originals.
+        const wscale = WIDTH_REF / Math.max(def.widthLeftAt(0.5), 1e-4);
         const zAt = s => this.zBase + this.depth * (
-            Math.sin(s * 3.1 + seed * 5.3) * 0.6 +
-            Math.sin(s * 6.7 + seed * 9.1) * 0.4
+            Math.sin(s * wscale * 3.1 + seed * 5.3) * 0.6 +
+            Math.sin(s * wscale * 6.7 + seed * 9.1) * 0.4
         );
         const phaseAt = s => (length - s) * this.twist + seed * 2.399;
         // The offset from the spine: a seeded wave of arc length sets how far,
         // and the twist phase sets which way around the spine, so the offset's
         // direction rotates with the mark while it is drawn.
         const offAt = s => this.wander * (
-            Math.sin(s * 2.1 + seed * 4.7) * 0.6 +
-            Math.sin(s * 4.3 + seed * 8.3) * 0.4
+            Math.sin(s * wscale * 2.1 + seed * 4.7) * 0.6 +
+            Math.sin(s * wscale * 4.3 + seed * 8.3) * 0.4
         );
         const centers = samples.map((p, i) => {
             const s = ts[i] * length;

@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import { ShaderStrokeRenderer } from './ShaderStrokeRenderer.js';
 
+// The half-width (world units) at which the spike rate equals `spikes`;
+// wider strokes get proportionally fewer spikes per length.
+const WIDTH_REF = 0.12;
+
 /**
  * A broad stroke whose edge rises into sharp spikes.
  *
@@ -16,7 +20,9 @@ export class SpikeStrokeRenderer extends ShaderStrokeRenderer {
     /**
      * @param {object} opts
      * @param {string} [opts.color]
-     * @param {number} [opts.spikes]  Spikes per world unit of arc length.
+     * @param {number} [opts.spikes]  Spike rate at the reference width; the
+     *                                rate scales with width so spikes-per-width
+     *                                holds, keeping the spike shape steady.
      * @param {number} [opts.amp]     Spike height, in half-widths.
      * @param {number} [opts.sharp]   Tip sharpness; higher is needler.
      */
@@ -29,10 +35,14 @@ export class SpikeStrokeRenderer extends ShaderStrokeRenderer {
         this.inflate = 1 + amp * 1.25 + 0.2;
     }
 
-    uniforms() {
+    uniforms(def) {
+        // Spikes-per-width, not per world length: the rate rises for a thin
+        // stroke and falls for a wide one, so a wide edge is not left with a
+        // few spikes spaced far apart relative to its width.
+        const rate = this.spikes * WIDTH_REF / Math.max(def.maxWidth(), 1e-3);
         return {
             uColor: { value: new THREE.Color(this.color) },
-            uSpikes: { value: this.spikes },
+            uSpikes: { value: rate },
             uAmp: { value: this.amp },
             uSharp: { value: this.sharp },
         };
