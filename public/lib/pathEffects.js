@@ -293,16 +293,6 @@ export function mirroredPath(points, { x, y } = {}) {
     });
 }
 
-/** Copies of the path, each translated by one `[dx, dy]` of `offsets`.
- * Pressures ride along. */
-export function translatedPaths(points, offsets) {
-    return offsets.map(([dx, dy]) => points.map(p => {
-        const q = new THREE.Vector3(p.x + dx, p.y + dy, p.z ?? 0);
-        if (p.pressure !== undefined) q.pressure = p.pressure;
-        return q;
-    }));
-}
-
 /**
  * `count - 1` copies of the path rotated evenly around `center` (the path's
  * own start when omitted), so the path and the copies together divide the

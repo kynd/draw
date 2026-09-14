@@ -5,12 +5,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Symmetric strokes" slug="symmetric-strokes">
   <div class="monologue">
-    One gesture, several strokes: the drawn path comes back mirrored, rotated, stepped in parallel, or reflected across the canvas
+    One gesture, several strokes: the drawn path comes back mirrored, rotated, or reflected across the canvas
   </div>
 
   <div class="prose">
-    <p>The symmetry is a path transform: <code>mirroredPath</code>, <code>rotatedPaths</code>, and <code>translatedPaths</code> (on the Path Effects page) derive the copies from the drawn path, and every copy is an ordinary stroke drawn by the same tool. The drawing tool applies them through the registry's <code>symmetry</code> field: the roll (a rotation count, parallel offsets, the screen axes) lands at the stroke's start, the copies show while the gesture grows, and they land at release as ordinary strokes, so they record, replay, and mirror like anything drawn. At even odds a stroke's copies take their own palette colors.</p>
-    <div class="jp">対称性はパスの変換です。<code>mirroredPath</code>、<code>rotatedPaths</code>、<code>translatedPaths</code>（Path Effectsページ）が描かれたパスから複製を導き、各複製は同じツールで描かれる通常のストロークです。描画ツールはレジストリの<code>symmetry</code>フィールドを通してこれを適用します。ロール（回転の数、平行のオフセット、画面の軸）はストロークの始まりに決まり、複製は描いている間から表示され、離した瞬間に通常のストロークとして置かれます。そのため複製は描いたものと同じように記録され、再生され、ミラーされます。五分五分の確率で、ストロークの複製はそれぞれ自分のパレットの色を取ります。</div>
+    <p>The symmetry is a path transform: <code>mirroredPath</code> and <code>rotatedPaths</code> (on the Path Effects page) derive the copies from the drawn path, and every copy is an ordinary stroke drawn by the same tool. The drawing tool applies them through the registry's <code>symmetry</code> field: the roll (a rotation count, the screen axes) lands at the stroke's start, the copies show while the gesture grows, and they land at release as ordinary strokes, so they record, replay, and mirror like anything drawn. At even odds a stroke's copies take their own palette colors.</p>
+    <div class="jp">対称性はパスの変換です。<code>mirroredPath</code>と<code>rotatedPaths</code>（Path Effectsページ）が描かれたパスから複製を導き、各複製は同じツールで描かれる通常のストロークです。描画ツールはレジストリの<code>symmetry</code>フィールドを通してこれを適用します。ロール（回転の数、画面の軸）はストロークの始まりに決まり、複製は描いている間から表示され、離した瞬間に通常のストロークとして置かれます。そのため複製は描いたものと同じように記録され、再生され、ミラーされます。五分五分の確率で、ストロークの複製はそれぞれ自分のパレットの色を取ります。</div>
   </div>
 
   <section class="demo-section" id="mirror">
@@ -41,20 +41,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
-  <section class="demo-section" id="parallel">
-    <div class="demo-header">
-      <h2>Parallel strokes</h2>
-      <a href={`${base}/demos/symmetric-parallel/index.html`} target="_blank" rel="noopener">open full size ↗</a>
-    </div>
-    <div class="demo-embed">
-      <iframe src={`${base}/demos/symmetric-parallel/index.html?embedded`} title="Parallel strokes" scrolling="no"></iframe>
-    </div>
-    <div class="prose">
-      <p>Each gesture gains one to four copies stepped along one direction, a hatch of parallel strokes. The direction, the step, and a small jitter per copy roll at the stroke's start.</p>
-      <div class="jp">それぞれの身振りには、ひとつの方向に沿って段状に置かれた1つから4つの複製が付き、平行なストロークのハッチングになります。方向、間隔、複製ごとの小さな揺れは、ストロークの始まりにロールされます。</div>
-    </div>
-  </section>
-
   <section class="demo-section" id="screen">
     <div class="demo-header">
       <h2>Screen-space symmetry</h2>
@@ -78,8 +64,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/try-symmetric/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
     </div>
     <div class="prose">
-      <p>Draw with every symmetry on this page, in the drawing tool: each tool pairs one symmetry with one look (a mirrored brush, a rotating pencil, parallel ragged ribbons, a screen-reflected ribbon). The symmetry rolls at the stroke's start, the copies show while drawing, and they land at release as ordinary strokes, so Clear, Replay, and recording work as on the Drawing Tool Demo page. The symmetric tools also live in the master registry, so the Drawing Tool Demo rolls them into its trail.</p>
-      <div class="jp">このページのすべての対称性を使って、描画ツールの中で描いてみてください。各ツールはひとつの対称性とひとつの見た目を組み合わせます（鏡映しの筆、回転する鉛筆、平行のラグドリボン、画面反射のリボン）。対称性はストロークの始まりにロールされ、複製は描いている間から表示され、離した瞬間に通常のストロークとして置かれます。そのためClear、Replay、録画はDrawing Tool Demoページと同じように動きます。対称のツールはマスターレジストリにも入っているため、Drawing Tool Demoのロールの列にも現れます。</div>
+      <p>Draw with every symmetry on this page, in the drawing tool: each tool pairs one symmetry with one look (a mirrored brush, a rotating pencil, a screen-reflected ribbon). The symmetry rolls at the stroke's start, the copies show while drawing, and they land at release as ordinary strokes, so Clear, Replay, and recording work as on the Drawing Tool Demo page. The symmetric tools also live in the master registry, so the Drawing Tool Demo rolls them into its trail.</p>
+      <div class="jp">このページのすべての対称性を使って、描画ツールの中で描いてみてください。各ツールはひとつの対称性とひとつの見た目を組み合わせます（鏡映しの筆、回転する鉛筆、画面反射のリボン）。対称性はストロークの始まりにロールされ、複製は描いている間から表示され、離した瞬間に通常のストロークとして置かれます。そのためClear、Replay、録画はDrawing Tool Demoページと同じように動きます。対称のツールはマスターレジストリにも入っているため、Drawing Tool Demoのロールの列にも現れます。</div>
     </div>
   </section>
 </PageLayout>

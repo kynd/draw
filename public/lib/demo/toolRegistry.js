@@ -7,8 +7,8 @@
 // half to double at full pressure); the default is 2, a pencil barely moves,
 // a watercolor swings wide. `split` overrides whether a tool's gestures split
 // at sharp turns; by kind, strokes do and fills (blobs and shapes) do not.
-// `symmetry` names a stroke symmetry ('mirror', 'rotation', 'parallel',
-// 'screen'); the engine rolls it per stroke and lands the copies at release.
+// `symmetry` names a stroke symmetry ('mirror', 'rotation', 'screen'); the
+// engine rolls it per stroke and lands the copies at release.
 // `previewPath` overrides the shape the tool preview draws ('line', 'mass',
 // 'span', 'radial'); the default follows the kind and symmetry (see
 // `previewPathOf`).
@@ -419,11 +419,6 @@ export const toolRegistry = [
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
-        }) },
-    { id: 'parallel-ribbon', kind: 'stroke', symmetry: 'parallel',
-        params: [{ key: 'axis', pick: ['along', 'across'] }],
-        make: (v, ctx) => new RibbonStrokeRenderer({
-            cap: 'ragged', color: ctx.colorA, gradient: ctx.colorB, gradientAxis: v.axis,
         }) },
     { id: 'screen-ribbon', kind: 'stroke', symmetry: 'screen',
         params: [{ key: 'axis', pick: ['along', 'across'] }],

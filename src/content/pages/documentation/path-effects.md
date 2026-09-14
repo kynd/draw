@@ -34,11 +34,6 @@ Short strokes that copy small segments of the base and move sideways by a seeded
 The path mirrored across the vertical line through `x`, the horizontal line through `y`, or both (a point reflection). With neither given it mirrors across the vertical line through the path's own start. Pressures ride along, so a pen gesture mirrors with its dynamics.
 <div class="jp">`x`を通る垂直線、`y`を通る水平線、またはその両方（点対称）に対して鏡映しにしたパスです。どちらも省略すると、パス自身の始点を通る垂直線になります。筆圧も一緒に写されるため、ペンの身振りは強弱ごと鏡映しになります。</div>
 
-## translatedPaths
-
-Copies of the path, each translated by one `[dx, dy]` of `offsets`. Pressures ride along.
-<div class="jp">`offsets`の各`[dx, dy]`だけ平行移動したパスの複製です。筆圧も一緒に写されます。</div>
-
 ## rotatedPaths
 
 `count - 1` copies of the path rotated evenly around `center`, the path's own start when omitted, so the path and its copies together divide the turn into `count`. Pressures ride along.
