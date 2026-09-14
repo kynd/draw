@@ -67,7 +67,7 @@ export function setupSymmetryShowcase({ kind, theme = 'vivid-dark' }) {
             const raw = seededGesture(SEEDS[i], cx, cy);
             const knots = resampleEvery(raw, 0.06);
             const path = knots.length >= 3 ? catmullRomSpline(knots, 6) : raw;
-            const roll = rollSymmetry(kind);
+            const roll = rollSymmetry(kind, colors);
             const colorA = colors[i % colors.length];
             const colorB = colors[(i + 1) % colors.length];
             const [min, max] = entry.width ?? [2, 64];
@@ -75,9 +75,9 @@ export function setupSymmetryShowcase({ kind, theme = 'vivid-dark' }) {
             const values = randomValues(entry);
 
             [path, ...symmetricCopies(path, roll)].forEach((p, k) => {
-                const recolor = roll.recolor && k > 0;
-                const a = recolor ? colors[Math.floor(Math.random() * colors.length)] : colorA;
-                const b = recolor ? colors[Math.floor(Math.random() * colors.length)] : colorB;
+                const re = k > 0 ? roll.recolors?.[k - 1] : null;
+                const a = re ? re.a : colorA;
+                const b = re ? re.b : colorB;
                 const ctx = {
                     colorA: a, colorB: b, colors,
                     texture: background.texture, seed: SEEDS[i] + k,

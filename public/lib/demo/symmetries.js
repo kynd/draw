@@ -19,10 +19,12 @@ import { mirroredPath, rotatedPaths, translatedPaths } from '../pathEffects.js';
 const KINDS = {
     mirror: {
         roll: () => ({}),
+        countOf: () => 1,
         copies: path => [mirroredPath(path)],
     },
     rotation: {
         roll: () => ({ count: 2 + Math.floor(Math.random() * 5) }),
+        countOf: roll => roll.count - 1,
         copies: (path, roll) => rotatedPaths(path, { count: roll.count }),
     },
     parallel: {
@@ -37,10 +39,12 @@ const KINDS = {
                 }),
             };
         },
+        countOf: roll => roll.offsets.length,
         copies: (path, roll) => translatedPaths(path, roll.offsets),
     },
     screen: {
         roll: () => ({ axes: ['x', 'y', 'both'][Math.floor(Math.random() * 3)] }),
+        countOf: roll => (roll.axes === 'both' ? 3 : 1),
         copies: (path, roll) => {
             const paths = [];
             if (roll.axes !== 'y') paths.push(mirroredPath(path, { x: 0 }));
@@ -53,9 +57,19 @@ const KINDS = {
 
 export const SYMMETRY_KINDS = Object.keys(KINDS);
 
-/** The per-stroke roll for one kind, held while the stroke grows. */
-export function rollSymmetry(kind) {
-    return { kind, recolor: Math.random() < 0.5, ...KINDS[kind].roll() };
+/**
+ * The per-stroke roll for one kind, held while the stroke grows. With
+ * `colors` given, even odds add `recolors`: one resolved color pair per
+ * copy, so the live echo, the landed copies, and a mirror all agree.
+ */
+export function rollSymmetry(kind, colors = null) {
+    const roll = { kind, ...KINDS[kind].roll() };
+    if (colors && Math.random() < 0.5) {
+        const pick = () => colors[Math.floor(Math.random() * colors.length)];
+        roll.recolors = Array.from({ length: KINDS[kind].countOf(roll) },
+            () => ({ a: pick(), b: pick() }));
+    }
+    return roll;
 }
 
 /** The extra paths symmetric to `path` under a roll. */

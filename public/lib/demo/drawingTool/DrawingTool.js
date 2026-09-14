@@ -85,9 +85,29 @@ export class DrawingTool {
         this.board = new DrawingBoard(this.stage);
         this.recorder = new StrokeRecorder();
 
+        this._build = makeMarkBuilder({ state: this._state, board: this.board });
         this.cycle = setupDrawCycle({
             stage: this.stage, board: this.board, canvas,
-            build: makeMarkBuilder({ state: this._state, board: this.board }),
+            build: this._build,
+            // A symmetric tool's copies show while the gesture is live; the
+            // real copies land at release through `pointerUp`. The echo
+            // builds with each copy's resolved colors, so nothing shifts at
+            // release.
+            echo: () => this._symmetry
+                ? points => symmetricCopies(points, this._symmetry)
+                : null,
+            buildEcho: (path, run, seed, k) => {
+                const re = this._symmetry?.recolors?.[k];
+                if (!re) return this._build(path, run, seed);
+                const { colorA, colorB } = this._state;
+                this._state.colorA = re.a;
+                this._state.colorB = re.b;
+                try { return this._build(path, run, seed); }
+                finally {
+                    this._state.colorA = colorA;
+                    this._state.colorB = colorB;
+                }
+            },
             widthFor: () => this._state.widthPx / PIXELS_PER_UNIT,
             // Strokes split at sharp turns; fills draw one mark per gesture.
             split: () => toolSplits(this._state.tool),
@@ -281,7 +301,7 @@ export class DrawingTool {
         // Rolled at the stroke's start, so a rotation count or a set of
         // offsets holds steady while the gesture grows.
         this._symmetry = this._state.tool.symmetry
-            ? rollSymmetry(this._state.tool.symmetry) : null;
+            ? rollSymmetry(this._state.tool.symmetry, this._state.colors) : null;
         this._setUiHidden(true);
         this._emit('stroke-start');
         const p = this._toWorld(x, y, pressure);
@@ -312,17 +332,17 @@ export class DrawingTool {
         // With `recolor`, every copy takes its own palette colors.
         if (this._symmetry && this._points.length >= 2) {
             const { colorA, colorB } = this._state;
-            for (const copy of symmetricCopies(this._points, this._symmetry)) {
-                if (this._symmetry.recolor) {
-                    const colors = this._state.colors;
-                    this._state.colorA = colors[Math.floor(Math.random() * colors.length)];
-                    this._state.colorB = colors[Math.floor(Math.random() * colors.length)];
+            symmetricCopies(this._points, this._symmetry).forEach((copy, k) => {
+                const re = this._symmetry.recolors?.[k];
+                if (re) {
+                    this._state.colorA = re.a;
+                    this._state.colorB = re.b;
                 }
                 this._emitLiveState();
                 this._emitLive('points', { points: copy.map(plainPoint) });
                 this._emitLive('end');
                 this.cycle.feed(copy, true);
-            }
+            });
             this._state.colorA = colorA;
             this._state.colorB = colorB;
         }

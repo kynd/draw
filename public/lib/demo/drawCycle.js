@@ -34,11 +34,17 @@ import { DrawInput } from './drawInput.js';
  * measurement window ({ angle, span }), `true` for the default threshold,
  * `false` to draw unsplit, or a function returning any of those, read per
  * gesture, for a host whose current tool decides.
+ * `echo` (a function returning `points => paths[]` or null, read per feed)
+ * draws extra paths derived from the gesture — a symmetry's copies — while
+ * the gesture is live only; they are neither baked nor committed, so a host
+ * that lands the real copies at release shows them ahead of time. `buildEcho
+ * (path, run, seed, k)` builds an echo's mark (`build` when omitted).
  * `pointerTrace` shows or hides the pointer's own line; the returned
  * `setPointerTrace` changes it later.
  */
 export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCommit, onRelease,
     split = true, holdArc = 0.06, widthFor = null,
+    echo = null, buildEcho = null,
     pointerTrace = true, bindInput = true }) {
     let seed = 1;
 
@@ -140,7 +146,7 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         return path;
     }
 
-    function buildFromPoints(points) {
+    function buildFromPoints(points, done) {
         if (points.length < 2) return null;
         const cfg = splitConfig();
         const runs = cfg ? splitByTurn(points, cfg) : [points];
@@ -163,13 +169,32 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
             committed.push({ points: run, seed: seed + k });
         });
         if (!pieces.length) return null;
+        // The echoes ride the live group only: at done they are left out, so
+        // the bake and the commits carry the gesture alone, and the host
+        // lands the real copies itself.
+        if (!done) {
+            const paths = echo?.()?.(points) ?? [];
+            paths.forEach((copy, i) => {
+                const copyRuns = cfg ? splitByTurn(copy, cfg) : [copy];
+                copyRuns.forEach((run, k) => {
+                    if (holdArc && !hasSettledStart(run, holdArc)) return;
+                    const path = smoothPiece(run);
+                    if (!path) return;
+                    const mark = (buildEcho ?? build)(path, run, seed + 50 + i * 8 + k, i);
+                    if (!mark) return;
+                    mark.mesh.position.z += 0.0001;
+                    group.add(mark.mesh);
+                    pieces.push(mark);
+                });
+            });
+        }
         return { group, pieces, committed, seedSpan: runs.length };
     }
 
     function feed(points, done) {
         disposeGhost();
         disposeLive();
-        live = buildFromPoints(points);
+        live = buildFromPoints(points, done);
         if (live) stage.add(live.group);
         setPointerLine(done ? [] : points);
         if (done && live) {
