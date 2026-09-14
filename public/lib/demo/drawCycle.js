@@ -147,57 +147,50 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         return path;
     }
 
-    function buildFromPoints(points, done) {
+    // Each piece's seed and draw order come from its own fixed slot, not from
+    // a running count, so a piece keeps its look as other parts of the gesture
+    // grow or split. The base gesture owns slots 0..; each symmetry copy owns
+    // a block of STRIDE starting at (i + 1) * STRIDE, wide enough that no
+    // hand-drawn gesture reaches it.
+    const STRIDE = 100;
+    function buildFromPoints(points) {
         if (points.length < 2) return null;
         const cfg = splitConfig();
-        const runs = cfg ? splitByTurn(points, cfg) : [points];
         const group = new THREE.Group();
         const pieces = [];
         const committed = [];
-        runs.forEach((run, k) => {
-            // Held until the piece carries enough arc for a stable direction.
+
+        // Builds one run at a fixed slot; its seed and z never depend on how
+        // many other runs exist.
+        const addRun = (run, slot, colorK) => {
             if (holdArc && !hasSettledStart(run, holdArc)) return;
             const path = smoothPiece(run);
             if (!path) return;
-            const mark = build(path, run, seed + k);
+            const builder = colorK === null ? build : (buildEcho ?? build);
+            const mark = builder(path, run, seed + slot, colorK);
             if (!mark) return;
-            // A hair of stagger keeps the pieces' draw order deterministic;
-            // single-coverage pieces composite through the coverage layer in
-            // this order, later pieces over earlier ones.
-            mark.mesh.position.z += Math.min(k, 40) * 0.0002;
+            // Single-coverage pieces composite through the coverage layer in
+            // draw order, later over earlier; a hair of z keeps that order.
+            mark.mesh.position.z += Math.min(slot, 40) * 0.0002;
             group.add(mark.mesh);
             pieces.push(mark);
-            committed.push({ points: run, seed: seed + k });
-        });
+            committed.push({ points: run, seed: seed + slot, echo: colorK });
+        };
+
+        (cfg ? splitByTurn(points, cfg) : [points]).forEach((run, k) => addRun(run, k, null));
         if (!pieces.length) return null;
-        // The echoes build with the gesture, continuing its seed sequence
-        // and its z stagger, so the bake lands exactly what is on screen.
-        let echoSeed = seed + runs.length;
-        let zi = runs.length;
         const paths = echo?.()?.(points) ?? [];
         paths.forEach((copy, i) => {
-            const copyRuns = cfg ? splitByTurn(copy, cfg) : [copy];
-            copyRuns.forEach((run, k) => {
-                if (holdArc && !hasSettledStart(run, holdArc)) return;
-                const path = smoothPiece(run);
-                if (!path) return;
-                const mark = (buildEcho ?? build)(path, run, echoSeed + k, i);
-                if (!mark) return;
-                mark.mesh.position.z += Math.min(zi, 40) * 0.0002;
-                group.add(mark.mesh);
-                pieces.push(mark);
-                committed.push({ points: run, seed: echoSeed + k, echo: i });
-            });
-            echoSeed += copyRuns.length;
-            zi += copyRuns.length;
+            const base = (i + 1) * STRIDE;
+            (cfg ? splitByTurn(copy, cfg) : [copy]).forEach((run, k) => addRun(run, base + k, i));
         });
-        return { group, pieces, committed, seedSpan: echoSeed - seed };
+        return { group, pieces, committed, seedSpan: (paths.length + 1) * STRIDE };
     }
 
     function feed(points, done) {
         disposeGhost();
         disposeLive();
-        live = buildFromPoints(points, done);
+        live = buildFromPoints(points);
         if (live) stage.add(live.group);
         setPointerLine(done ? [] : points);
         if (done && live) {
