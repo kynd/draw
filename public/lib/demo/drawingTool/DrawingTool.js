@@ -9,6 +9,7 @@ import { DrawingBoard } from '../drawingBoard.js';
 import { setupDrawCycle } from '../drawCycle.js';
 import { taperByArc } from '../strokePaths.js';
 import { INITIALIZERS } from '../initializers.js';
+import { rollSymmetry, symmetricCopies } from '../symmetries.js';
 import { pathArcLength } from '../pressure.js';
 import { StrokeRecorder } from '../strokeRecorder.js';
 import { DrawingPlayer, downloadDrawingZip } from '../drawingPlayer.js';
@@ -154,6 +155,7 @@ export class DrawingTool {
         // feed itself rather than on the replay flow.
         this._playerFeeding = false;
         this._initializing = false;
+        this._symmetry = null;
         this.player = new DrawingPlayer({
             feed: (points, done) => {
                 this._playerFeeding = true;
@@ -276,6 +278,10 @@ export class DrawingTool {
     pointerDown({ x, y, pressure = 0 }) {
         if (!this._inputEnabled || this._drawing) return;
         this._drawing = true;
+        // Rolled at the stroke's start, so a rotation count or a set of
+        // offsets holds steady while the gesture grows.
+        this._symmetry = this._state.tool.symmetry
+            ? rollSymmetry(this._state.tool.symmetry) : null;
         this._setUiHidden(true);
         this._emit('stroke-start');
         const p = this._toWorld(x, y, pressure);
@@ -301,6 +307,26 @@ export class DrawingTool {
         this._drawing = false;
         this._emitLive('end');
         this.cycle.feed(this._points, true);
+        // A symmetric tool's copies land at release, each fed as its own
+        // stroke, so they record, replay, and mirror like anything drawn.
+        // With `recolor`, every copy takes its own palette colors.
+        if (this._symmetry && this._points.length >= 2) {
+            const { colorA, colorB } = this._state;
+            for (const copy of symmetricCopies(this._points, this._symmetry)) {
+                if (this._symmetry.recolor) {
+                    const colors = this._state.colors;
+                    this._state.colorA = colors[Math.floor(Math.random() * colors.length)];
+                    this._state.colorB = colors[Math.floor(Math.random() * colors.length)];
+                }
+                this._emitLiveState();
+                this._emitLive('points', { points: copy.map(plainPoint) });
+                this._emitLive('end');
+                this.cycle.feed(copy, true);
+            }
+            this._state.colorA = colorA;
+            this._state.colorB = colorB;
+        }
+        this._symmetry = null;
         this._setUiHidden(false);
         this._emit('stroke-end');
     }

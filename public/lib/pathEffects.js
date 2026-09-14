@@ -275,14 +275,32 @@ export function blobOutline(points, { span = 0.15, radius = 0.14 } = {}) {
     return bSpline(perimeter, 6, true);
 }
 
-/** The path mirrored across the vertical line through `x` (the path's own
- * start when omitted). Pressures ride along. */
-export function mirroredPath(points, x = points[0]?.x ?? 0) {
+/**
+ * The path mirrored across the vertical line through `x`, the horizontal
+ * line through `y`, or both (a point reflection). With neither given it
+ * mirrors across the vertical line through the path's own start. Pressures
+ * ride along.
+ */
+export function mirroredPath(points, { x, y } = {}) {
+    const ax = x ?? (y === undefined ? points[0]?.x ?? 0 : undefined);
     return points.map(p => {
-        const q = new THREE.Vector3(2 * x - p.x, p.y, p.z ?? 0);
+        const q = new THREE.Vector3(
+            ax !== undefined ? 2 * ax - p.x : p.x,
+            y !== undefined ? 2 * y - p.y : p.y,
+            p.z ?? 0);
         if (p.pressure !== undefined) q.pressure = p.pressure;
         return q;
     });
+}
+
+/** Copies of the path, each translated by one `[dx, dy]` of `offsets`.
+ * Pressures ride along. */
+export function translatedPaths(points, offsets) {
+    return offsets.map(([dx, dy]) => points.map(p => {
+        const q = new THREE.Vector3(p.x + dx, p.y + dy, p.z ?? 0);
+        if (p.pressure !== undefined) q.pressure = p.pressure;
+        return q;
+    }));
 }
 
 /**

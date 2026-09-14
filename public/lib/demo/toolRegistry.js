@@ -7,6 +7,8 @@
 // half to double at full pressure); the default is 2, a pencil barely moves,
 // a watercolor swings wide. `split` overrides whether a tool's gestures split
 // at sharp turns; by kind, strokes do and fills (blobs and shapes) do not.
+// `symmetry` names a stroke symmetry ('mirror', 'rotation', 'parallel',
+// 'screen'); the engine rolls it per stroke and lands the copies at release.
 
 import { RibbonStrokeRenderer } from '../renderers/RibbonStrokeRenderer.js';
 import { BrushStrokeRenderer } from '../renderers/BrushStrokeRenderer.js';
@@ -400,6 +402,33 @@ export const toolRegistry = [
         params: [{ key: 'mix', min: 0.3, max: 0.9 }],
         contour: (a, b, seed) => triangleFromEnds(a, b, { angles: [45, 45, 90], seed }),
         make: shapeFill },
+
+    // Symmetric strokes: each pairs one symmetry with one base look. The
+    // engine rolls the symmetry per stroke and lands the copies at release.
+    { id: 'mirror-brush', kind: 'stroke', symmetry: 'mirror',
+        params: [{ key: 'bristles', min: 6, max: 50, step: 1 }, { key: 'rough', min: 0, max: 1 }, { key: 'dry', min: 0, max: 0.7 }],
+        make: (v, ctx) => new BrushStrokeRenderer({
+            cap: 'ragged', colorA: ctx.colorA, colorB: ctx.colorB,
+            bristles: v.bristles, rough: v.rough, dry: v.dry,
+        }) },
+    { id: 'rotation-pencil', kind: 'stroke', symmetry: 'rotation', pressure: 1.25, width: [1, 8],
+        params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'rounded', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
+        }) },
+    { id: 'parallel-watercolor', kind: 'stroke', symmetry: 'parallel', pressure: 3,
+        params: [{ key: 'pigment', min: 0.2, max: 1 }, { key: 'rim', min: 0, max: 1 },
+            { key: 'bleed', min: 0, max: 1 }],
+        make: (v, ctx) => new WatercolorStrokeRenderer({
+            cap: 'rounded', color: ctx.colorA, background: ctx.texture, blurred: ctx.texture,
+            pigment: v.pigment, rim: v.rim, bleed: v.bleed,
+        }) },
+    { id: 'screen-ribbon', kind: 'stroke', symmetry: 'screen',
+        params: [{ key: 'axis', pick: ['along', 'across'] }],
+        make: (v, ctx) => new RibbonStrokeRenderer({
+            cap: 'rounded', color: ctx.colorA, gradient: ctx.colorB, gradientAxis: v.axis,
+        }) },
 ];
 
 function shapeFill(v, ctx) {

@@ -69,6 +69,14 @@ export class ShapeFillsDemoConfig extends DrawingToolConfig {
     }
 }
 
+export class SymmetricDemoConfig extends DrawingToolConfig {
+    constructor() {
+        super({ tools: [
+            'mirror-brush', 'rotation-pencil', 'parallel-watercolor', 'screen-ribbon',
+        ] });
+    }
+}
+
 /** The combined instrument: the whole master registry, and a clear that
  * picks from every initializer. */
 export class DrawingToolDemoConfig extends DrawingToolConfig {
