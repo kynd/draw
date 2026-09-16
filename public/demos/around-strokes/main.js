@@ -1,13 +1,13 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
-import { spiralPath, entangledPaths, scatteredPaths, wigglePath } from '../../lib/pathEffects.js';
+import { spiralPath, entangledPaths, scatteredPaths } from '../../lib/pathEffects.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
 
-const ROWS = 4;
-const SEEDS = [3.0, 7.0, 11.0, 15.0];
+const ROWS = 3;
+const SEEDS = [3.0, 7.0, 11.0];
 
 const readout = document.getElementById('readout');
 const ctrl = {
@@ -46,19 +46,12 @@ function derive(i, base, width) {
             seed: SEEDS[i],
         });
     }
-    if (i === 2) {
-        return scatteredPaths(base, {
-            spacing: width * 1.5,
-            offset: reach,
-            length: 0.04 + width * 1.2,
-            seed: SEEDS[i],
-        });
-    }
-    return [wigglePath(base, {
-        amplitude: reach,
-        cycleStart: reach * 1.5,
-        cycleEnd: width * 1.2,
-    })];
+    return scatteredPaths(base, {
+        spacing: width * 1.5,
+        offset: reach,
+        length: 0.04 + width * 1.2,
+        seed: SEEDS[i],
+    });
 }
 
 function rebuild() {

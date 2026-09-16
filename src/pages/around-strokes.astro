@@ -23,8 +23,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/around-strokes/index.html?embedded`} title="Around strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Paths derived from the base path (spiral, entangled, scattered, and wiggle from top to bottom), drawn with the brush renderer. The <strong>Cycle</strong> slider sets how far the spiral advances per turn as a multiple of its radius, so the loops half-overlap at 1 and sit beside each other near 2.</p>
-      <div class="jp">元のパスから導いたパスです（上から順にspiral、entangled、scattered、wiggle）。描画にはbrushレンダラを使います。<strong>Cycle</strong>スライダーは、スパイラルが1回転で進む距離を半径の倍数で決めます。1でループは半分重なり、2付近で隣り合います。</div>
+      <p>Paths derived from the base path (spiral, entangled, and scattered from top to bottom), drawn with the brush renderer. The <strong>Cycle</strong> slider sets how far the spiral advances per turn as a multiple of its radius, so the loops half-overlap at 1 and sit beside each other near 2.</p>
+      <div class="jp">元のパスから導いたパスです（上から順にspiral、entangled、scattered）。描画にはbrushレンダラを使います。<strong>Cycle</strong>スライダーは、スパイラルが1回転で進む距離を半径の倍数で決めます。1でループは半分重なり、2付近で隣り合います。</div>
 
       <details>
         <summary>Details</summary>
@@ -37,12 +37,23 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <p><strong>Scattered:</strong> Short strokes copy small segments of the base and move sideways by a seeded offset. The stroke count follows the length, so the scatter keeps its density as the stroke grows.</p>
         <div class="jp"><strong>散布：</strong>短いストロークが元のパスの一部を写し取り、シード付きのオフセットで横へ移動します。ストロークの本数は長さに従うため、散らばりは伸びても密度を保ちます。</div>
 
-        <p><strong>Wiggle:</strong> A single path crossing the base from side to side, its wavelength tightening from loose at the start to tight at the end. The offset eases to zero at both ends, so the mark leaves and returns to the drawn path.</p>
-        <div class="jp"><strong>ウィグル：</strong>元のパスを左右に横切る一本のパスで、波長は始めのゆるいものから終わりのきついものへと詰まっていきます。オフセットは両端でゼロに収まるため、マークは描いたパスから離れ、また戻ってきます。</div>
-
         <p>The generators return plain point arrays, documented on <a href={`${base}/documentation/path-effects`}>Path Effects</a>, so any renderer can draw the result.</p>
         <div class="jp">生成器は通常の点の配列を返すため（<a href={`${base}/documentation/path-effects`}>Path Effects</a>に記載）、どのレンダラでも結果を描画できます。</div>
       </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="wiggle">
+    <div class="demo-header">
+      <h2>Wiggle</h2>
+      <a href={`${base}/demos/wiggle-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/wiggle-strokes/index.html?embedded`} title="Wiggle" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>A single path crossing the base from side to side, its wavelength tightening from loose at the start to tight at the end. The wave count follows the length, so the loose-to-tight sweep reads the same on any stroke, and the offset eases to zero at both ends, so the mark leaves and returns to the drawn path. The three rows are the same wave at different wavelengths relative to its amplitude: a tightening one (the drawing tool's default), one with rounder turns, and a much looser one.</p>
+      <div class="jp">元のパスを左右に横切る一本のパスで、波長は始めのゆるいものから終わりのきついものへと詰まっていきます。波の数は長さに従うため、ゆるいから詰まるへの移り変わりはどのストロークでも同じように読めます。オフセットは両端でゼロに収まるため、マークは描いたパスから離れ、また戻ってきます。3つの行は同じ波を、振幅に対する波長の比を変えて示したものです。詰まっていくもの（描画ツールの既定）、ターンがより丸いもの、そしてずっとゆるいもの。</div>
     </div>
   </section>
 
