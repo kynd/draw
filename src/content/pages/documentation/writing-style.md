@@ -143,6 +143,14 @@ The opening monologue says what we do on the page, in the first person: it opens
 <strong>But:</strong> On this page, we build the stroke class that turns a path and a width into drawable geometry, and the renderers that shade it.</p>
 </div>
 
+Say what the page aims for concretely, not with a vague evaluative word. "A better one", "a nicer result", "improved" tells the reader nothing about what the page's methods are for. Name the actual qualities, and if several kinds of thing want different ones, say so and name a few.
+<div class="jp">ページが目指すものは、漠然とした評価語ではなく具体的に述べます。「より良いもの」「きれいな結果」「改善」では、そのページの手法が何のためなのか読者には伝わりません。実際の性質を名指し、対象の種類ごとに求めるものが異なるなら、そのことを述べていくつか挙げます。</div>
+
+<div class="page-note">
+<p><strong>Not:</strong> On this page, we explore methods that turn a drawn path into a better one.<br />
+<strong>But:</strong> On this page, we explore methods that reshape a drawn path to suit the stroke or fill it will become, since each kind wants its own quality: a smoother curve, marks kept apart at a corner, a closed region to fill.</p>
+</div>
+
 The Japanese follows the Geom monologue register: written from the meaning, reflective, and free to break into short sentences (けれど, そこで) rather than tracking the English clause for clause.
 <div class="jp">日本語はGeomのモノローグの語り口にならいます。意味から書き起こし、内省的で、英語の節を逐一なぞるのではなく短い文に区切って構いません（けれど、そこで）。</div>
 
