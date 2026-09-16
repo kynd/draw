@@ -10,14 +10,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   </div>
 
   <div class="prose">
-    <p>The demo draws the basic rounded stroke in gray on white, so the only thing to look at is how pen pressure becomes width. DrawInput records a pressure on every drawn point (a mouse records zero), and a mapping turns it into the width along the stroke. Lengths in the controls and readouts are CSS pixels: the canvas draws at a fixed scale, so resizing the window crops or reveals paper rather than rescaling the drawing.</p>
-    <div class="jp">デモは、基本の丸いストロークを白地にグレーで描きます。見るのは、筆圧がどのように幅になるかだけです。DrawInputは描かれたすべての点に筆圧を記録し（マウスはゼロを記録する）、それをマッピングがストロークに沿った幅へ変えます。コントロールと読み出しの長さはCSSピクセルです。キャンバスは固定スケールで描画されるため、ウィンドウをリサイズしても描画は拡大縮小されず、紙が切り取られるか、新たに現れるだけです。</div>
+    <p>A stroke feels more expressive when its width follows the pen, swelling under a hard press and tapering as it lifts. This demo draws a plain rounded stroke in gray, so the only thing to watch is how pressure becomes width. Draw with a pen tablet; a mouse reports no pressure and draws a constant width.</p>
+    <div class="jp">ストロークは、幅がペンに従うと、より表情豊かになります。強く押せばふくらみ、離せば細くなります。このデモは基本の丸いストロークをグレーで描くので、見るのは筆圧がどのように幅になるかだけです。ペンタブレットで描いてみてください。マウスは筆圧を報告しないため、一定の幅で描きます。</div>
 
-    <p>Before the mapping, the pressure passes through a dead zone and a response curve. The slightest touch of a pen never reports zero, so pressure below the threshold counts as the lightest touch and the remainder is stretched back to the full range. The result is then raised to an exponent. Raw tablet pressure feels front-loaded (a light touch already reports a substantial value), so an exponent above 1 spreads the low end out and makes light strokes easier to hold; below 1 compresses it. Both demos expose these as Threshold and Curve.</p>
-    <div class="jp">マッピングの前に、筆圧は不感帯と応答カーブを通ります。ペンはどれほど軽く触れてもゼロを報告しないため、しきい値以下の筆圧は最も軽いタッチとみなし、残りを全域に引き伸ばします。その結果を指数で累乗します。タブレットの生の筆圧は立ち上がりが早く感じられるため（軽いタッチでもかなりの値を報告する）、1より大きい指数は低域を引き伸ばし、軽いストロークを保ちやすくします。1より小さい指数は低域を圧縮します。どちらのデモも、これらをThresholdとCurveとして公開しています。</div>
-
-    <p>The mapping is a ratio around the set width: middle pressure draws the width as set, a light touch shrinks it and a heavy press grows it by the same factor, up to the scale at either end. A mouse, which records no pressure, draws the set width. After the mapping, the width passes a slope limit: it cannot rise or fall faster than the limit per unit of length, clamped in a forward and a backward pass. A hard press becomes a swell and a quick release a tapered exit instead of a cliff. At 1 the outline flares at most 45 degrees, which is also about where the stroke geometry would start to fold. Both demos expose it as Limit, and the pressure itself is smoothed by a short moving average before any of this. Pressure, width, and the limit are all parameterized by distance from the start, and the smoothing spline is local, so the drawn part holds still while the stroke grows; only a short zone at the tip reflows.</p>
-    <div class="jp">マッピングは、設定した幅を中心にした倍率です。中間の筆圧では設定どおりの幅で描かれ、軽いタッチは同じ係数で幅を縮め、強い押し込みは広げます。両端でscale倍（またはその逆数）に達します。筆圧を記録しないマウスは、設定した幅のまま描きます。マッピングの後、幅は勾配の制限を通ります。長さあたりの制限より速く増減することはできず、前向きと後ろ向きの2回の走査でクランプされます。強い押し込みはふくらみに、素早い離しは崖ではなく先細りの抜きになります。1では輪郭の開きは最大45度で、これはストロークのジオメトリが折れ始めるあたりでもあります。どちらのデモもこれをLimitとして公開しています。また筆圧自体は、これらの前に短い移動平均で滑らかにされます。筆圧、幅、制限はすべて始点からの距離でパラメータ化され、平滑化のスプラインは局所的です。そのため、ストロークが伸びても描かれた部分は動かず、変化するのは先端の短い区間だけです。</div>
+    <p>Pressure maps to width as a ratio around a set width: middle pressure draws it as set, a light touch thins it and a hard press widens it, up to the <strong>Scale</strong> at either end. A dead zone (<strong>Threshold</strong>) treats the faintest touch as zero, since a pen never truly reports it, and a response curve (<strong>Curve</strong>) reshapes the low end, where raw tablet pressure feels front-loaded. A slope limit (<strong>Limit</strong>) then caps how fast the width may change along the stroke, so a hard press swells and a quick release tapers instead of stepping.</p>
+    <div class="jp">筆圧は、設定した幅を中心にした倍率として幅に写されます。中間の筆圧では設定どおりの幅で描かれ、軽いタッチは細く、強い押し込みは太くし、両端で<strong>Scale</strong>に達します。不感帯（<strong>Threshold</strong>）は、ごく弱いタッチをゼロとして扱います。ペンは決して完全なゼロを報告しないからです。応答カーブ（<strong>Curve</strong>）は低域を作り直します。タブレットの生の筆圧は立ち上がりが早く感じられるためです。そのあと勾配の制限（<strong>Limit</strong>）が、ストロークに沿って幅が変化できる速さを抑えるので、強い押し込みはふくらみになり、素早い離しは段差ではなく先細りになります。</div>
   </div>
 
   <section class="demo-section" id="scale">
@@ -29,8 +26,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/pressure-scale/index.html?embedded`} title="Scaled width" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Pressure scales the base width as a ratio: middle pressure draws the base, a light touch down to the base over the scale, full pressure up to the base times the scale.</p>
-      <div class="jp">筆圧が基本の幅を倍率で伸縮させます。中間の筆圧で基本の幅、軽いタッチで基本の幅をscaleで割った値まで、最大の筆圧で基本の幅のscale倍までです。</div>
+      <p>Draw with a pen and vary the pressure; every control described above is a slider in the panel.</p>
+      <div class="jp">ペンで、筆圧を変えながら描いてみてください。上で説明したコントロールは、すべてパネルのスライダーです。</div>
     </div>
   </section>
 
