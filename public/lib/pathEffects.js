@@ -53,8 +53,8 @@ export function spiralPath(points, { cycle = 0.02, radius = 0.14, turns, count }
  * A single path that wiggles from side to side across the base, its wavelength tightening
  * from `cycleStart` at the beginning to `cycleEnd` at the end. The wiggle count comes from
  * the path's length, so the loose-to-tight sweep reads the same on a short stroke as on a
- * long one. The offset runs along the base normal and eases to zero at both ends, so the
- * mark leaves and returns to the drawn path.
+ * long one. The offset runs along the base normal at full amplitude the whole way, so the
+ * first crossing is as wide as the last.
  *
  * @param {THREE.Vector3[]} points
  * @param {object} [opts]
@@ -80,8 +80,7 @@ export function wigglePath(points, { amplitude = 0.1, cycleStart = 0.12, cycleEn
         const t = i / (n - 1);
         const c = curve.getPointAt(t);
         const tan = curve.getTangentAt(t);
-        const env = Math.sin(Math.PI * t);
-        const offset = Math.sin(phaseAt(t * length)) * amplitude * env;
+        const offset = Math.sin(phaseAt(t * length)) * amplitude;
         out.push(new THREE.Vector3(c.x - tan.y * offset, c.y + tan.x * offset, c.z));
     }
     return out;

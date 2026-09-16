@@ -21,8 +21,8 @@ The tip circles with sin and cos while its center moves along the base path, ret
 
 ## wigglePath
 
-One path crossing the base from side to side, its wavelength tightening from `cycleStart` at the beginning to `cycleEnd` at the end. The crossing count comes from the path's length, so the loose-to-tight sweep reads the same on a short stroke as on a long one. The offset runs along the base normal and eases to zero at both ends, so the mark leaves and returns to the drawn path. Takes `amplitude`, `cycleStart`, and `cycleEnd`.
-<div class="jp">元のパスを左右に横切る一本のパスで、波長は始めの`cycleStart`から終わりの`cycleEnd`へと詰まっていきます。横切る回数はパスの長さから決まるため、ゆるいから詰まるへの移り変わりは、短いストロークでも長いストロークでも同じように読めます。オフセットは元のパスの法線方向に走り、両端でゼロに収まるため、マークは描いたパスから離れ、また戻ってきます。`amplitude`、`cycleStart`、`cycleEnd`を受け取ります。</div>
+One path crossing the base from side to side, its wavelength tightening from `cycleStart` at the beginning to `cycleEnd` at the end. The crossing count comes from the path's length, so the loose-to-tight sweep reads the same on a short stroke as on a long one. The offset runs along the base normal at full amplitude the whole way, so the first crossing is as wide as the last. Takes `amplitude`, `cycleStart`, and `cycleEnd`.
+<div class="jp">元のパスを左右に横切る一本のパスで、波長は始めの`cycleStart`から終わりの`cycleEnd`へと詰まっていきます。横切る回数はパスの長さから決まるため、ゆるいから詰まるへの移り変わりは、短いストロークでも長いストロークでも同じように読めます。オフセットは元のパスの法線方向に、全体を通して振幅いっぱいで走るため、最初の横切りは最後と同じ幅になります。`amplitude`、`cycleStart`、`cycleEnd`を受け取ります。</div>
 
 ## entangledPaths
 
