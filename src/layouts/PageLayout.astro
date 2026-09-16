@@ -99,9 +99,14 @@ const navItems: NavItem[] = [
           { label: 'Dashes, dots, strips', href: '#patterns' },
           { label: 'Wet patterns',         href: '#wet-patterns' },
           { label: 'Fringe',               href: '#fringe' },
-          { label: 'Around strokes',       href: '#around-strokes' },
           { label: 'Graphic strokes',      href: '#graphic-strokes' },
           { label: 'Try drawing',          href: '#try' },
+        ]
+      },
+      { label: 'Around strokes', href: `${base}/around-strokes`, slug: 'around-strokes',
+        subLinks: [
+          { label: 'Around strokes', href: '#around-strokes' },
+          { label: 'Try drawing',    href: '#try' },
         ]
       },
       { label: 'Fills', href: `${base}/fills`, slug: 'fills',
@@ -180,6 +185,7 @@ const navItems: NavItem[] = [
       { label: 'Path Effects', href: `${base}/documentation/path-effects`, slug: 'documentation/path-effects',
         subLinks: [
           { label: 'spiralPath',     href: '#spiralpath' },
+          { label: 'wigglePath',     href: '#wigglepath' },
           { label: 'entangledPaths', href: '#entangledpaths' },
           { label: 'scatteredPaths', href: '#scatteredpaths' },
         ]

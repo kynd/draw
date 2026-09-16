@@ -1,17 +1,17 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
-import { spiralPath, entangledPaths, scatteredPaths } from '../../lib/pathEffects.js';
+import { spiralPath, entangledPaths, scatteredPaths, wigglePath } from '../../lib/pathEffects.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
 
-const ROWS = 3;
-const SEEDS = [3.0, 7.0, 11.0];
+const ROWS = 4;
+const SEEDS = [3.0, 7.0, 11.0, 15.0];
 
 const readout = document.getElementById('readout');
 const ctrl = {
-    turns: document.getElementById('turns'),
+    cycle: document.getElementById('cycle'),
     width: document.getElementById('width'),
 };
 
@@ -29,28 +29,36 @@ function randomizeColors() {
 }
 
 /**
- * Derived paths for row `i`. The count of sub-strokes and their offset from the base
- * both follow the width, so a heavier stroke spreads further and splits into more
- * parts rather than only thickening.
+ * Derived paths for row `i`. Every spatial size follows the width, so a heavier stroke
+ * spreads further; every count follows the path's length, so the pattern keeps its
+ * spacing as the stroke grows.
  */
 function derive(i, base, width) {
     const reach = width * 7;
     if (i === 0) {
-        return [spiralPath(base, { turns: parseInt(ctrl.turns.value, 10), radius: reach })];
+        return [spiralPath(base, { cycle: reach * parseFloat(ctrl.cycle.value), radius: reach })];
     }
     if (i === 1) {
         return entangledPaths(base, {
             count: Math.round(3 + width * 260),
             amplitude: reach,
+            wavelength: reach * 3,
             seed: SEEDS[i],
         });
     }
-    return scatteredPaths(base, {
-        count: Math.round(25 + width * 3200),
-        offset: reach,
-        length: 0.04 + width * 1.2,
-        seed: SEEDS[i],
-    });
+    if (i === 2) {
+        return scatteredPaths(base, {
+            spacing: width * 1.5,
+            offset: reach,
+            length: 0.04 + width * 1.2,
+            seed: SEEDS[i],
+        });
+    }
+    return [wigglePath(base, {
+        amplitude: reach,
+        cycleStart: reach * 1.5,
+        cycleEnd: width * 1.2,
+    })];
 }
 
 function rebuild() {
@@ -61,7 +69,7 @@ function rebuild() {
     entries = [];
 
     const width = parseFloat(ctrl.width.value);
-    const { spread } = layout(stage.extentY, width * 8);
+    const { spread } = layout(stage.extentY, width * 8, ROWS);
     let samples = 0, vertices = 0, triangles = 0, strokes = 0;
 
     for (let i = 0; i < ROWS; i++) {
@@ -107,7 +115,7 @@ function rebuild() {
 Object.values(ctrl).forEach(el => {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =
-            el.id === 'width' ? parseFloat(el.value).toFixed(3) : el.value;
+            el.id === 'width' ? parseFloat(el.value).toFixed(3) : parseFloat(el.value).toFixed(1);
         rebuild();
     });
 });

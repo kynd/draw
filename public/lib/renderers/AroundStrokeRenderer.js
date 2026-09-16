@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { StrokeRenderer } from './StrokeRenderer.js';
 import { BrushStrokeRenderer } from './BrushStrokeRenderer.js';
 import { StrokeDef } from '../StrokeDef.js';
-import { spiralPath, entangledPaths, scatteredPaths } from '../pathEffects.js';
+import { spiralPath, entangledPaths, scatteredPaths, wigglePath } from '../pathEffects.js';
 
 /**
  * Paths derived from the drawn path, each drawn with the brush renderer, in
- * one of three looks.
+ * one of four looks.
  *
  *   spiral     the tip circles while its center moves along the path, one
  *              continuous coil.
@@ -14,30 +14,33 @@ import { spiralPath, entangledPaths, scatteredPaths } from '../pathEffects.js';
  *              endpoints pulled back toward the base.
  *   scattered  short strokes copying small segments of the path, moved
  *              sideways by a seeded offset.
+ *   wiggle     one path crossing the base from side to side, its wavelength
+ *              tightening from loose at the start to tight at the end.
  *
- * The count of sub-strokes and their offset from the base both follow the
- * width, so a heavier stroke spreads further and splits into more parts
- * rather than only thickening. The width is capped at 0.03 world units for
- * the derivation, the range the formulas are calibrated for; past it the
- * counts grow without bound. The generators are documented on the Path
+ * Every spatial size (the radius, the wave amplitude, the scatter offset) follows the
+ * width, so a heavier stroke spreads further. Every count (the spiral's turns, the
+ * wiggle's crossings, the scatter's strokes) follows the path's length, so the pattern
+ * keeps its spacing as the stroke grows instead of crowding a short stroke and
+ * stretching a long one. The width is capped at 0.03 world units for the derivation,
+ * the range the formulas are calibrated for. The generators are documented on the Path
  * Effects page.
  */
 export class AroundStrokeRenderer extends StrokeRenderer {
     /**
      * @param {object} opts
-     * @param {'spiral'|'entangled'|'scattered'} [opts.mode]
+     * @param {'spiral'|'entangled'|'scattered'|'wiggle'} [opts.mode]
      * @param {string} [opts.colorA]
      * @param {string} [opts.colorB]
      * @param {number} [opts.reach]  How far the derived paths stray, in widths.
-     * @param {number} [opts.turns]  The spiral's turn count.
+     * @param {number} [opts.cycle]  The spiral's advance per turn, as a multiple of its radius.
      */
-    constructor({ mode = 'spiral', colorA = '#46608a', colorB = '#8a4630', reach = 7, turns = 22 } = {}) {
+    constructor({ mode = 'spiral', colorA = '#46608a', colorB = '#8a4630', reach = 7, cycle = 1.5 } = {}) {
         super();
         this.mode = mode;
         this.colorA = colorA;
         this.colorB = colorB;
         this.reach = reach;
-        this.turns = turns;
+        this.cycle = cycle;
     }
 
     _paths(def, width) {
@@ -45,17 +48,25 @@ export class AroundStrokeRenderer extends StrokeRenderer {
         const reach = width * this.reach;
         const seed = def.seed ?? 1;
         if (this.mode === 'spiral') {
-            return [spiralPath(base, { turns: this.turns, radius: reach })];
+            return [spiralPath(base, { cycle: reach * this.cycle, radius: reach })];
         }
         if (this.mode === 'entangled') {
             return entangledPaths(base, {
                 count: Math.round(3 + width * 260),
                 amplitude: reach,
+                wavelength: reach * 3,
                 seed,
             });
         }
+        if (this.mode === 'wiggle') {
+            return [wigglePath(base, {
+                amplitude: reach,
+                cycleStart: reach * 1.5,
+                cycleEnd: width * 1.2,
+            })];
+        }
         return scatteredPaths(base, {
-            count: Math.round(25 + width * 3200),
+            spacing: width * 1.5,
             offset: reach,
             length: 0.04 + width * 1.2,
             seed,

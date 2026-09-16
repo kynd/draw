@@ -45,7 +45,15 @@ export class PatternedDemoConfig extends DrawingToolConfig {
         super({ tools: [
             'pattern-dashes', 'pattern-dots', 'pattern-strips',
             'wet-dashes', 'wet-dots', 'wet-strips', 'feather', 'leaves', 'fringe', 'wet-fringe',
-            'around-spiral', 'around-entangled', 'around-scattered', 'pixels', 'polygons', 'lanes',
+            'pixels', 'polygons', 'lanes',
+        ] });
+    }
+}
+
+export class AroundDemoConfig extends DrawingToolConfig {
+    constructor() {
+        super({ tools: [
+            'around-spiral', 'around-entangled', 'around-scattered', 'around-wiggle',
         ] });
     }
 }

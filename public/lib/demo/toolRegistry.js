@@ -312,9 +312,9 @@ export const toolRegistry = [
             mode: 'fringe', color: ctx.colorA, colorB: ctx.colorB, size: v.size, angle: v.angle,
             drag: v.drag, background: ctx.texture }) },
     { id: 'around-spiral', kind: 'stroke', width: [2, 6],
-        params: [{ key: 'turns', min: 8, max: 30, step: 1 }, { key: 'reach', min: 4, max: 10 }],
+        params: [{ key: 'cycle', min: 0.6, max: 3 }, { key: 'reach', min: 4, max: 10 }],
         make: (v, ctx) => new AroundStrokeRenderer({
-            mode: 'spiral', colorA: ctx.colorA, colorB: ctx.colorB, turns: v.turns, reach: v.reach,
+            mode: 'spiral', colorA: ctx.colorA, colorB: ctx.colorB, cycle: v.cycle, reach: v.reach,
         }) },
     { id: 'around-entangled', kind: 'stroke', width: [2, 6],
         params: [{ key: 'reach', min: 4, max: 10 }],
@@ -325,6 +325,11 @@ export const toolRegistry = [
         params: [{ key: 'reach', min: 4, max: 10 }],
         make: (v, ctx) => new AroundStrokeRenderer({
             mode: 'scattered', colorA: ctx.colorA, colorB: ctx.colorB, reach: v.reach,
+        }) },
+    { id: 'around-wiggle', kind: 'stroke', width: [2, 6],
+        params: [{ key: 'reach', min: 4, max: 10 }],
+        make: (v, ctx) => new AroundStrokeRenderer({
+            mode: 'wiggle', colorA: ctx.colorA, colorB: ctx.colorB, reach: v.reach,
         }) },
     { id: 'flat-blob', kind: 'blob',
         params: [{ key: 'axis', pick: ['along', 'across'] }],

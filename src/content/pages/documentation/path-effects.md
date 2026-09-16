@@ -16,18 +16,23 @@ All randomness is seeded, so the same seed returns the same paths.
 
 ## spiralPath
 
-The tip circles with sin and cos while its center moves along the base path, returning one continuous coil. Takes `turns`, `radius`, and `count` (output points, since a spiral needs far more than its base).
-<div class="jp">中心が元のパスに沿って進むあいだ、先端がsinとcosで円を描き、一本の連続したコイルを返します。`turns`、`radius`、`count`（出力点数。スパイラルには元のパスよりはるかに多くの点が必要です）を受け取ります。</div>
+The tip circles with sin and cos while its center moves along the base path, returning one continuous coil. The turn count comes from the path's length, one turn per `cycle` of arc, so every loop advances the same distance whatever the stroke's length. Takes `cycle`, `radius`, `turns` (overriding the cycle derivation), and `count` (output points, overriding the per-turn resolution).
+<div class="jp">中心が元のパスに沿って進むあいだ、先端がsinとcosで円を描き、一本の連続したコイルを返します。回転数はパスの長さから決まり、弧長の`cycle`ごとに1回転するため、ストロークの長さによらず各ループは同じ距離だけ進みます。`cycle`、`radius`、`turns`（cycleからの導出を上書き）、`count`（1回転あたりの分解能を上書きする出力点数）を受け取ります。</div>
+
+## wigglePath
+
+One path crossing the base from side to side, its wavelength tightening from `cycleStart` at the beginning to `cycleEnd` at the end. The crossing count comes from the path's length, so the loose-to-tight sweep reads the same on a short stroke as on a long one. The offset runs along the base normal and eases to zero at both ends, so the mark leaves and returns to the drawn path. Takes `amplitude`, `cycleStart`, and `cycleEnd`.
+<div class="jp">元のパスを左右に横切る一本のパスで、波長は始めの`cycleStart`から終わりの`cycleEnd`へと詰まっていきます。横切る回数はパスの長さから決まるため、ゆるいから詰まるへの移り変わりは、短いストロークでも長いストロークでも同じように読めます。オフセットは元のパスの法線方向に走り、両端でゼロに収まるため、マークは描いたパスから離れ、また戻ってきます。`amplitude`、`cycleStart`、`cycleEnd`を受け取ります。</div>
 
 ## entangledPaths
 
-Copies of the path, each offset by its own seeded low-frequency waves. Endpoints pull back toward the base so the bundle reads as one gesture. Takes `count`, `amplitude`, `waves`, and `seed`.
-<div class="jp">パスの複製で、それぞれが独自のシード付き低周波の波でずらされます。端点は元のパスへ引き戻されるため、束全体がひとつの身振りに見えます。`count`、`amplitude`、`waves`、`seed`を受け取ります。</div>
+Copies of the path, each offset by its own seeded low-frequency waves. Endpoints pull back toward the base so the bundle reads as one gesture. The wave count per copy comes from the path's length, one wave per `wavelength` of arc, so a long stroke wiggles as often as a short one. Takes `count`, `amplitude`, `wavelength`, `waves`, and `seed`.
+<div class="jp">パスの複製で、それぞれが独自のシード付き低周波の波でずらされます。端点は元のパスへ引き戻されるため、束全体がひとつの身振りに見えます。複製ごとの波の数はパスの長さから決まり、弧長の`wavelength`ごとに1波なので、長いストロークは短いものと同じ頻度で揺れます。`count`、`amplitude`、`wavelength`、`waves`、`seed`を受け取ります。</div>
 
 ## scatteredPaths
 
-Short strokes that copy small segments of the base and move sideways by a seeded offset. Takes `count`, `length`, `offset`, and `seed`.
-<div class="jp">元のパスの短い区間を写し取り、シード付きのオフセットで横へずらした短いストロークです。`count`、`length`、`offset`、`seed`を受け取ります。</div>
+Short strokes that copy small segments of the base and move sideways by a seeded offset. The stroke count comes from the path's length, one per `spacing` of arc, so the scatter keeps its density as the stroke grows. Takes `spacing`, `length`, `offset`, and `seed`.
+<div class="jp">元のパスの短い区間を写し取り、シード付きのオフセットで横へずらした短いストロークです。ストロークの本数はパスの長さから決まり、弧長の`spacing`ごとに1本なので、伸びても散らばりの密度を保ちます。`spacing`、`length`、`offset`、`seed`を受け取ります。</div>
 
 ## mirroredPath
 

@@ -1,0 +1,62 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Around strokes" slug="around-strokes">
+  <div class="monologue">
+    On this page, we build strokes that wind a family of marks around the drawn path, coiling, bundling, scattering, or crossing back and forth over it instead of laying one ribbon along it.
+    <div class="jp">このページでは、描いたパスのまわりにマークの群れを巻きつけるストロークを作ります。一本のリボンをパスに沿わせるのではなく、コイルにし、束ね、散らし、あるいは左右に往復させます。</div>
+  </div>
+
+  <div class="prose">
+    <p>The look is a set of paths derived from the drawn one: a coil around it, wiggly copies of it, short strokes scattered along it, or a single crossing wave. The generators (<code>spiralPath</code>, <code>entangledPaths</code>, <code>scatteredPaths</code>, and <code>wigglePath</code> on the <a href={`${base}/documentation/path-effects`}>Path Effects</a> page) return plain point arrays, so each derived path is an ordinary stroke drawn by the brush renderer. Every spatial size follows the stroke's width, so a heavier stroke spreads further; every count follows the path's length, so the pattern keeps its spacing as the stroke grows rather than crowding a short stroke and stretching a long one.</p>
+    <div class="jp">見た目は、描いたパスから導かれた一群のパスです。パスを巻くコイル、揺れる複製、パスに沿って散らばる短いストローク、あるいは一本の横切る波。生成器（<a href={`${base}/documentation/path-effects`}>Path Effects</a>ページの<code>spiralPath</code>、<code>entangledPaths</code>、<code>scatteredPaths</code>、<code>wigglePath</code>）は通常の点の配列を返すため、導かれた各パスはbrushレンダラで描かれる普通のストロークです。空間的な大きさはすべてストロークの幅に従うため、太いストロークほど遠くへ広がります。本数はすべてパスの長さに従うため、短いストロークで詰まり長いストロークで伸びることなく、パターンは間隔を保ちます。</div>
+  </div>
+
+  <section class="demo-section" id="around-strokes">
+    <div class="demo-header">
+      <h2>Around strokes</h2>
+      <a href={`${base}/demos/around-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/around-strokes/index.html?embedded`} title="Around strokes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Paths derived from the base path (spiral, entangled, scattered, and wiggle from top to bottom), drawn with the brush renderer. The <strong>Cycle</strong> slider sets how far the spiral advances per turn as a multiple of its radius, so the loops half-overlap at 1 and sit beside each other near 2.</p>
+      <div class="jp">元のパスから導いたパスです（上から順にspiral、entangled、scattered、wiggle）。描画にはbrushレンダラを使います。<strong>Cycle</strong>スライダーは、スパイラルが1回転で進む距離を半径の倍数で決めます。1でループは半分重なり、2付近で隣り合います。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Spiral:</strong> The tip circles with sin and cos while its center moves along the base path, producing one continuous coil. One turn per cycle of arc length, so every loop advances the same distance whatever the stroke's length.</p>
+        <div class="jp"><strong>スパイラル：</strong>中心が元のパスに沿って進むあいだ、先端がsinとcosで円を描き、一本の連続したコイルになります。弧長のcycleごとに1回転するため、ストロークの長さによらず、各ループは同じ距離だけ進みます。</div>
+
+        <p><strong>Entangled:</strong> Copies of the path are offset by seeded low-frequency waves, and their endpoints pull back toward the base so the bundle reads as one gesture. The wave count follows the length, so a long stroke wiggles as often as a short one.</p>
+        <div class="jp"><strong>もつれ：</strong>パスの複製がシード付きの低周波の波でずらされます。端点は元のパスへ引き戻されるため、束はひとつの身振りとして読めます。波の数は長さに従うため、長いストロークは短いものと同じ頻度で揺れます。</div>
+
+        <p><strong>Scattered:</strong> Short strokes copy small segments of the base and move sideways by a seeded offset. The stroke count follows the length, so the scatter keeps its density as the stroke grows.</p>
+        <div class="jp"><strong>散布：</strong>短いストロークが元のパスの一部を写し取り、シード付きのオフセットで横へ移動します。ストロークの本数は長さに従うため、散らばりは伸びても密度を保ちます。</div>
+
+        <p><strong>Wiggle:</strong> A single path crossing the base from side to side, its wavelength tightening from loose at the start to tight at the end. The offset eases to zero at both ends, so the mark leaves and returns to the drawn path.</p>
+        <div class="jp"><strong>ウィグル：</strong>元のパスを左右に横切る一本のパスで、波長は始めのゆるいものから終わりのきついものへと詰まっていきます。オフセットは両端でゼロに収まるため、マークは描いたパスから離れ、また戻ってきます。</div>
+
+        <p>The generators return plain point arrays, documented on <a href={`${base}/documentation/path-effects`}>Path Effects</a>, so any renderer can draw the result.</p>
+        <div class="jp">生成器は通常の点の配列を返すため（<a href={`${base}/documentation/path-effects`}>Path Effects</a>に記載）、どのレンダラでも結果を描画できます。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-around-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed" data-w="860" data-h="620" style="width:860px;height:620px">
+      <iframe src={`${base}/demos/try-around-strokes/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw with the strokes on this page, in the drawing tool: the settings panel picks the tool, its colors, and its parameters exactly, the floating dials reroll the palette, set the width, and walk a trail of rolled tools, and Clear, Replay, and recording work as on the Drawing Tool Demo page. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes as separate strokes; each piece appears once its direction settles, and the wider the stroke, the harder its turns smooth. With a pen tablet, pressure scales the stroke around the set width, light thinner and heavy wider, each tool by its own amount; a mouse draws at the set width.</p>
+      <div class="jp">このページのストロークを使って、描画ツールの中で描いてみてください。設定パネルでは、ツールとその色、パラメータを正確に選べます。浮かぶ3つのダイヤルでは、パレットを引き直したり、幅を変えたり、ロールしてきたツールの列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭く曲がると描いた線はそこで分割されるため、速いジグザグは別々のストロークとして焼き込まれます。各断片は向きが安定してから現れ、ストロークが太いほど曲がりは強く滑らかになります。ペンタブレットでは、筆圧が設定した幅を中心にストロークを伸縮させます。軽ければ細く、強ければ太く、その振れ幅はツールごとに異なります。マウスは設定した幅のまま描きます。</div>
+    </div>
+  </section>
+</PageLayout>

@@ -18,19 +18,28 @@ function toCurve(points) {
  * A spiral wound around the path: the tip circles with sin/cos while its center moves
  * along the base. Returns one continuous path.
  *
+ * The revolution count comes from the path's own length: one turn per `cycle` of arc,
+ * so every loop advances the same distance no matter how long the stroke is. A fixed
+ * `turns` count instead crowds a short stroke and stretches a long one. Pass `turns` to
+ * override the derivation.
+ *
  * @param {THREE.Vector3[]} points
  * @param {object} [opts]
- * @param {number} [opts.turns]    Full revolutions over the whole length.
+ * @param {number} [opts.cycle]    Arc length the coil advances per revolution.
  * @param {number} [opts.radius]
- * @param {number} [opts.count]    Output points. A spiral needs far more than its base.
+ * @param {number} [opts.turns]    Full revolutions, overriding the cycle derivation.
+ * @param {number} [opts.count]    Output points, overriding the per-turn resolution.
  */
-export function spiralPath(points, { turns = 22, radius = 0.14, count = 900 } = {}) {
+export function spiralPath(points, { cycle = 0.02, radius = 0.14, turns, count } = {}) {
     const curve = toCurve(points);
+    const length = curve.getLength();
+    const revolutions = turns ?? Math.max(1, length / cycle);
+    const n = count ?? Math.min(4000, Math.max(2, Math.round(revolutions * 36)));
     const out = [];
-    for (let i = 0; i < count; i++) {
-        const t = i / (count - 1);
+    for (let i = 0; i < n; i++) {
+        const t = i / (n - 1);
         const c = curve.getPointAt(t);
-        const theta = t * Math.PI * 2 * turns;
+        const theta = t * Math.PI * 2 * revolutions;
         out.push(new THREE.Vector3(
             c.x + Math.cos(theta) * radius,
             c.y + Math.sin(theta) * radius,
@@ -41,20 +50,64 @@ export function spiralPath(points, { turns = 22, radius = 0.14, count = 900 } = 
 }
 
 /**
+ * A single path that wiggles from side to side across the base, its wavelength tightening
+ * from `cycleStart` at the beginning to `cycleEnd` at the end. The wiggle count comes from
+ * the path's length, so the loose-to-tight sweep reads the same on a short stroke as on a
+ * long one. The offset runs along the base normal and eases to zero at both ends, so the
+ * mark leaves and returns to the drawn path.
+ *
+ * @param {THREE.Vector3[]} points
+ * @param {object} [opts]
+ * @param {number} [opts.amplitude]   Peak offset from the base, in world units.
+ * @param {number} [opts.cycleStart]  Wavelength at the start (loose).
+ * @param {number} [opts.cycleEnd]    Wavelength at the end (tight).
+ */
+export function wigglePath(points, { amplitude = 0.1, cycleStart = 0.12, cycleEnd = 0.03 } = {}) {
+    const curve = toCurve(points);
+    const length = curve.getLength();
+    if (length < 1e-4) return points.map(p => p.clone());
+    // Wavelength is linear in arc length, so the accumulated phase has a closed form:
+    // with lambda(s) = l0 + k s, the integral of 2*pi/lambda ds is (2*pi/k) ln(lambda/l0).
+    const l0 = cycleStart, l1 = cycleEnd;
+    const k = (l1 - l0) / length;
+    const phaseAt = s => Math.abs(k) < 1e-9
+        ? (Math.PI * 2 / l0) * s
+        : (Math.PI * 2 / k) * Math.log((l0 + k * s) / l0);
+    const cycles = phaseAt(length) / (Math.PI * 2);
+    const n = Math.min(4000, Math.max(60, Math.round(cycles * 40)));
+    const out = [];
+    for (let i = 0; i < n; i++) {
+        const t = i / (n - 1);
+        const c = curve.getPointAt(t);
+        const tan = curve.getTangentAt(t);
+        const env = Math.sin(Math.PI * t);
+        const offset = Math.sin(phaseAt(t * length)) * amplitude * env;
+        out.push(new THREE.Vector3(c.x - tan.y * offset, c.y + tan.x * offset, c.z));
+    }
+    return out;
+}
+
+/**
  * Wiggly copies of the path, each offset by its own low-frequency wave so the set
- * entangles. Deterministic for a given seed.
+ * entangles. The wave count per copy comes from the path's length (one wave per
+ * `wavelength` of arc), so a long stroke wiggles as often as a short one rather than
+ * stretching a fixed count over its length. Deterministic for a given seed.
  *
  * @returns {THREE.Vector3[][]}
  */
-export function entangledPaths(points, { count = 6, amplitude = 0.12, waves = 3, seed = 1, samples = 120 } = {}) {
+export function entangledPaths(points, { count = 6, amplitude = 0.12, wavelength = 0.6, waves = 3, seed = 1 } = {}) {
     const curve = toCurve(points);
+    const length = curve.getLength();
+    const baseWaves = Math.max(1, length / wavelength);
+    const samples = Math.min(400, Math.max(24, Math.round(baseWaves * 40)));
     const rand = seededRandom(seed);
     const paths = [];
     for (let k = 0; k < count; k++) {
-        // Two or three sine components per axis, with seeded frequency and phase.
+        // Two or three sine components per axis, their frequency seeded around the
+        // length-derived base count so the wavelength holds as the stroke grows.
         const comps = Array.from({ length: waves }, () => ({
-            fx: 1 + rand() * 3.5, px: rand() * Math.PI * 2, ax: (rand() * 0.7 + 0.3),
-            fy: 1 + rand() * 3.5, py: rand() * Math.PI * 2, ay: (rand() * 0.7 + 0.3),
+            fx: baseWaves * (0.5 + rand()), px: rand() * Math.PI * 2, ax: (rand() * 0.7 + 0.3),
+            fy: baseWaves * (0.5 + rand()), py: rand() * Math.PI * 2, ay: (rand() * 0.7 + 0.3),
         }));
         const path = [];
         for (let i = 0; i < samples; i++) {
@@ -80,12 +133,15 @@ export function entangledPaths(points, { count = 6, amplitude = 0.12, waves = 3,
 
 /**
  * Short strokes scattered roughly along the path: each copies a small segment of the
- * base and moves it sideways by a seeded offset. Deterministic for a given seed.
+ * base and moves it sideways by a seeded offset. The stroke count comes from the path's
+ * length (one per `spacing` of arc), so the scatter keeps its density as the stroke
+ * grows rather than thinning out. Deterministic for a given seed.
  *
  * @returns {THREE.Vector3[][]}
  */
-export function scatteredPaths(points, { count = 60, length = 0.05, offset = 0.14, seed = 1, samples = 10 } = {}) {
+export function scatteredPaths(points, { spacing = 0.02, length = 0.05, offset = 0.14, seed = 1, samples = 10 } = {}) {
     const curve = toCurve(points);
+    const count = Math.max(1, Math.round(curve.getLength() / spacing));
     const rand = seededRandom(seed);
     const paths = [];
     for (let k = 0; k < count; k++) {
