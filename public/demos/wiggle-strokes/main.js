@@ -4,7 +4,7 @@ import { wigglePath } from '../../lib/pathEffects.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
-import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY } from '../../lib/demo/strokePaths.js';
 
 // Three characters of the same crossing wave. `reach` is the amplitude in widths; the
 // wavelengths (start loose, end tight) are multiples of that amplitude, so a smaller
@@ -59,7 +59,7 @@ function rebuild() {
         });
         const def = new StrokeDef({
             points: path,
-            widthLeft: taper(width),
+            widthLeft: () => width,
             renderer,
             seed: SEEDS[i],
         });
