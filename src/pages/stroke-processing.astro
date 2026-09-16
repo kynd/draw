@@ -5,8 +5,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Stroke processing" slug="stroke-processing">
   <div class="monologue">
-    On this page, we explore methods that reshape a drawn path to suit the stroke or fill it will become, since each kind wants its own quality: a smoother curve, marks kept apart at a corner, a closed region to fill.
-    <div class="jp">このページでは、描いたパスを、それがなるストロークや塗りに合わせて作り変える手法を探ります。種類ごとに求める性質が異なるからです。より滑らかな曲線、角で分かれたままのマーク、塗りのための閉じた領域、といった具合です。</div>
+    On this page, we explore methods for reshaping a drawn path to suit the stroke or fill it will become. Different results call for different qualities: a smoother curve, marks that stay separate at a corner, or a closed region that can be filled.
+    <div class="jp">このページでは、描いたパスを、それがなるストロークや塗りに合わせて変形する手法を探ります。求める結果によって必要な性質は異なります。より滑らかな曲線、角で分かれたままのマーク、塗りつぶせる閉じた領域などです。</div>
   </div>
 
   <section class="demo-section" id="smoothing">
@@ -18,23 +18,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/stroke-processing/index.html?embedded`} title="Curve smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Raw pointer input is shaky, so a stroke is smoothed before it is drawn. Draw on the canvas with the mouse. The gray line is the drawn path shown exactly, one pixel wide; the blue and red lines are its natural and Hobby smoothings. <strong>Span</strong> sets the resampling length.</p>
-      <div class="jp">生のポインタ入力は手ぶれを含むため、ストロークは描く前に滑らかにします。キャンバスにマウスで描いてください。グレーの線は描いたパスをそのまま1ピクセル幅で表示したものです。青と赤の線は、それをnatural曲線とHobby曲線で滑らかにしたものです。<strong>Span</strong>は再サンプリングの間隔を決めます。</div>
+      <p>Raw pointer input is often shaky, so it helps to smooth the path before rendering strokes. Draw on the canvas with the mouse. The gray line shows the drawn path exactly, one pixel wide; the blue and red lines show the Natural and Hobby curves.</p>
+      <div class="jp">生のポインター入力は手ぶれを含むことが多いため、ストロークを描画する前にパスを滑らかにすると効果的です。マウスを使ってキャンバスに描いてみてください。グレーの線は描いたパスをそのまま1ピクセル幅で示し、青と赤の線はNatural曲線とHobby曲線によって滑らかにした結果を示します。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Resampling:</strong> The drawn path is walked by arc length and one knot is taken per span. Everything the hand wobbled between the knots is discarded there, so the span is the smoothing strength.</p>
-        <div class="jp"><strong>再サンプリング：</strong>描かれたパスを弧長に沿ってたどり、スパンごとに1つのノットを取ります。ノットの間で手が揺れた分はそこで捨てられるため、スパンがそのまま平滑化の強さになります。</div>
+      <p>Both methods use the same knots, so the <strong>Span</strong> slider adjusts the balance between fidelity and smoothness for both at once. We walk along the drawn path by arc length and take one knot per span. This discards any wobble between knots, so the span controls the smoothing strength.</p>
+      <div class="jp">どちらの手法も同じノットを使うため、<strong>Span</strong>スライダーで両方の忠実度と滑らかさのバランスを同時に調整できます。描いたパスに沿ってたどり、一定のスパンごとに1つのノットを取ります。ノット間の揺れが取り除かれるため、スパンによってスムーシングの強さを調整できます。</div>
 
-        <p><strong>Natural curve:</strong> A cubic spline through the knots with zero second derivative at the ends, parameterized by chord length so uneven knot spacing does not distort the shape.</p>
-        <div class="jp"><strong>natural曲線：</strong>ノットを通る3次スプラインで、両端の2階微分はゼロです。弦長でパラメータ化するため、ノットの間隔が不均一でも形は歪みません。</div>
-
-        <p><strong>Hobby curve:</strong> The interpolation METAFONT draws paths with: tangent directions come from a mock-curvature system and control handles from Hobby's velocity function. It swings wider through corners than the natural spline, which is the visible difference between the two.</p>
-        <div class="jp"><strong>Hobby曲線：</strong>METAFONTがパスを描くのに使う補間です。接線方向は擬似曲率の連立方程式から、制御ハンドルはHobbyの速度関数から求まります。角ではnaturalスプラインより大きく膨らみ、これが両者の見た目の違いです。</div>
-
-        <p>Both take the same knots, so moving the span slider trades fidelity against smoothness for both at once. The curves are documented on <a href={`${base}/documentation/curves`}>Curves</a>.</p>
-        <div class="jp">どちらも同じノットを受け取るため、スパンのスライダーを動かすと、両方の曲線で忠実さと滑らかさのバランスが同時に変わります。曲線については<a href={`${base}/documentation/curves`}>Curves</a>に記載しています。</div>
-      </details>
+      <p>For more about the Natural and Hobby curves, see <a href="https://www.kynd.info/writing/controlling-curves/" target="_blank" rel="noopener">Controlling curves</a>.</p>
+      <div class="jp">Natural曲線とHobby曲線については、<a href="https://www.kynd.info/writing/controlling-curves/" target="_blank" rel="noopener">Controlling curves（曲線のコントロール）</a>を見てください。</div>
     </div>
   </section>
 
@@ -47,20 +38,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/local-smoothing/index.html?embedded`} title="Local smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>While a stroke is still being drawn, the part already down must not shift, or the whole line would wriggle as new points arrive. Two curves that cannot move the settled part of a growing stroke: a Catmull-Rom spline (blue) and a cubic B-spline (green). The stability readout shows the largest movement of the settled part per added point; for both it is exactly zero.</p>
-      <div class="jp">ストロークを描いている最中に、すでに描かれた部分が動くと、点が増えるたびに線全体がうねってしまいます。伸びていくストロークの、すでに描かれた部分を動かさない2つの曲線です。Catmull-Romスプライン（青）と3次B-スプライン（緑）。Stabilityの表示は、点を1つ加えるごとの、確定した部分の最大移動量です。どちらも正確にゼロになります。</div>
+      <p>In the first demo, you may have noticed a problem: while the resulting lines are smooth and appealing, they can sometimes jump suddenly when a point is added. The methods in this demo avoid that. The part already on the canvas should stay still. You can compare two curves that preserve the settled portion of a growing stroke: a Catmull–Rom spline (blue) and a cubic B-spline (green). The stability readout shows the largest movement in the settled portion for each added point; for both curves, it remains exactly zero.</p>
+      <div class="jp">最初のデモでは、結果の線は滑らかできれいですが、点を追加した瞬間に線が急に跳ねるように動くことがあると気づくかもしれません。このデモの手法は、すでにキャンバス上に描かれた部分を静止させることで、この問題を避けます。伸びていくストロークの確定した部分を保つ2つの曲線、Catmull-Romスプライン（青）と3次B-スプライン（緑）を比較できます。Stabilityの表示は、点を1つ追加するごとの確定部分の最大移動量を示し、どちらの曲線でも正確にゼロを保ちます。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Why the others jump:</strong> The natural spline and Hobby's curve each solve one system over every knot, so a new knot re-solves the whole curve. The influence decays with distance, but it never reaches zero.</p>
-        <div class="jp"><strong>他の曲線が跳ねる理由：</strong>naturalスプラインとHobby曲線は、すべてのノットにまたがるひとつの連立方程式を解くため、新しいノットは曲線全体を解き直します。影響は距離とともに減衰しますが、ゼロにはなりません。</div>
+      <p>The Natural and Hobby curves each solve one system across all knots. Adding a new knot therefore recalculates the entire curve. Its influence decreases with distance but never reaches zero.</p>
+      <div class="jp">Natural曲線とHobby曲線は、それぞれすべてのノットにまたがる1つの連立方程式を解きます。そのため、新しいノットを追加すると曲線全体が再計算されます。影響は距離とともに小さくなりますが、ゼロにはなりません。</div>
 
-        <p><strong>Local support:</strong> Each segment of these two depends only on its four surrounding knots. Appending a knot changes the last segments and nothing before them, which the readout measures as exactly zero.</p>
-        <div class="jp"><strong>局所性：</strong>この2つの曲線の各セグメントは、周囲の4つのノットにだけ依存します。ノットを追加しても変わるのは末尾のセグメントだけで、それより前は変わりません。表示される値が正確にゼロなのはそのためです。</div>
+      <p>Each segment of the Catmull-Rom and B-spline curves depends only on its four surrounding knots. Adding a knot changes only the final segments, while everything before them stays fixed.</p>
+      <div class="jp">Catmull-Rom曲線とB-スプライン曲線の各セグメントは、周囲の4つのノットだけに依存します。ノットを追加しても変化するのは末尾のセグメントだけで、それより前の部分は固定されたままです。</div>
 
-        <p><strong>The trade:</strong> The Catmull-Rom passes through every knot but is only C1, so its curvature can kink at knots. The B-spline is C2 and smoother, and pays for it by approximating the knots instead of passing through them, visibly cutting the corners.</p>
-        <div class="jp"><strong>引き換え：</strong>Catmull-Romはすべてのノットを通りますが、C1連続に留まるため、ノットで曲率が折れることがあります。B-スプラインはC2連続でより滑らかですが、その代わりノットを通らずに近似するため、角が目に見えて内側に削られます。</div>
-      </details>
+      <p>The Catmull-Rom curve passes through every knot, but it is only C1 continuous, so its curvature can kink at the knots. The B-spline is C2 continuous and smoother, but it approximates the knots instead of passing through them, visibly cutting across corners.</p>
+      <div class="jp">Catmull-Rom曲線はすべてのノットを通りますが、C1連続にとどまるため、ノットで曲率が折れることがあります。B-スプラインはC2連続でより滑らかですが、ノットを通らずに近似するため、角を目に見えて横切ります。</div>
     </div>
   </section>
 
@@ -73,17 +61,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/stroke-splitting/index.html?embedded`} title="Stroke splitting" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Quick back-and-forth marks should read as separate strokes, and a sharp corner should survive rather than round away. So a drawn line is split into separate strokes wherever its direction turns more than a threshold angle. Fast zigzag squiggling becomes a run of short strokes instead of one folded line. Each piece is smoothed on its own, so a corner ends one curve and starts the next.</p>
-      <div class="jp">素早い往復の筆は別々のストロークとして読めるべきで、鋭い角も丸められて消えるのではなく残るべきです。そこで、向きがしきい値の角度を超えて変わる場所で、描かれた線を別々のストロークに分割します。速いジグザグの走り書きは、折りたたまれた1本の線ではなく、短いストロークの連なりになります。各断片は個別に平滑化されるため、角ではひとつの曲線が終わり、次の曲線が始まります。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>Turn over a window:</strong> The turn at a point compares the incoming and outgoing directions, each measured over a fixed arc window rather than one segment, so the jitter of dense points does not trigger cuts.</p>
-        <div class="jp"><strong>窓で測る回転：</strong>ある点での回転は、入る方向と出る方向を比べて求めます。どちらの方向も、1セグメントではなく固定の弧長の窓で測るため、密集した点のジッタで分割が起きることはありません。</div>
-
-        <p><strong>One cut per corner:</strong> A cut cannot follow another within the window's arc, so a sharp corner yields exactly one cut. The boundary point is shared by both pieces, so the strokes stay connected end to end.</p>
-        <div class="jp"><strong>角ごとに1回の分割：</strong>窓の弧長の内側では次の分割は起きないため、鋭い角はちょうど1回だけ分割されます。境界の点は両方の断片が共有するので、ストロークは端と端でつながったままです。</div>
-      </details>
+      <p>Many strokes in this project try to wrap the drawn path with a certain width, but very sharp corners can produce non-ideal rendering, especially when quickly squiggling back and forth. In this demo, we split a drawn line whenever its direction changes beyond a threshold angle. A fast zigzag becomes a sequence of short strokes rather than a single folded line.</p>
+      <div class="jp">このプロジェクトの多くのストロークは、描いたパスを一定の幅で包むように描画しますが、非常に鋭い角、特に素早く往復して描いた場合には、望ましくない結果が生じることがあります。このデモでは、方向の変化がしきい値の角度を超えるたびに、描いた線を分割します。速いジグザグは、折り返された1本の線ではなく、短いストロークの連なりになります。</div>
     </div>
   </section>
 
@@ -96,17 +75,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/smoothed-brush/index.html?embedded`} title="Smoothed brush" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Smoothing is only useful if a real renderer can draw the result, not just a bare line. The same smoothing, drawn as a stroke: the smoothed path feeds the brush renderer with ragged ends. The dropdown selects among all four curves.</p>
-      <div class="jp">平滑化は、素の線ではなく実際のレンダラで結果を描けてこそ役に立ちます。同じ平滑化を、ストロークとして描いたものです。滑らかにしたパスをbrushレンダラに渡し、端はraggedにしています。ドロップダウンで4つの曲線のどれでも選べます。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>Rendering:</strong> The smoothed polyline becomes the stroke's control points, so a processed path draws with any renderer unchanged.</p>
-        <div class="jp"><strong>描画：</strong>滑らかにしたポリラインがそのままストロークの制御点になるため、処理したパスはどのレンダラでも変更なしで描けます。</div>
-
-        <p><strong>Span:</strong> A span of zero disables the resampling: every drawn point is a knot, and the stroke follows the hand exactly.</p>
-        <div class="jp"><strong>スパン：</strong>スパンがゼロのときは再サンプリングが無効になります。描いたすべての点がノットになり、ストロークは手の動きをそのままたどります。</div>
-      </details>
+      <p>In this demo, you can see how smoothing methods apply to actual strokes, not just bare lines. Use the dropdown to choose from all four methods.</p>
+      <div class="jp">このデモでは、スムーシングの手法を単なる線ではなく、実際のストロークに適用した結果を確認できます。ドロップダウンから4つの手法を選べます。</div>
     </div>
   </section>
 
@@ -119,14 +89,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/split-brush/index.html?embedded`} title="Split brush" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Drawn as strokes rather than lines, the split lets a fast gesture read as distinct marks instead of one tangled ribbon: each split piece feeds the brush renderer as its own stroke, with its own taper, ragged ends, and colors. Fast zigzag squiggling lays down a run of separate brush marks in one gesture. Every try-drawing demo and the drawing tool split strokes this way.</p>
-      <div class="jp">線ではなくストロークとして描くと、分割は速い身振りを、もつれた1本のリボンではなく別々の筆の跡として見せます。分割された各断片は、それぞれのテーパー、raggedな端、色を持つ独立したストロークとしてbrushレンダラに渡されます。速いジグザグの走り書きでは、ひとつの身振りで別々の筆の跡が連なって置かれます。すべてのTry drawingデモと描画ツールは、この方法でストロークを分割します。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>Per-piece processing:</strong> Each piece is resampled and smoothed on its own before rendering, so a corner ends one tapered stroke and starts the next instead of being rounded away.</p>
-        <div class="jp"><strong>断片ごとの処理：</strong>各断片は描画の前に個別に再サンプリングされ、滑らかにされます。そのため角では、丸められて消えるのではなく、テーパーを持つひとつのストロークが終わり、次のストロークが始まります。</div>
-      </details>
+      <p>In this demo, you can see how the splitting method can be applied to actual strokes.</p>
+      <div class="jp">このデモでは、分割の手法を実際のストロークに適用した結果を確認できます。</div>
     </div>
   </section>
 
@@ -139,17 +103,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/hold-start/index.html?embedded`} title="Held start" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A mark drawn from the very first point flickers through directions before the stroke is long enough to have one, which reads as broken, so each piece is held until it carries enough arc for a stable direction, then appears already settled. The thin black line shows the pointer meanwhile. The stroke splits at sharp turns as in the drawing demos, and a fresh piece after a split waits the same way its stroke did. Every drawing demo now runs this gate.</p>
-      <div class="jp">最初の点から描かれる筆跡は、ストロークが向きを持てるだけの長さになる前に向きが揺れてちらつき、壊れて見えます。そこで各断片は、安定した向きを持てるだけの弧長になるまで保留され、落ち着いた状態で現れます。その間、細い黒線がポインタの位置を示します。ストロークは描画デモと同じく鋭い曲がりで分割され、分割後の新しい断片も、ストロークの始まりと同じように待ちます。今ではすべての描画デモがこのゲートを通しています。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>The gate:</strong> <code>hasSettledStart</code> walks the drawn points and passes once the accumulated arc reaches a threshold. Distance, not a point count: a slow hand piles points onto one spot without adding direction.</p>
-        <div class="jp"><strong>ゲート：</strong><code>hasSettledStart</code>は描かれた点をたどり、積算した弧長がしきい値に達したら通します。点の数ではなく距離で判定します。ゆっくり動く手は、向きの情報を足さないまま、一点に点を積み上げるからです。</div>
-
-        <p>A gesture released below the threshold draws nothing, and a piece split off below it stays hidden until its own arc passes.</p>
-        <div class="jp">しきい値に届かないまま離した身振りは、何も描きません。分割で生まれた断片も、自身の弧長がしきい値を超えるまでは現れません。</div>
-      </details>
+      <p>At the beginning of a stroke, when there are only a few points to sample, it's hard to predict which direction the user is drawing. This can sometimes cause a flickering result. To prevent this, each stroke remains hidden until it has enough arc length to establish a stable direction; then it appears in a settled state.</p>
+      <div class="jp">ストロークの始まりでは、サンプリングできる点が少ないため、ユーザーがどの方向に描いているのかを正確に予測するのが困難です。その結果、表示がちらつくことがあります。これを防ぐため、それぞれのストロークは安定した方向を確立できるだけの弧長に達するまで隠され、落ち着いたところで表示されます。</div>
     </div>
   </section>
 
@@ -162,17 +117,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/width-smoothing/index.html?embedded`} title="Width smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A sharp turn folds a wide ribbon over itself into an overlap a thin line never shows, so the smoothing follows the stroke's width: a narrow stroke follows the hand directly, and a wide one rounds its turns. The wider the stroke, the earlier the turns are rounded away; drawn thin, the same gesture keeps its corners. Every drawing demo now smooths this way.</p>
-      <div class="jp">鋭い曲がりは太いリボンを自分の上に折り重ね、細い線には出ない重なりを作ってしまいます。そこで平滑化はストロークの幅に従います。細いストロークは手の動きにそのまま従い、太いストロークは曲がりを丸めます。ストロークが太いほど曲がりは早めに丸められ、同じ身振りでも細く描けば角はそのまま残ります。今ではすべての描画デモがこの方法で平滑化しています。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>The rule:</strong> <code>smoothByWidth</code> spaces the smoothing knots at width × gain, clamped to a working range, and interpolates them with the local Catmull-Rom, so the settled part of a growing stroke holds still.</p>
-        <div class="jp"><strong>規則：</strong><code>smoothByWidth</code>は、平滑化のノットを幅×gainの間隔で置き（動作レンジに収めます）、局所的なCatmull-Romで補間します。そのため、伸びていくストロークのすでに描かれた部分は動きません。</div>
-
-        <p>The black pointer line stays unsmoothed, so the gap between the hand and the mark shows the smoothing at work: none when thin, wide arcs when thick.</p>
-        <div class="jp">黒いポインタの線は平滑化されないため、手と筆跡のずれがそのまま平滑化の働きを見せます。細いときはずれがなく、太いときは大きな弧になります。</div>
-      </details>
+      <p>A sharp turn can fold a wide ribbon over itself. To prevent this, tie the amount of smoothing to the stroke width: a narrow stroke tracks the hand closely, while a wide stroke rounds its turns.</p>
+      <div class="jp">幅のあるリボンは急なカーブで自分自身の上に折り重なってしまうことがあります。これを防ぐため、スムーシングの量をストロークの幅に合わせます。細いストロークは手の動きに忠実に従い、太いストロークは緩やかなカーブを描きます。</div>
     </div>
   </section>
 
@@ -185,20 +131,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/blob-drawing/index.html?embedded`} title="Blob drawing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A fill needs a closed region, but a drawn gesture is an open path. Draw a line and it becomes a filled blob that contains the whole gesture: the smallest convex region around every drawn point, smoothed and painted.</p>
-      <div class="jp">塗りには閉じた領域が必要ですが、描いた身振りは開いたパスです。線を描くと、その身振り全体を含む塗りつぶされたブロブになります。描いたすべての点を囲む最小の凸領域を、滑らかにして塗ったものです。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>The hull:</strong> The convex hull of the drawn points is the smallest convex region containing all of them. Its perimeter is resampled at the span for even knots, and the closed Catmull-Rom or B-spline rounds it into a blob.</p>
-        <div class="jp"><strong>ハル：</strong>描いた点の凸包は、そのすべてを含む最小の凸領域です。その外周をスパンで再サンプリングして等間隔のノットを取り、閉じたCatmull-RomまたはB-スプラインでブロブへと丸めます。</div>
-
-        <p><strong>Containment:</strong> Smoothing cuts inside the hull, so each knot is pushed outward along its edge normal by a fraction of the span. The curve then still contains every drawn point.</p>
-        <div class="jp"><strong>包含：</strong>平滑化はハルの内側を通るため、各ノットは辺の法線方向へスパンの一部だけ外へ押し出されます。これにより、曲線は描いたすべての点を含んだままになります。</div>
-
-        <p><strong>Filling:</strong> The closed polyline becomes a THREE.Shape and its triangulation fills the area.</p>
-        <div class="jp"><strong>塗り：</strong>閉じたポリラインはTHREE.Shapeになり、その三角形分割で領域を塗りつぶします。</div>
-      </details>
+      <p>A fill needs a closed region, but a drawn gesture is an open path. This demo creates a closed path that contains the entire gesture: it finds the smallest convex region around all drawn points, then smooths and paints it.</p>
+      <div class="jp">塗りには閉じた領域が必要ですが、描いた身振りは開いたパスです。このデモでは、ジェスチャー全体を含む閉じたパスを作ります。描いたすべての点を囲む最小の凸領域を求め、それを滑らかにして塗りつぶします。</div>
     </div>
   </section>
 
@@ -211,23 +145,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/tight-blob/index.html?embedded`} title="Tight blob" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The convex hull above fills in every concavity, so a crescent becomes a lump. This blob keeps the concavities: the drawn path is closed into a smooth loop, and the shape is everything within a radius of that loop.</p>
-      <div class="jp">上の凸包は凹みをすべて埋めてしまい、三日月のような形もかたまりになります。このブロブは凹みを保ちます。描いたパスは滑らかなループとして閉じられ、そのループから一定の半径以内にある領域すべてが形になります。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>Closing first:</strong> The path knots feed the closed spline, so the gesture becomes an enclosed loop before the offset. Without this, an open stroke offsets into a tube that follows the line; with it, the result is always a mass. The offset's distance field does not care if the closure crosses the stroke, so any gesture closes safely.</p>
-        <div class="jp"><strong>先に閉じる：</strong>パスのノットは閉じたスプラインに渡され、オフセットの前に身振りが閉じたループになります。これがないと、開いたストロークは線に沿ったチューブになってしまいます。閉じておけば、結果は常にひとつのかたまりです。オフセットの距離場は、閉じ目がストロークと交差していても変わらないため、どんな身振りでも安全に閉じられます。</div>
-
-        <p><strong>The outline:</strong> The distance field to the closed loop is stamped onto a grid, and the radius contour is extracted with marching squares. Its outer boundary keeps the loop's concavities, where the convex hull above spans them.</p>
-        <div class="jp"><strong>輪郭：</strong>閉じたループへの距離場をグリッドに書き込み、半径の等値線をmarching squaresで取り出します。その外側の境界はループの凹みを保ちます。上の凸包はそこをまたいでしまいます。</div>
-
-        <p><strong>Smoothing:</strong> The contour is resampled at the span and rounded by the closed Catmull-Rom or B-spline. The contour already sits the radius out from the path, so the smoothing has room to cut inward without excluding any drawn point.</p>
-        <div class="jp"><strong>平滑化：</strong>等値線はスパンで再サンプリングされ、閉じたCatmull-RomまたはB-スプラインで丸められます。等値線はパスから半径の分だけ外にあるため、平滑化が内側を通っても、描いた点が外に出ることはありません。</div>
-
-        <p><strong>Radius:</strong> Small, the blob reads as a tube around the line; large, the concavities fill in and it approaches the hull.</p>
-        <div class="jp"><strong>半径：</strong>小さいと、ブロブは線を包むチューブに見えます。大きくすると凹みが埋まっていき、凸包に近づきます。</div>
-      </details>
+      <p>The convex hull method fills in every concavity, which can turn a crescent into a solid lump. This demo preserves those concavities instead. It closes the drawn path into a smooth loop, then defines the shape as everything within a chosen radius of that loop.</p>
+      <div class="jp">凸包の手法はすべての凹みを埋めてしまうため、三日月形でも丸まった塊になってしまいます。このデモでは、代わりに凹みを保ちます。描いたパスを滑らかなループとして閉じ、そのループから選択した半径以内の領域すべてを形として定義します。</div>
     </div>
   </section>
 </PageLayout>

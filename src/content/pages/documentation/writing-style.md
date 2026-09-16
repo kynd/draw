@@ -104,6 +104,11 @@ Describe features of the library. Do not describe the arbitrary decisions of a d
 The kept example survives because it states what the library does with any path. The cut examples describe one demo's inputs, which the reader can neither reuse nor act on.
 <div class="jp">残した例は、ライブラリがどんなパスに対しても行うことを述べているため生き残ります。削った例はひとつのデモへの入力の説明であり、読者はそれを再利用することも、それに基づいて行動することもできません。</div>
 
+## Addressing the reader
+
+On a demo or log page, address the reader directly. Use "you" and the imperative for anything they can do with the demo: "Draw on the canvas with the mouse", "Use the dropdown to choose a method", "you may have noticed". This is the log voice; documentation pages stay impersonal.
+<div class="jp">デモやログのページでは、読者に直接語りかけます。デモで読者ができることには「you」や命令形を使います。「マウスでキャンバスに描いてください」「ドロップダウンで手法を選べます」「気づいたかもしれません」。これはログの声で、ドキュメントのページは非人称のままにします。</div>
+
 ## Endings
 
 Stop when the fact is stated. Do not append a clause explaining why the fact matters, or restating it in other words.
@@ -159,8 +164,8 @@ The Japanese follows the Geom monologue register: written from the meaning, refl
 An intro may motivate the approach by contrast, naming the naive option and what the library does instead ("Rather than relying on randomly chosen colors, we develop several strategies…"). Name the sibling project (Geom) when the logic carries over from it.
 <div class="jp">導入は、素朴な選択肢と、その代わりにライブラリが何をするのかを対比させて動機づけて構いません（「ランダムに選んだ色に頼るのではなく、いくつかの戦略を構築します」）。ロジックがGeomプロジェクトから引き継がれている場合は、その名前に触れます。</div>
 
-Open a section with the motivation, the problem it solves or why it is useful, before describing what it does. Lead with the problem, then the technique.
-<div class="jp">セクションは、それが解決する問題や役に立つ理由、つまり動機から始め、その後に何をするのかを述べます。まず問題を示し、次に手法を説明します。</div>
+Open a section with the motivation, the problem it solves or why it is useful, before describing what it does. Lead with the problem, then the technique. When a section introduces a new method, this is required: say what the method helps with and what problem it solves or avoids, then describe the method.
+<div class="jp">セクションは、それが解決する問題や役に立つ理由、つまり動機から始め、その後に何をするのかを述べます。まず問題を示し、次に手法を説明します。新しい手法を導入するセクションでは、これは必須です。その手法が何に役立ち、どんな問題を解決あるいは回避するのかを述べてから、手法そのものを説明します。</div>
 
 <div class="page-note">
 <p><strong>Not:</strong> A blob that stays a blob and still keeps its concavities: the drawn path is closed into a smooth loop…<br />
