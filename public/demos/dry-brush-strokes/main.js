@@ -27,7 +27,7 @@ const ctrl = {
 const stage = new StrokeStage(document.getElementById('canvas'));
 
 let entries = [];
-let colors = ['#2c2c31', '#232326', '#3a3038'];
+let colors = [];
 
 function randomizeColors() {
     const palette = randomSchemePalette('dark-cluster');
@@ -99,4 +99,5 @@ document.getElementById('random-btn').addEventListener('click', () => {
 
 stage.onResize(() => rebuild());
 wireCollapsibles();
+colors = randomizeColors();
 rebuild();
