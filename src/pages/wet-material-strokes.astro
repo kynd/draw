@@ -37,8 +37,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <p><strong>Caps:</strong> Ends are carved in the shader inside the same margin, so one quad past the end serves rounded, square, and ragged caps.</p>
         <div class="jp"><strong>端点：</strong>終端は同じ余白の中でシェーダによって削り出されるため、終端の先のひとつの四角形が、rounded、square、raggedのすべてに使えます。</div>
 
-        <p><strong>Watercolor:</strong> The wash reads a pre-blurred copy of the background, one texel per fragment, instead of gathering a neighborhood. Pigment collects just inside the boundary, leaving a darker rim.</p>
-        <div class="jp"><strong>水彩：</strong>にじみは、周辺のピクセルを集めて読む代わりに、あらかじめぼかした背景のコピーをフラグメントごとに1テクセルだけ読みます。顔料は輪郭のすぐ内側に集まり、濃い縁を残します。</div>
+        <p><strong>Watercolor:</strong> A flat silhouette is captured through the coverage layer as one clean shape, so a stroke that folds over itself never seams; a post-process then blurs that mask into a feathered edge and paints the wash, mixing the background through. Pigment collects just inside the boundary, leaving a darker rim.</p>
+        <div class="jp"><strong>水彩：</strong>平坦なシルエットをカバレッジレイヤーでひとつのきれいな形として捉えるため、自分の上に折り返すストロークでも継ぎ目が出ません。その後、後処理がマスクをぼかして羽状の縁にし、背景を混ぜながらにじみを描きます。顔料は輪郭のすぐ内側に集まり、濃い縁を残します。</div>
 
         <p><strong>Smear:</strong> Each fragment samples backward along the stroke's direction in screen space and averages the result, so the background streaks the way the mark traveled. The sampling distance varies with noise across and along the mark.</p>
         <div class="jp"><strong>引きずり：</strong>各フラグメントは、画面上でストロークの向きに沿って後方をサンプリングして平均するため、背景は線が進んだ方向に筋を引きます。サンプリングの距離は、幅方向と長さ方向のノイズによって変わります。</div>

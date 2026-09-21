@@ -48,6 +48,7 @@ export class CoverageLayer {
         material.blendDst = THREE.OneMinusSrcAlphaFactor;
         material.blendSrcAlpha = THREE.OneFactor;
         material.blendDstAlpha = THREE.OneMinusSrcAlphaFactor;
+        this._defaultComposite = material;
         this._compositeMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
         this._compositeScene.add(this._compositeMesh);
     }
@@ -112,9 +113,21 @@ export class CoverageLayer {
         if (parent) parent.add(mesh);
         else this._scene.remove(mesh);
 
-        // The layer composites into the output exactly once.
+        // The layer composites into the output exactly once. A mark may carry its
+        // own composite shader (`userData.coverageComposite`) to run a post-process
+        // over its clean single-coverage mask (blur, noise, background mix) instead
+        // of a straight blit; the layer hands it the mask texture and its size.
+        const custom = mesh.userData.coverageComposite;
+        if (custom) {
+            const u = custom.uniforms;
+            if (u.uMap) u.uMap.value = this.target.texture;
+            if (u.uTexel) u.uTexel.value.set(1 / this.target.width, 1 / this.target.height);
+            if (u.uScreen) u.uScreen.value.set(this.target.width, this.target.height);
+            this._compositeMesh.material = custom;
+        }
         renderer.setRenderTarget(outputTarget);
         renderer.render(this._compositeScene, this._compositeCamera);
+        this._compositeMesh.material = this._defaultComposite;
 
         renderer.setRenderTarget(previousTarget);
         renderer.autoClear = previousAuto;

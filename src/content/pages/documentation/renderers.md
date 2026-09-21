@@ -228,11 +228,11 @@ Three renderers that read what is underneath and move it. All take a `background
 
 ### WatercolorStrokeRenderer
 
-Reads a pre-blurred copy of the background rather than gathering a neighbourhood per fragment. A thirty pixel radius costs hundreds of taps on every covered fragment, while the same result is one texel read against a copy blurred once for the whole frame.
-<div class="jp">フラグメントごとに周辺を集めるのではなく、あらかじめぼかした背景のコピーを読みます。半径30ピクセルなら覆われた全フラグメントで数百回のサンプリングが必要ですが、同じ結果はフレーム全体で一度ぼかしたコピーを1テクセル読むだけで得られます。</div>
+Captured in two stages, so a stroke that folds over itself never seams or darkens. A flat solid silhouette renders through the coverage layer first: MAX blending over a uniform shape gives one clean union whatever the overlap. A post-process composite then paints the wash from that mask, blurring the coverage into a soft feathered edge, breaking it up with noise (irregular but smooth, since it comes from a blurred field rather than a hard geometry edge), collecting a rim where the coverage falls off, and mixing the background through a noise-bent lens.
+<div class="jp">2段階で捉えるため、自分自身の上に折り返すストロークでも継ぎ目や濃みが出ません。まず平坦で単色のシルエットをカバレッジレイヤーで描きます。均一な形へのMAXブレンディングは、どんな重なりでもひとつのきれいな和になります。次に、後処理のコンポジットがそのマスクから水彩を描きます。カバレッジをぼかして柔らかく羽状の縁にし、ノイズで縁を崩し（硬いジオメトリの縁ではなくぼかした場から来るため、不規則でも滑らかです）、カバレッジが落ちるところにrimを集め、ノイズで曲げたレンズ越しに背景を混ぜます。</div>
 
-Takes `blurred` alongside `background`, plus `pigment`, `rim`, `granulation`, `edge` and `bleed`. The rim darkens just inside the boundary, where water dries back and leaves pigment.
-<div class="jp">`background`に加えて`blurred`を受け取り、さらに`pigment`、`rim`、`granulation`、`edge`、`bleed`を取ります。rimは輪郭のすぐ内側を濃くします。水が引きながら乾き、そこに顔料を残すからです。</div>
+Takes `pigment`, `rim`, `granulation`, `edge`, `bleed`, and `feather` (the edge blur radius) alongside `background`. The rim darkens just inside the boundary, where water dries back and leaves pigment.
+<div class="jp">`background`に加えて`pigment`、`rim`、`granulation`、`edge`、`bleed`、`feather`（縁のぼかし半径）を取ります。rimは輪郭のすぐ内側を濃くします。水が引きながら乾き、そこに顔料を残すからです。</div>
 
 `bleed` picks the background up through taps displaced by a 2D noise field, unrelated to the stroke's direction, so what lies underneath seeps into the wash in blotches rather than streaks. Wetter blotches bend the taps farther, and some taps read the sharp background, so edges underneath grow warped tendrils instead of staying put. Where the blotch noise runs wet, the pigment thins and more background shows through.
 <div class="jp">`bleed`は、ストロークの向きと無関係な2Dノイズ場でずらしたサンプリングで背景を拾います。そのため、下にあるものは筋ではなくにじみとして水彩に染み込みます。濡れたにじみほどサンプリングは遠くへ曲がり、一部のサンプリングは鮮明な背景を読むため、下にあるエッジはその場に留まらず、ゆがんだ触手を伸ばします。にじみのノイズが濡れているところでは顔料が薄まり、背景がより透けます。</div>
