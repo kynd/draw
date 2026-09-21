@@ -123,7 +123,14 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
                 // threshold is low, so it fills in as a grainy body; uGrain and a lighter
                 // pressure lift it, catching on fewer tooth tops.
                 float threshold = mix(0.9, uGrain * 0.14, edgeLevel) + (1.0 - press) * 0.2;
-                float alpha = smoothstep(threshold - 0.09, threshold + 0.09, tooth) * uOpacity;
+                float grainMask = smoothstep(threshold - 0.09, threshold + 0.09, tooth);
+
+                // Multiply the grain mask by a continuous tonal noise, so the flecks vary
+                // in darkness like real pigment settling rather than reading as one flat
+                // value. Centred so the darkest flecks stay full and only some lighten.
+                float dust = fbm(screenUv() * uScreen / (uTooth * 0.45) + uSeed * 41.0);
+                dust = clamp((dust - 0.5) * 1.8 + 0.5, 0.0, 1.0);
+                float alpha = grainMask * mix(0.5, 1.0, dust) * uOpacity;
                 if (alpha <= 0.004) discard;
 
                 vec3 color = uColor;
@@ -140,7 +147,11 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
                     // Voronoi cells are organic, so the colors read as irregular flecks
                     // rather than the squares a floor grid gives.
                     vec2 sp = screenUv() * uScreen;
-                    vec2 g = sp / (uTooth * 1.3);
+                    // A per-pixel jitter of the sample point, so pixels near a cell
+                    // boundary fall either way and the colour separation reads fuzzy
+                    // rather than a hard Voronoi edge.
+                    vec2 jit = (vec2(hash21(sp + uSeed * 3.0), hash21(sp.yx + uSeed * 5.0)) - 0.5) * 0.55;
+                    vec2 g = sp / (uTooth * 0.8) + jit;
                     vec2 gi = floor(g), gf = fract(g);
                     float best = 1e9;
                     vec2 bestCell = gi;
