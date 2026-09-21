@@ -162,9 +162,17 @@ export function attachDrawingToolUi(tool, layout) {
         const s = widthSpec();
         return Math.round((w - s.min) / (s.max - s.min) * 127);
     };
+    // The dial holds its own continuous 0..127 position and maps that onto the
+    // width, rounded. It must not be snapped back to the width's coarse grid, or
+    // a tool with few widths (a 2..20 range) would make the dial jump between a
+    // handful of positions. This flag tells the width re-sync to leave it alone
+    // while the dial itself is driving.
+    let widthFromDial = false;
     const widthLatch = new FrameLatch(v => {
         const s = widthSpec();
-        tool.setParams({ width: Math.round(s.min + (v / 127) * (s.max - s.min)) });
+        widthFromDial = true;
+        try { tool.setParams({ width: Math.round(s.min + (v / 127) * (s.max - s.min)) }); }
+        finally { widthFromDial = false; }
     });
     const dialWidth = new Dial($('dial-width'),
         { label: 'Width', value: widthToDial(tool.state.values.width),
@@ -382,7 +390,7 @@ export function attachDrawingToolUi(tool, layout) {
                 widthRemap = true;
                 try { tool.setParams({ width }); } finally { widthRemap = false; }
             }
-        } else if (!widthRemap) {
+        } else if (!widthRemap && !widthFromDial) {
             dialWidth.set(widthToDial(tool.state.values.width), false);
         }
         if (!fromUi) syncPane();

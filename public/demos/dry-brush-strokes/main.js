@@ -30,7 +30,7 @@ let entries = [];
 let colors = [];
 
 function randomizeColors() {
-    const palette = randomSchemePalette('dark-cluster');
+    const palette = randomSchemePalette('vivid-wheel');
     stage.setBackground(paperColor(palette.entries[0].H));
     return BRUSHES.map((_, i) => palette.entries[i % palette.length].hex);
 }
