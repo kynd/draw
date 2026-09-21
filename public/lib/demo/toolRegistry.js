@@ -218,13 +218,13 @@ export const toolRegistry = [
     { id: 'charcoal', kind: 'stroke', pressure: 1.5, width: [2, 28],
         params: [{ key: 'grain', min: 0.4, max: 0.9 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
-            cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            cap: 'square', rag: 0.25, color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 4.5, softness: 0.5, edge: 0.3, opacity: 0.92,
         }) },
     { id: 'pastel', kind: 'stroke', pressure: 1.5, width: [3, 32],
         params: [{ key: 'grain', min: 0.5, max: 1 }, { key: 'pressure', min: 0.2, max: 0.6 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
-            cap: 'ragged', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            cap: 'square', rag: 0.25, color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 7.0, softness: 0.65, edge: 0.55, opacity: 0.95,
         }) },
     { id: 'pencil-rainbow', kind: 'stroke', pressure: 1.25, width: [1, 8],
@@ -237,14 +237,14 @@ export const toolRegistry = [
     { id: 'charcoal-multi', kind: 'stroke', pressure: 1.5, width: [2, 28],
         params: [{ key: 'grain', min: 0.4, max: 0.9 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
-            cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',
+            cap: 'square', rag: 0.25, color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',
             grain: v.grain, pressure: v.pressure,
             tooth: 4.5, softness: 0.5, edge: 0.3, opacity: 0.92,
         }) },
     { id: 'pastel-multi', kind: 'stroke', pressure: 1.5, width: [3, 32],
         params: [{ key: 'grain', min: 0.5, max: 1 }, { key: 'pressure', min: 0.2, max: 0.6 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
-            cap: 'ragged', color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',
+            cap: 'square', rag: 0.25, color: ctx.colorA, colors: ctx.colors.slice(0, 4), blend: 'grain',
             grain: v.grain, pressure: v.pressure,
             tooth: 7.0, softness: 0.65, edge: 0.55, opacity: 0.95,
         }) },

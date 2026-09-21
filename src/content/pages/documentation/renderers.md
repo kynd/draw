@@ -194,8 +194,8 @@ The eroded edge is translucent, so the mark renders through the coverage layer b
 Pencil, charcoal, and pastel are one renderer at different settings. Paper tooth is a screen-space noise, because it belongs to the paper rather than to the stroke, and coverage is the tooth thresholded, so a light line breaks into speckle instead of fading evenly. A low-frequency `pressure` noise along the stroke scales both the darkness and the drawn width.
 <div class="jp">鉛筆、木炭、パステルは、ひとつのレンダラの設定違いです。紙の目は画面空間のノイズです。ストロークではなく紙に属するものだからです。被覆はその目をしきい値で切ったもので、薄い線は均一に薄れるのではなく、粒に割れて途切れます。線に沿った低周波の`pressure`ノイズが、濃さと描かれる幅の両方を変化させます。</div>
 
-What separates the media is scale: `tooth` is in pixels, and `softness` and `edge` set the falloff and the wobble of the boundary. Takes `color`, `grain`, `tooth`, `pressure`, `softness`, `edge`, and `opacity`.
-<div class="jp">画材を分けるのはスケールです。`tooth`はピクセル単位で、`softness`と`edge`が輪郭の減衰と揺らぎを決めます。`color`、`grain`、`tooth`、`pressure`、`softness`、`edge`、`opacity`を受け取ります。</div>
+What separates the media is scale: `tooth` is in pixels, and `softness` and `edge` set the falloff and the wobble of the boundary. Takes `color`, `grain`, `tooth`, `pressure`, `softness`, `edge`, `opacity`, and `rag` (how much the cap's end frays, in half-widths).
+<div class="jp">画材を分けるのはスケールです。`tooth`はピクセル単位で、`softness`と`edge`が輪郭の減衰と揺らぎを決めます。`color`、`grain`、`tooth`、`pressure`、`softness`、`edge`、`opacity`、`rag`（端点のほつれの大きさ、半幅単位）を受け取ります。</div>
 
 With a `colors` list (up to four are used) the media turn multicolor, by `blend`: `'along'` shifts the color along the stroke, cycling the list with arc length and blending at the joins, like a pencil with a rainbow lead; `'grain'` colors each cell of the paper tooth from the list, with a slight per-cell value jitter, so the flecks read as mixed pigment.
 <div class="jp">`colors`のリスト（最大4色まで使われます）を与えると、画材は`blend`に従って多色になります。`'along'`は、虹色の芯を持つ色鉛筆のように、弧長とともにリストを循環させ、継ぎ目で混ぜながらストロークに沿って色を変えます。`'grain'`は紙の目のセルごとにリストから色を取り、セルごとにわずかに明度を揺らすため、粒は混ざった顔料として読めます。</div>

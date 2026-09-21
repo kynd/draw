@@ -6,7 +6,8 @@ import { wireCollapsibles } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
 
 const SEEDS = [1.0, 2.3, 5.1];
-const CAPS = ['rounded', 'square', 'ragged'];
+const CAPS = ['rounded', 'square', 'square'];
+const RAG = [0, 0.25, 0.25];
 
 // Pencil, charcoal, pastel: one renderer at three settings.
 const MEDIA = [
@@ -50,6 +51,7 @@ function rebuild() {
     MEDIA.forEach((media, i) => {
         const renderer = new DryMediaStrokeRenderer({
             cap: CAPS[i],
+            rag: RAG[i],
             color: colors[i],
             grain: media.grain * grainScale,
             tooth: media.tooth,

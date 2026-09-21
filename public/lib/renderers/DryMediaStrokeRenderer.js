@@ -40,6 +40,7 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
         softness = 0.35,
         edge = 0.08,
         opacity = 1.0,
+        rag = 0,
         samplesPerUnit = 120,
         ...rest
     } = {}) {
@@ -55,6 +56,7 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
         this.softness = softness;
         this.edge = edge;
         this.opacity = opacity;
+        this.rag = rag;
     }
 
     uniforms() {
@@ -74,6 +76,7 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
             uSoftness: { value: this.softness },
             uEdgeWobble: { value: this.edge },
             uOpacity: { value: this.opacity },
+            uRag: { value: this.rag },
         };
     }
 
@@ -89,13 +92,14 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
             uniform float uSoftness;
             uniform float uEdgeWobble;
             uniform float uOpacity;
+            uniform float uRag;
 
             vec3 listColor(int i) {
                 return i == 0 ? uC0 : i == 1 ? uC1 : i == 2 ? uC2 : uC3;
             }
 
             void main() {
-                float across = capDistance();
+                float across = raggedCapDistance(uRag);
 
                 // Pressure wanders along the stroke, thinning the line and lightening it.
                 float wander = fbm(vec2(vUv.x * uLength * 1.3, uSeed * 23.0));
