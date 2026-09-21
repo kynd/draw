@@ -26,7 +26,11 @@ export class DebossStrokeRenderer extends ShaderStrokeRenderer {
         samplesPerUnit = 90,
         ...rest
     } = {}) {
-        super({ inflate: 1.15, samplesPerUnit, ...rest });
+        // Single coverage, so a stroke that folds over itself keeps one clean
+        // silhouette: MAX blending keeps the brighter body wherever a fold
+        // overlaps, so the darkening band survives only on the true outer
+        // boundary instead of being drawn along every internal fold.
+        super({ inflate: 1.15, samplesPerUnit, singleCoverage: true, ...rest });
         this.color = color;
         this.bevel = bevel;
         this.amount = amount;
