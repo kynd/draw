@@ -142,7 +142,10 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
 
                     vec2 sp = vUv * uScreen;
                     float grain = fbm(sp / 26.0 + uSeed * 13.0);
-                    float edgeN = fbm(sp / 20.0 + uSeed * 5.0) - 0.5;
+                    // Mostly low-frequency wander, so the boundary undulates in big soft
+                    // lobes, with a little mid-frequency detail on top.
+                    float edgeN = (fbm(sp / 64.0 + uSeed * 5.0) - 0.5) * 1.5
+                                + (fbm(sp / 24.0 + uSeed * 8.0) - 0.5) * 0.5;
 
                     // Irregular but soft edge: the noise shifts the soft coverage
                     // threshold, so the boundary wanders without ever being a hard tooth.
@@ -150,18 +153,22 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
                     if (body <= 0.002) discard;
 
                     // The background through a noise-bent lens: what lies underneath
-                    // seeps in as blotches, softened by a small gather.
-                    vec2 nuv = sp / 48.0;
-                    float blot = fbm(nuv * 0.6 + uSeed * 11.0);
-                    float amp = uBleed * (0.35 + blot);
-                    vec2 disp = vec2(fbm(nuv + uSeed * 3.7) - 0.5, fbm(nuv + uSeed * 7.9 + 31.0) - 0.5);
-                    vec2 buv = vUv + disp * amp * 220.0 * uTexel;
-                    vec2 sp2 = 2.5 * uTexel;
-                    vec3 soft = (texture2D(uBg, clamp(buv, 0.001, 0.999)).rgb * 2.0
-                        + texture2D(uBg, clamp(buv + sp2, 0.001, 0.999)).rgb
-                        + texture2D(uBg, clamp(buv - sp2, 0.001, 0.999)).rgb
-                        + texture2D(uBg, clamp(buv + vec2(sp2.x, -sp2.y), 0.001, 0.999)).rgb
-                        + texture2D(uBg, clamp(buv + vec2(-sp2.x, sp2.y), 0.001, 0.999)).rgb) / 6.0;
+                    // seeps in as blotches, then a wide disk gather blooms it soft so it
+                    // reads as pigment bleeding into wet paper, not a displaced copy.
+                    vec2 nuv = sp / 56.0;
+                    float blot = fbm(nuv * 0.5 + uSeed * 11.0);
+                    float amp = uBleed * (0.4 + 1.2 * blot);
+                    vec2 disp = vec2(fbm(nuv * 0.7 + uSeed * 3.7) - 0.5, fbm(nuv * 0.7 + uSeed * 7.9 + 31.0) - 0.5);
+                    vec2 buv = vUv + disp * amp * 300.0 * uTexel;
+                    float bloom = 5.0 + uBleed * 16.0;
+                    vec3 soft = vec3(0.0);
+                    const int M = 12;
+                    for (int i = 0; i < M; i++) {
+                        float a = float(i) * 2.3999632;
+                        float rad = sqrt((float(i) + 0.5) / float(M)) * bloom;
+                        soft += texture2D(uBg, clamp(buv + vec2(cos(a), sin(a)) * rad * uTexel, 0.001, 0.999)).rgb;
+                    }
+                    soft /= float(M);
 
                     // Where the blotch noise runs wet, the pigment thins and more of the
                     // picked-up background shows through.
@@ -169,9 +176,12 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
                     strength *= 1.0 - uBleed * 0.55 * smoothstep(0.35, 0.8, blot);
                     vec3 wash = mix(soft, uColor, clamp(strength, 0.0, 1.0));
 
-                    // Pigment collects just inside the boundary, where the water dries back.
-                    float rimBand = smoothstep(0.32, 0.5, cov) * (1.0 - smoothstep(0.54, 0.8, cov));
-                    wash = mix(wash, uColor * 0.62, rimBand * uRim);
+                    // Pigment collects just inside the boundary, where the water dries
+                    // back. A wide band across the feathered coverage, broken up by noise,
+                    // so it reads as soft settled pigment rather than a clean outline.
+                    float rimBand = smoothstep(0.18, 0.5, cov) * (1.0 - smoothstep(0.5, 0.95, cov));
+                    rimBand *= 0.45 + 0.9 * fbm(sp / 40.0 + uSeed * 17.0);
+                    wash = mix(wash, uColor * 0.62, clamp(rimBand, 0.0, 1.0) * uRim);
 
                     float alpha = body * (1.0 - uGrain * (1.0 - grain));
                     gl_FragColor = vec4(wash, alpha);
