@@ -107,19 +107,23 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
 
                 float wobble = (fbm(vec2(vUv.x * uLength * 3.0, vCross * 1.5 + uSeed * 7.0)) - 0.5);
                 float boundary = mix(0.55, 1.0, press) + wobble * uEdgeWobble;
-                float body = smoothstep(boundary, boundary - uSoftness, across);
-                if (body <= 0.001) discard;
+                // The edge falls from 1 in the interior to 0 past the boundary.
+                float edgeLevel = smoothstep(boundary, boundary - uSoftness, across);
+                if (edgeLevel <= 0.001) discard;
 
-                // Paper tooth, in screen space. Pigment catches its tops, so light
-                // coverage breaks into speckle instead of fading evenly.
-                // fbm rather than one octave: a single octave at pastel scale shows
-                // its bilinear lattice, and the finer octaves read as grain dust.
+                // Paper tooth, in screen space: the high-frequency grain the pigment
+                // catches on. fbm rather than one octave, so the finer octaves read as
+                // grain dust rather than a bilinear lattice.
                 float tooth = fbm(screenUv() * uScreen / uTooth);
-                tooth = (tooth - 0.5) * 1.6 + 0.5;
-                float catchLevel = press * body;
-                float cover = smoothstep(uGrain * (1.0 - catchLevel), 1.0, tooth * 0.6 + catchLevel * 0.55);
+                tooth = clamp((tooth - 0.5) * 1.4 + 0.5, 0.0, 1.0);
 
-                float alpha = body * press * mix(1.0, cover, uGrain) * uOpacity;
+                // The mark takes where the tooth rises above a threshold that climbs from
+                // the interior out past the edge, so the boundary dissolves into sparser
+                // and sparser flecks instead of fading as a smooth feather. The interior
+                // threshold is low, so it fills in as a grainy body; uGrain and a lighter
+                // pressure lift it, catching on fewer tooth tops.
+                float threshold = mix(0.9, uGrain * 0.14, edgeLevel) + (1.0 - press) * 0.2;
+                float alpha = smoothstep(threshold - 0.09, threshold + 0.09, tooth) * uOpacity;
                 if (alpha <= 0.004) discard;
 
                 vec3 color = uColor;
@@ -131,16 +135,25 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
                     int i1 = int(mod(floor(f) + 1.0, float(uColorCount)));
                     color = mix(listColor(i0), listColor(i1), smoothstep(0.25, 0.75, fract(f)));
                 } else if (uColorMode == 2) {
-                    // Each fleck of pigment takes its own color, picked by a hash at the
-                    // tooth's scale. A hash is uncorrelated cell to cell, so the colors
-                    // intermix as fine grain, where a single continuous noise mapped to an
-                    // index would instead paint contiguous islands of one color. A domain
-                    // warp keeps the flecks off a regular grid.
+                    // Each patch of pigment takes its own color from a cellular (Worley)
+                    // layout: the nearest of a set of jittered points, hashed to a color.
+                    // Voronoi cells are organic, so the colors read as irregular flecks
+                    // rather than the squares a floor grid gives.
                     vec2 sp = screenUv() * uScreen;
-                    vec2 warp = (vec2(fbm(sp / (uTooth * 5.0) + uSeed * 2.0),
-                                      fbm(sp / (uTooth * 5.0) + uSeed * 5.3)) - 0.5) * uTooth * 1.6;
-                    vec2 cell = floor((sp + warp) / (uTooth * 0.85));
-                    float idx = floor(hash21(cell + uSeed * 31.0) * float(uColorCount));
+                    vec2 g = sp / (uTooth * 1.3);
+                    vec2 gi = floor(g), gf = fract(g);
+                    float best = 1e9;
+                    vec2 bestCell = gi;
+                    for (int y = -1; y <= 1; y++) {
+                        for (int x = -1; x <= 1; x++) {
+                            vec2 o = vec2(float(x), float(y));
+                            vec2 fp = o + vec2(hash21(gi + o + uSeed), hash21(gi + o + uSeed + 7.13));
+                            vec2 dd = fp - gf;
+                            float dist = dot(dd, dd);
+                            if (dist < best) { best = dist; bestCell = gi + o; }
+                        }
+                    }
+                    float idx = floor(hash21(bestCell + uSeed * 31.0) * float(uColorCount));
                     color = listColor(int(idx));
                     float sparkle = fract(sin(dot(sp, vec2(12.9898, 78.233)) + uSeed * 3.0) * 43758.5453);
                     color *= 0.82 + 0.32 * sparkle;
