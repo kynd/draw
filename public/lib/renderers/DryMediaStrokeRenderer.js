@@ -131,14 +131,17 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
                     int i1 = int(mod(floor(f) + 1.0, float(uColorCount)));
                     color = mix(listColor(i0), listColor(i1), smoothstep(0.25, 0.75, fract(f)));
                 } else if (uColorMode == 2) {
-                    // The color comes from a second noise at the tooth's own
-                    // scale, so each fleck of pigment takes its color from an
-                    // organic patch rather than a square cell, and a per-pixel
-                    // jitter varies the value like ground pigment.
+                    // Each fleck of pigment takes its own color, picked by a hash at the
+                    // tooth's scale. A hash is uncorrelated cell to cell, so the colors
+                    // intermix as fine grain, where a single continuous noise mapped to an
+                    // index would instead paint contiguous islands of one color. A domain
+                    // warp keeps the flecks off a regular grid.
                     vec2 sp = screenUv() * uScreen;
-                    float cn = fbm(sp / (uTooth * 1.6) + vec2(uSeed * 13.0 + 31.0, uSeed * 7.0));
-                    cn = clamp((cn - 0.5) * 2.4 + 0.5, 0.0, 0.999);
-                    color = listColor(int(cn * float(uColorCount)));
+                    vec2 warp = (vec2(fbm(sp / (uTooth * 5.0) + uSeed * 2.0),
+                                      fbm(sp / (uTooth * 5.0) + uSeed * 5.3)) - 0.5) * uTooth * 1.6;
+                    vec2 cell = floor((sp + warp) / (uTooth * 0.85));
+                    float idx = floor(hash21(cell + uSeed * 31.0) * float(uColorCount));
+                    color = listColor(int(idx));
                     float sparkle = fract(sin(dot(sp, vec2(12.9898, 78.233)) + uSeed * 3.0) * 43758.5453);
                     color *= 0.82 + 0.32 * sparkle;
                 }
