@@ -827,7 +827,7 @@ export class DrawingTool {
         this._previewSize = { w: 1.1, h: 0.62 };
         // The mark renders into the preview's own target, so the box crops
         // it; the quad shows the target under a rounded-corner mask. The
-        // semi-transparent black paper is the target's clear color, so
+        // semi-transparent gray paper is the target's clear color, so
         // drawing behind the preview shows through.
         const px = PIXELS_PER_UNIT * 2;
         this._previewTarget = new THREE.WebGLRenderTarget(
@@ -973,7 +973,7 @@ export class DrawingTool {
         this._previewCamera.position.set(c.x, c.y, 5);
         renderer.autoClear = false;
         renderer.setRenderTarget(this._previewTarget);
-        renderer.setClearColor('#000000', 0.4);
+        renderer.setClearColor('#888888', 0.5);
         renderer.clear(true, true, false);
         if (marks.length) {
             const flagged = [];
