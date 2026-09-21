@@ -297,10 +297,17 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                         color = g * (0.2 + 0.9 * diff)
                               + vec3(specularAt(n, 24.0)) * 0.45 + vec3(specularAt(n, 8.0)) * 0.2;
                     } else {
-                        // Metal: the canvas is the environment map.
+                        // Metal: the canvas is the environment map, reflected a little
+                        // blurred (a brushed rather than mirror-polished surface), so a
+                        // sharp feature underneath does not read as a pixelated facet.
                         vec3 r = reflect(vec3(0.0, 0.0, -1.0), n);
-                        vec2 suv = clamp(screenUv() + r.xy * uBend, 0.001, 0.999);
-                        vec3 env = texture2D(uBg, suv).rgb;
+                        vec2 suv = screenUv() + r.xy * uBend;
+                        vec2 bp = 3.5 / uScreen;
+                        vec3 env = (texture2D(uBg, clamp(suv, 0.001, 0.999)).rgb * 2.0
+                            + texture2D(uBg, clamp(suv + bp, 0.001, 0.999)).rgb
+                            + texture2D(uBg, clamp(suv - bp, 0.001, 0.999)).rgb
+                            + texture2D(uBg, clamp(suv + vec2(bp.x, -bp.y), 0.001, 0.999)).rgb
+                            + texture2D(uBg, clamp(suv + vec2(-bp.x, bp.y), 0.001, 0.999)).rgb) / 6.0;
                         color = env * uTint * (0.3 + 0.85 * diff)
                               + vec3(specularAt(n, 80.0)) * 1.1 + vec3(specularAt(n, 12.0)) * 0.3;
                     }

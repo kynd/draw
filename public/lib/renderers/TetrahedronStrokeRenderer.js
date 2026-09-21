@@ -205,9 +205,16 @@ export class TetrahedronStrokeRenderer extends Stroke3DRenderer {
                         // Flat palette colors, one per face.
                         color = vColor * (0.3 + 0.85 * diff) + vec3(specularAt(n, 30.0)) * 0.25;
                     } else {
+                        // The canvas reflected a little blurred, so a sharp feature
+                        // underneath does not read as pixels within each facet.
                         vec3 r = reflect(vec3(0.0, 0.0, -1.0), n);
-                        vec2 suv = clamp(screenUv() + r.xy * uBend, 0.001, 0.999);
-                        vec3 env = texture2D(uBg, suv).rgb;
+                        vec2 suv = screenUv() + r.xy * uBend;
+                        vec2 bp = 3.5 / uScreen;
+                        vec3 env = (texture2D(uBg, clamp(suv, 0.001, 0.999)).rgb * 2.0
+                            + texture2D(uBg, clamp(suv + bp, 0.001, 0.999)).rgb
+                            + texture2D(uBg, clamp(suv - bp, 0.001, 0.999)).rgb
+                            + texture2D(uBg, clamp(suv + vec2(bp.x, -bp.y), 0.001, 0.999)).rgb
+                            + texture2D(uBg, clamp(suv + vec2(-bp.x, bp.y), 0.001, 0.999)).rgb) / 6.0;
                         color = env * uTint * (0.3 + 0.85 * diff)
                               + vec3(specularAt(n, 80.0)) * 1.0 + vec3(specularAt(n, 12.0)) * 0.3;
                     }

@@ -70,12 +70,13 @@ export class MaterialBlobRenderer extends BlobRenderer {
             // with hard edges. Sharp features in the reflection are what read as
             // metal; a plain gradient shades like matte paint.
             vec3 metalEnv(vec3 r) {
-                // The presented frame flips world y, so the sky side is -r.y.
+                // The presented frame flips world y, so the sky side is -r.y. The bands
+                // are soft-edged: hard edges over the ridged relief break into facets.
                 float ry = -r.y;
-                vec3 env = mix(vec3(0.04), vec3(0.38), smoothstep(-0.1, 0.15, ry));
-                env = mix(env, vec3(1.0), smoothstep(0.16, 0.2, ry) - smoothstep(0.42, 0.52, ry));
-                env = mix(env, vec3(0.85), smoothstep(-0.5, -0.46, ry) - smoothstep(-0.3, -0.26, ry));
-                env = mix(env, vec3(0.9), (smoothstep(0.3, 0.36, r.x) - smoothstep(0.55, 0.62, r.x)) * 0.7);
+                vec3 env = mix(vec3(0.05), vec3(0.4), smoothstep(-0.24, 0.28, ry));
+                env = mix(env, vec3(1.0), smoothstep(0.08, 0.26, ry) - smoothstep(0.38, 0.62, ry));
+                env = mix(env, vec3(0.82), smoothstep(-0.58, -0.4, ry) - smoothstep(-0.34, -0.16, ry));
+                env = mix(env, vec3(0.88), (smoothstep(0.22, 0.42, r.x) - smoothstep(0.5, 0.7, r.x)) * 0.6);
                 return env;
             }
 
@@ -111,10 +112,14 @@ export class MaterialBlobRenderer extends BlobRenderer {
                 if (uMode == 2) {
                     slope = (hash22(triangleId(vWorld) + uSeed * 3.0) - 0.5) * 2.0 * uRelief;
                 } else if (uMode == 0) {
+                    // A wider step than the other modes, so the finite difference
+                    // averages the sharp ridges into a smooth normal instead of
+                    // aliasing them into facets under the hard-edged reflection.
+                    float em = 0.03;
                     slope = vec2(
-                        metalRelief(vWorld + vec2(e, 0.0)) - metalRelief(vWorld - vec2(e, 0.0)),
-                        metalRelief(vWorld + vec2(0.0, e)) - metalRelief(vWorld - vec2(0.0, e))
-                    ) / (2.0 * e) * uRelief * 0.25;
+                        metalRelief(vWorld + vec2(em, 0.0)) - metalRelief(vWorld - vec2(em, 0.0)),
+                        metalRelief(vWorld + vec2(0.0, em)) - metalRelief(vWorld - vec2(0.0, em))
+                    ) / (2.0 * em) * uRelief * 0.25;
                 } else {
                     slope = vec2(
                         reliefAt(vWorld + vec2(e, 0.0)) - reliefAt(vWorld - vec2(e, 0.0)),
