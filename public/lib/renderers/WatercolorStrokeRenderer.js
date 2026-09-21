@@ -30,8 +30,13 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
         bleed = 0.6,
         samplesPerUnit = 90,
         cap = 'rounded',
+        singleCoverage = true,
     } = {}) {
-        super({ cap, inflate: 1.4, samplesPerUnit });
+        // The wash is translucent, so a stroke that folds over itself would composite
+        // twice and darken into creases along the overlap. Single coverage renders the
+        // mark alone with MAX blending and composites it once, so a self-overlapping
+        // gesture stays one even wash.
+        super({ cap, inflate: 1.4, samplesPerUnit, singleCoverage });
         this.color = color;
         this.background = background;
         this.blurred = blurred;
