@@ -17,10 +17,14 @@ import * as THREE from 'three';
  */
 export class CoverageLayer {
     constructor() {
+        // Multisampled, so a mark composited through the layer gets the same
+        // edge antialiasing as one drawn straight into the canvas buffer. The
+        // per-sample MAX keeps single coverage; the resolve gives the soft edge.
         this.target = new THREE.WebGLRenderTarget(1, 1, {
             minFilter: THREE.NearestFilter,
             magFilter: THREE.NearestFilter,
             depthBuffer: false,
+            samples: 4,
         });
         this.target.texture.colorSpace = THREE.SRGBColorSpace;
 
@@ -33,14 +37,17 @@ export class CoverageLayer {
             depthTest: false,
             depthWrite: false,
         });
-        // Straight alpha over, leaving the destination's alpha untouched, so
-        // compositing into an opaque canvas keeps it opaque.
+        // Straight alpha over, on color and alpha alike. Compositing into an
+        // opaque canvas keeps it opaque (dst alpha 1 stays 1), while compositing
+        // into a translucent target (the tool preview's semi-transparent field)
+        // lets the mark's own coverage raise the alpha, so a solid mark reads
+        // solid instead of staying at the field's low alpha.
         material.blending = THREE.CustomBlending;
         material.blendEquation = THREE.AddEquation;
         material.blendSrc = THREE.SrcAlphaFactor;
         material.blendDst = THREE.OneMinusSrcAlphaFactor;
-        material.blendSrcAlpha = THREE.ZeroFactor;
-        material.blendDstAlpha = THREE.OneFactor;
+        material.blendSrcAlpha = THREE.OneFactor;
+        material.blendDstAlpha = THREE.OneMinusSrcAlphaFactor;
         this._compositeMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
         this._compositeScene.add(this._compositeMesh);
     }
