@@ -21,7 +21,6 @@ const readout = document.getElementById('readout');
 const ctrl = {
     grain: document.getElementById('grain'),
     pressure: document.getElementById('pressure'),
-    scale: document.getElementById('scale'),
 };
 
 const stage = new StrokeStage(document.getElementById('canvas'));
@@ -42,10 +41,9 @@ function rebuild() {
     });
     entries = [];
 
-    const scale = parseFloat(ctrl.scale.value);
     const grainScale = parseFloat(ctrl.grain.value);
     const pressureScale = parseFloat(ctrl.pressure.value);
-    const { spread } = layout(stage.extentY, MEDIA[2].width * scale);
+    const { spread } = layout(stage.extentY, MEDIA[2].width);
     let samples = 0, vertices = 0, triangles = 0;
 
     MEDIA.forEach((media, i) => {
@@ -62,7 +60,7 @@ function rebuild() {
         });
         const def = new StrokeDef({
             points: straightThenWiggle(centerY(i, MEDIA.length, spread), { z0: 0.01 + i * 0.01 }),
-            widthLeft: taper(media.width * scale),
+            widthLeft: taper(media.width),
             renderer,
             seed: SEEDS[i],
         });

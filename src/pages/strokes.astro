@@ -90,6 +90,29 @@ const demos = [
     </div>
   </section>
 
+  <section class="demo-section" id="dry-brush">
+    <div class="demo-header">
+      <h2>Dry brush</h2>
+      <a href={`${base}/demos/dry-brush-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/dry-brush-strokes/index.html?embedded`} title="Dry brush" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>A stiff, dragged brush that catches on the paper's tooth and breaks into grain. The three rows are fine, medium, and coarse grain from top to bottom, at increasing tooth scale.</p>
+      <div class="jp">紙の目に引っかかり、粒状に割れる、硬く引きずるブラシです。3つの行は上から順に細かい、中くらい、粗い粒で、目のスケールが大きくなっていきます。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Grain threshold:</strong> Pigment takes where the paper tooth rises above a threshold, so the mark is a scatter of flecks rather than a filled body. The threshold climbs toward the edge, so the boundary dissolves into grain.</p>
+        <div class="jp"><strong>粒のしきい値：</strong>紙の目がしきい値を超えたところに顔料が乗るため、線は塗りつぶされた本体ではなく、粒の散らばりになります。しきい値は縁に向かって高くなるので、境界は粒に溶けていきます。</div>
+
+        <p>It is the dry-media renderer with a hard threshold; softening it turns the same mark toward pencil, charcoal, and pastel.</p>
+        <div class="jp">これは、しきい値を硬くした dry-media レンダラです。しきい値を緩めると、同じ線は鉛筆、木炭、パステルへと近づきます。</div>
+      </details>
+    </div>
+  </section>
+
   <section class="demo-section" id="shadow-strokes">
     <div class="demo-header">
       <h2>Shadow strokes</h2>

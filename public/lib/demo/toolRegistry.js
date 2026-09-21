@@ -248,6 +248,26 @@ export const toolRegistry = [
             grain: v.grain, pressure: v.pressure,
             tooth: 7.0, softness: 0.65, edge: 0.55, opacity: 0.95,
         }) },
+    // Dry brush: the dry-media renderer with a hard grain threshold (grainSoft),
+    // so the mark reads as a stiff, dragged brush rather than pigment. Named by grain.
+    { id: 'dry-brush-fine', kind: 'stroke', pressure: 1.25, width: [2, 20],
+        params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'rounded', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1, grainSoft: 0.09,
+        }) },
+    { id: 'dry-brush-medium', kind: 'stroke', pressure: 1.5, width: [2, 28],
+        params: [{ key: 'grain', min: 0.4, max: 0.9 }, { key: 'pressure', min: 0.2, max: 0.7 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'square', rag: 0.25, color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            tooth: 4.5, softness: 0.5, edge: 0.3, opacity: 0.92, grainSoft: 0.09,
+        }) },
+    { id: 'dry-brush-coarse', kind: 'stroke', pressure: 1.5, width: [3, 32],
+        params: [{ key: 'grain', min: 0.5, max: 1 }, { key: 'pressure', min: 0.2, max: 0.6 }],
+        make: (v, ctx) => new DryMediaStrokeRenderer({
+            cap: 'square', rag: 0.25, color: ctx.colorA, grain: v.grain, pressure: v.pressure,
+            tooth: 7.0, softness: 0.65, edge: 0.55, opacity: 0.95, grainSoft: 0.09,
+        }) },
     { id: 'deboss', kind: 'stroke',
         params: [{ key: 'bevel', min: 0.2, max: 1 }, { key: 'amount', min: 0.3, max: 1.4 }],
         make: (v, ctx) => new DebossStrokeRenderer({

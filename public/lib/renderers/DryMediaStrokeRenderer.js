@@ -41,6 +41,7 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
         edge = 0.08,
         opacity = 1.0,
         rag = 0,
+        grainSoft = 0.6,
         samplesPerUnit = 120,
         ...rest
     } = {}) {
@@ -57,6 +58,7 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
         this.edge = edge;
         this.opacity = opacity;
         this.rag = rag;
+        this.grainSoft = grainSoft;
     }
 
     uniforms() {
@@ -77,6 +79,7 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
             uEdgeWobble: { value: this.edge },
             uOpacity: { value: this.opacity },
             uRag: { value: this.rag },
+            uGrainSoft: { value: this.grainSoft },
         };
     }
 
@@ -93,6 +96,7 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
             uniform float uEdgeWobble;
             uniform float uOpacity;
             uniform float uRag;
+            uniform float uGrainSoft;
 
             vec3 listColor(int i) {
                 return i == 0 ? uC0 : i == 1 ? uC1 : i == 2 ? uC2 : uC3;
@@ -123,7 +127,7 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
                 // threshold is low, so it fills in as a grainy body; uGrain and a lighter
                 // pressure lift it, catching on fewer tooth tops.
                 float threshold = mix(0.9, uGrain * 0.14, edgeLevel) + (1.0 - press) * 0.2;
-                float grainMask = smoothstep(threshold - 0.09, threshold + 0.09, tooth);
+                float grainMask = smoothstep(threshold - uGrainSoft, threshold + uGrainSoft, tooth);
 
                 // Multiply the grain mask by a continuous tonal noise, so the flecks vary
                 // in darkness like real pigment settling rather than reading as one flat

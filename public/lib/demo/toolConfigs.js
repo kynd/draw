@@ -8,6 +8,7 @@ export class StrokesDemoConfig extends DrawingToolConfig {
     constructor() {
         super({ tools: [
             'ribbon', 'ribbon-ragged', 'ribbon-square', 'brush', 'brush-rounded', 'brush-square',
+            'dry-brush-fine', 'dry-brush-medium', 'dry-brush-coarse',
             'shadow', 'deboss', 'glow',
         ] });
     }
