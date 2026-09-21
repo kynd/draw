@@ -63,6 +63,25 @@ const HEIGHT_FIELD_CHUNK = /* glsl */`
     uniform float uEdge;
     uniform float uRag;
 
+    // Value noise with a quintic fade, so its gradient is C2 continuous and does not
+    // crease at cell boundaries. The height's normal comes from a finite difference of
+    // this, and the cubic fade fbm uses leaves grid-aligned ridges that a reflective
+    // bead turns into pixelated facets.
+    float smoothValueNoise(vec2 p) {
+        vec2 i = floor(p), f = fract(p);
+        f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+        return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x),
+                   mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x), f.y);
+    }
+
+    // Relief noise: fewer octaves than fbm, so the finest octave stays well within what
+    // the finite-difference normal can resolve rather than aliasing into pixel facets.
+    float reliefNoise(vec2 p) {
+        float v = 0.0, a = 0.5;
+        for (int i = 0; i < 3; i++) { v += a * smoothValueNoise(p); p *= 2.0; a *= 0.5; }
+        return v;
+    }
+
     /**
      * Height in units of the stroke's half-width, so the gradient below comes out
      * dimensionless and needs no fudge factor to look right at any width.
@@ -76,7 +95,7 @@ const HEIGHT_FIELD_CHUNK = /* glsl */`
         float dome = 1.0 - a * a;
         // Liquid dragged by the brush: low frequency along the path, higher across it,
         // so the features stretch into streaks that follow the stroke.
-        float liquid = fbm(vec2(along * uLength * uStretch, lateral * uAcross + uSeed * 19.0));
+        float liquid = reliefNoise(vec2(along * uLength * uStretch, lateral * uAcross + uSeed * 19.0));
         return dome * uDome + (liquid - 0.5) * uNoise;
     }
 
