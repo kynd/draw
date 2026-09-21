@@ -75,6 +75,15 @@ export class BrushStrokeRenderer extends ShaderStrokeRenderer {
                 float edge = 1.0 - across - (bristle - 0.5) * uRough;
                 float alpha = smoothstep(0.0, 0.07, edge);
 
+                // A square cap has no cap geometry, so its end would be a razor-straight
+                // cut. Pull it back a little with the same bristle noise, so individual
+                // bristles stop just short of the end instead of all ending on one line.
+                if (uCap == 0) {
+                    float endDist = min(vUv.x, 1.0 - vUv.x) * uLength / max(uWidth, 1e-4);
+                    float endEdge = endDist - 0.06 - (bristle - 0.5) * uRough;
+                    alpha *= smoothstep(0.0, 0.07, endEdge);
+                }
+
                 // Dry patches: a slower noise that removes paint where the brush lifted.
                 float dryNoise = fbm(vec2(along * 0.28, vCross * 1.4 + uSeed * 7.0));
                 alpha *= smoothstep(uDry - 0.20, uDry + 0.22, dryNoise + 0.34);
