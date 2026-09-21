@@ -261,4 +261,24 @@ const FRAGMENT_PRELUDE = /* glsl */`
         // Rounded: the end closes on a circle of the same radius as the half-width.
         return length(vec2(beyond, vCross));
     }
+
+    // capDistance with the two ends broken up a little, so a mark does not finish on
+    // a razor-straight cut or a clean arc. amount is the erosion depth in half-widths;
+    // zero returns capDistance unchanged, and the ragged cap (already toothed) is left be.
+    float raggedCapDistance(float amount) {
+        if (amount <= 0.0 || uCap == 2) return capDistance();
+        float across = abs(vCross);
+        float beyond = abs(vBeyond);
+        float n = valueNoise(vec2(vCross * 6.0 + uSeed * 13.0, uSeed * 2.3)) - 0.5;
+        if (uCap == 0) {
+            // Square: no geometry past the flat end, so measure the distance to the
+            // nearest end in half-widths and erode it inward with the noise.
+            float endDist = min(vUv.x, 1.0 - vUv.x) * uLength / max(uWidth, 1e-4);
+            float recede = amount * (0.6 + n);
+            return max(across, 1.0 + recede - endDist);
+        }
+        // Rounded: perturb the radius over the cap, so the arc is not a clean curve.
+        float onCap = smoothstep(0.0, 0.6, beyond);
+        return length(vec2(beyond, vCross)) + onCap * n * amount * 1.6;
+    }
 `;

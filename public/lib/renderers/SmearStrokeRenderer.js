@@ -20,6 +20,7 @@ export class SmearStrokeRenderer extends ShaderStrokeRenderer {
         variation = 0.75,
         tint = 0.35,
         edge = 0.25,
+        rag = 0.2,
         samplesPerUnit = 90,
         cap = 'rounded',
     } = {}) {
@@ -30,6 +31,7 @@ export class SmearStrokeRenderer extends ShaderStrokeRenderer {
         this.variation = variation;
         this.tint = tint;
         this.edge = edge;
+        this.rag = rag;
     }
 
     uniforms() {
@@ -40,6 +42,7 @@ export class SmearStrokeRenderer extends ShaderStrokeRenderer {
             uVariation: { value: this.variation },
             uTint: { value: this.tint },
             uEdge: { value: this.edge },
+            uRag: { value: this.rag },
         };
     }
 
@@ -51,10 +54,11 @@ export class SmearStrokeRenderer extends ShaderStrokeRenderer {
             uniform float uVariation;
             uniform float uTint;
             uniform float uEdge;
+            uniform float uRag;
 
             void main() {
                 vec2 suv = screenUv();
-                float across = capDistance();
+                float across = raggedCapDistance(uRag);
 
                 float wobble = (fbm(vec2(vUv.x * uLength * 2.6, vCross * 2.2 + uSeed * 9.0)) - 0.5);
                 float boundary = 1.0 + wobble * uEdge;

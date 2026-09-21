@@ -34,9 +34,10 @@ export class OilStrokeRenderer extends HeightFieldStrokeRenderer {
         stretch = 0.3,
         across = 0.8,
         dome = 0.8,
+        rag = 0.2,
         ...rest
     } = {}) {
-        super({ noise, stretch, across, dome, ...rest });
+        super({ noise, stretch, across, dome, rag, ...rest });
         this.color = color;
         this.background = background;
         this.drag = drag;

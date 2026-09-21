@@ -20,6 +20,7 @@ export class HeightFieldStrokeRenderer extends ShaderStrokeRenderer {
         stretch = 0.9,
         across = 2.0,
         edge = 0.10,
+        rag = 0,
         samplesPerUnit = 90,
         inflate = 1.25,
         cap = 'rounded',
@@ -30,6 +31,7 @@ export class HeightFieldStrokeRenderer extends ShaderStrokeRenderer {
         this.stretch = stretch;
         this.across = across;
         this.edge = edge;
+        this.rag = rag;
     }
 
     uniforms() {
@@ -39,6 +41,7 @@ export class HeightFieldStrokeRenderer extends ShaderStrokeRenderer {
             uStretch: { value: this.stretch },
             uAcross: { value: this.across },
             uEdge: { value: this.edge },
+            uRag: { value: this.rag },
         };
     }
 
@@ -58,6 +61,7 @@ const HEIGHT_FIELD_CHUNK = /* glsl */`
     uniform float uStretch;
     uniform float uAcross;
     uniform float uEdge;
+    uniform float uRag;
 
     /**
      * Height in units of the stroke's half-width, so the gradient below comes out
@@ -96,7 +100,7 @@ const HEIGHT_FIELD_CHUNK = /* glsl */`
         vec2 slope = T * (-dAlongWorld) + N2 * (-dLateral);
         vec3 n = normalize(vec3(slope, 1.0));
 
-        body = smoothstep(1.0, 1.0 - uEdge, capDistance());
+        body = smoothstep(1.0, 1.0 - uEdge, raggedCapDistance(uRag));
         return n;
     }
 `;
