@@ -1,6 +1,6 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { ChromeStrokeRenderer } from '../../lib/renderers/ChromeStrokeRenderer.js';
-import { MirrorStrokeRenderer } from '../../lib/renderers/MirrorStrokeRenderer.js';
+import { FrostedGlassStrokeRenderer } from '../../lib/renderers/FrostedGlassStrokeRenderer.js';
 import { GlassStrokeRenderer } from '../../lib/renderers/GlassStrokeRenderer.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
@@ -49,8 +49,9 @@ function makeRenderer(index) {
 
     if (index === 0) return new ChromeStrokeRenderer({ ...field, specular });
     if (index === 1) {
-        return new MirrorStrokeRenderer({
-            ...field, specular, background: background.texture, strength: bend * 0.5,
+        return new FrostedGlassStrokeRenderer({
+            ...field, specular, background: background.texture,
+            refract: bend * 3.5, reflect: bend * 1.5, grain: 0.028,
         });
     }
     return new GlassStrokeRenderer({

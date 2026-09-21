@@ -110,7 +110,7 @@ public/lib/                            library code
                 WatercolorStrokeRenderer.js  SmearStrokeRenderer.js
                 WetBrushStrokeRenderer.js
                 HeightFieldStrokeRenderer.js base for surface materials
-                ChromeStrokeRenderer.js  MirrorStrokeRenderer.js
+                ChromeStrokeRenderer.js  FrostedGlassStrokeRenderer.js
                 GlassStrokeRenderer.js  OilStrokeRenderer.js
                 DryMediaStrokeRenderer.js  DebossStrokeRenderer.js
                 HaloStrokeRenderer.js  AroundStrokeRenderer.js

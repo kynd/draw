@@ -269,10 +269,10 @@ The drag runs first, over a mix of the sharp and softened background set by `wet
 An assumed environment of two tones split at a horizon. A mirror shows mostly a bright sky and a dark ground, and the eye reads the boundary sweeping across a curved surface as metal.
 <div class="jp">環境を、地平線で分かれた2つの色調と仮定します。鏡に映るのはおおむね明るい空と暗い地面であり、その境界が曲面の上を走るのを、目は金属として読み取ります。</div>
 
-### MirrorStrokeRenderer
+### FrostedGlassStrokeRenderer
 
-The reflected direction is used as a screen-space offset into the background rather than as a ray into a cube map. It is not a correct reflection and cannot show anything outside the frame, but for a flat mark lying on a surface the difference is invisible. `contrast` is pushed after sampling, since a mirror does not return a muted copy.
-<div class="jp">反射方向は、キューブマップへのレイではなく、背景への画面空間のオフセットとして使われます。正しい反射ではなく、フレームの外は映せませんが、面の上に横たわる平らな線ではその違いは見えません。サンプリング後に`contrast`を強めます。鏡は彩度を落とした複製を返すわけではないからです。</div>
+The clear-glass lens, roughened so it scatters instead of imaging. Each fragment takes several taps around its background lookup, each offset in a per-pixel random direction, and averages them, so the refraction reads grainy and blurred rather than as a sharp bend. `grain` sets the scatter radius; at zero it collapses back to plain glass. A soft, broad highlight stands in for the sharp specular, since frost scatters that too.
+<div class="jp">透明なガラスのレンズを粗くし、像を結ばずに散乱するようにしたものです。各フラグメントは背景の参照の周りで複数回サンプルを取り、それぞれをピクセルごとにランダムな方向へずらして平均します。そのため屈折は、鋭く曲がるのではなく、ざらついて滲んで見えます。`grain`は散乱の半径を決め、ゼロでは通常のガラスに戻ります。鋭いスペキュラの代わりに、柔らかく広いハイライトが乗ります。すりガラスもそれを散らすからです。</div>
 
 ### GlassStrokeRenderer
 

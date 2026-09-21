@@ -28,7 +28,7 @@ import { StoneBlobRenderer } from '../renderers/StoneBlobRenderer.js';
 import { TubeStrokeRenderer } from '../renderers/TubeStrokeRenderer.js';
 import { TetrahedronStrokeRenderer } from '../renderers/TetrahedronStrokeRenderer.js';
 import { SmearStrokeRenderer } from '../renderers/SmearStrokeRenderer.js';
-import { MirrorStrokeRenderer } from '../renderers/MirrorStrokeRenderer.js';
+import { FrostedGlassStrokeRenderer } from '../renderers/FrostedGlassStrokeRenderer.js';
 import { GlassStrokeRenderer } from '../renderers/GlassStrokeRenderer.js';
 import { PolygonStrokeRenderer } from '../renderers/PolygonStrokeRenderer.js';
 import { LineStrokeRenderer } from '../renderers/LineStrokeRenderer.js';
@@ -191,10 +191,11 @@ export const toolRegistry = [
             cap: 'rounded', color: ctx.colorA, background: ctx.texture,
             drag: v.drag, variation: v.variation,
         }) },
-    { id: 'mirror', kind: 'stroke',
-        params: [{ key: 'strength', min: 0.008, max: 0.07 }, { key: 'specular', min: 0.3, max: 1.4 }],
-        make: (v, ctx) => new MirrorStrokeRenderer({
-            cap: 'rounded', background: ctx.texture, strength: v.strength, specular: v.specular,
+    { id: 'frosted-glass', kind: 'stroke',
+        params: [{ key: 'refract', min: 0.08, max: 0.3 }, { key: 'grain', min: 0.008, max: 0.045 }],
+        make: (v, ctx) => new FrostedGlassStrokeRenderer({
+            cap: 'rounded', background: ctx.texture, refract: v.refract,
+            reflect: v.refract * 0.5, grain: v.grain,
         }) },
     { id: 'glass-stroke', kind: 'stroke',
         params: [{ key: 'refract', min: 0.02, max: 0.14 }, { key: 'specular', min: 0.3, max: 1.4 }],

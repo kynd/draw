@@ -98,8 +98,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <p><strong>Chrome:</strong> The environment is two tones split at a horizon; the boundary sweeping across the curved surface reads as metal.</p>
         <div class="jp"><strong>クローム：</strong>環境は地平線で分かれた2つの色調です。曲面を横切るその境界が、金属として読み取られます。</div>
 
-        <p><strong>Mirror:</strong> The reflected direction is used as a screen-space offset into the background, so the reflection costs one texture read but cannot show anything outside the frame. Contrast is pushed after sampling.</p>
-        <div class="jp"><strong>鏡面：</strong>反射方向は背景への画面空間のオフセットとして使われるため、反射はテクスチャ1回の読み取りで済みますが、フレームの外は映せません。コントラストはサンプリングの後に強められます。</div>
+        <p><strong>Frosted glass:</strong> The clear-glass lens, roughened. Each fragment scatters its background lookup over several taps in a per-pixel random direction, so the refraction reads grainy and blurred rather than as a sharp bend.</p>
+        <div class="jp"><strong>すりガラス：</strong>透明なガラスのレンズを粗くしたものです。各フラグメントは背景の参照を、ピクセルごとにランダムな方向へ複数回散らして平均するため、屈折は鮮明に曲がるのではなく、ざらついて滲んで見えます。</div>
 
         <p><strong>Glass:</strong> Refraction offsets the background lookup along the surface normal, largest where the surface tilts most. Reflection is mixed in by a Fresnel term (mirror-like at glancing angles).</p>
         <div class="jp"><strong>ガラス：</strong>屈折は背景の参照位置を表面の法線方向にずらし、表面が最も傾く場所でずれが最大になります。反射はフレネル項（浅い角度で鏡のようになる性質）によって混ぜられます。</div>

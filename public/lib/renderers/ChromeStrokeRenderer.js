@@ -53,11 +53,12 @@ export class ChromeStrokeRenderer extends HeightFieldStrokeRenderer {
                 vec3 view = vec3(0.0, 0.0, 1.0);
                 vec3 r = reflect(-view, n);
 
-                // Horizon split, softened just enough to stay smooth on the bead.
-                float horizon = smoothstep(-0.06, 0.06, -r.y);
+                // Horizon split, wide enough that the bead's relief reads as a smooth
+                // sweep across it rather than a hard edge broken into facets.
+                float horizon = smoothstep(-0.22, 0.22, -r.y);
                 vec3 env = mix(uGround, uSky, horizon);
                 // A second, dimmer band keeps the dark side from reading as flat paint.
-                env = mix(env, uSky, smoothstep(0.55, 0.95, abs(r.x)) * 0.25);
+                env = mix(env, uSky, smoothstep(0.4, 1.0, abs(r.x)) * 0.25);
 
                 vec3 light = normalize(vec3(-0.45, -0.75, 0.55));
                 vec3 halfVec = normalize(light + view);

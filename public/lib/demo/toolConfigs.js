@@ -17,7 +17,7 @@ export class WetStrokesDemoConfig extends DrawingToolConfig {
     constructor() {
         super({ tools: [
             'watercolor', 'smear', 'wet-brush', 'oil', 'oil-square', 'oil-ragged',
-            'chrome', 'mirror', 'glass-stroke',
+            'chrome', 'frosted-glass', 'glass-stroke',
         ] });
     }
 }
