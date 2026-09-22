@@ -5,6 +5,54 @@ const RADIAL = 14;
 const CAP_LAT = 5;
 
 /**
+ * Eases the centerline so no bend is tighter than `radius`.
+ *
+ * A tube of a given thickness cannot bend to a point sharper than its own radius: the
+ * inner wall would cross itself and the surface would tear. Where the local turn is
+ * tighter than that, the point is relaxed toward the midpoint of its neighbors, in
+ * proportion to how far past the limit it is, over several passes. A straight run and
+ * a gentle curve are left alone, so a thin tube keeps its corners and a fat one eases
+ * them the way a real tube of that thickness would. Endpoints are held so the tube
+ * still starts and ends where it was drawn.
+ */
+function limitCurvature(centers, radius) {
+    const n = centers.length;
+    if (n < 3) return;
+    const tmp = centers.map(c => c.clone());
+    for (let pass = 0; pass < 24; pass++) {
+        for (let i = 1; i < n - 1; i++) {
+            const a = centers[i - 1], b = centers[i], c = centers[i + 1];
+            const ax = b.x - a.x, ay = b.y - a.y, bx = c.x - b.x, by = c.y - b.y;
+            const turn = Math.abs(Math.atan2(ax * by - ay * bx, ax * bx + ay * by));
+            const ds = (Math.hypot(ax, ay) + Math.hypot(bx, by)) / 2;
+            const oscR = ds / Math.max(turn, 1e-4);
+            const excess = Math.min(Math.max(1 - oscR / radius, 0), 1);
+            const w = excess * 0.5;
+            tmp[i].set(
+                b.x + w * ((a.x + c.x) / 2 - b.x),
+                b.y + w * ((a.y + c.y) / 2 - b.y),
+                b.z + w * ((a.z + c.z) / 2 - b.z),
+            );
+        }
+        for (let i = 1; i < n - 1; i++) centers[i].copy(tmp[i]);
+    }
+}
+
+/** In-plane normals (the +90 degree rotation of the XY tangent) from a centerline. */
+function reframe(centers) {
+    const n = centers.length;
+    const normals = [];
+    for (let i = 0; i < n; i++) {
+        const a = centers[Math.max(0, i - 1)], b = centers[Math.min(n - 1, i + 1)];
+        let tx = b.x - a.x, ty = b.y - a.y;
+        const len = Math.hypot(tx, ty) || 1;
+        tx /= len; ty /= len;
+        normals.push(new THREE.Vector3(-ty, tx, 0));
+    }
+    return normals;
+}
+
+/**
  * A 3D tube around the spine, closed by rounded caps, in one of three looks.
  *
  *   candy   diagonal stripes wrapping the tube from a list of colors, with a
@@ -53,9 +101,15 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
     }
 
     build(def) {
-        const { centers, normals, ts, length, phaseAt, seed } = this.frames(def);
+        const { centers, ts, length, phaseAt, seed } = this.frames(def);
         const n = centers.length;
         const B = new THREE.Vector3(0, 0, 1);
+
+        // A bend tighter than the tube's radius tears the surface, so ease the
+        // centerline to that limit, then take the ring frame from the eased line so
+        // each cross-section is square to the tube's actual direction.
+        limitCurvature(centers, Math.max(def.maxWidth(), 1e-4));
+        const normals = reframe(centers);
 
         const positions = [], normalsA = [], along = [], around = [], wobs = [];
         const indices = [];
