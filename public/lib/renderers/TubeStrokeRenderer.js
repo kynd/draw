@@ -5,36 +5,46 @@ const RADIAL = 14;
 const CAP_LAT = 5;
 
 /**
- * Eases the centerline so no bend is tighter than `radius`.
+ * Eases the centerline so no bend is tighter than the tube's radius.
  *
  * A tube of a given thickness cannot bend to a point sharper than its own radius: the
- * inner wall would cross itself and the surface would tear. Where the local turn is
- * tighter than that, the point is relaxed toward the midpoint of its neighbors, in
- * proportion to how far past the limit it is, over several passes. A straight run and
- * a gentle curve are left alone, so a thin tube keeps its corners and a fat one eases
- * them the way a real tube of that thickness would. Endpoints are held so the tube
- * still starts and ends where it was drawn.
+ * inner wall would cross itself and the surface would fold through itself. Each point
+ * is replaced by a tent-weighted average of its neighbors within about a radius of arc
+ * length, which rounds any corner to that radius while leaving a straight run and a
+ * gentle curve (whose neighbors already lie on a line or a wide arc) essentially in
+ * place. The window is measured in arc length, so a corner packed with samples is
+ * rounded as much as a sparse one; a thin tube keeps its corners and a fat one rounds
+ * them the way a real tube of that thickness would. Endpoints are held, and the window
+ * shrinks near them, so the tube still starts and ends where it was drawn.
  */
 function limitCurvature(centers, radius) {
     const n = centers.length;
     if (n < 3) return;
-    const tmp = centers.map(c => c.clone());
-    for (let pass = 0; pass < 24; pass++) {
+    const arc = new Array(n);
+    arc[0] = 0;
+    for (let i = 1; i < n; i++) arc[i] = arc[i - 1] + centers[i].distanceTo(centers[i - 1]);
+    const win = radius * 1.2;
+    for (let pass = 0; pass < 2; pass++) {
+        const src = centers.map(c => c.clone());
         for (let i = 1; i < n - 1; i++) {
-            const a = centers[i - 1], b = centers[i], c = centers[i + 1];
-            const ax = b.x - a.x, ay = b.y - a.y, bx = c.x - b.x, by = c.y - b.y;
-            const turn = Math.abs(Math.atan2(ax * by - ay * bx, ax * bx + ay * by));
-            const ds = (Math.hypot(ax, ay) + Math.hypot(bx, by)) / 2;
-            const oscR = ds / Math.max(turn, 1e-4);
-            const excess = Math.min(Math.max(1 - oscR / radius, 0), 1);
-            const w = excess * 0.5;
-            tmp[i].set(
-                b.x + w * ((a.x + c.x) / 2 - b.x),
-                b.y + w * ((a.y + c.y) / 2 - b.y),
-                b.z + w * ((a.z + c.z) / 2 - b.z),
-            );
+            // Keep the window symmetric and clear of the fixed endpoints.
+            const w = Math.min(win, arc[i], arc[n - 1] - arc[i]);
+            if (w <= 1e-6) continue;
+            let sx = src[i].x, sy = src[i].y, sz = src[i].z, sw = 1;
+            for (let j = i - 1; j >= 0; j--) {
+                const d = arc[i] - arc[j];
+                if (d > w) break;
+                const wt = 1 - d / w;
+                sx += src[j].x * wt; sy += src[j].y * wt; sz += src[j].z * wt; sw += wt;
+            }
+            for (let j = i + 1; j < n; j++) {
+                const d = arc[j] - arc[i];
+                if (d > w) break;
+                const wt = 1 - d / w;
+                sx += src[j].x * wt; sy += src[j].y * wt; sz += src[j].z * wt; sw += wt;
+            }
+            centers[i].set(sx / sw, sy / sw, sz / sw);
         }
-        for (let i = 1; i < n - 1; i++) centers[i].copy(tmp[i]);
     }
 }
 
