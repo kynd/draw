@@ -145,19 +145,19 @@ export const toolRegistry = [
         make: (v, ctx) => new StoneBlobRenderer({
             mode: 'rock', color: ctx.colorA, colorB: ctx.colorB, relief: v.relief,
         }) },
-    { id: 'tube-candy', kind: 'stroke',
+    { id: 'tube-candy', kind: 'stroke', width: [4, 32],
         params: [{ key: 'twist', min: 1, max: 7 }, { key: 'stripes', min: 2, max: 10 }, { key: 'depth', min: 0.04, max: 0.24 }],
         make: (v, ctx) => new TubeStrokeRenderer({
             mode: 'candy', colors: ctx.colors.slice(0, 4),
             twist: v.twist, stripes: v.stripes, depth: v.depth,
         }) },
-    { id: 'tube-wobble', kind: 'stroke',
+    { id: 'tube-wobble', kind: 'stroke', width: [4, 32],
         params: [{ key: 'twist', min: 1, max: 7 }, { key: 'wobbleFreq', min: 8, max: 20 }, { key: 'depth', min: 0.04, max: 0.24 }],
         make: (v, ctx) => new TubeStrokeRenderer({
             mode: 'wobble', colorA: ctx.colorA, colorB: ctx.colorB,
             twist: v.twist, wobbleFreq: v.wobbleFreq, depth: v.depth,
         }) },
-    { id: 'tube-metal', kind: 'stroke',
+    { id: 'tube-metal', kind: 'stroke', width: [4, 32],
         params: [{ key: 'twist', min: 1, max: 7 }, { key: 'bend', min: 0.2, max: 0.6 }, { key: 'depth', min: 0.04, max: 0.24 }],
         make: (v, ctx) => new TubeStrokeRenderer({
             mode: 'metal', background: ctx.texture, tint: ctx.tintLight,

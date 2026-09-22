@@ -38,20 +38,6 @@ function limitCurvature(centers, radius) {
     }
 }
 
-/** In-plane normals (the +90 degree rotation of the XY tangent) from a centerline. */
-function reframe(centers) {
-    const n = centers.length;
-    const normals = [];
-    for (let i = 0; i < n; i++) {
-        const a = centers[Math.max(0, i - 1)], b = centers[Math.min(n - 1, i + 1)];
-        let tx = b.x - a.x, ty = b.y - a.y;
-        const len = Math.hypot(tx, ty) || 1;
-        tx /= len; ty /= len;
-        normals.push(new THREE.Vector3(-ty, tx, 0));
-    }
-    return normals;
-}
-
 /**
  * A 3D tube around the spine, closed by rounded caps, in one of three looks.
  *
@@ -101,15 +87,15 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
     }
 
     build(def) {
-        const { centers, ts, length, phaseAt, seed } = this.frames(def);
+        const { centers, normals, ts, length, phaseAt, seed } = this.frames(def);
         const n = centers.length;
         const B = new THREE.Vector3(0, 0, 1);
 
         // A bend tighter than the tube's radius tears the surface, so ease the
-        // centerline to that limit, then take the ring frame from the eased line so
-        // each cross-section is square to the tube's actual direction.
+        // centerline to that limit. The ring frame stays the smooth spine normal:
+        // framing off the eased centers would follow the wander wiggle and ripple
+        // the shading, and a round cross-section is the same whichever way it faces.
         limitCurvature(centers, Math.max(def.maxWidth(), 1e-4));
-        const normals = reframe(centers);
 
         const positions = [], normalsA = [], along = [], around = [], wobs = [];
         const indices = [];
@@ -337,9 +323,19 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                         // a saturated deep version of the stripe color as if light
                         // scatters inside the body, and the highlight stays tight
                         // and white.
-                        float k = fract(vAlong * uLength * uStripes + vAround + uSeed * 0.37);
-                        int ci = int(floor(k * 4.0));
-                        vec3 base = ci == 0 ? uC0 : ci == 1 ? uC1 : ci == 2 ? uC2 : uC3;
+                        // Four colors cycling along a stripe coordinate, blended
+                        // across each boundary over about a pixel (from the
+                        // coordinate's screen derivative) so the stripe edges are
+                        // antialiased instead of stepping with a crawling jaggy.
+                        float sc = vAlong * uLength * uStripes + vAround + uSeed * 0.37;
+                        float f = fract(sc) * 4.0;
+                        float g = fract(f);
+                        int i0 = int(floor(f));
+                        int i1 = int(mod(float(i0) + 1.0, 4.0));
+                        vec3 col0 = i0 == 0 ? uC0 : i0 == 1 ? uC1 : i0 == 2 ? uC2 : uC3;
+                        vec3 col1 = i1 == 0 ? uC0 : i1 == 1 ? uC1 : i1 == 2 ? uC2 : uC3;
+                        float aa = clamp(fwidth(sc) * 4.0, 0.0001, 0.5);
+                        vec3 base = mix(col0, col1, smoothstep(1.0 - aa, 1.0, g));
                         vec3 deep = base * base;
                         float ndl = dot(n, lightDir());
                         float wrap = clamp((ndl + 0.55) / 1.55, 0.0, 1.0);
