@@ -49,8 +49,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
       <details>
         <summary>Details</summary>
-        <p><strong>Depth and rotation:</strong> The spine gains depth from a seeded wave of arc length, so the tube reads as an object lying over the canvas. The shape also rotates around the spine by an angle keyed to the distance from the stroke's end, and a seeded offset pushes it slightly off the spine in a direction that rotates with the same angle, so the whole mark visibly turns and orbits while it is drawn. The rotation is the one deliberate exception to prefix stability. The mark floats about 100 pixels over the canvas, lit from the upper left.</p>
-        <div class="jp"><strong>深さと回転：</strong>スパインは弧長のシード付き波から深さを得るため、チューブはキャンバスの上に置かれた物体として読めます。形はさらに、ストロークの終端からの距離に応じた角度でスパインの周りを回転し、同じ角度で回転する方向へ、シード付きのオフセットでスパインからわずかにずらされます。そのため、描いている間は筆跡全体が目に見えて回転し、周回します。この回転は、プレフィックスの安定性に対する唯一の意図的な例外です。筆跡はキャンバスの約100ピクセル上に浮かび、左上からの光に照らされます。</div>
+        <p><strong>Depth and rotation:</strong> The spine gains depth from a seeded wave of arc length, so the tube reads as an object lying over the canvas. The shape also rotates around the spine by an angle keyed to the distance from the stroke's start, and a seeded offset pushes it slightly off the spine in a direction that rotates with the same angle, so the mark orbits the spine along its length while holding still as the stroke grows. The mark floats about 100 pixels over the canvas, lit from the upper left.</p>
+        <div class="jp"><strong>深さと回転：</strong>スパインは弧長のシード付き波から深さを得るため、チューブはキャンバスの上に置かれた物体として読めます。形はさらに、ストロークの始点からの距離に応じた角度でスパインの周りを回転し、同じ角度で回転する方向へ、シード付きのオフセットでスパインからわずかにずらされます。そのため筆跡はスパインの周りを長さに沿って周回しつつ、ストロークが伸びても止まったままです。筆跡はキャンバスの約100ピクセル上に浮かび、左上からの光に照らされます。</div>
 
         <p><strong>Candy:</strong> Diagonal stripes from a list of colors, wrapping with the tube's angle so they run like a barber pole, shaded like glossy plastic: the shadow side and the rim fall back to a saturated deep version of the stripe color, as if light scatters inside the body, under a tight white highlight.</p>
         <div class="jp"><strong>キャンディ：</strong>色のリストからなる斜めの縞が、チューブの角度とともに巻き付き、床屋のポールのように走ります。光沢のあるプラスチックとして陰影付けされます。影の側と縁は、光が中で散乱しているかのように、縞の色を深く鮮やかにした色へ沈み、その上に鋭い白いハイライトが乗ります。</div>
@@ -64,31 +64,25 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
-  <section class="demo-section" id="tetrahedrons">
+  <section class="demo-section" id="solids">
     <div class="demo-header">
-      <h2>Tetrahedron strokes</h2>
+      <h2>Solid strokes</h2>
       <a href={`${base}/demos/tetra-strokes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
     <div class="demo-embed">
-      <iframe src={`${base}/demos/tetra-strokes/index.html?embedded`} title="Tetrahedron strokes" scrolling="no"></iframe>
+      <iframe src={`${base}/demos/tetra-strokes/index.html?embedded`} title="Solid strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Chains of 3D tetrahedrons along the spine, flat-shaded: same-hue facets, flat palette colors, and metal that reflects the canvas.</p>
-      <div class="jp">スパインに沿った3Dの四面体の連なりで、フラットに陰影付けされます。同じ色相のファセット、パレットからの平坦な色、そしてキャンバスを反射する金属。</div>
+      <p>Chains of flat-shaded 3D solids scattered along the spine, in three shapes: tetrahedra, boxes, and cones. Every face takes one flat color from the palette.</p>
+      <div class="jp">スパインに沿って散らされた、フラットに陰影付けされた3Dの立体の連なりで、四面体・立方体・円錐の3つの形があります。各面はパレットから平坦な色をひとつ取ります。</div>
 
       <details>
         <summary>Details</summary>
-        <p><strong>Placement:</strong> Each tetrahedron takes a random size and orientation from the stroke's seed, on the same deepened, rotating spine as the tubes, so the chain turns as the stroke grows. The step between neighbors is their two circumradii plus <code>spacing</code> of their sum, so they cannot touch.</p>
-        <div class="jp"><strong>配置：</strong>各四面体は、ストロークのシードからランダムな大きさと向きを取ります。チューブと同じ、深さがつき回転するスパインの上に置かれるため、連なりはストロークが伸びるにつれて回ります。隣どうしの間隔は、2つの外接半径にその和の<code>spacing</code>倍を足したものなので、四面体どうしが触れることはありません。</div>
+        <p><strong>Placement:</strong> Each solid takes a seeded size, side, and orientation, on the same deepened spine as the tubes. It is thrown to one side of the spine, so the chain fills a band rather than a line. The step between neighbors is their two circumradii plus <code>spacing</code> of their sum, so tighter spacing packs more of them.</p>
+        <div class="jp"><strong>配置：</strong>各立体は、シードによる大きさ・左右・向きを取り、チューブと同じ深さのついたスパインの上に置かれます。スパインの片側へ振り出されるため、連なりは線ではなく帯を埋めます。隣どうしの間隔は、2つの外接半径にその和の<code>spacing</code>倍を足したものなので、間隔を詰めるほど数が増えます。</div>
 
-        <p><strong>Facets:</strong> Every face's color keeps the base color's hue while its lightness and chroma vary, so the chain reads as one material in many cuts.</p>
-        <div class="jp"><strong>ファセット：</strong>各面の色は基本色の色相を保ちながら、明度と彩度が変わります。そのため連なりは、さまざまに切り出されたひとつの素材として読めます。</div>
-
-        <p><strong>Colors:</strong> Every face takes one flat random color from the palette.</p>
-        <div class="jp"><strong>カラー：</strong>各面はパレットから、平坦なランダムの色をひとつ取ります。</div>
-
-        <p><strong>Metal:</strong> The same canvas reflection as the tubes, but the flat normals break it per face.</p>
-        <div class="jp"><strong>金属：</strong>チューブと同じキャンバスの反射ですが、法線がフラットなため、反射は面ごとに分断されます。</div>
+        <p><strong>Rotation:</strong> The rotation keys on distance from the tip, so the whole chain turns as the stroke grows. Every face takes one flat random color from the palette, so a solid reads as a cluster of colored facets.</p>
+        <div class="jp"><strong>回転：</strong>回転は先端からの距離に基づくため、連なり全体はストロークが伸びるにつれて回ります。各面はパレットから平坦なランダムの色をひとつ取るので、立体は色付きの面の集まりとして読めます。</div>
       </details>
     </div>
   </section>

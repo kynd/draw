@@ -36,7 +36,7 @@ export class ShapedDemoConfig extends DrawingToolConfig {
     constructor() {
         super({ tools: [
             'cloud', 'squares', 'spikes', 'tube-candy', 'tube-wobble', 'tube-metal',
-            'tetra-facets', 'tetra-colors', 'tetra-metal',
+            'tetrahedra', 'boxes', 'cones',
         ] });
     }
 }

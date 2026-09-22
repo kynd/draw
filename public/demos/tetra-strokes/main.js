@@ -1,14 +1,14 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
-import { TetrahedronStrokeRenderer } from '../../lib/renderers/TetrahedronStrokeRenderer.js';
+import { SolidStrokeRenderer } from '../../lib/renderers/SolidStrokeRenderer.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
-import { TestBackground } from '../../lib/demo/testBackground.js';
 
 const ROWS = 3;
 const SEEDS = [1.0, 2.3, 5.1];
+const SHAPES = ['tetra', 'box', 'cone'];
 
 const readout = document.getElementById('readout');
 const ctrl = {
@@ -19,45 +19,25 @@ const ctrl = {
 };
 
 const stage = new StrokeStage(document.getElementById('canvas'));
-let palette = randomSchemePalette('vivid-dark');
-const background = new TestBackground(palette, { blur: 6 });
-const plane = background.createPlane(stage.extentX, stage.extentY);
-stage.add(plane);
 
 let entries = [];
-let colors = { stripes: [], a: '#803050', b: '#2a5080', tint: '#e8d8c8' };
-
-function randomizeColors() {
-    palette = randomSchemePalette('vivid-dark');
-    background.paint(palette, stage.viewport.pixelWidth, stage.viewport.pixelHeight);
-    const sorted = [...palette.entries].sort((a, b) => a.L - b.L);
-    return {
-        stripes: Array.from({ length: 4 }, () => palette.pick().hex),
-        a: sorted[0].hex,
-        b: sorted[1 % sorted.length].hex,
-        tint: sorted[sorted.length - 1].hex,
-    };
-}
-
+let colors = [];
 let showNormals = false;
 
+function randomizeColors() {
+    const palette = randomSchemePalette('vivid-wheel');
+    stage.setBackground(paperColor(palette.entries[0].H));
+    return palette.entries.map(e => e.hex);
+}
+
 function makeRenderer(index) {
-    const common = {
+    return new SolidStrokeRenderer({
+        shape: SHAPES[index],
+        colors,
         showNormals,
         depth: parseFloat(ctrl.depth.value),
         twist: parseFloat(ctrl.twist.value),
         spacing: parseFloat(ctrl.spacing.value),
-    };
-    if (index === 0) {
-        return new TetrahedronStrokeRenderer({ ...common, mode: 'facets', colorA: colors.a });
-    }
-    if (index === 1) {
-        return new TetrahedronStrokeRenderer({
-            ...common, mode: 'colors', colors: colors.stripes,
-        });
-    }
-    return new TetrahedronStrokeRenderer({
-        ...common, mode: 'metal', tint: colors.tint, background: background.texture,
     });
 }
 
@@ -69,7 +49,7 @@ function rebuild() {
     entries = [];
 
     const width = parseFloat(ctrl.width.value) / PIXELS_PER_UNIT;
-    const { spread } = layout(stage.extentY, width * 1.3);
+    const { spread } = layout(stage.extentY, width * 2.6);
     let samples = 0, vertices = 0, triangles = 0;
 
     for (let i = 0; i < ROWS; i++) {
@@ -113,11 +93,7 @@ document.getElementById('random-btn').addEventListener('click', () => {
     rebuild();
 });
 
-stage.onResize(() => {
-    background.paint(palette, stage.viewport.pixelWidth, stage.viewport.pixelHeight);
-    background.resizePlane(plane, stage.extentX, stage.extentY);
-    rebuild();
-});
+stage.onResize(() => rebuild());
 wireCollapsibles();
 colors = randomizeColors();
 rebuild();

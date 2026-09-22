@@ -26,7 +26,7 @@ import { WashBlobRenderer } from '../renderers/WashBlobRenderer.js';
 import { MaterialBlobRenderer } from '../renderers/MaterialBlobRenderer.js';
 import { StoneBlobRenderer } from '../renderers/StoneBlobRenderer.js';
 import { TubeStrokeRenderer } from '../renderers/TubeStrokeRenderer.js';
-import { TetrahedronStrokeRenderer } from '../renderers/TetrahedronStrokeRenderer.js';
+import { SolidStrokeRenderer } from '../renderers/SolidStrokeRenderer.js';
 import { SmearStrokeRenderer } from '../renderers/SmearStrokeRenderer.js';
 import { FrostedGlassStrokeRenderer } from '../renderers/FrostedGlassStrokeRenderer.js';
 import { GlassStrokeRenderer } from '../renderers/GlassStrokeRenderer.js';
@@ -163,23 +163,23 @@ export const toolRegistry = [
             mode: 'metal', background: ctx.texture, tint: ctx.tintLight,
             twist: v.twist, bend: v.bend, depth: v.depth,
         }) },
-    { id: 'tetra-facets', kind: 'stroke',
-        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: 0, max: 0.8 }, { key: 'depth', min: 0.04, max: 0.24 }],
-        make: (v, ctx) => new TetrahedronStrokeRenderer({
-            mode: 'facets', colorA: ctx.colorA,
+    { id: 'tetrahedra', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: -0.2, max: 0.25 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new SolidStrokeRenderer({
+            shape: 'tetra', colors: ctx.colors,
             twist: v.twist, spacing: v.spacing, depth: v.depth,
         }) },
-    { id: 'tetra-colors', kind: 'stroke',
-        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: 0, max: 0.8 }, { key: 'depth', min: 0.04, max: 0.24 }],
-        make: (v, ctx) => new TetrahedronStrokeRenderer({
-            mode: 'colors', colors: ctx.colors,
+    { id: 'boxes', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: -0.2, max: 0.25 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new SolidStrokeRenderer({
+            shape: 'box', colors: ctx.colors,
             twist: v.twist, spacing: v.spacing, depth: v.depth,
         }) },
-    { id: 'tetra-metal', kind: 'stroke',
-        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'bend', min: 0.2, max: 0.6 }, { key: 'depth', min: 0.04, max: 0.24 }],
-        make: (v, ctx) => new TetrahedronStrokeRenderer({
-            mode: 'metal', background: ctx.texture, tint: ctx.tintLight,
-            twist: v.twist, bend: v.bend, depth: v.depth,
+    { id: 'cones', kind: 'stroke',
+        params: [{ key: 'twist', min: 1, max: 12 }, { key: 'spacing', min: -0.2, max: 0.25 }, { key: 'depth', min: 0.04, max: 0.24 }],
+        make: (v, ctx) => new SolidStrokeRenderer({
+            shape: 'cone', colors: ctx.colors,
+            twist: v.twist, spacing: v.spacing, depth: v.depth,
         }) },
     { id: 'ribbon-square', kind: 'stroke', params: [{ key: 'axis', pick: ['along', 'across'] }],
         make: (v, ctx) => new RibbonStrokeRenderer({

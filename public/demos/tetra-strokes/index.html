@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tetrahedron strokes — facets, palette colors, canvas metal</title>
+  <title>Solid strokes — tetrahedra, boxes, cones</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
@@ -15,8 +15,8 @@
     <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
 
     <div class="dp-panel">
-      <div class="dp-hd"><span class="dp-title">Tetrahedrons</span></div>
-      <div class="dp-note">Top to bottom: facets, palette colors, canvas metal.</div>
+      <div class="dp-hd"><span class="dp-title">Solids</span></div>
+      <div class="dp-note">Top to bottom: tetrahedra, boxes, cones.</div>
       <div class="dp-row">
         <span class="dp-label">Width</span>
         <input id="width" class="dp-range" type="range" min="6" max="28" step="1" value="15" />
@@ -34,8 +34,8 @@
       </div>
       <div class="dp-row">
         <span class="dp-label">Spacing</span>
-        <input id="spacing" class="dp-range" type="range" min="0" max="1" step="0.05" value="0.15" />
-        <span class="dp-val" id="spacing-val">0.15</span>
+        <input id="spacing" class="dp-range" type="range" min="-0.2" max="0.3" step="0.02" value="0.05" />
+        <span class="dp-val" id="spacing-val">0.05</span>
       </div>
 
       <hr class="dp-divider" />

@@ -123,7 +123,7 @@ public/lib/                            library code
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js
                 LineStrokeRenderer.js
                 Stroke3DRenderer.js  TubeStrokeRenderer.js
-                TetrahedronStrokeRenderer.js
+                SolidStrokeRenderer.js
   demo/         viewport.js  stage.js  panel.js  strokePaths.js  drawInput.js
                 drawingBoard.js  drawCycle.js  blobShowcase.js
                 pressure.js  testBackground.js  midi.js  dial.js  latch.js

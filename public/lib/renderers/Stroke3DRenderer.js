@@ -10,11 +10,12 @@ const WIDTH_REF = 0.08;
  *
  * The spine gains depth from a seeded wave of arc length, so the mark reads as an
  * object lying over the canvas rather than a flat fill, and the shape rotates
- * around the spine by an angle that depends on the distance from the stroke's
- * start. A seeded offset also pushes the shape slightly off the spine, in a
- * direction that rotates with the same angle, so the mark orbits the spine along
- * its length. Every one of these keys on distance from the start, so the drawn
- * part holds still as the stroke grows.
+ * around the spine by an angle that depends on the distance from one end. A seeded
+ * offset also pushes the shape slightly off the spine, in a direction that rotates
+ * with the same angle, so the mark orbits the spine along its length. By default
+ * the angle keys on distance from the start, so the drawn part holds still as the
+ * stroke grows; with `spinFromTip` it keys on distance from the end, so the whole
+ * mark turns while it is drawn.
  *
  * The frame is the 2D spine normal for the in-plane axis and +z for the
  * out-of-plane axis. The 3D strokes carry true normals, so their shared light
@@ -26,19 +27,25 @@ export class Stroke3DRenderer extends StrokeRenderer {
      * @param {object} opts
      * @param {number} [opts.depth]  Amplitude of the spine's depth wave.
      * @param {number} [opts.twist]  Rotation around the spine, radians per unit of
-     *                               distance from the start.
+     *                               distance from the reference end.
      * @param {number} [opts.zBase]  Height the wave rides on, above the canvas.
      *                               The default holds the spine about 100 CSS
      *                               pixels over it.
      * @param {number} [opts.wander] Amplitude of the offset from the spine.
+     * @param {boolean} [opts.spinFromTip]  Key the rotation on distance from the
+     *                               end rather than the start, so the whole mark
+     *                               turns as the stroke grows instead of holding
+     *                               still. Off by default.
      */
-    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.5, wander = 0.1, showNormals = false } = {}) {
+    constructor({ samplesPerUnit = 90, depth = 0.14, twist = 5, zBase = 0.5, wander = 0.1,
+        spinFromTip = false, showNormals = false } = {}) {
         super();
         this.samplesPerUnit = samplesPerUnit;
         this.depth = depth;
         this.twist = twist;
         this.zBase = zBase;
         this.wander = wander;
+        this.spinFromTip = spinFromTip;
         // Debug view: paint the surface with its normals (xyz as rgb), and tint
         // back-facing pixels red, so winding and normal problems show themselves.
         this.showNormals = showNormals;
@@ -57,7 +64,7 @@ export class Stroke3DRenderer extends StrokeRenderer {
             Math.sin(s * wscale * 3.1 + seed * 5.3) * 0.6 +
             Math.sin(s * wscale * 6.7 + seed * 9.1) * 0.4
         );
-        const phaseAt = s => s * this.twist + seed * 2.399;
+        const phaseAt = s => (this.spinFromTip ? length - s : s) * this.twist + seed * 2.399;
         // The offset from the spine: a seeded wave of arc length sets how far,
         // and the twist phase sets which way around the spine, so the offset's
         // direction rotates with the mark while it is drawn.
