@@ -1,101 +1,125 @@
 import * as THREE from 'three';
-import { ShaderStrokeRenderer } from './ShaderStrokeRenderer.js';
-import { resampleSpine } from './StrokeRenderer.js';
+import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
 import { seededRandom } from '../random.js';
 
-const MAX_BLOBS = 128;
-
 /**
- * A cloud: large discs scattered along the stroke, drawn as one union.
+ * A cloud: large discs scattered along the stroke.
  *
- * The discs are seeded offsets from the spine with big radii, and the fragment shader
- * evaluates the signed distance to their union. A union has one well-defined outline
- * whatever the placement, which is what keeps the boundary from ever crossing itself,
- * however far the blobs are thrown.
+ * The mark is flat and one color, so the discs need no union: overlapping discs of
+ * the same color read as one shape, and the outline is just their outer arcs. Each
+ * disc is a quad with a soft circular edge, drawn transparent so the coverage of
+ * overlapping discs combines, so the boundary is antialiased without any per-fragment
+ * search. The discs are placed on the spine with a seeded throw, spaced to a fraction
+ * of their radius so density holds for a stroke of any length, and nothing caps the
+ * count.
  */
-export class CloudStrokeRenderer extends ShaderStrokeRenderer {
+export class CloudStrokeRenderer extends StrokeRenderer {
     /**
      * @param {object} opts
      * @param {string} [opts.color]
      * @param {number} [opts.blob]    Disc radius, in stroke half-widths.
      * @param {number} [opts.offset]  How far discs stray from the spine, in half-widths.
      */
-    constructor({ color = '#46608a', blob = 1.5, offset = 1.3, samplesPerUnit = 90, ...rest } = {}) {
-        super({ cap: 'rounded', samplesPerUnit, ...rest });
+    constructor({ color = '#46608a', blob = 1.5, offset = 1.3, samplesPerUnit = 90 } = {}) {
+        super();
         this.color = color;
         this.blob = blob;
         this.offset = offset;
+        this.samplesPerUnit = samplesPerUnit;
     }
 
     build(def) {
-        const { samples, normals, length } = resampleSpine(def, this.samplesPerUnit, 8, 2048);
+        const { samples, length } = resampleSpine(def, this.samplesPerUnit, 8, 2048);
         const rand = seededRandom(def.seed);
         const w = Math.max(def.maxWidth(), 1e-6);
         const rBase = w * this.blob;
         const offAmp = w * this.offset;
+        // Spacing is fixed to the disc size, so extending the stroke adds discs
+        // rather than spreading them, and nothing caps the count.
+        const spacing = rBase * 0.65;
+        const pad = rBase * 0.06 + 0.01;
+
+        const positions = [];
+        const locals = [];
+        const radii = [];
+        const indices = [];
+        let quads = 0;
 
         // Discs land at jittered arc-length intervals, thrown in any direction with
-        // seeded size. Every third disc stays near the spine with at least the base
-        // radius, so the chain cannot break however the others are scattered.
-        //
-        // The interval is fixed to the disc size, not to a share of the length, so
-        // density holds as the stroke grows: extending it adds new discs at the tail
-        // rather than spreading the existing ones apart. A stroke long enough to fill
-        // the disc budget falls back to spreading, the only way to keep it covered.
-        const spacing = Math.max(rBase * 0.65, length / MAX_BLOBS);
-        const blobs = [];
+        // seeded size. Every third disc stays near the spine at full radius, so the
+        // chain cannot break however the others are scattered.
         let due = 0, acc = 0, k = 0;
         for (let i = 0; i < samples.length; i++) {
             if (i > 0) acc += samples[i].distanceTo(samples[i - 1]);
-            if (acc >= due && blobs.length < MAX_BLOBS) {
-                const anchored = k % 3 === 0;
-                const angle = rand() * Math.PI * 2;
-                const mag = rand() * (anchored ? offAmp * 0.25 : offAmp);
-                const r = anchored
-                    ? rBase * (1.0 + 0.4 * rand())
-                    : rBase * (0.45 + 1.15 * rand());
-                blobs.push(new THREE.Vector4(
-                    samples[i].x + Math.cos(angle) * mag,
-                    samples[i].y + Math.sin(angle) * mag,
-                    r, 0
-                ));
-                due += spacing * (0.55 + 0.9 * rand());
-                k++;
-            }
+            if (acc < due) continue;
+
+            const anchored = k % 3 === 0;
+            const angle = rand() * Math.PI * 2;
+            const mag = rand() * (anchored ? offAmp * 0.25 : offAmp);
+            const r = anchored
+                ? rBase * (1.0 + 0.4 * rand())
+                : rBase * (0.45 + 1.15 * rand());
+            const cx = samples[i].x + Math.cos(angle) * mag;
+            const cy = samples[i].y + Math.sin(angle) * mag;
+            const z = samples[i].z;
+            const h = r + pad;
+
+            const base = quads * 4;
+            positions.push(cx - h, cy - h, z, cx + h, cy - h, z, cx + h, cy + h, z, cx - h, cy + h, z);
+            locals.push(-h, -h, h, -h, h, h, -h, h);
+            for (let c = 0; c < 4; c++) radii.push(r);
+            indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+            quads++;
+
+            due += spacing * (0.55 + 0.9 * rand());
+            k++;
         }
-        this._blobs = blobs;
-        this.inflate = (offAmp + rBase * 1.65) / w + 0.5;
-        return super.build(def);
-    }
 
-    uniforms() {
-        const arr = Array.from({ length: MAX_BLOBS }, (_, i) =>
-            this._blobs[i] ?? new THREE.Vector4(0, 0, -1, 0));
-        return {
-            uColor: { value: new THREE.Color(this.color) },
-            uBlobs: { value: arr },
-            uBlobCount: { value: this._blobs.length },
-        };
-    }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('aLocal', new THREE.Float32BufferAttribute(locals, 2));
+        geometry.setAttribute('aRadius', new THREE.Float32BufferAttribute(radii, 1));
+        geometry.setIndex(indices);
+        geometry.computeBoundingSphere();
 
-    fragmentShader() {
-        return /* glsl */`
-            uniform vec3 uColor;
-            uniform vec4 uBlobs[${MAX_BLOBS}];
-            uniform int uBlobCount;
-
-            void main() {
-                float d = 1e6;
-                for (int i = 0; i < ${MAX_BLOBS}; i++) {
-                    if (i >= uBlobCount) break;
-                    vec4 b = uBlobs[i];
-                    if (b.z <= 0.0) continue;
-                    d = min(d, length(vWorld.xy - b.xy) - b.z);
+        const mesh = new THREE.Mesh(geometry, new THREE.ShaderMaterial({
+            uniforms: { uColor: { value: new THREE.Color(this.color) } },
+            vertexShader: /* glsl */`
+                attribute vec2 aLocal;
+                attribute float aRadius;
+                varying vec2 vLocal;
+                varying float vRadius;
+                void main() {
+                    vLocal = aLocal;
+                    vRadius = aRadius;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                 }
-                float alpha = 1.0 - smoothstep(-0.004, 0.004, d);
-                if (alpha <= 0.003) discard;
-                gl_FragColor = vec4(uColor, alpha);
-            }
-        `;
+            `,
+            fragmentShader: /* glsl */`
+                precision highp float;
+                uniform vec3 uColor;
+                varying vec2 vLocal;
+                varying float vRadius;
+                void main() {
+                    float d = length(vLocal) - vRadius;
+                    float alpha = 1.0 - smoothstep(-0.005, 0.005, d);
+                    if (alpha <= 0.003) discard;
+                    gl_FragColor = vec4(uColor, alpha);
+                }
+            `,
+            // One color and flat, so overlapping discs combine to the same color:
+            // the discs blend into one shape without writing depth against each other.
+            transparent: true,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+        }));
+        mesh.userData.samples = samples;
+        mesh.userData.stats = {
+            sampleCount: samples.length,
+            vertexCount: positions.length / 3,
+            triangleCount: indices.length / 3,
+            length,
+        };
+        return mesh;
     }
 }

@@ -289,13 +289,13 @@ The drag and the ridges share one lane noise, so the paint that moved furthest a
 
 ## Shaped strokes
 
-Three renderers whose outline is a signed-distance field evaluated per fragment, rather than a thickened path. The geometry is only a canvas wide enough to cover the shape.
-<div class="jp">3つのレンダラの輪郭は、太らせたパスではなく、フラグメントごとに評価される符号付き距離場です。ジオメトリは、形を覆うのに足りる広さのキャンバスに過ぎません。</div>
+Renderers whose outline is a shape rather than a thickened path. The rounded squares and spikes evaluate a signed-distance field per fragment, over a canvas wide enough to cover the shape. The cloud stamps its discs as geometry.
+<div class="jp">輪郭が、太らせたパスではなく形そのものであるレンダラです。角丸の正方形とトゲは、形を覆うのに足りる広さのキャンバス上で、フラグメントごとに符号付き距離場を評価します。雲は円をジオメトリとしてスタンプします。</div>
 
 ### CloudStrokeRenderer
 
-Large discs scattered along the stroke, drawn as one union. Size, spacing, and throw direction are all seeded per disc, and a union has one well-defined outline whatever the placement, so the boundary never crosses itself. Every third disc stays near the spine at full radius, so the chain cannot break. The spacing is fixed to the disc size, so density holds as the stroke grows: a longer stroke gains discs at its tail rather than spreading the existing ones, up to a fixed budget past which it falls back to spreading to stay covered. Takes `color`, `blob`, and `offset`, both in half-widths.
-<div class="jp">ストロークに沿って散らされた大きな円を、ひとつの和集合として描きます。大きさ、間隔、飛ばす方向はすべて円ごとにシードで決まり、和集合の輪郭は配置によらずひとつに定まるため、境界が自分と交差することはありません。3つに1つの円は最大の半径のままスパインの近くに留まるため、連なりが途切れることはありません。間隔は円の大きさに固定されているため、ストロークが伸びても密度は保たれます。長いストロークは既存の円を広げるのではなく末尾に円を足していき、決まった上限を超えると、覆いを保つために間隔を広げる方式に切り替わります。`color`、`blob`、`offset`（どちらも半幅単位）を受け取ります。</div>
+Large discs scattered along the stroke. The mark is flat and one color, so the discs need no union: overlapping discs of the same color read as one shape, and the outline is just their outer arcs. Each disc is a quad with a soft circular edge, drawn transparent so the coverage of overlapping discs combines and the boundary is antialiased without a per-fragment search. Size and throw direction are seeded per disc, and every third disc stays near the spine at full radius, so the chain cannot break. The discs are spaced to a fraction of their radius, so density holds for a stroke of any length and nothing caps the count. Takes `color`, `blob`, and `offset`, both in half-widths.
+<div class="jp">ストロークに沿って散らされた大きな円です。筆跡は平坦で一色なので、円に和集合は要りません。同じ色の重なった円はひとつの形として読め、輪郭はその外側の弧にすぎません。各円は柔らかい円形の縁を持つ矩形で、透明に描かれるため、重なった円の被覆が合わさり、フラグメントごとの探索なしに境界がアンチエイリアスされます。大きさと振り出す方向は円ごとにシードで決まり、3つに1つの円は最大の半径のままスパインの近くに留まるため、連なりが途切れることはありません。円は半径の何分の一かの間隔で置かれるため、どんな長さのストロークでも密度は保たれ、その数に上限はありません。`color`、`blob`、`offset`（どちらも半幅単位）を受け取ります。</div>
 
 ### RoundedSquareStrokeRenderer
 
