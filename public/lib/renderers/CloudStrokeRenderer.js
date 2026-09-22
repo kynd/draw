@@ -29,7 +29,7 @@ export class CloudStrokeRenderer extends StrokeRenderer {
     }
 
     build(def) {
-        const { samples, length } = resampleSpine(def, this.samplesPerUnit, 8, 2048);
+        const { samples, normals, tangents, length } = resampleSpine(def, this.samplesPerUnit, 8, 2048);
         const rand = seededRandom(def.seed);
         const w = Math.max(def.maxWidth(), 1e-6);
         const rBase = w * this.blob;
@@ -45,22 +45,26 @@ export class CloudStrokeRenderer extends StrokeRenderer {
         const indices = [];
         let quads = 0;
 
-        // Discs land at jittered arc-length intervals, thrown in any direction with
-        // seeded size. Every third disc stays near the spine at full radius, so the
-        // chain cannot break however the others are scattered.
+        // Discs land at jittered arc-length intervals with seeded size. They are
+        // thrown mostly to the side, along the spine's normal to either edge, with
+        // only a little wander along it, so the cloud bulges out from the center
+        // line rather than clumping along it. Every third disc stays near the spine
+        // at full radius, so the chain cannot break however the others are scattered.
         let due = 0, acc = 0, k = 0;
         for (let i = 0; i < samples.length; i++) {
             if (i > 0) acc += samples[i].distanceTo(samples[i - 1]);
             if (acc < due) continue;
 
             const anchored = k % 3 === 0;
-            const angle = rand() * Math.PI * 2;
-            const mag = rand() * (anchored ? offAmp * 0.25 : offAmp);
+            const nrm = normals[i], tan = tangents[i];
+            const side = rand() < 0.5 ? 1 : -1;
+            const across = (anchored ? offAmp * 0.25 : offAmp) * (0.4 + 0.6 * rand()) * side;
+            const along = (rand() - 0.5) * offAmp * 0.5;
             const r = anchored
                 ? rBase * (1.0 + 0.4 * rand())
                 : rBase * (0.45 + 1.15 * rand());
-            const cx = samples[i].x + Math.cos(angle) * mag;
-            const cy = samples[i].y + Math.sin(angle) * mag;
+            const cx = samples[i].x + nrm.x * across + tan.x * along;
+            const cy = samples[i].y + nrm.y * across + tan.y * along;
             const z = samples[i].z;
             const h = r + pad;
 

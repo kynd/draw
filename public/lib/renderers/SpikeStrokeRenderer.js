@@ -77,7 +77,7 @@ export class SpikeStrokeRenderer extends ShaderStrokeRenderer {
                 // (linear) component keeps the body thick, while the power
                 // sharpens only the tip. The tip is a corner in both terms, so
                 // the point survives.
-                float spike = mix(pow(max(tri, 0.0), uSharp), max(tri, 0.0), 0.55);
+                float spike = mix(pow(max(tri, 0.0), uSharp), max(tri, 0.0), 0.28);
 
                 // Spikes belong to the body edge, not the rounded caps: fade
                 // them out onto the cap so each end closes on a plain curve.
