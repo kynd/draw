@@ -104,7 +104,9 @@ class DrawingEngineWrapper {
         };
     }
 
-    clear() { this._tool.clear(); }
+    // The packaged clear resets the canvas and lays down the initializer, the
+    // behavior this contract has always had; the demo UI's plain clear is separate.
+    clear() { this._tool.initialize(); }
 
     /** `value` is a dial position, 0..1. */
     setParameter(id, value) {

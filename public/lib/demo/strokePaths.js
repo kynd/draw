@@ -166,7 +166,7 @@ export function seededSegment(seed, { cx = 0, cy = 0, r = 0.6 } = {}) {
 /**
  * A random wandering stroke for scattering marks on a fresh canvas: a wiggling
  * run at a random position and direction inside the extents, with a pressure
- * that swells through the middle. Uses Math.random; a caller that needs
+ * that swells gently through the middle. Uses Math.random; a caller that needs
  * determinism records the points it gets back.
  */
 export function scatterPath(extentX, extentY, { length = null } = {}) {
@@ -189,7 +189,7 @@ export function scatterPath(extentX, extentY, { length = null } = {}) {
             Math.max(-ey, Math.min(ey, y0 + dir.y * along + perp.y * across)),
             0
         );
-        p.pressure = 0.25 + 0.6 * Math.sin(t * Math.PI);
+        p.pressure = 0.6 + 0.15 * Math.sin(t * Math.PI);
         points.push(p);
     }
     return points;

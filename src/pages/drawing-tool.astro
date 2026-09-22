@@ -16,8 +16,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <p>Three dials float over the canvas. The hue dial steps the palette, moving the key hue and rolling a fresh scheme; the width dial maps a position into the current tool's width range and holds it across tool changes; the tool dial steps through a trail of rolled tools, each with its own width, parameters, and pressure sensitivity. Both the tool and the palette remember a run of past states on each side, so dialing back returns the same one, its preview included. Every release rerolls the palette's jitter under the same hue and scheme, so the key color holds while the rest moves, and the dials also listen to MIDI. The box at the bottom left previews the current tool. No tool paints one flat color: the flat ones fill with a gradient between the two current colors, along the drawn spine or across it.</p>
     <div class="jp">3つのダイヤルがキャンバスの上に浮かびます。色相ダイヤルはパレットを進め、基準の色相を動かして新しい配色をロールします。幅ダイヤルは現在のツールの幅レンジに位置を写し、ツールを変えても保ちます。ツールダイヤルは、ロールされたツールの列をたどります。各ツールは自分の幅、パラメータ、筆圧の感度を持ちます。ツールもパレットも、両側に過去の状態を一連だけ記憶するため、戻せばプレビューも含めて同じものに帰れます。ペンを離すたびに、同じ色相と配色のままパレットの揺らぎが引き直されるので、基準の色は保たれ、残りが動きます。ダイヤルはMIDIからも操作できます。左下の箱は現在のツールをプレビューします。単色で塗るツールはありません。平坦なツールは、現在の2色の間のグラデーションで、描かれたスパインに沿って、あるいは横切って塗ります。</div>
 
-    <p>Clear fills the canvas with a palette gradient and a few scattered marks. Replay redraws everything since the last clear through the same drawing cycle, since each mark stores its tool, parameters, colors, seed, and drawn points rather than the resulting raster. A checkbox rerolls the tool and colors on every release, another shows the pointer's own path while drawing, Record captures the replay to a video, and Download saves the drawing's log as a zip of JSON that the Player page reads back. In full screen a dropdown offers fixed canvas sizes.</p>
-    <div class="jp">Clearはキャンバスをパレットのグラデーションで塗り、いくつかのランダムな筆跡を散らします。Replayは、最後のClear以降のすべてを同じ描画サイクルで描き直します。各筆跡はツール、パラメータ、色、シード、描かれた点を保存し、結果のラスタは保存しないからです。チェックボックスで、ペンを離すたびにツールと色を引き直せます。別のチェックボックスは、描いている間ポインタ自身の軌跡を表示します。録画ボタンはリプレイをビデオにキャプチャし、ダウンロードボタンは描画のログを、Playerページで再生できるJSONのzipとして保存します。全画面では、固定のキャンバスサイズを選ぶドロップダウンが現れます。</div>
+    <p>Initialize fills the canvas with a palette gradient and a few scattered marks; Clear empties it to a fresh background instead. Replay redraws everything since the canvas was last reset through the same drawing cycle, since each mark stores its tool, parameters, colors, seed, and drawn points rather than the resulting raster. A checkbox rerolls the tool and colors on every release, another shows the pointer's own path while drawing, Record captures the replay to a video, and Download saves the drawing's log as a zip of JSON that the Player page reads back. In full screen a dropdown offers fixed canvas sizes.</p>
+    <div class="jp">Initializeはキャンバスをパレットのグラデーションで塗り、いくつかのランダムな筆跡を散らします。Clearは代わりに、新しい背景に空にします。Replayは、キャンバスを最後にリセットして以降のすべてを同じ描画サイクルで描き直します。各筆跡はツール、パラメータ、色、シード、描かれた点を保存し、結果のラスタは保存しないからです。チェックボックスで、ペンを離すたびにツールと色を引き直せます。別のチェックボックスは、描いている間ポインタ自身の軌跡を表示します。録画ボタンはリプレイをビデオにキャプチャし、ダウンロードボタンは描画のログを、Playerページで再生できるJSONのzipとして保存します。全画面では、固定のキャンバスサイズを選ぶドロップダウンが現れます。</div>
   </div>
 
   <div class="prose">
@@ -34,7 +34,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/drawing-tool/index.html?embedded`} title="Drawing tool" scrolling="no" allow="midi; fullscreen" allowfullscreen></iframe>
     </div>
     <div class="prose">
-      <p>Draw on the canvas, turn the dials, and use the settings panel on the right: clear, replay, record, full screen.</p>
+      <p>Draw on the canvas, turn the dials, and use the settings panel on the right: initialize, clear, replay, record, full screen.</p>
       <div class="jp">キャンバスに描き、ダイヤルを回し、右の設定パネル（クリア、リプレイ、録画、全画面）を使ってみてください。</div>
     </div>
   </section>

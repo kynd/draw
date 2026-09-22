@@ -22,6 +22,7 @@ const TEMPLATE = /* html */`
   <div class="dp-panel" id="side-pane">
     <div class="dp-sub-label">Canvas</div>
     <div class="dp-btn-row">
+      <button id="init-btn" class="dp-btn secondary">Initialize</button>
       <button id="clear-btn" class="dp-btn secondary">Clear</button>
       <button id="fullscreen-btn" class="dp-btn secondary">Full screen</button>
     </div>
@@ -187,6 +188,11 @@ export function attachDrawingToolUi(tool, layout) {
         if (tool.state.replaying) return;
         tool.clear();
     });
+    const initBtn = $('init-btn');
+    initBtn.addEventListener('click', () => {
+        if (tool.state.replaying) return;
+        tool.initialize();
+    });
 
     const autoCheck = $('auto-check');
     autoCheck.addEventListener('change', () => tool.setAutoRandomize(autoCheck.checked));
@@ -210,7 +216,7 @@ export function attachDrawingToolUi(tool, layout) {
 
     function setReplayUi(on) {
         replayBtn.textContent = on ? 'Stop' : 'Replay';
-        for (const el of [clearBtn, autoCheck, traceCheck, recordBtn, downloadBtn,
+        for (const el of [initBtn, clearBtn, autoCheck, traceCheck, recordBtn, downloadBtn,
             guideBtn, guideToggle, advBtn]) {
             el.disabled = on;
         }

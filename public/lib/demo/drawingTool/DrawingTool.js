@@ -207,7 +207,7 @@ export class DrawingTool {
             this._fitGuide();
             if (this._clearOnResize && !this._replaying) {
                 this._clearOnResize = false;
-                this.clear();
+                this.initialize();
             }
             this._emit('resize', { width, height });
         });
@@ -218,7 +218,7 @@ export class DrawingTool {
         // still has no size. A scatter drawn then collapses to a point and
         // records a degenerate stroke, so the first clear waits for the
         // resize that sizes the stage.
-        if (this.stage.extentX > 0.01) this.clear();
+        if (this.stage.extentX > 0.01) this.initialize();
         else this._clearOnResize = true;
         requestAnimationFrame(() => { this._positionPreview(); this._refreshPreview(); });
     }
@@ -535,7 +535,16 @@ export class DrawingTool {
      * explicit `background` overrides the initializer's; with no configured
      * initializers the canvas clears to bare paper.
      */
+    /** Empties the canvas to a fresh background, with no strokes. */
     clear({ background = null } = {}) {
+        this.cycle.disposeGhost();
+        const bg = background ?? this._rollBackground();
+        this._resetSurface(bg);
+        this._finishClear(bg);
+    }
+
+    /** Empties the canvas, then lays down the configured initializer's strokes. */
+    initialize({ background = null } = {}) {
         this.cycle.disposeGhost();
         const ids = this.config.initializers;
         const plan = ids.length
@@ -545,9 +554,7 @@ export class DrawingTool {
             })
             : { marks: [] };
         const bg = background ?? plan.background ?? this._rollBackground();
-        this.board.clear(bg);
-        this.recorder.begin(bg);
-        this._emitLive('clear', { background: bg });
+        this._resetSurface(bg);
         this._initializing = true;
         for (const mark of plan.marks) {
             const entry = this._registry.find(e => e.id === mark.toolId);
@@ -566,6 +573,16 @@ export class DrawingTool {
             this.cycle.feed(mark.path, true);
         }
         this._initializing = false;
+        this._finishClear(bg);
+    }
+
+    _resetSurface(bg) {
+        this.board.clear(bg);
+        this.recorder.begin(bg);
+        this._emitLive('clear', { background: bg });
+    }
+
+    _finishClear(bg) {
         // Back to the live selection: the palette from its config, the tool
         // from the trail's current entry.
         this._regenPalette();
