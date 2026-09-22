@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { resampleEvery, catmullRomSpline, splitByTurn } from '../../lib/curves.js';
@@ -37,7 +38,7 @@ function refresh() {
     const angle = parseFloat(angleInput.value) * Math.PI / 180;
     const span = parseFloat(windowInput.value);
     const smooth = parseFloat(spanInput.value);
-    const width = parseFloat(widthInput.value);
+    const width = parseFloat(widthInput.value) / PIXELS_PER_UNIT;
     const runs = splitByTurn(drawn, { angle, span });
 
     let vertices = 0, triangles = 0;
@@ -103,7 +104,7 @@ for (const el of [angleInput, windowInput, spanInput, widthInput]) {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =
             el.id === 'angle' ? el.value
-            : el.id === 'width' ? parseFloat(el.value).toFixed(3)
+            : el.id === 'width' ? parseFloat(el.value).toFixed(0)
             : parseFloat(el.value).toFixed(2);
         refresh();
     });

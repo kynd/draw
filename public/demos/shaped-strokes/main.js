@@ -1,4 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { CloudStrokeRenderer } from '../../lib/renderers/CloudStrokeRenderer.js';
 import { RoundedSquareStrokeRenderer } from '../../lib/renderers/RoundedSquareStrokeRenderer.js';
 import { SpikeStrokeRenderer } from '../../lib/renderers/SpikeStrokeRenderer.js';
@@ -64,7 +65,7 @@ function rebuild() {
     });
     entries = [];
 
-    const width = parseFloat(ctrl.width.value);
+    const width = parseFloat(ctrl.width.value) / PIXELS_PER_UNIT;
     const { spread } = layout(stage.extentY, LAYOUT_REACH);
     let samples = 0, vertices = 0, triangles = 0;
 
@@ -95,7 +96,7 @@ function rebuild() {
     stage.draw();
 }
 
-const decimals = id => (id === 'width' ? 3 : (id === 'cell' ? 2 : 1));
+const decimals = id => (id === 'width' ? 0 : (id === 'cell' ? 2 : 1));
 Object.values(ctrl).forEach(el => {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =

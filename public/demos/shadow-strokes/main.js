@@ -1,4 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
 import { DebossStrokeRenderer } from '../../lib/renderers/DebossStrokeRenderer.js';
 import { StrokeHalo } from '../../lib/StrokeHalo.js';
@@ -54,7 +55,7 @@ function rebuild() {
     silhouettes.forEach(({ mesh, renderer }) => renderer.dispose(mesh));
     silhouettes = [];
 
-    const width = parseFloat(ctrl.width.value);
+    const width = parseFloat(ctrl.width.value) / PIXELS_PER_UNIT;
     const offset = parseFloat(ctrl.offset.value);
     const softness = parseFloat(ctrl.softness.value);
     const { spread } = layout(stage.extentY, width * 1.4);
@@ -114,7 +115,7 @@ function rebuild() {
 Object.values(ctrl).forEach(el => {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =
-            parseFloat(el.value).toFixed(el.id === 'width' || el.id === 'offset' ? 3 : 2);
+            parseFloat(el.value).toFixed(el.id === 'width' ? 0 : el.id === 'offset' ? 3 : 2);
         rebuild();
     });
 });

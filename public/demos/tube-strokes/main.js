@@ -1,4 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { TubeStrokeRenderer } from '../../lib/renderers/TubeStrokeRenderer.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
@@ -69,7 +70,7 @@ function rebuild() {
     });
     entries = [];
 
-    const width = parseFloat(ctrl.width.value);
+    const width = parseFloat(ctrl.width.value) / PIXELS_PER_UNIT;
     // The wiggle grows with the width, so a wide tube keeps the same drawn
     // shape instead of folding through its own wave, capped so three rows
     // still fit the canvas.
@@ -105,7 +106,7 @@ function rebuild() {
     stage.draw();
 }
 
-const decimals = id => (id === 'width' ? 3 : (id === 'depth' ? 2 : 1));
+const decimals = id => (id === 'width' ? 0 : (id === 'depth' ? 2 : 1));
 Object.values(ctrl).forEach(el => {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =

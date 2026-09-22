@@ -1,4 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { ChromeStrokeRenderer } from '../../lib/renderers/ChromeStrokeRenderer.js';
 import { FrostedGlassStrokeRenderer } from '../../lib/renderers/FrostedGlassStrokeRenderer.js';
 import { GlassStrokeRenderer } from '../../lib/renderers/GlassStrokeRenderer.js';
@@ -66,7 +67,7 @@ function rebuild() {
     });
     entries = [];
 
-    const width = parseFloat(ctrl.width.value);
+    const width = parseFloat(ctrl.width.value) / PIXELS_PER_UNIT;
     const { spread } = layout(stage.extentY, width);
     let samples = 0, vertices = 0, triangles = 0;
 

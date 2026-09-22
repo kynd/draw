@@ -84,7 +84,7 @@ function refresh() {
         stage.draw();
         return;
     }
-    const width = parseFloat(widthInput.value);
+    const width = parseFloat(widthInput.value) / PIXELS_PER_UNIT;
     const gain = parseFloat(gainInput.value);
     const path = smoothByWidth(drawn, width, { gain });
     const span = Math.min(Math.max(width * gain, 0.02), 0.3);
@@ -118,7 +118,7 @@ const input = new DrawInput(document.getElementById('canvas'), stage, {
     onChange: points => { drawn = points; refresh(); },
 });
 
-for (const [el, id, decimals] of [[widthInput, 'width-val', 3], [gainInput, 'gain-val', 1]]) {
+for (const [el, id, decimals] of [[widthInput, 'width-val', 0], [gainInput, 'gain-val', 1]]) {
     el.addEventListener('input', () => {
         document.getElementById(id).textContent = parseFloat(el.value).toFixed(decimals);
         refresh();

@@ -82,7 +82,7 @@ function rebuild(colors) {
     entries = [];
 
     const density = parseInt(densityInput.value, 10);
-    const width = parseFloat(widthInput.value);
+    const width = parseFloat(widthInput.value) / PIXELS_PER_UNIT;
     const { spread } = layout(buffer.extentY, width);
     let samples = 0, vertices = 0, triangles = 0;
     const perStroke = [];
@@ -167,7 +167,7 @@ densityInput.addEventListener('input', () => {
 });
 
 widthInput.addEventListener('input', () => {
-    widthVal.textContent = parseFloat(widthInput.value).toFixed(3);
+    widthVal.textContent = parseFloat(widthInput.value).toFixed(0);
     rebuild(colors);
 });
 

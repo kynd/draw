@@ -1,4 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { WatercolorStrokeRenderer } from '../../lib/renderers/WatercolorStrokeRenderer.js';
 import { SmearStrokeRenderer } from '../../lib/renderers/SmearStrokeRenderer.js';
 import { WetBrushStrokeRenderer } from '../../lib/renderers/WetBrushStrokeRenderer.js';
@@ -83,7 +84,7 @@ function rebuild() {
     });
     entries = [];
 
-    const width = parseFloat(ctrl.width.value);
+    const width = parseFloat(ctrl.width.value) / PIXELS_PER_UNIT;
     const { spread } = layout(stage.extentY, width);
     let samples = 0, vertices = 0, triangles = 0;
 
@@ -114,7 +115,7 @@ function rebuild() {
     stage.draw();
 }
 
-const decimals = id => (id === 'drag' ? 0 : (id === 'width' ? 3 : 2));
+const decimals = id => (id === 'drag' ? 0 : (id === 'width' ? 0 : 2));
 Object.values(ctrl).forEach(el => {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =

@@ -1,4 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { spiralPath, entangledPaths, scatteredPaths } from '../../lib/pathEffects.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
@@ -61,7 +62,7 @@ function rebuild() {
     });
     entries = [];
 
-    const width = parseFloat(ctrl.width.value);
+    const width = parseFloat(ctrl.width.value) / PIXELS_PER_UNIT;
     const { spread } = layout(stage.extentY, width * 8, ROWS);
     let samples = 0, vertices = 0, triangles = 0, strokes = 0;
 
@@ -108,7 +109,7 @@ function rebuild() {
 Object.values(ctrl).forEach(el => {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =
-            el.id === 'width' ? parseFloat(el.value).toFixed(3) : parseFloat(el.value).toFixed(1);
+            el.id === 'width' ? parseFloat(el.value).toFixed(0) : parseFloat(el.value).toFixed(1);
         rebuild();
     });
 });

@@ -1,4 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { PatternStrokeRenderer } from '../../lib/renderers/PatternStrokeRenderer.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
@@ -36,7 +37,7 @@ function rebuild() {
     });
     entries = [];
 
-    const width = parseFloat(ctrl.width.value);
+    const width = parseFloat(ctrl.width.value) / PIXELS_PER_UNIT;
     const size = parseFloat(ctrl.size.value);
     const angle = parseFloat(ctrl.angle.value);
     const { spread } = layout(stage.extentY, width * 1.6);
@@ -71,7 +72,7 @@ function rebuild() {
     stage.draw();
 }
 
-const decimals = id => (id === 'width' ? 3 : (id === 'angle' ? 0 : 2));
+const decimals = id => (id === 'width' ? 0 : (id === 'angle' ? 0 : 2));
 Object.values(ctrl).forEach(el => {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =

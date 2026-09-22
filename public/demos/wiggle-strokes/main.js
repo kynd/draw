@@ -1,4 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { wigglePath } from '../../lib/pathEffects.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
@@ -38,7 +39,7 @@ function rebuild() {
     });
     entries = [];
 
-    const width = parseFloat(widthInput.value);
+    const width = parseFloat(widthInput.value) / PIXELS_PER_UNIT;
     const maxReach = Math.max(...ROWS.map(r => r.reach));
     const { spread } = layout(stage.extentY, width * maxReach, ROWS.length);
     let samples = 0, vertices = 0, triangles = 0;
@@ -83,7 +84,7 @@ function rebuild() {
 }
 
 widthInput.addEventListener('input', () => {
-    document.getElementById('width-val').textContent = parseFloat(widthInput.value).toFixed(3);
+    document.getElementById('width-val').textContent = parseFloat(widthInput.value).toFixed(0);
     rebuild();
 });
 

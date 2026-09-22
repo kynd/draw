@@ -85,7 +85,7 @@ function refresh() {
         return;
     }
     const minArc = parseFloat(holdInput.value) / PIXELS_PER_UNIT;
-    const width = parseFloat(widthInput.value);
+    const width = parseFloat(widthInput.value) / PIXELS_PER_UNIT;
     // The same split as the drawing demos: a sharp turn starts a new piece,
     // and every piece passes the same gate its stroke did.
     const runs = splitByTurn(drawn);
@@ -134,7 +134,7 @@ holdInput.addEventListener('input', () => {
     refresh();
 });
 widthInput.addEventListener('input', () => {
-    document.getElementById('width-val').textContent = parseFloat(widthInput.value).toFixed(3);
+    document.getElementById('width-val').textContent = parseFloat(widthInput.value).toFixed(0);
     refresh();
 });
 document.getElementById('random-btn').addEventListener('click', () => {

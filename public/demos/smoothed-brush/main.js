@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
 import { resampleEvery, naturalSpline, hobbyCurve, catmullRomSpline, bSpline } from '../../lib/curves.js';
@@ -57,7 +58,7 @@ function refresh() {
     });
     const def = new StrokeDef({
         points: smoothed,
-        widthLeft: taper(parseFloat(widthInput.value)),
+        widthLeft: taper(parseFloat(widthInput.value) / PIXELS_PER_UNIT),
         renderer,
         seed: 3.7,
     });
@@ -107,7 +108,7 @@ spanInput.addEventListener('input', () => {
     refresh();
 });
 widthInput.addEventListener('input', () => {
-    document.getElementById('width-val').textContent = parseFloat(widthInput.value).toFixed(3);
+    document.getElementById('width-val').textContent = parseFloat(widthInput.value).toFixed(0);
     refresh();
 });
 document.getElementById('random-btn').addEventListener('click', () => {

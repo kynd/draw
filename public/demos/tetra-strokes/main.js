@@ -1,4 +1,5 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
+import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { TetrahedronStrokeRenderer } from '../../lib/renderers/TetrahedronStrokeRenderer.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
@@ -67,7 +68,7 @@ function rebuild() {
     });
     entries = [];
 
-    const width = parseFloat(ctrl.width.value);
+    const width = parseFloat(ctrl.width.value) / PIXELS_PER_UNIT;
     const { spread } = layout(stage.extentY, width * 1.3);
     let samples = 0, vertices = 0, triangles = 0;
 
@@ -98,7 +99,7 @@ function rebuild() {
     stage.draw();
 }
 
-const decimals = id => (id === 'width' ? 3 : (id === 'depth' || id === 'spacing' ? 2 : 1));
+const decimals = id => (id === 'width' ? 0 : (id === 'depth' || id === 'spacing' ? 2 : 1));
 Object.values(ctrl).forEach(el => {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =
