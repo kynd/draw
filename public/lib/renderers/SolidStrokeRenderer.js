@@ -5,24 +5,28 @@ import { Stroke3DRenderer, STROKE3D_GLSL, SHOW_NORMALS_GLSL } from './Stroke3DRe
 /**
  * The unit shapes, each as vertices (circumradius 1) and triangle faces. A face is a
  * list of vertex indices; the outward normal is fixed at build time from the winding.
+ * `groups` labels each face with a color group, so faces sharing a group take one
+ * color: the two triangles of a cube's square, or all of a cone's base.
  */
 const R3 = 1 / Math.sqrt(3);
 const SHAPES = {
-    // Tetrahedron over alternating cube corners.
+    // Tetrahedron over alternating cube corners; every face its own color.
     tetra: {
         verts: [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]].map(c => c.map(x => x * R3)),
         faces: [[0, 1, 2], [0, 3, 1], [0, 2, 3], [1, 3, 2]],
+        groups: [0, 1, 2, 3],
     },
-    // Cube: eight corners, six square faces as two triangles each.
+    // Cube: eight corners, six square faces as two triangles each; a square is one color.
     box: {
         verts: [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
                 [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]].map(c => c.map(x => x * R3)),
         faces: [[0, 2, 1], [0, 3, 2], [4, 5, 6], [4, 6, 7], [0, 1, 5], [0, 5, 4],
                 [2, 3, 7], [2, 7, 6], [1, 2, 6], [1, 6, 5], [0, 4, 7], [0, 7, 3]],
+        groups: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5],
     },
-    // Cone: an apex, a base ring, and a base fan.
+    // Cone: an apex, a base ring, and a base fan. Each side its own color, the base one.
     cone: (() => {
-        const N = 12, verts = [[0, 0, 1]], faces = [];
+        const N = 12, verts = [[0, 0, 1]], faces = [], groups = [];
         for (let i = 0; i < N; i++) {
             const a = (i / N) * Math.PI * 2;
             verts.push([Math.cos(a) * 0.95, Math.sin(a) * 0.95, -0.55]);
@@ -30,17 +34,18 @@ const SHAPES = {
         const base = verts.length; verts.push([0, 0, -0.55]);
         for (let i = 0; i < N; i++) {
             const a = 1 + i, b = 1 + (i + 1) % N;
-            faces.push([0, a, b]);         // side
-            faces.push([base, b, a]);      // base
+            faces.push([0, a, b]); groups.push(i);      // side: its own color
+            faces.push([base, b, a]); groups.push(N);   // base: all one color
         }
-        return { verts, faces };
+        return { verts, faces, groups };
     })(),
 };
 
 /**
  * A chain of flat-shaded 3D solids scattered along the spine, in one of three shapes:
- * tetrahedra, boxes, or cones. Every face takes one flat color from the `colors`
- * palette, so a solid reads as a cluster of colored facets.
+ * tetrahedra, boxes, or cones. Color is chosen per face group, so faces sharing a
+ * group take one flat color from the `colors` palette: a cube's square is one color,
+ * a cone's base is one color, and a tetrahedron's every face its own.
  *
  * Placement, size, side, and orientation all derive from the stroke's seed, so the
  * same seed scatters the same solids. Sizes range from below the stroke width to past
@@ -139,14 +144,23 @@ export class SolidStrokeRenderer extends Stroke3DRenderer {
             verts.forEach(v => solidCenter.add(v));
             solidCenter.multiplyScalar(1 / verts.length);
 
-            for (const face of shape.faces) {
+            // One color per group, so faces sharing a group (a cube's square, a
+            // cone's base) read as one flat color rather than split by triangle.
+            const groupCount = shape.groups.reduce((m, g) => Math.max(m, g), 0) + 1;
+            const groupColors = [];
+            for (let g = 0; g < groupCount; g++) {
+                groupColors.push(palette[Math.floor(rand() * palette.length) % palette.length]);
+            }
+
+            for (let fi = 0; fi < shape.faces.length; fi++) {
+                const face = shape.faces[fi];
                 const [a, b, c] = face;
                 e1.copy(verts[b]).sub(verts[a]);
                 e2.copy(verts[c]).sub(verts[a]);
                 fn.copy(e1).cross(e2).normalize();
                 mid.copy(verts[a]).add(verts[b]).add(verts[c]).multiplyScalar(1 / 3).sub(solidCenter);
                 if (fn.dot(mid) < 0) fn.negate();
-                faceColor.copy(palette[Math.floor(rand() * palette.length) % palette.length]);
+                faceColor.copy(groupColors[shape.groups[fi]]);
                 for (const j of face) {
                     positions.push(verts[j].x, verts[j].y, verts[j].z);
                     normalsA.push(fn.x, fn.y, fn.z);

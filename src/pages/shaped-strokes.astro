@@ -81,8 +81,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <p><strong>Placement:</strong> Each solid takes a seeded size, side, and orientation, on the same deepened spine as the tubes. It is thrown to one side of the spine, so the chain fills a band rather than a line. The step between neighbors is their two circumradii plus <code>spacing</code> of their sum, so tighter spacing packs more of them.</p>
         <div class="jp"><strong>配置：</strong>各立体は、シードによる大きさ・左右・向きを取り、チューブと同じ深さのついたスパインの上に置かれます。スパインの片側へ振り出されるため、連なりは線ではなく帯を埋めます。隣どうしの間隔は、2つの外接半径にその和の<code>spacing</code>倍を足したものなので、間隔を詰めるほど数が増えます。</div>
 
-        <p><strong>Rotation:</strong> The rotation keys on distance from the tip, so the whole chain turns as the stroke grows. Every face takes one flat random color from the palette, so a solid reads as a cluster of colored facets.</p>
-        <div class="jp"><strong>回転：</strong>回転は先端からの距離に基づくため、連なり全体はストロークが伸びるにつれて回ります。各面はパレットから平坦なランダムの色をひとつ取るので、立体は色付きの面の集まりとして読めます。</div>
+        <p><strong>Rotation:</strong> The rotation keys on distance from the tip, so the whole chain turns as the stroke grows. Color is chosen per face group, so a cube's square and a cone's base are each one flat color while a tetrahedron's every face is its own.</p>
+        <div class="jp"><strong>回転：</strong>回転は先端からの距離に基づくため、連なり全体はストロークが伸びるにつれて回ります。色は面のグループごとに選ばれるため、立方体の正方形と円錐の底面はそれぞれ一色、四面体は各面が自分の色になります。</div>
       </details>
     </div>
   </section>
