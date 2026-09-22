@@ -91,21 +91,55 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     }
 
     // The pointer's own path, shown over the live mark while drawing and gone on
-    // release. THREE.Line stays one pixel wide at any scale.
+    // release. THREE.Line stays one pixel wide at any scale. depthTest is off so a
+    // 3D stroke that rises off the canvas cannot bury the trace under itself.
     const pointerLine = new THREE.Line(
         new THREE.BufferGeometry(),
-        new THREE.LineBasicMaterial({ color: '#000000' })
+        new THREE.LineBasicMaterial({ color: '#000000', depthTest: false, depthWrite: false })
     );
     pointerLine.position.z = 0.06;
     pointerLine.frustumCulled = false;
     pointerLine.visible = pointerTrace;
+    pointerLine.renderOrder = 10;
     // Drawn in the stage's overlay pass, above the coverage-layer composites.
     pointerLine.userData.overlay = true;
     stage.add(pointerLine);
 
+    // The processed spine each piece is actually built from (the smoothed path,
+    // not the raw pointer), as segments so separate pieces do not join up. A
+    // debug overlay, off by default.
+    const spineLine = new THREE.LineSegments(
+        new THREE.BufferGeometry(),
+        new THREE.LineBasicMaterial({ color: '#1a6fe0', depthTest: false, depthWrite: false })
+    );
+    spineLine.position.z = 0.062;
+    spineLine.frustumCulled = false;
+    spineLine.visible = false;
+    spineLine.renderOrder = 11;
+    spineLine.userData.overlay = true;
+    stage.add(spineLine);
+
     function setPointerTrace(on) {
         pointerLine.visible = on;
         stage.draw();
+    }
+
+    function setSpineTrace(on) {
+        spineLine.visible = on;
+        stage.draw();
+    }
+
+    function setSpineLine(paths) {
+        spineLine.geometry.dispose();
+        const verts = [];
+        for (const path of paths) {
+            for (let i = 0; i < path.length - 1; i++) {
+                verts.push(path[i].x, path[i].y, 0, path[i + 1].x, path[i + 1].y, 0);
+            }
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+        spineLine.geometry = geometry;
     }
 
     function setPointerLine(points) {
@@ -159,6 +193,7 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         const group = new THREE.Group();
         const pieces = [];
         const committed = [];
+        const spinePaths = [];
 
         // Builds one run at a fixed slot; its seed and z never depend on how
         // many other runs exist.
@@ -166,6 +201,7 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
             if (holdArc && !hasSettledStart(run, holdArc)) return;
             const path = smoothPiece(run);
             if (!path) return;
+            spinePaths.push(path);
             const builder = colorK === null ? build : (buildEcho ?? build);
             const mark = builder(path, run, seed + slot, colorK);
             if (!mark) return;
@@ -184,7 +220,7 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
             const base = (i + 1) * STRIDE;
             (cfg ? splitByTurn(copy, cfg) : [copy]).forEach((run, k) => addRun(run, base + k, i));
         });
-        return { group, pieces, committed, seedSpan: (paths.length + 1) * STRIDE };
+        return { group, pieces, committed, spinePaths, seedSpan: (paths.length + 1) * STRIDE };
     }
 
     function feed(points, done) {
@@ -193,6 +229,7 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         live = buildFromPoints(points);
         if (live) stage.add(live.group);
         setPointerLine(done ? [] : points);
+        setSpineLine(done || !live ? [] : live.spinePaths);
         if (done && live) {
             board.bake([live.group]);
             ghost = live;
@@ -216,5 +253,5 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     const getSeed = () => seed;
     const setSeed = value => { seed = value; };
 
-    return { disposeGhost, input, feed, setPointerTrace, getSeed, setSeed };
+    return { disposeGhost, input, feed, setPointerTrace, setSpineTrace, getSeed, setSeed };
 }

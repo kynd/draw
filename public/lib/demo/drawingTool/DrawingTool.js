@@ -524,6 +524,7 @@ export class DrawingTool {
     setAutoRandomize(on) { this._autoRandom = Boolean(on); }
 
     setPointerTrace(on) { this.cycle.setPointerTrace(Boolean(on)); }
+    setSpineTrace(on) { this.cycle.setSpineTrace(Boolean(on)); }
 
     // ------------------------------------------------------------------
     // Canvas

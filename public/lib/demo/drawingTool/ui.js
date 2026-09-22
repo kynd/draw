@@ -40,6 +40,7 @@ const TEMPLATE = /* html */`
     <div class="dp-sub-label">Drawing</div>
     <label class="dp-check"><input id="auto-check" type="checkbox" />Randomize tool on release</label>
     <label class="dp-check"><input id="trace-check" type="checkbox" />Show pointer trace</label>
+    <label class="dp-check"><input id="spine-check" type="checkbox" />Show spine</label>
 
     <div class="dp-sub-label">Replay</div>
     <div class="dp-btn-row">
@@ -198,6 +199,8 @@ export function attachDrawingToolUi(tool, layout) {
     autoCheck.addEventListener('change', () => tool.setAutoRandomize(autoCheck.checked));
     const traceCheck = $('trace-check');
     traceCheck.addEventListener('change', () => tool.setPointerTrace(traceCheck.checked));
+    const spineCheck = $('spine-check');
+    spineCheck.addEventListener('change', () => tool.setSpineTrace(spineCheck.checked));
 
     // ------------------------------------------------------------------
     // Replay section
@@ -216,7 +219,7 @@ export function attachDrawingToolUi(tool, layout) {
 
     function setReplayUi(on) {
         replayBtn.textContent = on ? 'Stop' : 'Replay';
-        for (const el of [initBtn, clearBtn, autoCheck, traceCheck, recordBtn, downloadBtn,
+        for (const el of [initBtn, clearBtn, autoCheck, traceCheck, spineCheck, recordBtn, downloadBtn,
             guideBtn, guideToggle, advBtn]) {
             el.disabled = on;
         }
