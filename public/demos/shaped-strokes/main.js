@@ -10,6 +10,11 @@ import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strok
 const ROWS = 3;
 const SEEDS = [1.0, 2.3, 5.1];
 
+// The row layout is fixed, so changing a control resizes each mark in place
+// rather than shifting the rows up and down. The reserved reach is the cloud's
+// at the default settings (its offset plus blob radius, in half-widths).
+const LAYOUT_REACH = 0.07 * (1 + 1.3 + 1.5 * 1.3);
+
 const readout = document.getElementById('readout');
 const ctrl = {
     blob: document.getElementById('blob'),
@@ -60,9 +65,7 @@ function rebuild() {
     entries = [];
 
     const width = parseFloat(ctrl.width.value);
-    // The cloud reaches farthest: its offset plus its blob radius, in half-widths.
-    const reach = width * (1 + parseFloat(ctrl.offset.value) + parseFloat(ctrl.blob.value) * 1.3);
-    const { spread } = layout(stage.extentY, reach);
+    const { spread } = layout(stage.extentY, LAYOUT_REACH);
     let samples = 0, vertices = 0, triangles = 0;
 
     for (let i = 0; i < ROWS; i++) {
