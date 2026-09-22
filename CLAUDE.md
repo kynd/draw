@@ -117,7 +117,8 @@ public/lib/                            library code
                 CloudStrokeRenderer.js  RoundedSquareStrokeRenderer.js
                 SpikeStrokeRenderer.js  PatternStrokeRenderer.js
                 WetPatternStrokeRenderer.js
-                BlobRenderer.js  ShapedBlobRenderer.js  PaintBlobRenderer.js
+                BlobRenderer.js  ShapedBlobRenderer.js  PatternedFillRenderer.js
+                PaintBlobRenderer.js
                 WashBlobRenderer.js  MaterialBlobRenderer.js  StoneBlobRenderer.js
                 SlitScanBlobRenderer.js
                 PixelStrokeRenderer.js  PolygonStrokeRenderer.js

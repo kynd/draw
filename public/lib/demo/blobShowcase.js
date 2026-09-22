@@ -81,6 +81,8 @@ export function setupBlobShowcase({ makeRow, makeShape = null, background = fals
             const renderer = makeRow(i, {
                 color: colors[i][0],
                 color2: colors[i][1],
+                paletteColors: palette.entries.map(e => e.hex),
+                paper: paperColor(palette.entries[0].H),
                 background: testBg?.texture ?? null,
                 blurred: testBg?.blurred ?? null,
                 start,
