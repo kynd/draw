@@ -12,9 +12,9 @@ const ROWS = 3;
 const SEEDS = [1.0, 2.3, 5.1];
 
 // The row layout is fixed, so changing a control resizes each mark in place
-// rather than shifting the rows up and down. The reserved reach is the cloud's
-// at the default settings (its offset plus blob radius, in half-widths).
-const LAYOUT_REACH = 0.07 * (1 + 1.3 + 1.5 * 1.3);
+// rather than shifting the rows up and down. The reach matches the other stroke
+// demos' row spacing (about a stroke width past the wiggle).
+const LAYOUT_REACH = 0.12;
 
 const readout = document.getElementById('readout');
 const ctrl = {
