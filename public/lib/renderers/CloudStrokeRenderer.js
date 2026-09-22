@@ -3,7 +3,7 @@ import { ShaderStrokeRenderer } from './ShaderStrokeRenderer.js';
 import { resampleSpine } from './StrokeRenderer.js';
 import { seededRandom } from '../random.js';
 
-const MAX_BLOBS = 80;
+const MAX_BLOBS = 128;
 
 /**
  * A cloud: large discs scattered along the stroke, drawn as one union.
@@ -37,6 +37,11 @@ export class CloudStrokeRenderer extends ShaderStrokeRenderer {
         // Discs land at jittered arc-length intervals, thrown in any direction with
         // seeded size. Every third disc stays near the spine with at least the base
         // radius, so the chain cannot break however the others are scattered.
+        //
+        // The interval is fixed to the disc size, not to a share of the length, so
+        // density holds as the stroke grows: extending it adds new discs at the tail
+        // rather than spreading the existing ones apart. A stroke long enough to fill
+        // the disc budget falls back to spreading, the only way to keep it covered.
         const spacing = Math.max(rBase * 0.65, length / MAX_BLOBS);
         const blobs = [];
         let due = 0, acc = 0, k = 0;

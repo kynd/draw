@@ -269,6 +269,11 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                 void main() {
                     if (uShowNormal == 1) { gl_FragColor = normalDebug(vNormal); return; }
                     vec3 n = normalize(vNormal);
+                    // At a bend tighter than the tube, or a cusp where the frame
+                    // flips, the surface folds and a face can wind inward. Drawn
+                    // double-sided it still covers, and flipping the inward normal
+                    // keeps it lit, so the fold reads as a crease rather than a hole.
+                    if (!gl_FrontFacing) n = -n;
                     float diff = diffuseAt(n);
                     vec3 color;
                     if (uMode == 0) {
@@ -314,6 +319,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                     gl_FragColor = vec4(color, 1.0);
                 }
             `,
+            side: THREE.DoubleSide,
         });
     }
 }

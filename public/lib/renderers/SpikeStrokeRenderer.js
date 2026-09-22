@@ -8,9 +8,12 @@ const WIDTH_REF = 0.12;
 /**
  * A broad stroke whose edge rises into sharp spikes.
  *
- * The boundary is pushed outward by a profile with a corner at each tip and a zero
- * derivative between them, so the tips stay sharp while the valleys stay rounded:
- * the profile is a power of a triangle wave, and the power is the sharpness.
+ * The boundary is pushed outward by a blade profile: a straight-sided (linear)
+ * component keeps each blade broad and the valleys narrow, and a power of a
+ * triangle wave draws the tip to a point. The corner at the tip survives any power,
+ * so the tip stays sharp while `sharp` only bends the sides toward it. The spikes
+ * rise along the body alone; over the caps they fade, so each end closes on a plain
+ * rounded curve rather than a fan of spikes.
  *
  * Each spike varies by a hash of its own index: height, lean (the tip's position
  * inside its cell), and spacing through a low-frequency warp of the phase. The two
@@ -70,9 +73,16 @@ export class SpikeStrokeRenderer extends ShaderStrokeRenderer {
                 float h = mix(0.35, 1.2, hash11(cell * 13.7 + side + uSeed * 91.0));
                 float tip = mix(0.25, 0.75, hash11(cell * 7.3 + side + uSeed * 17.0));
                 float tri = f < tip ? f / tip : (1.0 - f) / (1.0 - tip);
-                float spike = pow(max(tri, 0.0), uSharp);
+                // Broaden each blade and pinch the valleys: a straight-sided
+                // (linear) component keeps the body thick, while the power
+                // sharpens only the tip. The tip is a corner in both terms, so
+                // the point survives.
+                float spike = mix(pow(max(tri, 0.0), uSharp), max(tri, 0.0), 0.55);
 
-                float boundary = 1.0 + uAmp * h * spike;
+                // Spikes belong to the body edge, not the rounded caps: fade
+                // them out onto the cap so each end closes on a plain curve.
+                float body = 1.0 - smoothstep(0.0, 0.35, abs(vBeyond));
+                float boundary = 1.0 + uAmp * h * spike * body;
                 float d = capDistance() - boundary;
                 float alpha = 1.0 - smoothstep(-0.015, 0.015, d);
                 if (alpha <= 0.003) discard;

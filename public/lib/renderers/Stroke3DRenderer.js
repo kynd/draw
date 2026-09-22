@@ -11,12 +11,10 @@ const WIDTH_REF = 0.08;
  * The spine gains depth from a seeded wave of arc length, so the mark reads as an
  * object lying over the canvas rather than a flat fill, and the shape rotates
  * around the spine by an angle that depends on the distance from the stroke's
- * end: as the stroke grows, that distance changes everywhere, so the whole mark
- * visibly turns while it is drawn. A seeded offset also pushes the shape
- * slightly off the spine, in a direction that rotates with the same angle, so
- * the mark orbits the spine as well as turning. Rotation is the one deliberate
- * exception to prefix stability; the depth wave and the offset's amplitude key
- * on distance from the start and hold still.
+ * start. A seeded offset also pushes the shape slightly off the spine, in a
+ * direction that rotates with the same angle, so the mark orbits the spine along
+ * its length. Every one of these keys on distance from the start, so the drawn
+ * part holds still as the stroke grows.
  *
  * The frame is the 2D spine normal for the in-plane axis and +z for the
  * out-of-plane axis. The 3D strokes carry true normals, so their shared light
@@ -28,7 +26,7 @@ export class Stroke3DRenderer extends StrokeRenderer {
      * @param {object} opts
      * @param {number} [opts.depth]  Amplitude of the spine's depth wave.
      * @param {number} [opts.twist]  Rotation around the spine, radians per unit of
-     *                               distance from the end.
+     *                               distance from the start.
      * @param {number} [opts.zBase]  Height the wave rides on, above the canvas.
      *                               The default holds the spine about 100 CSS
      *                               pixels over it.
@@ -59,7 +57,7 @@ export class Stroke3DRenderer extends StrokeRenderer {
             Math.sin(s * wscale * 3.1 + seed * 5.3) * 0.6 +
             Math.sin(s * wscale * 6.7 + seed * 9.1) * 0.4
         );
-        const phaseAt = s => (length - s) * this.twist + seed * 2.399;
+        const phaseAt = s => s * this.twist + seed * 2.399;
         // The offset from the spine: a seeded wave of arc length sets how far,
         // and the twist phase sets which way around the spine, so the offset's
         // direction rotates with the mark while it is drawn.
