@@ -289,6 +289,191 @@ export function splitByTurn(points, { angle = Math.PI * 0.55, span = 0.05 } = {}
     return runs;
 }
 
+/**
+ * Chase smoothing: instead of interpolating through the drawn points, a tip walks
+ * forward chasing a carrot that rides `radius` ahead of it along the drawn path, and
+ * its heading turns no faster than `radius` allows. Aiming ahead lets the tip lean
+ * into a corner and cut it, rather than reaching it and overshooting into a loop, and
+ * the turn limit rounds any corner or jitter sharper than the radius while gentler
+ * shapes pass through.
+ *
+ * The tip is committed: `update` only ever extends it forward, so a growing stroke
+ * keeps every point already drawn, and moving the pointer back leaves the tip with no
+ * forward target, so it holds in place instead of chasing back. Where the path doubles
+ * back tighter than the radius, the carrot ahead is found past the too-tight part, so
+ * the tip cuts across it rather than spiraling on it. `feed` a stroke's points as they
+ * arrive and pass `done` on the last call to consume the lag out to the final point.
+ */
+export class ChaseSmoother {
+    /**
+     * @param {object} opts
+     * @param {number} [opts.radius]     Minimum turn radius, in world units.
+     * @param {number} [opts.step]       Tip step; defaults to a fraction of the radius.
+     * @param {number} [opts.lagFactor]  Cap on the steps per update, as a multiple of
+     *                                   the path length, so a pass cannot run away.
+     */
+    constructor({ radius = 0.1, step = null, lagFactor = 4 } = {}) {
+        this._step = step;
+        this.lagFactor = lagFactor;
+        this.setRadius(radius);
+        this.reset();
+    }
+
+    setRadius(radius) {
+        this.radius = radius;
+        this.st = this._step ?? Math.max(radius * 0.15, 1e-3);
+        this.lookahead = radius * 1.5;
+        this.maxTurn = this.st / Math.max(radius, 1e-4);
+    }
+
+    /** Clears the tip so the next `feed` starts a fresh stroke. */
+    reset() {
+        this.out = [];
+        this.tx = 0; this.ty = 0; this.hx = 1; this.hy = 0;
+        this.ci = 1;
+        this.started = false;
+        this.prevArc = 0;
+    }
+
+    /**
+     * Extends the committed tip along `points` (the whole stroke so far), and returns
+     * the tip path. Only new forward progress is added; nothing already output moves.
+     * Each call advances the tip by how far the pointer traveled since the last call,
+     * so the tip keeps pace with the pointer and closes on it when the pointer slows,
+     * rather than stalling a fixed lookahead behind. Pass `done` on the final call to
+     * spend the remaining lag out to the last point.
+     */
+    feed(points, done = false) {
+        const path = resampleEvery(points, this.st);
+        const n = path.length;
+        if (n < 2) return this.out.length ? this.out : points.map(p => p.clone());
+        if (!this.started) {
+            this.tx = path[0].x; this.ty = path[0].y;
+            this.hx = path[1].x - path[0].x; this.hy = path[1].y - path[0].y;
+            const hl = Math.hypot(this.hx, this.hy) || 1; this.hx /= hl; this.hy /= hl;
+            this.out = [path[0].clone()];
+            this.ci = 1; this.started = true; this.prevArc = 0;
+        }
+
+        // The pointer's travel since the last call is the tip's budget for this one.
+        let arc = 0;
+        for (let i = 1; i < n; i++) arc += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
+        let budget = arc - this.prevArc;
+        this.prevArc = arc;
+        if (done) budget = Infinity;
+
+        const last = path[n - 1];
+        const guard = this.lagFactor * n + 8;
+        let moved = 0;
+        for (let s = 0; s < guard && moved < budget; s++) {
+            // The carrot: the first path point at least `lookahead` ahead of the tip,
+            // advanced past any stretch that doubles back behind the heading.
+            while (this.ci < n - 1
+                && Math.hypot(path[this.ci].x - this.tx, path[this.ci].y - this.ty) < this.lookahead) this.ci++;
+            while (this.ci < n - 1) {
+                const ax = path[this.ci].x - this.tx, ay = path[this.ci].y - this.ty;
+                const al = Math.hypot(ax, ay) || 1;
+                if ((this.hx * ax + this.hy * ay) / al > 0.2) break;
+                this.ci++;
+            }
+            const carrot = path[this.ci];
+            // Forward only: if the sole remaining target is behind the heading, the
+            // pointer has doubled back, so hold here rather than turning around.
+            const bx = carrot.x - this.tx, by = carrot.y - this.ty;
+            const bl = Math.hypot(bx, by) || 1;
+            if (this.ci >= n - 1 && (this.hx * bx + this.hy * by) / bl < 0) break;
+            // Never run past the pointer; keep at most a step of lag.
+            if (Math.hypot(last.x - this.tx, last.y - this.ty) < this.st) break;
+            this._stepTo(carrot);
+            moved += this.st;
+        }
+        // Close onto the exact end once, only if it is reached and ahead.
+        if (done) {
+            const dx = last.x - this.tx, dy = last.y - this.ty;
+            if (Math.hypot(dx, dy) < this.st * 1.5 && (this.hx * dx + this.hy * dy) >= 0) this.out.push(last.clone());
+        }
+        return this.out;
+    }
+
+    _stepTo(carrot) {
+        let dx = carrot.x - this.tx, dy = carrot.y - this.ty;
+        const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+        let ang = Math.atan2(this.hx * dy - this.hy * dx, this.hx * dx + this.hy * dy);
+        ang = Math.min(Math.max(ang, -this.maxTurn), this.maxTurn);
+        const cos = Math.cos(ang), sin = Math.sin(ang);
+        const nhx = this.hx * cos - this.hy * sin;
+        this.hy = this.hx * sin + this.hy * cos; this.hx = nhx;
+        this.tx += this.hx * this.st; this.ty += this.hy * this.st;
+        this.out.push(new THREE.Vector3(this.tx, this.ty, 0));
+    }
+}
+
+/** Chase-smooth a completed path in one pass (see {@link ChaseSmoother}). */
+export function smoothByChase(points, opts = {}) {
+    if (points.length < 2) return points.map(p => p.clone());
+    return new ChaseSmoother(opts).feed(points, true).map(p => p.clone());
+}
+
+/**
+ * Curvature-limiting relaxation: repeatedly nudge every vertex that turns tighter than
+ * `radius` toward the chord of its neighbors, by enough to bring that turn back to the
+ * limit. Straight and gently curved parts satisfy the limit already, so they are left
+ * where they are; only the too-sharp parts move, and a sharp corner spreads into an arc
+ * over a few vertices. It is a projection onto the curvature-legal set, iterated: each
+ * pass reduces the worst violation, and more passes drive it toward zero. It is not a
+ * one-shot guarantee (the set is non-convex, and moving a vertex disturbs its
+ * neighbors), so the bound holds to whatever tolerance the pass count reaches.
+ *
+ * @param {THREE.Vector3[]} points
+ * @param {object} opts
+ * @param {number} [opts.radius]  Minimum radius of curvature, in world units.
+ * @param {number} [opts.step]    Resample step; the vertices the limit is measured on.
+ * @param {number} [opts.passes]  Relaxation sweeps.
+ * @param {number} [opts.relax]   Fraction of the correction applied per sweep, 0..1.
+ */
+export function smoothByCurvatureLimit(points, { radius = 0.1, step = null, passes = 60, relax = 0.9 } = {}) {
+    const st = step ?? Math.max(radius * 0.1, 1e-3);
+    const path = resampleEvery(points, st);
+    const n = path.length;
+    if (n < 3) return path.map(p => p.clone());
+    const pts = path.map(p => p.clone());
+    for (let pass = 0; pass < passes; pass++) {
+        for (let i = 1; i < n - 1; i++) {
+            const a = pts[i - 1], b = pts[i], c = pts[i + 1];
+            const ax = b.x - a.x, ay = b.y - a.y, bx = c.x - b.x, by = c.y - b.y;
+            const theta = Math.abs(Math.atan2(ax * by - ay * bx, ax * bx + ay * by));
+            const ds = (Math.hypot(ax, ay) + Math.hypot(bx, by)) / 2;
+            const thetaMax = ds / radius;
+            if (theta > thetaMax) {
+                const w = relax * (theta - thetaMax) / theta;
+                b.x += w * ((a.x + c.x) / 2 - b.x);
+                b.y += w * ((a.y + c.y) / 2 - b.y);
+            }
+        }
+    }
+    return pts;
+}
+
+/**
+ * The tightest radius of curvature along a polyline, and the vertices whose radius is
+ * below `radius` (the ones still violating a curvature limit). Radius at a vertex is its
+ * arc step divided by its turn angle.
+ */
+export function curvatureStats(points, radius) {
+    const marks = [];
+    let minR = Infinity;
+    for (let i = 1; i < points.length - 1; i++) {
+        const a = points[i - 1], b = points[i], c = points[i + 1];
+        const ax = b.x - a.x, ay = b.y - a.y, bx = c.x - b.x, by = c.y - b.y;
+        const theta = Math.abs(Math.atan2(ax * by - ay * bx, ax * bx + ay * by));
+        const ds = (Math.hypot(ax, ay) + Math.hypot(bx, by)) / 2;
+        const R = theta > 1e-5 ? ds / theta : Infinity;
+        if (R < minR) minR = R;
+        if (R < radius * 0.97) marks.push(b.clone());
+    }
+    return { minR, marks };
+}
+
 function sampleLine(a, b, samples) {
     return Array.from({ length: samples + 1 }, (_, k) => a.clone().lerp(b, k / samples));
 }

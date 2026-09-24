@@ -1,0 +1,43 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Smoothing experiments" slug="experimental/smoothing-experiments">
+  <div class="monologue">
+    Two ways to bound a stroke's curvature, before deciding which one earns a place
+  </div>
+
+  <div class="prose">
+    <p>This page is experimental and only exists in the local build. Both demos take a drawn path and limit how tightly it can turn, to a minimum radius, by two different methods.</p>
+    <div class="jp">このページは実験的なもので、ローカルのビルドにのみ存在します。どちらのデモも、描いた線を受け取り、最小半径まで、曲がりの鋭さを2つの異なる方法で制限します。</div>
+  </div>
+
+  <section class="demo-section" id="chase">
+    <div class="demo-header">
+      <h2>Chase smoothing</h2>
+      <a href={`${base}/demos/experimental/chase-smoothing/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/experimental/chase-smoothing/index.html?embedded`} title="Chase smoothing" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>A tip walks forward chasing a carrot that rides a radius ahead of it along the drawn path, and its heading turns no faster than the radius allows. The tip is committed: it only extends forward, so moving the pointer back holds it in place rather than pulling it back.</p>
+      <div class="jp">先端が、描いた線に沿って一半径ぶん先を進むにんじんを追って前へ歩き、その向きは半径が許す以上には速く曲がりません。先端は確定されていて、前にしか伸びないため、ポインタを戻しても引き戻されず、その場に留まります。</div>
+    </div>
+  </section>
+
+  <section class="demo-section" id="curvature-limit">
+    <div class="demo-header">
+      <h2>Curvature limit</h2>
+      <a href={`${base}/demos/experimental/curvature-limit/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/experimental/curvature-limit/index.html?embedded`} title="Curvature limit" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Constraint-projection relaxation: every vertex that turns tighter than the radius is nudged toward the chord of its neighbors, over repeated sweeps, so the too-sharp parts round out while straight and gentle parts stay put. The readout reports the tightest radius reached and marks vertices still over the limit, so the number of passes needed to hit the bound is visible.</p>
+      <div class="jp">制約射影の緩和法です。半径より鋭く曲がる各頂点を、繰り返しの掃引で隣接点の弦へと寄せるため、鋭すぎる部分は丸まり、まっすぐな部分やゆるやかな部分はそのまま残ります。読み出しは到達した最も小さい半径を示し、まだ限界を超えている頂点に印を付けるので、限界に達するのに必要な掃引の回数が見えます。</div>
+    </div>
+  </section>
+</PageLayout>
