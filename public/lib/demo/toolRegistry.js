@@ -368,19 +368,19 @@ export const toolRegistry = [
             });
         } },
     { id: 'polka-dots', kind: 'blob',
-        params: [{ key: 'scale', min: 0.06, max: 0.22 }, { key: 'jitter', min: 0, max: 0.4 }],
+        params: [{ key: 'scale', min: 0.03, max: 0.11 }, { key: 'jitter', min: 0, max: 0.4 }],
         make: (v, ctx) => new PatternedFillRenderer({
             pattern: 'dots', colors: ctx.colors, background: ctx.tintLight,
             scale: v.scale, jitter: v.jitter,
         }) },
     { id: 'grid-squares', kind: 'blob',
-        params: [{ key: 'scale', min: 0.06, max: 0.22 }, { key: 'inset', min: 0, max: 0.3 }],
+        params: [{ key: 'scale', min: 0.03, max: 0.11 }, { key: 'inset', min: 0, max: 0.3 }],
         make: (v, ctx) => new PatternedFillRenderer({
             pattern: 'squares', colors: ctx.colors, background: ctx.tintLight,
             scale: v.scale, inset: v.inset,
         }) },
     { id: 'riley-waves', kind: 'blob',
-        params: [{ key: 'scale', min: 0.05, max: 0.2 }, { key: 'waveAmp', min: 0, max: 0.2 }],
+        params: [{ key: 'scale', min: 0.025, max: 0.1 }, { key: 'waveAmp', min: 0, max: 0.2 }],
         make: (v, ctx) => new PatternedFillRenderer({
             pattern: 'waves', colors: ctx.colors,
             scale: v.scale, waveAmp: v.waveAmp,
