@@ -82,7 +82,7 @@ export class ShapedBlobRenderer extends BlobRenderer {
         const count = Math.round(this.spikes);
         const cellArc = perimeter / count;
         // Points per spike, kept within the contour budget.
-        const per = Math.max(6, Math.min(12, Math.floor(MAX_CONTOUR / count) - 1));
+        const per = Math.max(8, Math.min(16, Math.floor(MAX_CONTOUR / count) - 1));
         const hash = (k, salt) => {
             const x = Math.sin(k * 13.7 + seed * 91.0 + salt) * 43758.5453;
             return x - Math.floor(x);
@@ -95,18 +95,40 @@ export class ShapedBlobRenderer extends BlobRenderer {
         for (let k = 0; k < count; k++) {
             const h = 0.2 + 1.4 * hash(k, 3.1);
             const tip = 0.25 + 0.5 * hash(k, 7.7);
-            // Densely sample the profile curve, measure its length in (arc, offset)
-            // space, and place the spike's vertices at equal chord length along it, so
-            // the steep sides near the tip get as many vertices as the flat base
-            // instead of the base hogging them; the tip is forced in as a sharp corner.
-            const DENSE = 64;
-            const fD = new Array(DENSE + 1), cum = new Array(DENSE + 1);
-            cum[0] = 0; fD[0] = 0;
-            for (let m = 1; m <= DENSE; m++) {
+            // Densely sample the spike outline in world space, then place its vertices
+            // by a measure that mixes arc length with turning, so the corners where the
+            // outline bends hardest (the knee at the base, the tip) collect more
+            // vertices than the near-straight stretches. The tip is forced in as a
+            // sharp corner.
+            const DENSE = 96;
+            const fD = new Array(DENSE + 1);
+            const wx = new Array(DENSE + 1), wy = new Array(DENSE + 1);
+            for (let m = 0; m <= DENSE; m++) {
                 fD[m] = m / DENSE;
-                const dA = (fD[m] - fD[m - 1]) * cellArc;
-                const dO = profileOff(fD[m], h, tip) - profileOff(fD[m - 1], h, tip);
-                cum[m] = cum[m - 1] + Math.hypot(dA, dO);
+                const off = profileOff(fD[m], h, tip);
+                const { px, py, nx, ny } = sampleAt((k + fD[m]) * cellArc);
+                wx[m] = px + nx * off; wy[m] = py + ny * off;
+            }
+            const chord = new Array(DENSE + 1); chord[0] = 0;
+            let totalChord = 0;
+            for (let m = 1; m <= DENSE; m++) {
+                chord[m] = Math.hypot(wx[m] - wx[m - 1], wy[m] - wy[m - 1]);
+                totalChord += chord[m];
+            }
+            const turn = new Array(DENSE + 1).fill(0);
+            let totalTurn = 0;
+            for (let m = 1; m < DENSE; m++) {
+                const ax = wx[m] - wx[m - 1], ay = wy[m] - wy[m - 1];
+                const bx = wx[m + 1] - wx[m], by = wy[m + 1] - wy[m];
+                turn[m] = Math.abs(Math.atan2(ax * by - ay * bx, ax * bx + ay * by));
+                totalTurn += turn[m];
+            }
+            // Balance the two so a full spike's worth of turning weighs as much as its
+            // arc, then bias toward curvature.
+            const bias = (totalChord / Math.max(totalTurn, 1e-4)) * 1.5;
+            const cum = new Array(DENSE + 1); cum[0] = 0;
+            for (let m = 1; m <= DENSE; m++) {
+                cum[m] = cum[m - 1] + chord[m] + bias * turn[m - 1];
             }
             const total = cum[DENSE] || 1;
             const cellFs = [tip];

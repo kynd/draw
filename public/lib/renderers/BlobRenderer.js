@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export const MAX_CONTOUR = 160;
+export const MAX_CONTOUR = 200;
 
 /**
  * Base for renderers that fill a closed region.
