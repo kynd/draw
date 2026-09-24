@@ -62,7 +62,8 @@ export class AroundDemoConfig extends DrawingToolConfig {
 export class PaintingDemoConfig extends DrawingToolConfig {
     constructor() {
         super({ tools: [
-            'flat-blob', 'wobbly-blob', 'spiky-blob', 'dry-brush', 'flat-paint', 'knife-oil',
+            'flat-blob', 'wobbly-blob', 'spiky-blob', 'polka-dots', 'grid-squares', 'riley-waves',
+            'dry-brush', 'flat-paint', 'knife-oil',
             'wash', 'watery-wash', 'gouache', 'metal', 'glass-blob', 'facet-glass',
             'rock', 'marble', 'sand',
         ] });

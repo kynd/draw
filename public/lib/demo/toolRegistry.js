@@ -21,6 +21,7 @@ import { OilStrokeRenderer } from '../renderers/OilStrokeRenderer.js';
 import { ChromeStrokeRenderer } from '../renderers/ChromeStrokeRenderer.js';
 import { PixelStrokeRenderer } from '../renderers/PixelStrokeRenderer.js';
 import { ShapedBlobRenderer } from '../renderers/ShapedBlobRenderer.js';
+import { PatternedFillRenderer } from '../renderers/PatternedFillRenderer.js';
 import { PaintBlobRenderer } from '../renderers/PaintBlobRenderer.js';
 import { WashBlobRenderer } from '../renderers/WashBlobRenderer.js';
 import { MaterialBlobRenderer } from '../renderers/MaterialBlobRenderer.js';
@@ -366,6 +367,24 @@ export const toolRegistry = [
                 color: ctx.colorA, colorB: ctx.colorB, gradientFrom, gradientTo, wobble: v.wobble,
             });
         } },
+    { id: 'polka-dots', kind: 'blob',
+        params: [{ key: 'scale', min: 0.06, max: 0.22 }, { key: 'jitter', min: 0, max: 0.4 }],
+        make: (v, ctx) => new PatternedFillRenderer({
+            pattern: 'dots', colors: ctx.colors, background: ctx.tintLight,
+            scale: v.scale, jitter: v.jitter,
+        }) },
+    { id: 'grid-squares', kind: 'blob',
+        params: [{ key: 'scale', min: 0.06, max: 0.22 }, { key: 'inset', min: 0, max: 0.3 }],
+        make: (v, ctx) => new PatternedFillRenderer({
+            pattern: 'squares', colors: ctx.colors, background: ctx.tintLight,
+            scale: v.scale, inset: v.inset,
+        }) },
+    { id: 'riley-waves', kind: 'blob',
+        params: [{ key: 'scale', min: 0.05, max: 0.2 }, { key: 'waveAmp', min: 0, max: 0.2 }],
+        make: (v, ctx) => new PatternedFillRenderer({
+            pattern: 'waves', colors: ctx.colors,
+            scale: v.scale, waveAmp: v.waveAmp,
+        }) },
     { id: 'dry-brush', kind: 'blob',
         params: [{ key: 'dry', min: 0.3, max: 1 }],
         make: (v, ctx) => new PaintBlobRenderer({

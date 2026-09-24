@@ -108,7 +108,7 @@ export class PatternedFillRenderer extends BlobRenderer {
                     }
                 }
                 float aa = fwidth(best) + 1e-4;
-                float t = 1.0 - smoothstep(s * 0.46 - aa, s * 0.46 + aa, best);
+                float t = 1.0 - smoothstep(s * 0.34 - aa, s * 0.34 + aa, best);
                 return mix(uBg, pickColor(bestCell), t);
             }
 
