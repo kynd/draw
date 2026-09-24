@@ -80,25 +80,48 @@ export class ShapedBlobRenderer extends BlobRenderer {
         };
 
         const count = Math.round(this.spikes);
+        const cellArc = perimeter / count;
         // Points per spike, kept within the contour budget.
         const per = Math.max(6, Math.min(12, Math.floor(MAX_CONTOUR / count) - 1));
         const hash = (k, salt) => {
             const x = Math.sin(k * 13.7 + seed * 91.0 + salt) * 43758.5453;
             return x - Math.floor(x);
         };
+        const profileOff = (f, h, tip) => {
+            const tri = f < tip ? f / tip : (1 - f) / (1 - tip);
+            return this.spikeAmp * h * Math.pow(Math.max(tri, 0), this.sharp);
+        };
         const out = [];
         for (let k = 0; k < count; k++) {
             const h = 0.2 + 1.4 * hash(k, 3.1);
             const tip = 0.25 + 0.5 * hash(k, 7.7);
-            const fs = [];
-            for (let m = 0; m < per; m++) fs.push(m / per);
-            fs.push(tip);
-            fs.sort((p, q) => p - q);
-            for (const f of fs) {
+            // Densely sample the profile curve, measure its length in (arc, offset)
+            // space, and place the spike's vertices at equal chord length along it, so
+            // the steep sides near the tip get as many vertices as the flat base
+            // instead of the base hogging them; the tip is forced in as a sharp corner.
+            const DENSE = 64;
+            const fD = new Array(DENSE + 1), cum = new Array(DENSE + 1);
+            cum[0] = 0; fD[0] = 0;
+            for (let m = 1; m <= DENSE; m++) {
+                fD[m] = m / DENSE;
+                const dA = (fD[m] - fD[m - 1]) * cellArc;
+                const dO = profileOff(fD[m], h, tip) - profileOff(fD[m - 1], h, tip);
+                cum[m] = cum[m - 1] + Math.hypot(dA, dO);
+            }
+            const total = cum[DENSE] || 1;
+            const cellFs = [tip];
+            let mi = 0;
+            for (let p = 0; p < per; p++) {
+                const target = total * p / per;
+                while (mi < DENSE && cum[mi + 1] < target) mi++;
+                const seg = cum[mi + 1] - cum[mi] || 1;
+                cellFs.push(fD[mi] + (fD[mi + 1] - fD[mi]) * (target - cum[mi]) / seg);
+            }
+            cellFs.sort((p, q) => p - q);
+            for (const f of cellFs) {
                 if (f >= 1) continue;
-                const tri = f < tip ? f / tip : (1 - f) / (1 - tip);
-                const off = this.spikeAmp * h * Math.pow(Math.max(tri, 0), this.sharp);
-                const { px, py, nx, ny } = sampleAt(((k + f) / count) * perimeter);
+                const off = profileOff(f, h, tip);
+                const { px, py, nx, ny } = sampleAt((k + f) * cellArc);
                 out.push(new THREE.Vector3(px + nx * off, py + ny * off, 0));
             }
         }
