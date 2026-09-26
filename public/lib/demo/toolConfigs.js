@@ -54,7 +54,8 @@ export class PatternedDemoConfig extends DrawingToolConfig {
 export class AroundDemoConfig extends DrawingToolConfig {
     constructor() {
         super({ tools: [
-            'around-spiral', 'around-entangled', 'around-scattered', 'around-wiggle',
+            'around-spiral', 'around-entangled', 'around-scattered',
+            'around-wiggle', 'around-wiggle-even', 'around-wiggle-u',
         ] });
     }
 }

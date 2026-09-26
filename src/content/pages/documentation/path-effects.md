@@ -21,8 +21,8 @@ The tip circles with sin and cos while its center moves along the base path, ret
 
 ## wigglePath
 
-One path crossing the base from side to side, its wavelength tightening from `cycleStart` at the beginning to `cycleEnd` at the end. The crossing count comes from the path's length, so the loose-to-tight sweep reads the same on a short stroke as on a long one. The offset runs along the base normal at full amplitude the whole way, so the first crossing is as wide as the last. Takes `amplitude`, `cycleStart`, and `cycleEnd`.
-<div class="jp">元のパスを左右に横切る一本のパスで、波長は始めの`cycleStart`から終わりの`cycleEnd`へと詰まっていきます。横切る回数はパスの長さから決まるため、ゆるいから詰まるへの移り変わりは、短いストロークでも長いストロークでも同じように読めます。オフセットは元のパスの法線方向に、全体を通して振幅いっぱいで走るため、最初の横切りは最後と同じ幅になります。`amplitude`、`cycleStart`、`cycleEnd`を受け取ります。</div>
+One path crossing the base from side to side. Its wavelength runs from `cycleStart` at the beginning to `cycleEnd` at the end, so equal values hold a constant wavelength and unequal ones sweep loose to tight. The crossing count comes from the path's length, so the sweep reads the same on a short stroke as on a long one. The offset runs along the base normal at full amplitude the whole way, so the first crossing is as wide as the last. `shape` is the crossing profile: `sine` is a plain sine, `u` flattens each lobe toward its extreme and steepens the crossing, so the excursions read as U turns. Takes `amplitude`, `cycleStart`, `cycleEnd`, and `shape`. The companion `wiggleStrokeWidth(amplitude, wavelength, density)` returns a brush line width for the wave, derived from amplitude and wavelength and clamped to 2 to 6 pixels at `density` 1, then scaled by `density`, so the line stays balanced to the overall shape unless it is thinned or thickened.
+<div class="jp">元のパスを左右に横切る一本のパスです。波長は始めの`cycleStart`から終わりの`cycleEnd`へと変化するため、両者が等しければ波長は一定に保たれ、異なればゆるいから詰まるへと移り変わります。横切る回数はパスの長さから決まるため、その移り変わりは短いストロークでも長いストロークでも同じように読めます。オフセットは元のパスの法線方向に、全体を通して振幅いっぱいで走るため、最初の横切りは最後と同じ幅になります。`shape`は横切りのプロファイルです。`sine`は素直なサイン波、`u`は各ローブを端で平らにし横切りを急にするため、振れがU字のターンとして読めます。`amplitude`、`cycleStart`、`cycleEnd`、`shape`を受け取ります。</div>
 
 ## entangledPaths
 

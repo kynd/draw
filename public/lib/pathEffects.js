@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { seededRandom } from './random.js';
 import { resampleEvery, bSpline } from './curves.js';
+import { PIXELS_PER_UNIT } from './CanvasBuffer.js';
 
 /**
  * Generators that derive new paths from a base path.
@@ -50,38 +51,96 @@ export function spiralPath(points, { cycle = 0.02, radius = 0.14, turns, count }
 }
 
 /**
- * A single path that wiggles from side to side across the base, its wavelength tightening
- * from `cycleStart` at the beginning to `cycleEnd` at the end. The wiggle count comes from
- * the path's length, so the loose-to-tight sweep reads the same on a short stroke as on a
- * long one. The offset runs along the base normal at full amplitude the whole way, so the
- * first crossing is as wide as the last.
+ * The brush line width for a wiggle, derived from its amplitude and wavelength so the
+ * line stays balanced to the overall shape rather than fixed. Both are in world units.
+ * At `density` 1 the result is clamped to 2..6 CSS pixels (a small or tight wave takes a
+ * thin line, a large loose one a thicker line); `density` scales that from there, so a
+ * caller can thin or thicken the line relative to the wave.
+ *
+ * @param {number} amplitude  Peak offset from the base, in world units.
+ * @param {number} wavelength  Wavelength, in world units.
+ * @param {number} [density]  Multiplier on the balanced width.
+ * @returns {number} Line width, in world units.
+ */
+export function wiggleStrokeWidth(amplitude, wavelength, density = 1) {
+    const featurePx = Math.min(amplitude, wavelength) * PIXELS_PER_UNIT;
+    const balanced = Math.min(6, Math.max(2, featurePx * 0.08));
+    return balanced * density / PIXELS_PER_UNIT;
+}
+
+/**
+ * A single path that wiggles from side to side across the base. Its wavelength runs from
+ * `cycleStart` at the beginning to `cycleEnd` at the end, so equal values hold a constant
+ * wavelength and unequal ones sweep loose to tight. The wiggle count comes from the path's
+ * length, so the sweep reads the same on a short stroke as on a long one. The offset runs
+ * along the base normal at full amplitude the whole way, so the first crossing is as wide
+ * as the last. `shape` is the crossing profile: `sine` is a plain sine, `u` flattens each
+ * lobe toward its extreme and steepens the crossing, so the excursions read as U turns.
  *
  * @param {THREE.Vector3[]} points
  * @param {object} [opts]
  * @param {number} [opts.amplitude]   Peak offset from the base, in world units.
- * @param {number} [opts.cycleStart]  Wavelength at the start (loose).
- * @param {number} [opts.cycleEnd]    Wavelength at the end (tight).
+ * @param {number} [opts.cycleStart]  Wavelength at the start.
+ * @param {number} [opts.cycleEnd]    Wavelength at the end.
+ * @param {'sine'|'u'} [opts.shape]   The crossing profile.
  */
-export function wigglePath(points, { amplitude = 0.1, cycleStart = 0.12, cycleEnd = 0.03 } = {}) {
-    const curve = toCurve(points);
-    const length = curve.getLength();
-    if (length < 1e-4) return points.map(p => p.clone());
+export function wigglePath(points, { amplitude = 0.1, cycleStart = 0.12, cycleEnd = 0.03, shape = 'sine' } = {}) {
+    // Arc table over the raw control polygon. Sampling at fixed arc steps from the start
+    // (rather than even fractions of the whole, resampled through a spline's arc-length
+    // table) keeps the settled part put as points are appended at the tip: for a constant
+    // wavelength the wave holds still and only the tip advances, instead of the whole path
+    // crawling and jittering as it grows. A U lobe crosses steeply, so that drift used to
+    // show worst there.
+    const segs = [];
+    let total = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+        const a = points[i], b = points[i + 1];
+        const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+        const len = Math.hypot(dx, dy);
+        if (len < 1e-9) continue;
+        segs.push({ ax: a.x, ay: a.y, az: a.z, ux: dx / len, uy: dy / len, uz: dz / len, len, s0: total });
+        total += len;
+    }
+    if (total < 1e-4 || segs.length === 0) return points.map(p => p.clone());
+    const at = s => {
+        s = Math.min(Math.max(s, 0), total);
+        let i = 0;
+        while (i < segs.length - 1 && segs[i].s0 + segs[i].len < s) i++;
+        const sg = segs[i];
+        const local = Math.min(s - sg.s0, sg.len);
+        return { x: sg.ax + sg.ux * local, y: sg.ay + sg.uy * local, z: sg.az + sg.uz * local };
+    };
+
     // Wavelength is linear in arc length, so the accumulated phase has a closed form:
     // with lambda(s) = l0 + k s, the integral of 2*pi/lambda ds is (2*pi/k) ln(lambda/l0).
+    // A constant wavelength (l0 == l1) reduces to a phase linear in arc, stable per point.
     const l0 = cycleStart, l1 = cycleEnd;
-    const k = (l1 - l0) / length;
+    const k = (l1 - l0) / total;
     const phaseAt = s => Math.abs(k) < 1e-9
         ? (Math.PI * 2 / l0) * s
         : (Math.PI * 2 / k) * Math.log((l0 + k * s) / l0);
-    const cycles = phaseAt(length) / (Math.PI * 2);
-    const n = Math.min(4000, Math.max(60, Math.round(cycles * 40)));
+    // A U lobe dwells at its extreme and crosses steeply, so it needs more points per
+    // cycle than a sine to keep the corners from rounding away when the path is resampled.
+    const wave = shape === 'u'
+        ? ph => { const s = Math.sin(ph); return Math.sign(s) * Math.pow(Math.abs(s), 0.3); }
+        : ph => Math.sin(ph);
+
+    // Fixed arc step, sized to resolve the tightest wavelength (and the U's steeper
+    // crossings) and independent of the total length, so samples never shift as it grows.
+    const tight = Math.max(Math.min(l0, l1), 1e-4);
+    const ds = Math.max(tight / (shape === 'u' ? 72 : 40), total / 8000);
+    const delta = Math.max(ds, tight * 0.2);
     const out = [];
-    for (let i = 0; i < n; i++) {
-        const t = i / (n - 1);
-        const c = curve.getPointAt(t);
-        const tan = curve.getTangentAt(t);
-        const offset = Math.sin(phaseAt(t * length)) * amplitude;
-        out.push(new THREE.Vector3(c.x - tan.y * offset, c.y + tan.x * offset, c.z));
+    for (let s = 0; s <= total + 1e-9; s += ds) {
+        const ss = Math.min(s, total);
+        const c = at(ss);
+        // Tangent from a small fixed window, so the offset direction is smooth across the
+        // control polygon's corners without leaning on the moving tip.
+        const a = at(Math.max(ss - delta, 0)), b = at(Math.min(ss + delta, total));
+        let tx = b.x - a.x, ty = b.y - a.y;
+        const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+        const offset = wave(phaseAt(ss)) * amplitude;
+        out.push(new THREE.Vector3(c.x - ty * offset, c.y + tx * offset, c.z));
     }
     return out;
 }

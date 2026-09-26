@@ -52,8 +52,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/wiggle-strokes/index.html?embedded`} title="Wiggle" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A single path crossing the base from side to side, its wavelength tightening from loose at the start to tight at the end. The wave count follows the length, so the loose-to-tight sweep reads the same on any stroke, and the offset holds full amplitude the whole way, so the first crossing is as wide as the last. The three rows are the same wave at different wavelengths relative to its amplitude: a tightening one (the drawing tool's default), one with rounder turns, and a much looser one.</p>
-      <div class="jp">元のパスを左右に横切る一本のパスで、波長は始めのゆるいものから終わりのきついものへと詰まっていきます。波の数は長さに従うため、ゆるいから詰まるへの移り変わりはどのストロークでも同じように読めます。オフセットは全体を通して振幅いっぱいを保つため、最初の横切りは最後と同じ幅になります。3つの行は同じ波を、振幅に対する波長の比を変えて示したものです。詰まっていくもの（描画ツールの既定）、ターンがより丸いもの、そしてずっとゆるいもの。</div>
+      <p>A single path crossing the base from side to side. The width sets the wave's amplitude, so it grows the whole shape, and the wavelength is an absolute size in pixels; the brush line that traces the wave is derived from the two and clamped between 2 and 6 pixels, so it stays balanced to the shape. The wave count follows the length, so the pattern reads the same on any stroke, and the offset holds full amplitude the whole way, so the first crossing is as wide as the last. The three rows are the variations: the wavelength tightening from loose at the start to tight at the end, the same wave at a constant wavelength, and a constant wavelength whose lobes are U turns instead of sine humps.</p>
+      <div class="jp">元のパスを左右に横切る一本のパスです。幅が波の振幅を決めるため形全体が大きくなり、波長はピクセル単位の絶対的な大きさです。波をなぞる筆の線はその2つから導かれ、2〜6ピクセルに収められるため、形に対して釣り合いを保ちます。波の数は長さに従うため、パターンはどのストロークでも同じように読めます。オフセットは全体を通して振幅いっぱいを保つため、最初の横切りは最後と同じ幅になります。3つの行はその変種です。波長が始めのゆるいものから終わりのきついものへと詰まるもの、同じ波を一定の波長で描いたもの、そして一定の波長でローブがサインの山ではなくU字のターンになるもの。</div>
     </div>
   </section>
 

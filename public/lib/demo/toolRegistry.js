@@ -13,6 +13,7 @@
 // 'span', 'radial'); the default follows the kind and symmetry (see
 // `previewPathOf`).
 
+import { PIXELS_PER_UNIT } from '../CanvasBuffer.js';
 import { RibbonStrokeRenderer } from '../renderers/RibbonStrokeRenderer.js';
 import { BrushStrokeRenderer } from '../renderers/BrushStrokeRenderer.js';
 import { WatercolorStrokeRenderer } from '../renderers/WatercolorStrokeRenderer.js';
@@ -348,10 +349,22 @@ export const toolRegistry = [
         make: (v, ctx) => new AroundStrokeRenderer({
             mode: 'scattered', colorA: ctx.colorA, colorB: ctx.colorB, reach: v.reach,
         }) },
-    { id: 'around-wiggle', kind: 'stroke', width: [2, 6],
-        params: [{ key: 'reach', min: 4, max: 10 }],
+    // The drawn width is the wave's amplitude; wavelength is an absolute size in pixels;
+    // density scales the line that traces the wave.
+    { id: 'around-wiggle', kind: 'stroke', width: [20, 96],
+        params: [{ key: 'wavelength', min: 20, max: 120 }, { key: 'density', min: 0.5, max: 2 }],
         make: (v, ctx) => new AroundStrokeRenderer({
-            mode: 'wiggle', colorA: ctx.colorA, colorB: ctx.colorB, reach: v.reach,
+            mode: 'wiggle', colorA: ctx.colorA, colorB: ctx.colorB, wavelength: v.wavelength / PIXELS_PER_UNIT, density: v.density,
+        }) },
+    { id: 'around-wiggle-even', kind: 'stroke', width: [20, 96],
+        params: [{ key: 'wavelength', min: 20, max: 120 }, { key: 'density', min: 0.5, max: 2 }],
+        make: (v, ctx) => new AroundStrokeRenderer({
+            mode: 'wiggle-even', colorA: ctx.colorA, colorB: ctx.colorB, wavelength: v.wavelength / PIXELS_PER_UNIT, density: v.density,
+        }) },
+    { id: 'around-wiggle-u', kind: 'stroke', width: [20, 96],
+        params: [{ key: 'wavelength', min: 20, max: 120 }, { key: 'density', min: 0.5, max: 2 }],
+        make: (v, ctx) => new AroundStrokeRenderer({
+            mode: 'wiggle-u', colorA: ctx.colorA, colorB: ctx.colorB, wavelength: v.wavelength / PIXELS_PER_UNIT, density: v.density,
         }) },
     { id: 'flat-blob', kind: 'blob',
         params: [{ key: 'axis', pick: ['along', 'across'] }],

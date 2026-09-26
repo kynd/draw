@@ -16,13 +16,23 @@
 
     <div class="dp-panel">
       <div class="dp-hd"><span class="dp-title">Shape</span></div>
-      <div class="dp-note">Top to bottom: reach 4, 7, 10 widths.</div>
+      <div class="dp-note">Top to bottom: tightening, constant, and constant U-turn wavelength.</div>
       <div class="dp-row">
-        <span class="dp-label">Width</span>
-        <input id="width" class="dp-range" type="range" min="1" max="6" step="0.5" value="2" />
-        <span class="dp-val" id="width-val">2</span>
+        <span class="dp-label">Amplitude</span>
+        <input id="amp" class="dp-range" type="range" min="20" max="96" step="2" value="44" />
+        <span class="dp-val" id="amp-val">44</span>
       </div>
-      <div class="dp-note">Wavelength follows the length, tightening start to end.</div>
+      <div class="dp-row">
+        <span class="dp-label">Wavelength</span>
+        <input id="wavelength" class="dp-range" type="range" min="20" max="120" step="2" value="58" />
+        <span class="dp-val" id="wavelength-val">58</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Density</span>
+        <input id="density" class="dp-range" type="range" min="0.5" max="2" step="0.1" value="1" />
+        <span class="dp-val" id="density-val">1.0</span>
+      </div>
+      <div class="dp-note">Amplitude (the overall size) and wavelength are in pixels; density scales the line width.</div>
 
       <hr class="dp-divider" />
 

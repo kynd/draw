@@ -1,24 +1,28 @@
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
-import { wigglePath } from '../../lib/pathEffects.js';
+import { wigglePath, wiggleStrokeWidth } from '../../lib/pathEffects.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
 import { straightThenWiggle, layout, centerY } from '../../lib/demo/strokePaths.js';
 
-// Three characters of the same crossing wave. `reach` is the amplitude in widths; the
-// wavelengths (start loose, end tight) are multiples of that amplitude, so a smaller
-// wavelength-to-amplitude ratio reads as sharper turns and a larger one as rounder.
+// The three variations of the crossing wave. Amplitude (the overall size) and wavelength
+// are shared, set in pixels from the panel; the rows differ only in how the wavelength
+// runs and in the lobe profile: the first tightens loose to tight, the second holds it
+// constant, the third holds it constant with U-turn lobes instead of sine humps. The
+// brush line width is derived from the amplitude and wavelength, so it stays balanced.
 const ROWS = [
-    { reach: 7, startMul: 1.5, endMul: 0.17 },   // tightening, the drawing-tool default
-    { reach: 6, startMul: 2.6, endMul: 1.1 },    // rounder turns, mild tightening
-    { reach: 9, startMul: 5.0, endMul: 3.0 },    // much looser, long gentle waves
+    { tighten: true,  shape: 'sine' },
+    { tighten: false, shape: 'sine' },
+    { tighten: false, shape: 'u' },
 ];
 const SEEDS = [3.0, 7.0, 11.0];
 
 const readout = document.getElementById('readout');
-const widthInput = document.getElementById('width');
+const ampInput = document.getElementById('amp');
+const wavelengthInput = document.getElementById('wavelength');
+const densityInput = document.getElementById('density');
 
 const stage = new StrokeStage(document.getElementById('canvas'));
 
@@ -39,18 +43,21 @@ function rebuild() {
     });
     entries = [];
 
-    const width = parseFloat(widthInput.value) / PIXELS_PER_UNIT;
-    const maxReach = Math.max(...ROWS.map(r => r.reach));
-    const { spread } = layout(stage.extentY, width * maxReach, ROWS.length);
+    const amplitude = parseFloat(ampInput.value) / PIXELS_PER_UNIT;
+    const wl = parseFloat(wavelengthInput.value) / PIXELS_PER_UNIT;
+    const width = wiggleStrokeWidth(amplitude, wl, parseFloat(densityInput.value));
+    const { spread } = layout(stage.extentY, amplitude, ROWS.length);
     let samples = 0, vertices = 0, triangles = 0;
 
     ROWS.forEach((row, i) => {
-        const amplitude = width * row.reach;
         const base = straightThenWiggle(centerY(i, ROWS.length, spread), { z0: 0.01 + i * 0.01 });
         const path = wigglePath(base, {
             amplitude,
-            cycleStart: amplitude * row.startMul,
-            cycleEnd: amplitude * row.endMul,
+            cycleStart: wl,
+            // The tightening row floors its tight end at the amplitude; the others hold
+            // the wavelength constant.
+            cycleEnd: row.tighten ? Math.max(wl * 0.28, amplitude) : wl,
+            shape: row.shape,
         });
         const [colorA, colorB] = colorGroups[i];
         const renderer = new BrushStrokeRenderer({
@@ -83,9 +90,12 @@ function rebuild() {
     stage.draw();
 }
 
-widthInput.addEventListener('input', () => {
-    document.getElementById('width-val').textContent = parseFloat(widthInput.value).toFixed(0);
-    rebuild();
+[ampInput, wavelengthInput, densityInput].forEach(input => {
+    input.addEventListener('input', () => {
+        document.getElementById(`${input.id}-val`).textContent =
+            parseFloat(input.value).toFixed(input === densityInput ? 1 : 0);
+        rebuild();
+    });
 });
 
 document.getElementById('random-btn').addEventListener('click', () => {

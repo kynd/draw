@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { StrokeRenderer } from './StrokeRenderer.js';
 import { BrushStrokeRenderer } from './BrushStrokeRenderer.js';
 import { StrokeDef } from '../StrokeDef.js';
-import { spiralPath, entangledPaths, scatteredPaths, wigglePath } from '../pathEffects.js';
+import { spiralPath, entangledPaths, scatteredPaths, wigglePath, wiggleStrokeWidth } from '../pathEffects.js';
 
 /**
  * Paths derived from the drawn path, each drawn with the brush renderer, in
- * one of four looks.
+ * one of six looks.
  *
  *   spiral     the tip circles while its center moves along the path, one
  *              continuous coil.
@@ -14,33 +14,52 @@ import { spiralPath, entangledPaths, scatteredPaths, wigglePath } from '../pathE
  *              endpoints pulled back toward the base.
  *   scattered  short strokes copying small segments of the path, moved
  *              sideways by a seeded offset.
- *   wiggle     one path crossing the base from side to side, its wavelength
- *              tightening from loose at the start to tight at the end.
+ *   wiggle       one path crossing the base from side to side, its wavelength
+ *                tightening from loose at the start to tight at the end.
+ *   wiggle-even  the same crossing wave at a constant wavelength.
+ *   wiggle-u     a constant wavelength whose lobes are U turns, not sine humps.
  *
- * Every spatial size (the radius, the wave amplitude, the scatter offset) follows the
- * width, so a heavier stroke spreads further. Every count (the spiral's turns, the
- * wiggle's crossings, the scatter's strokes) follows the path's length, so the pattern
- * keeps its spacing as the stroke grows instead of crowding a short stroke and
- * stretching a long one. The width is capped at 0.03 world units for the derivation,
- * the range the formulas are calibrated for. The generators are documented on the Path
+ * The three wiggles read the drawn width as the wave's amplitude, so widening the
+ * stroke grows the whole shape, and take their wavelength as an absolute size in
+ * `wavelength` (world units). The brush line that traces the wave is not the drawn
+ * width but a thickness derived from the amplitude and wavelength, clamped to 2..6
+ * pixels and then scaled by `density`, so it stays balanced to the shape unless the
+ * caller thins or thickens it. The tightening wiggle floors its tight end at the
+ * amplitude, so even there a crossing is never sharper than it is wide.
+ *
+ * For the other three modes every spatial size (the radius, the scatter offset) follows
+ * the drawn width, so a heavier stroke spreads further, and that width is capped at 0.03
+ * world units for the derivation, the range the formulas are calibrated for. Every count
+ * (the spiral's turns, the wiggle's crossings, the scatter's strokes) follows the path's
+ * length, so the pattern keeps its spacing as the stroke grows instead of crowding a
+ * short stroke and stretching a long one. The generators are documented on the Path
  * Effects page.
  */
 export class AroundStrokeRenderer extends StrokeRenderer {
     /**
      * @param {object} opts
-     * @param {'spiral'|'entangled'|'scattered'|'wiggle'} [opts.mode]
+     * @param {'spiral'|'entangled'|'scattered'|'wiggle'|'wiggle-even'|'wiggle-u'} [opts.mode]
      * @param {string} [opts.colorA]
      * @param {string} [opts.colorB]
-     * @param {number} [opts.reach]  How far the derived paths stray, in widths.
+     * @param {number} [opts.reach]  How far the spiral, entangled, and scattered paths stray, in widths.
      * @param {number} [opts.cycle]  The spiral's advance per turn, as a multiple of its radius.
+     * @param {number} [opts.wavelength]  The wiggle's wavelength, in world units (the drawn width is its amplitude).
+     * @param {number} [opts.density]  Multiplier on the wiggle's derived line width.
      */
-    constructor({ mode = 'spiral', colorA = '#46608a', colorB = '#8a4630', reach = 7, cycle = 1.5 } = {}) {
+    constructor({ mode = 'spiral', colorA = '#46608a', colorB = '#8a4630',
+        reach = 7, cycle = 1.5, wavelength = 0.3, density = 1 } = {}) {
         super();
         this.mode = mode;
         this.colorA = colorA;
         this.colorB = colorB;
         this.reach = reach;
         this.cycle = cycle;
+        this.wavelength = wavelength;
+        this.density = density;
+    }
+
+    get _isWiggle() {
+        return this.mode === 'wiggle' || this.mode === 'wiggle-even' || this.mode === 'wiggle-u';
     }
 
     _paths(def, width) {
@@ -58,13 +77,6 @@ export class AroundStrokeRenderer extends StrokeRenderer {
                 seed,
             });
         }
-        if (this.mode === 'wiggle') {
-            return [wigglePath(base, {
-                amplitude: reach,
-                cycleStart: reach * 1.5,
-                cycleEnd: width * 1.2,
-            })];
-        }
         return scatteredPaths(base, {
             spacing: width * 1.5,
             offset: reach,
@@ -74,10 +86,32 @@ export class AroundStrokeRenderer extends StrokeRenderer {
     }
 
     build(def) {
-        const width = Math.min(Math.max(def.maxWidth(), 1e-4), 0.03);
         const group = new THREE.Group();
         let samples = 0, vertices = 0, triangles = 0;
-        this._paths(def, width).forEach((path, k) => {
+
+        // The wiggle reads the drawn width as the wave's amplitude; the brush line width
+        // is derived from the amplitude and wavelength. The other modes draw at the width
+        // itself, capped to the range their formulas are calibrated for.
+        let width, paths;
+        if (this._isWiggle) {
+            const amplitude = Math.max(def.maxWidth(), 1e-4);
+            const wl = this.wavelength;
+            const tighten = this.mode === 'wiggle';
+            width = wiggleStrokeWidth(amplitude, wl, this.density);
+            paths = [wigglePath(def.points, {
+                amplitude,
+                cycleStart: wl,
+                // The tightening wiggle floors its tight end at the amplitude; the others
+                // hold the wavelength constant.
+                cycleEnd: tighten ? Math.max(wl * 0.28, amplitude) : wl,
+                shape: this.mode === 'wiggle-u' ? 'u' : 'sine',
+            })];
+        } else {
+            width = Math.min(Math.max(def.maxWidth(), 1e-4), 0.03);
+            paths = this._paths(def, width);
+        }
+
+        paths.forEach((path, k) => {
             if (path.length < 2) return;
             const renderer = new BrushStrokeRenderer({
                 cap: 'rounded',
