@@ -51,8 +51,8 @@ const SHAPES = {
  * same seed scatters the same solids. Sizes range from below the stroke width to past
  * it, each solid is thrown to one side of the spine, and the step between neighbors is
  * their two circumradii plus `spacing` of the sum, so tighter spacing packs more of
- * them. The rotation keys on distance from the tip, so the solids turn as the stroke
- * grows.
+ * them. The rotation keys on distance from the tip and fades behind it, so the solids
+ * near the tip turn as the stroke grows while older ones settle to a fixed angle.
  */
 export class SolidStrokeRenderer extends Stroke3DRenderer {
     /**
