@@ -6,8 +6,9 @@ import { BlobRenderer } from './BlobRenderer.js';
  *
  * Rock is a craggy fold of noise shaded matte, with color patches between the two
  * tones. Marble is a smooth glossy dome whose color carries thin veins: a stripe
- * field warped by noise, folded to a line and sharpened. Sand is a matte grain of
- * per-pixel normal jitter with occasional glints.
+ * field warped by noise, folded to a line and sharpened. Sand is a matte low-frequency
+ * swell that mounds the surface, with a fine per-pixel normal jitter as grain over it
+ * and occasional glints.
  */
 export class StoneBlobRenderer extends BlobRenderer {
     /** @param {'rock'|'marble'|'sand'} [opts.mode] */
@@ -96,9 +97,17 @@ export class StoneBlobRenderer extends BlobRenderer {
                     color = mix(base, uColorB, clamp(vein * (0.5 + 0.7 * wisp), 0.0, 1.0));
                     gloss = 0.7;
                 } else {
-                    // Sand: per-pixel normal jitter as grain, with sparse glints.
+                    // Sand: a low-frequency swell so the surface mounds naturally, with
+                    // a fine per-pixel normal jitter as grain on top (flatter than the
+                    // swell) and sparse glints.
+                    float e = 0.02;
+                    vec2 lowGrad = vec2(
+                        fbm((vWorld + vec2(e, 0.0)) * 2.0 + uSeed * 17.0) - fbm((vWorld - vec2(e, 0.0)) * 2.0 + uSeed * 17.0),
+                        fbm((vWorld + vec2(0.0, e)) * 2.0 + uSeed * 17.0) - fbm((vWorld - vec2(0.0, e)) * 2.0 + uSeed * 17.0)
+                    ) / (2.0 * e);
+                    slope += lowGrad * uRelief * 0.11;
                     vec2 cell = floor(vWorld * 900.0);
-                    vec2 jitter = (hash22(cell + uSeed) - 0.5) * uRelief * 0.5;
+                    vec2 jitter = (hash22(cell + uSeed) - 0.5) * uRelief * 0.2;
                     slope += jitter;
                     float speck = hash21(cell * 1.7 + uSeed * 3.0);
                     color = mix(uColorB, uColor, 0.4 + 0.45 * speck);
