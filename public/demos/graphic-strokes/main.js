@@ -16,7 +16,7 @@ const readout = document.getElementById('readout');
 const ctrl = {
     cell: document.getElementById('cell'),
     jitter: document.getElementById('jitter'),
-    facets: document.getElementById('facets'),
+    facet: document.getElementById('facet'),
     facetJitter: document.getElementById('facetJitter'),
     lanes: document.getElementById('lanes'),
     duty: document.getElementById('duty'),
@@ -47,7 +47,7 @@ function makeRenderer(index) {
     if (index === 1) {
         return new PolygonStrokeRenderer({
             cap: CAPS[index],
-            facets: parseInt(ctrl.facets.value, 10),
+            facet: parseFloat(ctrl.facet.value),
             jitter: parseFloat(ctrl.facetJitter.value),
             colors,
         });
@@ -98,7 +98,7 @@ function rebuild() {
     stage.draw();
 }
 
-const decimals = id => (id === 'cell' || id === 'width' ? 0 : (id === 'facets' || id === 'lanes' ? 0 : 2));
+const decimals = id => (id === 'width' || id === 'lanes' ? 0 : (id === 'cell' ? 3 : 2));
 Object.values(ctrl).forEach(el => {
     el.addEventListener('input', () => {
         document.getElementById(`${el.id}-val`).textContent =

@@ -371,8 +371,8 @@ Square cells on a fixed grid, stamped from the spine outward rather than tested 
 
 ### PolygonStrokeRenderer
 
-Large flat triangles from a deliberately coarse resample. `jitter` displaces vertices across the width, which is what stops the result reading as a low-resolution ribbon: the silhouette has to break, not just the shading.
-<div class="jp">意図的に粗い再サンプリングから作られる、大きな単色の三角形です。`jitter`は頂点を幅方向にずらします。これがあるからこそ、結果が低解像度のリボンに見えません。崩れなければならないのは、陰影だけでなく輪郭そのものです。</div>
+Large flat triangles with boundaries at fixed arc-length steps along the control polygon, `facet` world units apart. The control points are only appended as the stroke is drawn, so a settled facet keeps its vertices and its color: the newest facet grows at the tip until it is `facet` long, then it is fixed and the next one begins. Each triangle's flat color and each boundary's `jitter` (lateral vertex displacement, as a fraction of width, what stops the result reading as a low-resolution ribbon: the silhouette has to break, not just the shading) key on their index, so nothing recolors or shifts behind the tip as the stroke grows. Takes `facet`, `jitter`, and `colors`.
+<div class="jp">境界が制御ポリゴンに沿って一定の弧長ごと（`facet`ワールド単位間隔）に並ぶ、大きな単色の三角形です。制御点は描画中に追記されるだけなので、落ち着いた面は頂点と色を保ちます。最も新しい面は`facet`の長さになるまで先端で伸び、そこで固定されて次の面が始まります。各三角形の単色と各境界の`jitter`（頂点の幅方向のずれ、幅に対する割合。これがあるからこそ結果が低解像度のリボンに見えず、崩れるべきは陰影だけでなく輪郭そのものです）はその添字に基づくため、ストロークが伸びても先端の背後で色が変わったりずれたりしません。`facet`、`jitter`、`colors`を取ります。</div>
 
 ### LineStrokeRenderer
 
