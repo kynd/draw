@@ -84,11 +84,20 @@ export class WashBlobRenderer extends BlobRenderer {
                 float alpha = 1.0 - smoothstep(-uFeather, uFeather * 0.4, d + wobble);
                 if (alpha <= 0.003) discard;
 
-                // Water thins the coverage unevenly: the wetter the fill, the more
-                // of it goes nearly transparent, edges included.
+                // Water thins the paint unevenly, but the thin patches show the
+                // picked-up (displaced) background, not the raw canvas: the fill stays
+                // opaque and the thinning is folded into the color below, so the wash
+                // reads off its own displaced map like the watercolor stroke rather than
+                // baring the undisplaced canvas through a lowered alpha.
                 float pool = fbm(vWorld * 2.2 + uSeed * 19.0);
-                alpha *= mix(1.0, 0.2 + 0.8 * pool, uWet * 0.9);
-                if (alpha <= 0.003) discard;
+
+                // Warp the background through a low-frequency noise lens before the flow
+                // drag, the way the watercolor stroke bends it, so what lies under the
+                // wash seeps in as displaced blotches. A wetter wash bends it further.
+                vec2 sp = screenUv() * uScreen;
+                vec2 warp = vec2(fbm(sp / 70.0 + uSeed * 3.7) - 0.5,
+                                 fbm(sp / 70.0 + uSeed * 7.9 + 31.0) - 0.5);
+                vec2 baseUv = screenUv() + warp * (0.02 + 0.09 * clamp(uWet, 0.0, 1.0));
 
                 // The flow direction wanders with position, so the drag reads as
                 // currents in the wash rather than one motion blur.
@@ -99,7 +108,7 @@ export class WashBlobRenderer extends BlobRenderer {
                 for (int i = 0; i < ${FLOW_TAPS}; i++) {
                     float f = float(i) / float(${FLOW_TAPS} - 1);
                     float w = 1.0 - f * 0.6;
-                    acc += texture2D(uBg, screenUv() - dir * uFlow * f).rgb * w;
+                    acc += texture2D(uBg, clamp(baseUv - dir * uFlow * f, 0.001, 0.999)).rgb * w;
                     wsum += w;
                 }
                 vec3 soft = acc / wsum;
@@ -112,6 +121,9 @@ export class WashBlobRenderer extends BlobRenderer {
                 vec3 layered = min(uColor, soft);
                 vec3 covered = mix(soft, uColor, clamp(strength, 0.0, 1.0));
                 vec3 wash = mix(covered, layered, uWet);
+                // The wet, thin patches lean back to the displaced background, so more
+                // of what lies under the wash shows through the pigment there.
+                wash = mix(soft, wash, mix(1.0, 0.2 + 0.8 * pool, uWet * 0.9));
 
                 // Pigment collects just inside the boundary as the water dries back.
                 float rimBand = smoothstep(-uFeather * 4.0, -uFeather, d)
