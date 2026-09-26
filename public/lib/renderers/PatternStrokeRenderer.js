@@ -142,7 +142,9 @@ export class PatternStrokeRenderer extends StrokeRenderer {
                     const hw = isLeaves
                         ? Math.max(hl * 0.26 * (0.8 + rand() * 0.4), 0.008)
                         : (wid / 2) * (0.85 + rand() * 0.3);
-                    const out = hl * 0.85;
+                    // Offset the sprout so its inner end clears the spine instead of
+                    // crossing it, so the two sides do not overlap in a band over it.
+                    const out = hl * 1.08;
                     const useB = this.mode === 'feather' ? k % 2 === 1
                         : this.mode === 'fringe' ? side < 0
                         : (k + (side < 0 ? 1 : 0)) % 2 === 1;
