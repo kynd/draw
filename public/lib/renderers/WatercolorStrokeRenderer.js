@@ -80,7 +80,8 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
                 uColor: { value: new THREE.Color(this.color) },
                 uSeed: { value: def.seed ?? 1 },
                 uPigment: { value: this.pigment },
-                uRim: { value: this.rim },
+                // Half strength: the rim read too dark, so an input of 1.0 lands at 0.5.
+                uRim: { value: this.rim * 0.5 },
                 uGrain: { value: this.granulation },
                 uEdge: { value: this.edge },
                 uBleed: { value: this.bleed },
