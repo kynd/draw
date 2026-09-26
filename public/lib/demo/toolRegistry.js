@@ -392,7 +392,7 @@ export const toolRegistry = [
             gloss: 0.1, edgeSoft: 0.03, dry: v.dry, noiseFreq: 3.5,
         }) },
     { id: 'flat-paint', kind: 'blob',
-        params: [{ key: 'relief', min: 0.1, max: 1 }],
+        params: [{ key: 'relief', min: 0.05, max: 0.5 }],
         make: (v, ctx) => new PaintBlobRenderer({
             color: ctx.colorA, colorB: ctx.colorB, fade: 0.12, relief: v.relief, gloss: 0.4, edgeSoft: 0.02,
         }) },

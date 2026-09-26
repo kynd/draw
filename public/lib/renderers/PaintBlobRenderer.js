@@ -196,7 +196,10 @@ export class PaintBlobRenderer extends BlobRenderer {
                 // Split pulls the pigment boundary to a low frequency and narrows
                 // its width, so the two colors meet on a sharp wandering line
                 // instead of mixing in patches.
-                float blend = fbm(vWorld * mix(uFreq * 0.45, 1.4, uSplit) + uSeed * 3.0);
+                float colorFreq = mix(uFreq * 0.45, 1.4, uSplit);
+                // Knife paint reads its two pigments in larger patches: half the frequency.
+                if (uKnife == 1) colorFreq *= 0.5;
+                float blend = fbm(vWorld * colorFreq + uSeed * 3.0);
                 float blendW = mix(0.2, 0.008, uSplit);
                 vec3 base = mix(uColor, uColorB, smoothstep(0.5 - blendW, 0.5 + blendW, blend));
                 vec3 pigment = base * (1.0 - uFade * (fbm(vWorld * uFreq * 0.6 + uSeed * 5.0) - 0.25));
