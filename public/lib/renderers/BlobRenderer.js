@@ -146,7 +146,12 @@ const PRELUDE = /* glsl */`
     }
     float fbm(vec2 p) {
         float v = 0.0, a = 0.5;
-        for (int i = 0; i < 4; i++) { v += a * valueNoise(p); p *= 2.0; a *= 0.5; }
+        // Each octave is rotated by an irrational angle before it is sampled, so no octave's
+        // value-noise lattice lines up with the axes or with another octave. Without this the
+        // shared lattice reads as a square grid across the material, worst where the grain is
+        // fine or high-contrast; the rotation keeps the same noise character with no grid.
+        mat2 rot = mat2(0.7373688, -0.6754903, 0.6754903, 0.7373688);
+        for (int i = 0; i < 4; i++) { p = rot * p; v += a * valueNoise(p); p *= 2.0; a *= 0.5; }
         return v;
     }
 

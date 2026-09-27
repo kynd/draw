@@ -123,7 +123,9 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
                 }
                 float fbm(vec2 p) {
                     float v = 0.0, a = 0.5;
-                    for (int i = 0; i < 4; i++) { v += a * valueNoise(p); p *= 2.0; a *= 0.5; }
+                    // Rotate each octave so the value-noise lattice never lines up into a grid.
+                    mat2 rot = mat2(0.7373688, -0.6754903, 0.6754903, 0.7373688);
+                    for (int i = 0; i < 4; i++) { p = rot * p; v += a * valueNoise(p); p *= 2.0; a *= 0.5; }
                     return v;
                 }
 
