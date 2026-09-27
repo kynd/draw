@@ -63,6 +63,13 @@ export class WashBlobRenderer extends BlobRenderer {
             uniform float uWet;
             uniform float uBristle;
 
+            // A smooth per-channel minimum, so the layered pigment darkens the background
+            // without the hard crease a plain min leaves where a channel crosses over.
+            vec3 sminv(vec3 a, vec3 b, float k) {
+                vec3 h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+                return mix(b, a, h) - k * h * (1.0 - h);
+            }
+
             void main() {
                 float arc;
                 vec2 outward;
@@ -95,9 +102,14 @@ export class WashBlobRenderer extends BlobRenderer {
                 // drag, the way the watercolor stroke bends it, so what lies under the
                 // wash seeps in as displaced blotches. A wetter wash bends it further.
                 vec2 sp = screenUv() * uScreen;
-                vec2 warp = vec2(fbm(sp / 70.0 + uSeed * 3.7) - 0.5,
-                                 fbm(sp / 70.0 + uSeed * 7.9 + 31.0) - 0.5);
-                vec2 baseUv = screenUv() + warp * (0.02 + 0.09 * clamp(uWet, 0.0, 1.0));
+                // Broad, gentle displacement: the noise features are wider than the
+                // displacement is far, so the lens never folds over itself into a sharp
+                // seam. Two octaves keep it organic without steepening the gradient.
+                vec2 warp = vec2(
+                    (fbm(sp / 150.0 + uSeed * 3.7) - 0.5) + (fbm(sp / 64.0 + uSeed * 4.3) - 0.5) * 0.3,
+                    (fbm(sp / 150.0 + uSeed * 7.9 + 31.0) - 0.5) + (fbm(sp / 64.0 + uSeed * 8.1 + 31.0) - 0.5) * 0.3
+                );
+                vec2 baseUv = screenUv() + warp * (0.012 + 0.05 * clamp(uWet, 0.0, 1.0));
 
                 // The flow direction wanders with position, so the drag reads as
                 // currents in the wash rather than one motion blur.
@@ -115,10 +127,10 @@ export class WashBlobRenderer extends BlobRenderer {
 
                 float grain = fbm(screenUv() * uScreen / 26.0 + uSeed * 13.0);
                 float strength = uPigment * (0.75 + 0.4 * grain);
-                // Two ways paint can meet the background: the min darkens like
+                // Two ways paint can meet the background: a soft min darkens like
                 // pigment layered over it, the mix covers like body. Water decides
                 // the balance, and the more of it, the more the paint darkens.
-                vec3 layered = min(uColor, soft);
+                vec3 layered = sminv(uColor, soft, 0.15);
                 vec3 covered = mix(soft, uColor, clamp(strength, 0.0, 1.0));
                 vec3 wash = mix(covered, layered, uWet);
                 // The wet, thin patches lean back to the displaced background, so more
