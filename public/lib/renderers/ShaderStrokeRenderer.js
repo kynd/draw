@@ -106,7 +106,11 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
             for (const end of [{ i: 0, t: 0, sign: -1 }, { i: n - 1, t: 1, sign: 1 }]) {
                 const wL = def.widthLeftAt(end.t);
                 const wR = def.widthRightAt(end.t);
-                const reach = Math.max(wL, wR) * this.inflate;
+                // A cap never reaches farther than the stroke is long, so a short piece
+                // (a sliver a split leaves between two close turns) does not sprout a
+                // full-width cap that dwarfs its body and lands orphaned over its
+                // neighbors.
+                const reach = Math.min(Math.max(wL, wR) * this.inflate, length);
                 const p = samples[end.i];
                 const nrm = normals[end.i];
                 const tan = tangents[end.i];
