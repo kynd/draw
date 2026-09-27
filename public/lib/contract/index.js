@@ -86,6 +86,9 @@ class DrawingEngineWrapper {
             };
         };
         const down = event => {
+            // Only the primary button draws, so a right or middle click can open
+            // the canvas's context menu (save image, and so on) instead.
+            if (event.button !== 0) return;
             this._tool.pointerDown(toLocal(event));
             try { canvas.setPointerCapture(event.pointerId); } catch (e) {}
         };

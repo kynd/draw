@@ -38,6 +38,9 @@ export class DrawInput {
 
         canvas.addEventListener('pointerdown', event => {
             if (!this.enabled) return;
+            // Only the primary button draws, so a right or middle click can open
+            // the canvas's context menu (save image, and so on) instead.
+            if (event.button !== 0) return;
             this._drawing = true;
             this.points = [toWorld(event)];
             onChange(this.points, false);

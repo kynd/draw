@@ -122,6 +122,9 @@ export function attachDrawingToolUi(tool, layout) {
         };
     };
     canvas.addEventListener('pointerdown', event => {
+        // Only the primary button draws; a right or middle click leaves the
+        // canvas alone so its context menu (save image, and so on) still opens.
+        if (event.button !== 0) return;
         tool.pointerDown(toLocal(event));
         // Capturing an inactive pointer throws (a synthetic event's id is not
         // an active pointer), and the stroke must not depend on it.
