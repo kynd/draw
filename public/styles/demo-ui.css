@@ -255,8 +255,10 @@ html, body {
 
 /* Rotary dial — a circle and a line, dragged vertically */
 .dp-dials {
-  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: 14px; z-index: 5;
+  /* Centered in the left column above the tool preview, which occupies the bottom
+     0.88 world units (176 CSS px) plus a small gap. */
+  position: absolute; left: 10px; top: 10px; bottom: 190px;
+  display: flex; flex-direction: column; justify-content: center; gap: 14px; z-index: 5;
 }
 .dp-dial { width: 56px; text-align: center; cursor: ns-resize; user-select: none; touch-action: none; }
 .dp-dial svg { width: 56px; height: 56px; display: block; }

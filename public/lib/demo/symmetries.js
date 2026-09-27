@@ -9,7 +9,8 @@ import { mirroredPath, rotatedPaths } from '../pathEffects.js';
  * Math.random; a host that needs determinism records what the copies drew.
  *
  *   mirror    the path mirrored across the vertical line through its start.
- *   rotation  the path repeated evenly around its start, 2 to 6 in all.
+ *   rotation  the path repeated evenly around its start; the count is settable (a tool
+ *             may expose it as a slider) and rolls 2 to 6 when left unset.
  *   screen    the path mirrored across the canvas's center axis, vertical,
  *             horizontal, or both (both adds the point reflection too).
  */
@@ -21,7 +22,9 @@ const KINDS = {
             [mirroredPath(path, { x: anchor ? anchor.x : path[0]?.x ?? 0 })],
     },
     rotation: {
-        roll: () => ({ count: 2 + Math.floor(Math.random() * 5) }),
+        // The count is settable (the tool exposes it as a slider); with none given it
+        // rolls 2 to 6.
+        roll: (opts = {}) => ({ count: opts.count ?? (2 + Math.floor(Math.random() * 5)) }),
         countOf: roll => roll.count - 1,
         copies: (path, roll, anchor) =>
             rotatedPaths(path, { center: anchor ?? path[0], count: roll.count }),
@@ -47,8 +50,8 @@ export const SYMMETRY_KINDS = Object.keys(KINDS);
  * `colors` given, even odds add `recolors`: one resolved color pair per
  * copy, so the live echo, the landed copies, and a mirror all agree.
  */
-export function rollSymmetry(kind, colors = null) {
-    const roll = { kind, ...KINDS[kind].roll() };
+export function rollSymmetry(kind, colors = null, opts = {}) {
+    const roll = { kind, ...KINDS[kind].roll(opts) };
     if (colors && Math.random() < 0.5) {
         const pick = () => colors[Math.floor(Math.random() * colors.length)];
         roll.recolors = Array.from({ length: KINDS[kind].countOf(roll) },

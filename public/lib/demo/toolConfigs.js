@@ -74,6 +74,8 @@ export class PaintingDemoConfig extends DrawingToolConfig {
 export class ShapeFillsDemoConfig extends DrawingToolConfig {
     constructor() {
         super({ tools: [
+            'circle-flat', 'oval-flat', 'rect-flat',
+            'diamond-flat', 'triangle-30-60-flat', 'triangle-45-flat',
             'circle-fill', 'oval-fill', 'rect-fill',
             'diamond-fill', 'triangle-30-60', 'triangle-45',
         ] });

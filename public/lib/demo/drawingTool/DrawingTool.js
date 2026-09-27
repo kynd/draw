@@ -774,10 +774,17 @@ export class DrawingTool {
      * count match what the preview shows.
      */
     _ensureNextRoll() {
-        if (!this._state.tool.symmetry) { this._nextRoll = null; return null; }
+        const tool = this._state.tool;
+        if (!tool.symmetry) { this._nextRoll = null; return null; }
+        // A rotation tool can expose its repetition count as a `repeat` slider; when it
+        // does, the count comes from the slider, and the roll is remade if it changes so
+        // the preview and the next stroke track it.
+        const repeat = tool.symmetry === 'rotation' && this._state.values.repeat != null
+            ? Math.round(this._state.values.repeat) : null;
+        if (this._nextRoll && repeat != null && this._nextRoll.count !== repeat) this._nextRoll = null;
         if (!this._nextRoll) {
             this._nextRoll = {
-                ...rollSymmetry(this._state.tool.symmetry, this._state.colors),
+                ...rollSymmetry(tool.symmetry, this._state.colors, repeat != null ? { count: repeat } : {}),
                 base: { a: this._state.colorA, b: this._state.colorB },
             };
         }
@@ -842,7 +849,7 @@ export class DrawingTool {
         // Overlays render above the coverage-layer composites.
         this._preview.userData.overlay = true;
         this.stage.add(this._preview);
-        this._previewSize = { w: 1.1, h: 0.62 };
+        this._previewSize = { w: 0.8, h: 0.8 };
         // The mark renders into the preview's own target, so the box crops
         // it; the quad shows the target under a rounded-corner mask. The
         // semi-transparent gray paper is the target's clear color, so
@@ -934,7 +941,7 @@ export class DrawingTool {
         };
         let mark = null;
         if (state.tool.kind === 'blob') {
-            const contour = blobOutline(path, { span: 0.1, radius: Math.min(Math.max(width * 1.3, 0.06), 0.16) });
+            const contour = blobOutline(path, { span: 0.1, radius: Math.min(Math.max(width * 1.6, 0.16), 0.26) });
             if (contour) {
                 const renderer = state.tool.make(state.values, ctx);
                 mark = { mesh: renderer.build(contour, ctx.seed), renderer };
@@ -943,7 +950,22 @@ export class DrawingTool {
             const a = path[0], b = path[path.length - 1];
             const contour = state.tool.contour(a, b, ctx.seed);
             if (contour) {
-                const renderer = state.tool.make(state.values, { ...ctx, start: a, end: b });
+                // Fit the shape to the box: shapes anchor differently (a circle on its
+                // start point at radius, a rect on a corner), so center the contour and
+                // scale it to fill the box, and carry the fill's endpoints with it.
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                for (const p of contour) {
+                    minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+                    minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+                }
+                const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+                const target = 0.62 * Math.min(this._previewSize.w, this._previewSize.h);
+                const s = target / Math.max(maxX - minX, maxY - minY, 1e-4);
+                const fit = p => { p.x = c.x + (p.x - cx) * s; p.y = c.y + (p.y - cy) * s; return p; };
+                contour.forEach(fit);
+                const sa = fit(new THREE.Vector3(a.x, a.y, 0));
+                const sb = fit(new THREE.Vector3(b.x, b.y, 0));
+                const renderer = state.tool.make(state.values, { ...ctx, start: sa, end: sb });
                 mark = { mesh: renderer.build(contour, ctx.seed), renderer };
             }
         } else {

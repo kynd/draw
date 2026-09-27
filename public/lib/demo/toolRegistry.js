@@ -464,6 +464,33 @@ export const toolRegistry = [
         contour: (a, b, seed) => triangleFromEnds(a, b, { angles: [45, 45, 90], seed }),
         make: shapeFill },
 
+    // The same endpoint shapes with a plain flat fill (a gradient between the two
+    // colors) instead of the slit-scan sample.
+    { id: 'circle-flat', kind: 'shape',
+        params: [{ key: 'axis', pick: ['along', 'across'] }],
+        contour: (a, b) => circleFromEnds(a, b),
+        make: flatShapeFill },
+    { id: 'oval-flat', kind: 'shape',
+        params: [{ key: 'axis', pick: ['along', 'across'] }],
+        contour: (a, b) => ovalFromEnds(a, b),
+        make: flatShapeFill },
+    { id: 'rect-flat', kind: 'shape',
+        params: [{ key: 'axis', pick: ['along', 'across'] }],
+        contour: (a, b) => rectFromEnds(a, b),
+        make: flatShapeFill },
+    { id: 'diamond-flat', kind: 'shape',
+        params: [{ key: 'axis', pick: ['along', 'across'] }],
+        contour: (a, b) => diamondFromEnds(a, b),
+        make: flatShapeFill },
+    { id: 'triangle-30-60-flat', kind: 'shape',
+        params: [{ key: 'axis', pick: ['along', 'across'] }],
+        contour: (a, b, seed) => triangleFromEnds(a, b, { angles: [30, 60, 90], seed }),
+        make: flatShapeFill },
+    { id: 'triangle-45-flat', kind: 'shape',
+        params: [{ key: 'axis', pick: ['along', 'across'] }],
+        contour: (a, b, seed) => triangleFromEnds(a, b, { angles: [45, 45, 90], seed }),
+        make: flatShapeFill },
+
     // Symmetric strokes: each pairs one symmetry with one base look. The
     // engine rolls the symmetry per stroke and lands the copies at release.
     { id: 'mirror-brush', kind: 'stroke', symmetry: 'mirror',
@@ -473,7 +500,7 @@ export const toolRegistry = [
             bristles: v.bristles, rough: v.rough, dry: v.dry,
         }) },
     { id: 'rotation-pencil', kind: 'stroke', symmetry: 'rotation', pressure: 1.25, width: [1, 8],
-        params: [{ key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
+        params: [{ key: 'repeat', min: 2, max: 8, step: 1 }, { key: 'grain', min: 0.3, max: 0.8 }, { key: 'pressure', min: 0.2, max: 0.7 }],
         make: (v, ctx) => new DryMediaStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, grain: v.grain, pressure: v.pressure,
             tooth: 2.0, softness: 0.35, edge: 0.08, opacity: 1,
@@ -490,6 +517,13 @@ function shapeFill(v, ctx) {
         color: ctx.colorA, background: ctx.texture, mix: v.mix,
         ...slitLineFromEnds(ctx.start, ctx.end, ctx.seed),
     });
+}
+
+// A plain flat fill of an endpoint shape: a gradient between the two colors, run along
+// or across the shape's chord.
+function flatShapeFill(v, ctx) {
+    const [gradientFrom, gradientTo] = gradPoints(ctx, v.axis);
+    return new ShapedBlobRenderer({ color: ctx.colorA, colorB: ctx.colorB, gradientFrom, gradientTo });
 }
 
 

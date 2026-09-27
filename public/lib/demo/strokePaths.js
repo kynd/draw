@@ -79,8 +79,8 @@ export function centerY(i, count, spread) {
 export function previewPath(category, c, { w, h }, { phase = 0, freq = 6 } = {}) {
     if (category === 'span') {
         return [
-            new THREE.Vector3(c.x - w * 0.07, c.y - h * 0.1, 0),
-            new THREE.Vector3(c.x + w * 0.09, c.y + h * 0.13, 0),
+            new THREE.Vector3(c.x - w * 0.26, c.y - h * 0.2, 0),
+            new THREE.Vector3(c.x + w * 0.28, c.y + h * 0.22, 0),
         ];
     }
     const n = 28;
@@ -89,8 +89,8 @@ export function previewPath(category, c, { w, h }, { phase = 0, freq = 6 } = {})
             const t = i / (n - 1);
             const a = phase + t * Math.PI * 1.9;
             return new THREE.Vector3(
-                c.x + Math.cos(a) * w * 0.2,
-                c.y + Math.sin(a) * h * 0.28, 0);
+                c.x + Math.cos(a) * w * 0.28,
+                c.y + Math.sin(a) * h * 0.3, 0);
         });
     }
     if (category === 'radial') {
