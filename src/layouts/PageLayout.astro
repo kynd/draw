@@ -42,7 +42,12 @@ const navItems: NavItem[] = [
           { label: 'Tight blob',      href: '#tight-blobs' },
         ]
       },
-      { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer' },
+      { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer',
+        subLinks: [
+          { label: 'The buffer', href: '#demo' },
+          { label: 'Color', href: '#color' },
+        ]
+      },
       { label: 'Pen pressure', href: `${base}/pen-pressure`, slug: 'pen-pressure',
         subLinks: [
           { label: 'Scaled width', href: '#scale' },
