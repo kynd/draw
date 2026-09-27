@@ -48,7 +48,7 @@ function rebuild() {
     const renderers = [
         new HaloStrokeRenderer({ mode: 'glow', color: colors.a, haloColor: colors.b }),
         new HaloStrokeRenderer({ mode: 'shadow', color: colors.a }),
-        new BrushStrokeRenderer({ colorA: colors.b, colorB: colors.c, rough: 0.4, dry: 0.15 }),
+        new BrushStrokeRenderer({ colorA: colors.b, colorB: colors.c, rough: 0.85, dry: 0.55 }),
     ];
     renderers.forEach((renderer, i) => {
         const def = new StrokeDef({

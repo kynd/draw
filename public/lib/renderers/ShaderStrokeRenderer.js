@@ -74,7 +74,10 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
         const crosses = [];
         const beyonds = [];
         const tangentAttr = [];
-        const indices = [];
+        // Kept separate so the final index order is start cap, then body, then end cap.
+        const bodyIndices = [];
+        const startCapIndices = [];
+        const endCapIndices = [];
         let maxWidth = 0;
 
         const push = (p, nrm, tan, offset, u, cross) => {
@@ -96,8 +99,8 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
         }
         for (let i = 0; i < n - 1; i++) {
             const l0 = 2 * i, r0 = 2 * i + 1, l1 = 2 * i + 2, r1 = 2 * i + 3;
-            indices.push(l0, r0, r1);
-            indices.push(l0, r1, l1);
+            bodyIndices.push(l0, r0, r1);
+            bodyIndices.push(l0, r1, l1);
         }
 
         // ── End extensions ───────────────────────────────────────────────────
@@ -136,9 +139,16 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
                     tangentAttr.push(tan.x, tan.y, tan.z);
                 };
                 corner(1, 0); corner(-1, 0); corner(-1, 1); corner(1, 1);
-                indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+                (end.i === 0 ? startCapIndices : endCapIndices)
+                    .push(base, base + 1, base + 2, base, base + 2, base + 3);
             }
         }
+
+        // Draw order: the start cap under the body, the end cap over it. A single-hue
+        // mark's coverage MAX is order-free, but a multicolor mark composites its color
+        // as a straight over, where draw order is the layering, so the near cap must go
+        // down before the body and the far cap after it.
+        const indices = [...startCapIndices, ...bodyIndices, ...endCapIndices];
 
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
