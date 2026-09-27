@@ -21,12 +21,18 @@ const FFLATE = 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
  * is also what `finish` does, so jumping to the end stays cheap.
  */
 export class DrawingPlayer {
-    constructor({ feed, applyRecord, clear, resize = null, canvas }) {
+    constructor({ feed, applyRecord, clear, resize = null, canvas, feedGroup = null, simultaneous = null }) {
         this.feed = feed;
         this.applyRecord = applyRecord;
         this.clear = clear;
         this.resize = resize;
         this.canvas = canvas;
+        // A gesture whose records were drawn together (a symmetric stroke's copies) is
+        // animated in lockstep through `feedGroup`; `simultaneous(records)` decides which
+        // gestures those are. Without both, every record animates on its own, as before.
+        this.feedGroup = feedGroup;
+        this.simultaneous = simultaneous;
+        this._group = null;
         this.data = null;
         this._pos = 0;          // committed records
         this._pi = 0;           // points fed of the current record
@@ -81,11 +87,19 @@ export class DrawingPlayer {
 
     _reset() {
         this._waitUntil = 0;
+        this._group = null;
         if (this.data.size) this.resize?.(this.data.size[0], this.data.size[1]);
         this.clear(this.data.background);
         this._pos = 0;
         this._pi = 0;
         this._primed = true;
+    }
+
+    /** The index one past the last record of the gesture at `pos` (the release). */
+    _gestureEnd(pos) {
+        let i = pos;
+        while (i < this.length && !this.data.records[i].release) i++;
+        return Math.min(i + 1, this.length);
     }
 
     /**
@@ -150,6 +164,36 @@ export class DrawingPlayer {
             done?.();
             return;
         }
+        // A symmetric stroke's records were drawn together, so animate them together:
+        // detect the group at its first record, then each frame feed every record in it
+        // grown to the same length, until the longest is done.
+        if (this._pi === 0 && !this._group && this.feedGroup && this.simultaneous) {
+            const end = this._gestureEnd(this._pos);
+            const recs = this.data.records.slice(this._pos, end);
+            if (end - this._pos > 1 && this.simultaneous(recs)) {
+                this._group = { end, len: Math.max(...recs.map(r => r.points.length)) };
+            }
+        }
+        if (this._group) {
+            const recs = this.data.records.slice(this._pos, this._group.end);
+            this._pi = Math.min(this._pi + this._ppf, this._group.len);
+            const groupDone = this._pi >= this._group.len;
+            this.feedGroup(recs.map(r => ({
+                record: r, points: toVectors(r.points.slice(0, this._pi)),
+            })), groupDone);
+            if (groupDone) {
+                const last = recs[recs.length - 1];
+                this._pos = this._group.end;
+                this._pi = 0;
+                this._group = null;
+                this._emit('step');
+                if (this._strokeWaitMs > 0 && this._pos < this.length && last.release) {
+                    this._waitUntil = performance.now() + this._strokeWaitMs;
+                }
+            }
+            this._raf = requestAnimationFrame(() => this._frame());
+            return;
+        }
         const record = this.data.records[this._pos];
         if (this._pi === 0) this.applyRecord(record);
         this._pi = Math.min(this._pi + this._ppf, record.points.length);
@@ -177,6 +221,7 @@ export class DrawingPlayer {
         const wasPlaying = this._playing;
         this.pause();
         this._waitUntil = 0;
+        this._group = null;
         if (!this._primed || target < this._pos) this._reset();
         // A partially fed record past the target is undone with an empty feed.
         if (this._pi > 0 && target <= this._pos) {

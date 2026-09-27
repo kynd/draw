@@ -2,6 +2,11 @@ import * as THREE from 'three';
 import { resampleEvery, catmullRomSpline, splitByTurn, hasSettledStart, smoothByWidth } from '../curves.js';
 import { DrawInput } from './drawInput.js';
 
+// Each symmetry copy owns a block of seed slots starting at (i + 1) * STRIDE, wide enough
+// that no hand-drawn gesture (whose base pieces count up from 0) reaches it. Exported so a
+// player can tell a gesture's copies apart from its own split pieces by the seed gap.
+export const ECHO_STRIDE = 100;
+
 /**
  * The draw-then-bake cycle every freehand demo shares.
  *
@@ -186,7 +191,7 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     // grow or split. The base gesture owns slots 0..; each symmetry copy owns
     // a block of STRIDE starting at (i + 1) * STRIDE, wide enough that no
     // hand-drawn gesture reaches it.
-    const STRIDE = 100;
+    const STRIDE = ECHO_STRIDE;
     function buildFromPoints(points) {
         if (points.length < 2) return null;
         const cfg = splitConfig();
@@ -247,6 +252,43 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         stage.draw();
     }
 
+    // Builds several records into one live group so they animate together, the way a
+    // symmetric stroke's copies did while it was drawn, rather than one after another.
+    // Each item is `{ points, prepare }`: `prepare` sets that record's state (its seed and
+    // colors) right before it builds, so every copy keeps the exact look it recorded.
+    function feedGroup(items, done) {
+        disposeGhost();
+        disposeLive();
+        const group = new THREE.Group();
+        const pieces = [], committed = [], spinePaths = [];
+        let seedSpan = 0;
+        for (const item of items) {
+            item.prepare?.();
+            const built = buildFromPoints(item.points);
+            if (!built) continue;
+            group.add(built.group);
+            pieces.push(...built.pieces);
+            committed.push(...built.committed);
+            spinePaths.push(...built.spinePaths);
+            seedSpan = Math.max(seedSpan, built.seedSpan);
+        }
+        live = pieces.length ? { group, pieces, committed, spinePaths, seedSpan } : null;
+        if (live) stage.add(group);
+        setPointerLine(items[0]?.points ?? []);
+        setSpineLine(live ? spinePaths : []);
+        if (done && live) {
+            board.bake([live.group]);
+            ghost = live;
+            makeWireOnly(ghost.group);
+            stage.add(ghost.group);
+            live = null;
+            for (const piece of ghost.committed) onCommit?.(piece.points, piece.seed, piece.echo ?? null);
+            seed += ghost.seedSpan;
+            onRelease?.();
+        }
+        stage.draw();
+    }
+
     // `bindInput: false` runs the cycle without pointer listeners of its own,
     // for a host that feeds events through its API instead.
     const input = bindInput ? new DrawInput(canvas, stage, { minDistance, onChange: feed }) : null;
@@ -256,5 +298,5 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
     const getSeed = () => seed;
     const setSeed = value => { seed = value; };
 
-    return { disposeGhost, input, feed, setPointerTrace, setSpineTrace, getSeed, setSeed };
+    return { disposeGhost, input, feed, feedGroup, setPointerTrace, setSpineTrace, getSeed, setSeed };
 }

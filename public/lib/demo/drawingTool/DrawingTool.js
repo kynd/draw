@@ -6,7 +6,7 @@ import { blobOutline } from '../../pathEffects.js';
 import { StrokeStage } from '../stage.js';
 import { CoverageLayer } from '../coverageLayer.js';
 import { DrawingBoard } from '../drawingBoard.js';
-import { setupDrawCycle } from '../drawCycle.js';
+import { setupDrawCycle, ECHO_STRIDE } from '../drawCycle.js';
 import { taperByArc, previewPath } from '../strokePaths.js';
 import { INITIALIZERS } from '../initializers.js';
 import { rollSymmetry, symmetricCopies } from '../symmetries.js';
@@ -191,6 +191,23 @@ export class DrawingTool {
             feed: (points, done) => {
                 this._playerFeeding = true;
                 try { this.cycle.feed(points, done); } finally { this._playerFeeding = false; }
+            },
+            // A symmetric stroke's records replay together: each carries its own seed and
+            // colors, so the group build applies each record before it builds that copy.
+            feedGroup: (items, done) => {
+                this._playerFeeding = true;
+                try {
+                    this.cycle.feedGroup(items.map(({ record, points }) => ({
+                        points,
+                        prepare: () => applyRecordTo(this._state, record, this._registry),
+                    })), done);
+                } finally { this._playerFeeding = false; }
+            },
+            // The gesture's copies sit a seed block past its own pieces, so a seed gap of at
+            // least one block marks a symmetric stroke, whose records animate as one.
+            simultaneous: records => {
+                const base = records[0]?.seed ?? 0;
+                return records.some(r => (r.seed ?? 0) - base >= ECHO_STRIDE);
             },
             applyRecord: record => applyRecordTo(this._state, record, this._registry),
             clear: background => {
