@@ -32,8 +32,10 @@ export class BrushStrokeRenderer extends ShaderStrokeRenderer {
         singleCoverage = true,
     } = {}) {
         // The eroded edge is translucent, so a self-overlapping gesture would
-        // composite twice and darken into creases; each pixel shades once.
-        super({ cap, inflate: 1.25, samplesPerUnit, singleCoverage });
+        // composite twice and darken into creases; each pixel shades once. The two
+        // pigments make it multicolor, so single coverage composites the color as a
+        // straight over rather than a MAX that would whiten the self-crossings.
+        super({ cap, inflate: 1.25, samplesPerUnit, singleCoverage, multiColor: true });
         this.colorA = colorA;
         this.colorB = colorB;
         this.bristles = bristles;

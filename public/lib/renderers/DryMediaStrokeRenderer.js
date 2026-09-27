@@ -45,9 +45,11 @@ export class DryMediaStrokeRenderer extends ShaderStrokeRenderer {
         samplesPerUnit = 120,
         ...rest
     } = {}) {
-        // Dry media is translucent, so a self-overlapping gesture would
-        // composite twice and darken into creases; each pixel shades once.
-        super({ inflate: 1.4, samplesPerUnit, singleCoverage: true, ...rest });
+        // Dry media is translucent, so a self-overlapping gesture would composite twice
+        // and darken into creases; each pixel shades once. A color list makes it
+        // multicolor, so single coverage composites the color as a straight over rather
+        // than a MAX that would whiten the self-crossings.
+        super({ inflate: 1.4, samplesPerUnit, singleCoverage: true, multiColor: colors != null, ...rest });
         this.color = color;
         this.colors = colors;
         this.blend = blend;

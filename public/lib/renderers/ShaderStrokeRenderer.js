@@ -36,10 +36,15 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
      * @param {boolean} [opts.singleCoverage]  Shade each pixel once per mark: where
      *     the ribbon overlaps itself, a translucent material would composite twice
      *     and darken into creases. The mark is flagged for the coverage layer,
-     *     which renders it alone with MAX blending and composites it once.
+     *     which renders it alone and composites it once.
+     * @param {boolean} [opts.multiColor]  The mark carries more than one hue (a brush's
+     *     two pigments, a rainbow media). Single coverage then composites the color as
+     *     a straight over (the top covering wins) rather than the per-channel MAX a
+     *     single-hue mark uses, since MAX across two hues brightens toward white where
+     *     the stroke crosses itself. Alpha still takes the MAX either way.
      */
     constructor({ cap = 'rounded', inflate = 1, samplesPerUnit = 120, transparent = true,
-        depthWrite = true, singleCoverage = false } = {}) {
+        depthWrite = true, singleCoverage = false, multiColor = false } = {}) {
         super();
         this.cap = cap;
         this.inflate = inflate;
@@ -47,6 +52,7 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
         this.transparent = transparent;
         this.depthWrite = depthWrite;
         this.singleCoverage = singleCoverage;
+        this.multiColor = multiColor;
     }
 
     /** Subclasses return their fragment shader body. */
@@ -163,6 +169,7 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
 
         const mesh = new THREE.Mesh(geometry, material);
         if (this.singleCoverage) mesh.userData.coverageLayer = true;
+        if (this.singleCoverage && this.multiColor) mesh.userData.coverageColorOver = true;
         mesh.userData.samples = samples;
         mesh.userData.stats = {
             sampleCount: n,

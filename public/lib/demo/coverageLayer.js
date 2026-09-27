@@ -49,6 +49,21 @@ export class CoverageLayer {
         material.blendSrcAlpha = THREE.OneFactor;
         material.blendDstAlpha = THREE.OneMinusSrcAlphaFactor;
         this._defaultComposite = material;
+
+        // For a multicolor mark, the layer holds premultiplied color (the draw pass
+        // composites it straight over), so the blit adds it as-is against
+        // one-minus-coverage instead of remultiplying by the coverage.
+        const premult = new THREE.MeshBasicMaterial({
+            map: this.target.texture, transparent: true, depthTest: false, depthWrite: false,
+        });
+        premult.blending = THREE.CustomBlending;
+        premult.blendEquation = THREE.AddEquation;
+        premult.blendSrc = THREE.OneFactor;
+        premult.blendDst = THREE.OneMinusSrcAlphaFactor;
+        premult.blendSrcAlpha = THREE.OneFactor;
+        premult.blendDstAlpha = THREE.OneMinusSrcAlphaFactor;
+        this._premultComposite = premult;
+
         this._compositeMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
         this._compositeScene.add(this._compositeMesh);
     }
@@ -68,7 +83,12 @@ export class CoverageLayer {
         const previousAuto = renderer.autoClear;
         renderer.autoClear = false;
 
-        // The mark alone, with MAX blending: overlaps keep single coverage.
+        // The mark alone. Alpha always takes the MAX, so overlaps keep single coverage.
+        // A single-hue mark also MAXes its color (max of one color is that color); a
+        // multicolor mark instead composites the color as a straight over, so a
+        // self-crossing shows the top covering rather than the per-channel max of two
+        // hues, which brightens toward white.
+        const colorOver = Boolean(mesh.userData.coverageColorOver);
         const parent = mesh.parent;
         this._scene.add(mesh);
         const saved = [];
@@ -85,10 +105,10 @@ export class CoverageLayer {
                     depthTest: m.depthTest, depthWrite: m.depthWrite,
                 });
                 m.blending = THREE.CustomBlending;
-                m.blendEquation = THREE.MaxEquation;
+                m.blendEquation = colorOver ? THREE.AddEquation : THREE.MaxEquation;
+                m.blendSrc = colorOver ? THREE.SrcAlphaFactor : THREE.OneFactor;
+                m.blendDst = colorOver ? THREE.OneMinusSrcAlphaFactor : THREE.OneFactor;
                 m.blendEquationAlpha = THREE.MaxEquation;
-                m.blendSrc = THREE.OneFactor;
-                m.blendDst = THREE.OneFactor;
                 m.blendSrcAlpha = THREE.OneFactor;
                 m.blendDstAlpha = THREE.OneFactor;
                 m.depthTest = false;
@@ -124,6 +144,10 @@ export class CoverageLayer {
             if (u.uTexel) u.uTexel.value.set(1 / this.target.width, 1 / this.target.height);
             if (u.uScreen) u.uScreen.value.set(this.target.width, this.target.height);
             this._compositeMesh.material = custom;
+        } else {
+            // A color-over mark left premultiplied color in the layer, so it blits
+            // premultiplied; a MAX mark left straight color and blits straight over.
+            this._compositeMesh.material = colorOver ? this._premultComposite : this._defaultComposite;
         }
         renderer.setRenderTarget(outputTarget);
         renderer.render(this._compositeScene, this._compositeCamera);
@@ -136,6 +160,7 @@ export class CoverageLayer {
     dispose() {
         this.target.dispose();
         this._compositeMesh.geometry.dispose();
-        this._compositeMesh.material.dispose();
+        this._defaultComposite.dispose();
+        this._premultComposite.dispose();
     }
 }
