@@ -228,8 +228,11 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         disposeLive();
         live = buildFromPoints(points);
         if (live) stage.add(live.group);
-        setPointerLine(done ? [] : points);
-        setSpineLine(done || !live ? [] : live.spinePaths);
+        // The pointer trace and spine overlays stay after release, showing the finished
+        // stroke until the next press begins one. A new press feeds a single point, which
+        // clears both here (an empty spine, a one-point line with nothing to draw).
+        setPointerLine(points);
+        setSpineLine(live ? live.spinePaths : []);
         if (done && live) {
             board.bake([live.group]);
             ghost = live;

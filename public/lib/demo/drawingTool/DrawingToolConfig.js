@@ -19,7 +19,7 @@ export class DrawingToolConfig {
      * @param {string[]} [opts.initializers] Initializer ids a clear picks from
      *                                      at random (see initializers.js);
      *                                      [] clears to bare paper.
-     * @param {boolean} [opts.pointerTrace] The pointer's own line while drawing.
+     * @param {boolean} [opts.pointerTrace] The pointer's own line, kept until the next stroke.
      */
     constructor({
         tools = null,

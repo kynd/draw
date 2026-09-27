@@ -7,30 +7,75 @@ import { seededRandom } from '../random.js';
  */
 
 export const AMPLITUDE = 0.34;
-export const CONTROL_POINTS = 64;
-const STRAIGHT_UNTIL = 0.30;
-const WIGGLE_END = 0.62;
+export const CONTROL_POINTS = 96;
+const STRAIGHT_FRAC = 0.24;
+const LOOP_FRAC = 0.30;
+const LOOP_TURNS = 1.0;
+const LOOP_DRIFT = 1.885;
+const WIGGLE_WAVES = 1.6;
+const LOOP_R_FRAC = 0.6;
+const WAVE_AMP_FRAC = 0.8;
 
 /**
- * A path that runs straight, then wiggles.
+ * A path that runs straight, rolls into a loop, then waves to the right.
  *
- * The amplitude is held at zero until STRAIGHT_UNTIL and eased in with a smoothstep, so
- * the straight run and the curve belong to one continuous path rather than meeting at a
- * corner. `wiggleScale` scales the wiggle's amplitude and wavelength together, so a
- * demo can grow the wave with its stroke width and keep the drawn shape similar.
+ * The straight run enters a one-turn loop horizontally. The loop is a circle whose center
+ * drifts right by LOOP_DRIFT radii, so it leaves horizontally too and its entry and exit
+ * strands cross once at about ninety degrees. The wave then runs to the right edge, its
+ * amplitude eased in from the loop exit so it starts straight.
+ *
+ * The loop rises 2 * LOOP_R_FRAC amplitudes and the wave reaches WAVE_AMP_FRAC amplitudes, and
+ * those two are chosen so the loop stays open (a hole in the middle) even under a thick stroke
+ * while their sum still fits the amplitude band. The straight run and wave sit below yBase by
+ * SHIFT so the whole path centers on yBase and spans exactly one amplitude either way, the same
+ * band a plain wave would. `wiggleScale` scales the amplitude, wavelength, and loop together,
+ * so a demo can grow the shape with its stroke width and keep it similar.
  */
 export function straightThenWiggle(yBase, { z0 = 0.002, zRise = 0.004, halfWidthX = 1.52,
     wiggleScale = 1 } = {}) {
     const points = [];
-    for (let i = 0; i < CONTROL_POINTS; i++) {
-        const t = i / (CONTROL_POINTS - 1);
-        const ramp = THREE.MathUtils.smoothstep(t, STRAIGHT_UNTIL, WIGGLE_END);
-        const phase = (t - STRAIGHT_UNTIL) * Math.PI * 4.4 / wiggleScale;
+    const R = AMPLITUDE * LOOP_R_FRAC * wiggleScale;
+    const waveAmp = AMPLITUDE * WAVE_AMP_FRAC * wiggleScale;
+    const drift = R * LOOP_DRIFT;
+    // Center the loop-and-wave extent on yBase: it rises 2R and dips waveAmp from the baseline,
+    // so dropping the baseline by half their difference makes it span one amplitude either way.
+    const base = yBase - (2 * R - waveAmp) / 2;
+    const xEntry = -halfWidthX * 0.24;
+    const xExit = xEntry + drift;
+
+    const straightCount = Math.round(CONTROL_POINTS * STRAIGHT_FRAC);
+    const loopCount = Math.round(CONTROL_POINTS * LOOP_FRAC);
+    const waveCount = CONTROL_POINTS - straightCount - loopCount;
+    const total = CONTROL_POINTS - 1;
+    let idx = 0;
+    const z = () => z0 + zRise * (idx / total);
+
+    // Straight run into the loop entry.
+    for (let i = 0; i < straightCount; i++, idx++) {
+        const f = i / (straightCount - 1);
         points.push(new THREE.Vector3(
-            THREE.MathUtils.lerp(-halfWidthX, halfWidthX, t),
-            yBase + ramp * AMPLITUDE * wiggleScale * Math.sin(phase),
-            z0 + zRise * t
-        ));
+            THREE.MathUtils.lerp(-halfWidthX, xEntry, f), base, z()));
+    }
+    // The roll: one turn of a circle whose center drifts right, entered and left horizontally,
+    // so the entry and exit strands cross at about ninety degrees. The center sits one radius
+    // above the baseline.
+    const cy = base + R;
+    for (let i = 1; i <= loopCount; i++, idx++) {
+        const f = i / loopCount;
+        const theta = -Math.PI / 2 + f * Math.PI * 2 * LOOP_TURNS;
+        const cx = xEntry + drift * f;
+        points.push(new THREE.Vector3(
+            cx + Math.cos(theta) * R, cy + Math.sin(theta) * R, z()));
+    }
+    // Wave to the right, amplitude eased in from the loop exit so it leaves the roll straight.
+    for (let i = 1; i <= waveCount; i++, idx++) {
+        const f = i / waveCount;
+        const ramp = THREE.MathUtils.smoothstep(f, 0, 0.33);
+        const phase = f * WIGGLE_WAVES * Math.PI * 2 / wiggleScale;
+        points.push(new THREE.Vector3(
+            THREE.MathUtils.lerp(xExit, halfWidthX, f),
+            base + ramp * waveAmp * Math.sin(phase),
+            z()));
     }
     return points;
 }
