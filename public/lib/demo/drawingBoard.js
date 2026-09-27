@@ -280,12 +280,19 @@ export class DrawingBoard {
         renderer.clear(true, true, false);
         renderer.render(this._bakeScene, camera);
 
-        // Coverage-layer marks bake one at a time through the shared layer,
-        // so their self-overlaps keep single coverage in the bake too.
-        layered.forEach(child => {
-            child.visible = true;
-            this.stage.coverage.draw(renderer, camera, child, back);
-        });
+        // Coverage-layer marks bake one at a time through the shared layer, so their
+        // self-overlaps keep single coverage in the bake too. They bake back-to-front by
+        // depth, the way the live render orders them, so a stroke's halo pieces all land
+        // under its ribbon pieces instead of a later piece's halo baking over an earlier
+        // piece's body where the pieces overlap at a split.
+        const zp = new THREE.Vector3();
+        layered
+            .map(child => { child.getWorldPosition(zp); return { child, z: zp.z }; })
+            .sort((a, b) => a.z - b.z)
+            .forEach(({ child }) => {
+                child.visible = true;
+                this.stage.coverage.draw(renderer, camera, child, back);
+            });
 
         renderer.setRenderTarget(previous);
         renderer.autoClear = previousAuto;
