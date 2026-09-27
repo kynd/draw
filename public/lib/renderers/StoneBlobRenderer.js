@@ -5,7 +5,10 @@ import { BlobRenderer } from './BlobRenderer.js';
  * A blob shaded as stone: rock, marble, or sand.
  *
  * Rock is a craggy fold of noise shaded matte, with color patches between the two
- * tones. Marble is a smooth glossy dome whose color carries thin veins: a stripe
+ * tones, its surface broken into large irregular facets (a coarse triangular lattice
+ * dragged by low-frequency noise) mixed into the crags by an amount that itself wanders,
+ * so the facet edges are hard in some stretches and absent in others. Marble is a smooth
+ * glossy dome whose color carries thin veins: a stripe
  * field warped by noise, folded to a line and sharpened. Sand is a matte low-frequency
  * swell that mounds the surface, with a fine per-pixel normal jitter as grain over it
  * and occasional glints.
@@ -17,6 +20,7 @@ export class StoneBlobRenderer extends BlobRenderer {
         color = '#8a8078',
         colorB = '#4a443e',
         relief = 0.6,
+        facets = 4,        // triangular-pane density for the rock's facets
         ...rest
     } = {}) {
         super({ margin: 0.15, ...rest });
@@ -24,6 +28,7 @@ export class StoneBlobRenderer extends BlobRenderer {
         this.color = color;
         this.colorB = colorB;
         this.relief = relief;
+        this.facets = facets;
     }
 
     uniforms() {
@@ -32,6 +37,7 @@ export class StoneBlobRenderer extends BlobRenderer {
             uColor: { value: new THREE.Color(this.color) },
             uColorB: { value: new THREE.Color(this.colorB) },
             uRelief: { value: this.relief },
+            uFacets: { value: this.facets },
         };
     }
 
@@ -41,6 +47,7 @@ export class StoneBlobRenderer extends BlobRenderer {
             uniform vec3 uColor;
             uniform vec3 uColorB;
             uniform float uRelief;
+            uniform float uFacets;
 
             // Crags: folded noise over a swell, matte and sharp-edged in shading.
             float rockRelief(vec2 p) {
@@ -66,7 +73,7 @@ export class StoneBlobRenderer extends BlobRenderer {
                 float alpha = 1.0 - smoothstep(-0.006, 0.0, d);
                 if (alpha <= 0.003) discard;
 
-                float domeW = min(0.3, uInset);
+                float domeW = min(0.3, localInset(vWorld, d, outward));
                 float t = clamp(-d / domeW, 0.0, 1.0);
                 float dome = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
                 float domeSlope = 30.0 * t * t * (t - 1.0) * (t - 1.0) / domeW;
@@ -77,10 +84,20 @@ export class StoneBlobRenderer extends BlobRenderer {
 
                 if (uMode == 0) {
                     float e = 0.012;
-                    slope += vec2(
+                    vec2 rockGrad = vec2(
                         rockRelief(vWorld + vec2(e, 0.0)) - rockRelief(vWorld - vec2(e, 0.0)),
                         rockRelief(vWorld + vec2(0.0, e)) - rockRelief(vWorld - vec2(0.0, e))
                     ) / (2.0 * e) * uRelief * 0.6;
+                    // Facet the rock: a coarse triangular lattice (a third the facet
+                    // frequency) whose vertices are dragged far by low-frequency noise, so
+                    // the panes are large and irregular. The mix into the crag relief
+                    // wanders on its own noise, so the facet edges read hard in some
+                    // stretches and are not visible at all in others.
+                    vec2 warp = (vec2(fbm(vWorld * 1.0 + uSeed * 5.0), fbm(vWorld * 1.0 + uSeed * 9.0)) - 0.5) * 0.5;
+                    vec2 facetId = triangleId(vWorld + warp, uFacets / 3.0);
+                    vec2 facetTilt = (hash22(facetId + uSeed * 3.0) - 0.5) * 2.0 * uRelief;
+                    float facetMix = smoothstep(0.35, 0.72, fbm(vWorld * 1.6 + uSeed * 21.0)) * 0.9;
+                    slope += mix(rockGrad, facetTilt, facetMix);
                     float mottle = fbm(vWorld * 2.4 + uSeed * 5.0);
                     color = mix(uColorB, uColor, smoothstep(0.3, 0.7, mottle));
                     // Crevices darken with the fold.

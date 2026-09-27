@@ -15,6 +15,8 @@ export const MAX_CONTOUR = 200;
  *   sdBlob(p, arc, outward)  signed distance at world point p, negative inside,
  *                            with the arc position of the nearest boundary point
  *                            and the outward unit direction.
+ *   localInset(p, d, outward)  the local half-width, so an edge dome can flatten by
+ *                            the middle of a narrow region instead of creasing there.
  *   uvAt(p)                  the background uv of an arbitrary world point, not
  *                            just this fragment's own.
  *   uPerimeter, uCount, uSeed, uScreen (synced by the stage), fbm and hashes.
@@ -63,7 +65,6 @@ export class BlobRenderer {
 
         const material = new THREE.ShaderMaterial({
             uniforms: {
-                uInset: { value: insetRadius(pts) },
                 uContour: { value: contourArr },
                 uArc: { value: arc },
                 uCount: { value: n },
@@ -114,7 +115,6 @@ const PRELUDE = /* glsl */`
     uniform float uArc[${MAX_CONTOUR}];
     uniform int uCount;
     uniform float uPerimeter;
-    uniform float uInset;
     uniform float uSeed;
     uniform vec2 uScreen;
 
@@ -148,6 +148,50 @@ const PRELUDE = /* glsl */`
         float v = 0.0, a = 0.5;
         for (int i = 0; i < 4; i++) { v += a * valueNoise(p); p *= 2.0; a *= 0.5; }
         return v;
+    }
+
+    // A triangle id on a regular triangular lattice, facets cells across a unit, so a
+    // shader can flat-shade or color per triangular pane. The .x carries which of the two
+    // triangles in each rhombus the point falls in.
+    vec2 triangleId(vec2 p, float facets) {
+        vec2 g = vec2(p.x - p.y * 0.57735, p.y * 1.1547) * facets;
+        vec2 cell = floor(g);
+        float upper = step(1.0, fract(g).x + fract(g).y);
+        return cell * 2.0 + vec2(upper, 0.0);
+    }
+
+    // A triangle id on a jittered triangular lattice: each lattice vertex is offset by a
+    // per-vertex hash, and a point takes the jittered triangle that contains it, found by
+    // testing the triangles in the cells around it. The panes stay triangular with
+    // straight edges; only their vertices move. The id (the three vertex indices summed)
+    // is the same for every point in a triangle, so a shader flat-shades per pane.
+    vec2 triFacetId(vec2 p, float facets, float jitter) {
+        float F = 0.3660254;   // position -> lattice skew, (sqrt(3)-1)/2
+        float G = 0.2113249;   // lattice -> position unskew, (3-sqrt(3))/6
+        vec2 s = p * facets;
+        vec2 hc = floor(s + (s.x + s.y) * F);
+        vec2 id = 3.0 * hc + 1.0;
+        for (int cj = -1; cj <= 1; cj++) {
+            for (int ci = -1; ci <= 1; ci++) {
+                vec2 c = hc + vec2(float(ci), float(cj));
+                for (int t = 0; t < 2; t++) {
+                    // Split each cell along the main diagonal, so unskewing gives
+                    // equilateral (60-degree) triangles rather than skewed ones.
+                    vec2 iA = c, iB = c + vec2(1.0, 0.0), iC = c + vec2(1.0, 1.0);
+                    if (t == 1) { iB = c + vec2(0.0, 1.0); }
+                    vec2 a = iA - (iA.x + iA.y) * G + (hash22(iA) - 0.5) * jitter;
+                    vec2 b = iB - (iB.x + iB.y) * G + (hash22(iB) - 0.5) * jitter;
+                    vec2 cc = iC - (iC.x + iC.y) * G + (hash22(iC) - 0.5) * jitter;
+                    float d1 = (s.x - a.x) * (b.y - a.y) - (s.y - a.y) * (b.x - a.x);
+                    float d2 = (s.x - b.x) * (cc.y - b.y) - (s.y - b.y) * (cc.x - b.x);
+                    float d3 = (s.x - cc.x) * (a.y - cc.y) - (s.y - cc.y) * (a.x - cc.x);
+                    bool neg = d1 < 0.0 || d2 < 0.0 || d3 < 0.0;
+                    bool pos = d1 > 0.0 || d2 > 0.0 || d3 > 0.0;
+                    if (!(neg && pos)) id = iA + iB + iC;
+                }
+            }
+        }
+        return id;
     }
 
     // Signed distance to the contour polygon: negative inside. Also reports the arc
@@ -185,58 +229,19 @@ const PRELUDE = /* glsl */`
         }
         return d;
     }
-`;
 
-/**
- * The deepest interior point's distance to the contour, found by a coarse
- * grid over the bounds refined around its best cell. The dome profiles cap
- * their depth at this, so a narrow region's slopes flatten before they meet
- * at the middle instead of creasing along it.
- */
-function insetRadius(pts) {
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const p of pts) {
-        minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
-        minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
-    }
-    const depth = (x, y) => {
-        let d2 = Infinity;
-        let inside = false;
-        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
-            const a = pts[j], b = pts[i];
-            const ex = b.x - a.x, ey = b.y - a.y;
-            const wx = x - a.x, wy = y - a.y;
-            const s = Math.min(Math.max((wx * ex + wy * ey) / ((ex * ex + ey * ey) || 1), 0), 1);
-            const dx = wx - ex * s, dy = wy - ey * s;
-            d2 = Math.min(d2, dx * dx + dy * dy);
-            if ((a.y > y) !== (b.y > y) && x < a.x + ((y - a.y) / (b.y - a.y)) * (b.x - a.x)) {
-                inside = !inside;
-            }
+    // The local half-width, marched inward from a point along its inward normal at a
+    // few fixed steps. An edge dome sized to this reaches its flat top by the middle of
+    // a narrow region, so the two rims meet with no slope there instead of creasing into
+    // a ridge; wide regions saturate the search and fall back to the dome's full width.
+    // Only the range a dome spans (~0.3) is searched, and it never over-reports, so it
+    // errs toward a flatter center rather than a sharper one.
+    float localInset(vec2 p, float d, vec2 outward) {
+        float best = -d;
+        for (int i = 1; i <= 4; i++) {
+            float a; vec2 o;
+            best = max(best, -sdBlob(p - outward * (float(i) * 0.075), a, o));
         }
-        return inside ? Math.sqrt(d2) : 0;
-    };
-    const N = 20;
-    let best = 0;
-    let bx = (minX + maxX) / 2, by = (minY + maxY) / 2;
-    for (let iy = 0; iy <= N; iy++) {
-        for (let ix = 0; ix <= N; ix++) {
-            const x = minX + ((maxX - minX) * ix) / N;
-            const y = minY + ((maxY - minY) * iy) / N;
-            const d = depth(x, y);
-            if (d > best) { best = d; bx = x; by = y; }
-        }
+        return best;
     }
-    let step = Math.max(maxX - minX, maxY - minY) / N;
-    for (let pass = 0; pass < 3; pass++) {
-        step /= 3;
-        let nx = bx, ny = by;
-        for (let iy = -2; iy <= 2; iy++) {
-            for (let ix = -2; ix <= 2; ix++) {
-                const d = depth(bx + ix * step, by + iy * step);
-                if (d > best) { best = d; nx = bx + ix * step; ny = by + iy * step; }
-            }
-        }
-        bx = nx; by = ny;
-    }
-    return Math.max(best, 0.02);
-}
+`;
