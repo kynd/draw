@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tube curvature — where a bend tears the surface</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../../styles/demo-ui.css" />
+  <style>
+    #labels { position: absolute; inset: 0; pointer-events: none; }
+    .tc-label {
+      position: absolute;
+      transform: translate(-50%, 0);
+      display: flex;
+      gap: 0.4em;
+      font: 400 11px 'Google Sans Code', monospace;
+      color: #40382e;
+      white-space: nowrap;
+    }
+    .tc-label span:last-child { color: #a03030; }
+  </style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap">
+      <canvas id="canvas"></canvas>
+      <div id="labels"></div>
+    </div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Tube curvature</span></div>
+      <div class="dp-note">Columns vary the turn angle φ, rows the bend radius (gentle at the top, sharp at the bottom). ρ is the tube radius over the bend radius; past about 1 the tube overlaps itself, cleanly now that the rings follow the eased centerline.</div>
+      <div class="dp-row">
+        <span class="dp-label">Width</span>
+        <input id="width" class="dp-range" type="range" min="6" max="40" step="1" value="15" />
+        <span class="dp-val" id="width-val">15</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Depth</span>
+        <input id="depth" class="dp-range" type="range" min="0" max="0.3" step="0.01" value="0.14" />
+        <span class="dp-val" id="depth-val">0.14</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Twist</span>
+        <input id="twist" class="dp-range" type="range" min="0" max="14" step="0.5" value="5" />
+        <span class="dp-val" id="twist-val">5.0</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Density</span>
+        <input id="density" class="dp-range" type="range" min="20" max="200" step="5" value="60" />
+        <span class="dp-val" id="density-val">60</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Wobble</span>
+        <input id="wobble" class="dp-range" type="range" min="0" max="1.5" step="0.05" value="1" />
+        <span class="dp-val" id="wobble-val">1.00</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Mode</span>
+        <select id="mode" class="dp-select">
+          <option value="wobble">Wobble</option>
+          <option value="candy">Candy</option>
+        </select>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Overlays</span></div>
+      <div class="dp-btn-row">
+        <button id="wire-btn" class="dp-toggle">Wireframe</button>
+        <button id="normals-btn" class="dp-toggle">Normals</button>
+        <button id="spine-btn" class="dp-toggle">Spine</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

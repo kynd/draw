@@ -1,0 +1,31 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Tube curvature" slug="experimental/tube-curvature">
+  <div class="monologue">
+    A grid of bends, from gentle to sharp, to find where a tube's surface tears
+  </div>
+
+  <div class="prose">
+    <p>This page is experimental and only exists in the local build. A wobble tube showed wedges cut into the outer wall of a tight bend, while the spine read clean, so the fault was in the surface rather than the drawn path. This demo isolates the bend: every stroke runs straight, curves through one circular arc, then runs straight again, and nothing is random, so a fold can be named by its cell and reproduced exactly.</p>
+    <div class="jp">このページは実験的なもので、ローカルのビルドにのみ存在します。ウォブルのチューブは、きつい曲がりの外壁に切り込む楔を見せていましたが、スパインはきれいだったので、原因は描いたパスではなく表面にありました。このデモは曲がりだけを取り出します。各ストロークはまっすぐ進み、ひとつの円弧で曲がり、また まっすぐ進みます。ランダムな要素はないので、破綻はそのセルで名指しでき、同じものを再現できます。</div>
+  </div>
+
+  <section class="demo-section" id="grid">
+    <div class="demo-header">
+      <h2>The bend grid</h2>
+      <a href={`${base}/demos/experimental/tube-curvature/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/experimental/tube-curvature/index.html?embedded`} title="Tube curvature grid" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Columns vary the turn angle from a quarter turn to well past a half turn. Rows vary the bend radius, gentle at the top and sharp at the bottom. Each label reads the turn angle and ρ, the tube radius over the bend radius: a tube cannot bend to a radius smaller than its own, so ρ near or above 1 is where the inner wall would cross itself. Raising the width pushes more cells over that line at once. The overlays show the wireframe, the surface normals, and the eased centerline the renderer actually builds.</p>
+      <div class="jp">列は曲がりの角度を、4分の1回転から半回転を超えるところまで変えます。行は曲がりの半径を変え、上がゆるやか、下が鋭くなります。各ラベルは曲がりの角度とρ、すなわち曲がりの半径に対するチューブの半径を示します。チューブは自分の半径より小さくは曲がれないので、ρが1に近いか超えるあたりで内壁が自分と交わります。幅を上げると、より多くのセルが一度にその線を越えます。オーバーレイは、ワイヤーフレーム、面の法線、そしてレンダラーが実際に作る、ならしたあとの中心線を示します。</div>
+
+      <p>The wedges that cut into the outer wall were a framing fault, not the tube passing through itself. Density sets the rings per unit of arc, and Wobble scales the radius swell from its full amount to none; neither cleared the wedges, so the cause was neither undersampling nor the swell. The centerline is eased to the curvature limit, but the cross-section frames were taken from the original sharp spine, so on a tight bend they turned faster than the eased centers advanced and the rings' outer edges swung past each other, pleating the surface inward. The rings now take their frame from the eased centerline, and the eased centerline is resampled at even distance before they are built, so they no longer crowd where the bend was sharp and the width and wobble read the eased distance rather than the pre-easing spacing. A tight bend now folds over itself cleanly, and only the expected inner crease where the tube meets itself remains.</p>
+      <div class="jp">外壁に切り込んでいた楔は、チューブが自分を通り抜けることではなく、フレーミングの誤りでした。Densityは弧の単位あたりのリング数を、Wobbleは半径のふくらみを全量からゼロまで調整しますが、どちらも楔を消しませんでした。ですから原因はサンプル不足でもふくらみでもありません。中心線は曲率の限界までならされますが、断面のフレームは元の鋭いスパインから取られていたため、きつい曲がりではならした中心よりも速く回り、リングの外側の縁が互いを追い越して面を内側に折り込んでいました。いまはリングがならした中心線からフレームを取り、さらにリングを組む前にならした中心線を等距離で取り直すため、曲がりが鋭かったところで詰まらず、幅とうねりも、ならす前の間隔ではなくならした距離を読みます。きつい曲がりはきれいに自分の上へ折り重なり、チューブが自分と接する内側の折り目だけが残ります。</div>
+  </section>
+</PageLayout>

@@ -49,6 +49,60 @@ function limitCurvature(centers, radius) {
 }
 
 /**
+ * Reframes each ring normal off the (eased) centerline, so the cross-sections turn at the
+ * same rate the centers advance. The normal is the in-plane perpendicular of the tangent
+ * between neighbors, the same convention resampleSpine uses, dropping Z so the depth ramp
+ * does not tilt the ring. A degenerate step keeps the previous normal.
+ */
+function reframeNormals(centers, normals) {
+    const n = centers.length;
+    for (let i = 0; i < n; i++) {
+        const a = centers[Math.max(0, i - 1)];
+        const b = centers[Math.min(n - 1, i + 1)];
+        let tx = b.x - a.x, ty = b.y - a.y;
+        const len = Math.hypot(tx, ty);
+        if (len < 1e-9) {
+            if (i > 0) normals[i].copy(normals[i - 1]);
+            continue;
+        }
+        normals[i].set(-ty / len, tx / len, 0);
+    }
+}
+
+/**
+ * Resamples an eased centerline at even arc length (measured in the XY plane, the plane the
+ * rings are framed in). The input samples are curvature-weighted, so after the easing they
+ * crowd where the bend was sharp; stepping by actual distance spreads the rings evenly and
+ * gives each one an arc position that advances with the eased shape, so width, wobble, and
+ * pattern read the real distance rather than the pre-easing spacing. Returns the new centers,
+ * their cumulative arc, and the total length.
+ */
+function resampleEven(centers, samplesPerUnit) {
+    const n = centers.length;
+    const arc = new Array(n);
+    arc[0] = 0;
+    for (let i = 1; i < n; i++) {
+        arc[i] = arc[i - 1] + Math.hypot(centers[i].x - centers[i - 1].x, centers[i].y - centers[i - 1].y);
+    }
+    const length = arc[n - 1];
+    let count = Math.round(length * samplesPerUnit) + 1;
+    count = Math.min(Math.max(count, 8), 1024);
+    const out = [], arcs = [];
+    let j = 0;
+    for (let k = 0; k < count; k++) {
+        const s = count === 1 ? 0 : length * (k / (count - 1));
+        while (j < n - 2 && arc[j + 1] < s) j++;
+        const seg = arc[j + 1] - arc[j];
+        const f = seg > 1e-12 ? (s - arc[j]) / seg : 0;
+        const a = centers[j], b = centers[j + 1];
+        out.push(new THREE.Vector3(
+            a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f, a.z + (b.z - a.z) * f));
+        arcs.push(s);
+    }
+    return { centers: out, arcs, length };
+}
+
+/**
  * A 3D tube around the spine, closed by rounded caps, in one of three looks.
  *
  *   candy   diagonal stripes wrapping the tube from a list of colors, with a
@@ -69,6 +123,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         background = null,
         stripes = 5,       // stripe bands per unit of arc length
         wobbleFreq = 12,   // wave rate relative to the width
+        wobbleAmount = 1,  // how far the radius swings from its mean, 1 the default swell
         bend = 0.4,        // how far the reflection displaces the canvas lookup
         ...rest
     } = {}) {
@@ -81,6 +136,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         this.background = background;
         this.stripes = stripes;
         this.wobbleFreq = wobbleFreq;
+        this.wobbleAmount = wobbleAmount;
         this.bend = bend;
     }
 
@@ -93,19 +149,29 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
         const phase = s / Math.max(def.widthLeftAt(0.5), 1e-4) * this.wobbleFreq * 0.025;
         const wob = 0.5 + 0.32 * Math.sin(phase + seed * 7.7)
                         + 0.18 * Math.sin(phase * 2.33 + seed * 3.1);
-        return { r: Math.max(base * (0.3 + 1.1 * wob), 1e-4), wob };
+        // The radius is the mean swell scaled from the mean by wobbleAmount, so 0 holds a
+        // constant radius and 1 is the full swell. The color still reads the raw wave.
+        const r = base * (0.85 + 1.1 * this.wobbleAmount * (wob - 0.5));
+        return { r: Math.max(r, 1e-4), wob };
     }
 
     build(def) {
-        const { centers, normals, ts, length, phaseAt, seed } = this.frames(def);
-        const n = centers.length;
+        const framed = this.frames(def);
+        const { phaseAt, seed } = framed;
         const B = new THREE.Vector3(0, 0, 1);
 
-        // A bend tighter than the tube's radius tears the surface, so ease the
-        // centerline to that limit. The ring frame stays the smooth spine normal:
-        // framing off the eased centers would follow the wander wiggle and ripple
-        // the shading, and a round cross-section is the same whichever way it faces.
-        limitCurvature(centers, Math.max(def.maxWidth(), 1e-4));
+        // A bend tighter than the tube's radius tears the surface, so ease the centerline to
+        // that limit. The eased centers still carry the curvature-weighted spacing, which
+        // crowds the rings where the bend was sharp, so resample them at even arc length and
+        // reframe off the even centers. Everything downstream reads this eased distance: the
+        // rings are evenly spread, and the width, wobble, twist, and stripes advance with the
+        // eased shape rather than jumping where the original samples crowded.
+        limitCurvature(framed.centers, Math.max(def.maxWidth(), 1e-4));
+        const { centers, arcs, length } = resampleEven(framed.centers, this.samplesPerUnit);
+        const n = centers.length;
+        const ts = arcs.map(s => (length > 1e-9 ? s / length : 0));
+        const normals = centers.map(() => new THREE.Vector3());
+        reframeNormals(centers, normals);
 
         const positions = [], normalsA = [], along = [], around = [], wobs = [];
         const indices = [];
@@ -149,11 +215,16 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
             if (i > 0 && i < n - 1) drds[i] = (rs[i1] - rs[i0]) / dsLen;
         }
 
+        // The ring does not twist around the spine: its vertices stay in the fixed N-B plane
+        // (N the in-plane normal, B the depth axis), so seen from the camera the tube keeps a
+        // clean silhouette instead of the zig-zag a spun ring's discrete vertices trace. The
+        // twist lives only in the pattern coordinate, so the candy helix is unchanged.
         const pushRing = (center, N, T, slope, phase, r, rInner, side, t, wob) => {
             const base = positions.length / 3;
+            const twistTurns = phase / (Math.PI * 2);
             for (let j = 0; j <= RADIAL; j++) {
                 const a = j / RADIAL;
-                const theta = a * Math.PI * 2 + phase;
+                const theta = a * Math.PI * 2;
                 const cN = Math.cos(theta), sB = Math.sin(theta);
                 // The half of the ring facing the bend's center uses the
                 // clamped reach; the ellipse's normal is corrected to match.
@@ -164,7 +235,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                 positions.push(center.x + dir.x, center.y + dir.y, center.z + dir.z);
                 normalsA.push(nrm.x, nrm.y, nrm.z);
                 along.push(t);
-                around.push(a);
+                around.push(a - twistTurns);
                 wobs.push(wob);
             }
             return base;
@@ -198,6 +269,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
             const s = ts[i] * length;
             const { r, wob } = this._radiusAt(def, ts[i], s, seed);
             const phase = phaseAt(s);
+            const twistTurns = phase / (Math.PI * 2);
             let prev = -1;
             for (let k = 1; k <= CAP_LAT; k++) {
                 const phi = (k / CAP_LAT) * Math.PI * 0.5;
@@ -209,7 +281,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                 const base = positions.length / 3;
                 for (let j = 0; j <= RADIAL; j++) {
                     const a = j / RADIAL;
-                    const theta = a * Math.PI * 2 + phase;
+                    const theta = a * Math.PI * 2;
                     dir.copy(normals[i]).multiplyScalar(Math.cos(theta))
                         .addScaledVector(B, Math.sin(theta));
                     const nx = dir.x * Math.cos(phi) + T.x * Math.sin(phi);
@@ -222,7 +294,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                     );
                     normalsA.push(nx, ny, nz);
                     along.push(tCap);
-                    around.push(a);
+                    around.push(a - twistTurns);
                     wobs.push(wob);
                 }
                 const from = prev >= 0 ? prev
