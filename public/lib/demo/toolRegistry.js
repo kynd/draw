@@ -584,3 +584,80 @@ export function randomValues(entry) {
 export function toolLabel(entry) {
     return entry.id.replace(/-/g, ' ').replace(/^./, c => c.toUpperCase());
 }
+
+// The tool dropdown's section headings, in the order they appear. Each tool
+// belongs to one category through TOOL_CATEGORY below; groupTools splits a
+// registry into these sections so a long list is scannable.
+export const TOOL_CATEGORIES = [
+    'Ink & ribbon',
+    'Brush',
+    'Wet paint',
+    'Dry media',
+    'Pattern strokes',
+    'Textured strokes',
+    'Wrapping strokes',
+    'Tube & solid',
+    'Material strokes',
+    'Fills',
+    'Shape fills',
+    'Symmetric',
+];
+
+// Every tool id mapped to its category. A tool missing here falls into a
+// trailing 'Other' section, so an omission is visible rather than hidden.
+const TOOL_CATEGORY = {
+    ribbon: 'Ink & ribbon', 'ribbon-ragged': 'Ink & ribbon', 'ribbon-square': 'Ink & ribbon',
+    brush: 'Brush', 'brush-rounded': 'Brush', 'brush-square': 'Brush',
+    watercolor: 'Wet paint', 'wet-brush': 'Wet paint', oil: 'Wet paint',
+    'oil-square': 'Wet paint', 'oil-ragged': 'Wet paint', smear: 'Wet paint',
+    pencil: 'Dry media', charcoal: 'Dry media', pastel: 'Dry media',
+    'pencil-rainbow': 'Dry media', 'charcoal-multi': 'Dry media', 'pastel-multi': 'Dry media',
+    'dry-brush-fine': 'Dry media', 'dry-brush-medium': 'Dry media', 'dry-brush-coarse': 'Dry media',
+    'pattern-dashes': 'Pattern strokes', 'pattern-dots': 'Pattern strokes', 'pattern-strips': 'Pattern strokes',
+    'wet-dashes': 'Pattern strokes', 'wet-dots': 'Pattern strokes', 'wet-strips': 'Pattern strokes',
+    feather: 'Pattern strokes', leaves: 'Pattern strokes', fringe: 'Pattern strokes', 'wet-fringe': 'Pattern strokes',
+    cloud: 'Textured strokes', squares: 'Textured strokes', spikes: 'Textured strokes',
+    pixels: 'Textured strokes', polygons: 'Textured strokes', lanes: 'Textured strokes',
+    'around-spiral': 'Wrapping strokes', 'around-entangled': 'Wrapping strokes', 'around-scattered': 'Wrapping strokes',
+    'around-wiggle': 'Wrapping strokes', 'around-wiggle-even': 'Wrapping strokes', 'around-wiggle-u': 'Wrapping strokes',
+    'tube-candy': 'Tube & solid', 'tube-wobble': 'Tube & solid', 'tube-metal': 'Tube & solid',
+    tetrahedra: 'Tube & solid', boxes: 'Tube & solid', cones: 'Tube & solid',
+    chrome: 'Material strokes', 'frosted-glass': 'Material strokes', 'glass-stroke': 'Material strokes',
+    deboss: 'Material strokes', shadow: 'Material strokes', glow: 'Material strokes',
+    'spiky-blob': 'Fills', 'knife-oil': 'Fills', wash: 'Fills', 'watery-wash': 'Fills',
+    metal: 'Fills', rock: 'Fills', 'flat-blob': 'Fills', 'wobbly-blob': 'Fills',
+    'polka-dots': 'Fills', 'grid-squares': 'Fills', 'riley-waves': 'Fills', 'dry-brush': 'Fills',
+    'flat-paint': 'Fills', gouache: 'Fills', 'glass-blob': 'Fills', 'facet-glass': 'Fills',
+    marble: 'Fills', sand: 'Fills',
+    'circle-fill': 'Shape fills', 'oval-fill': 'Shape fills', 'rect-fill': 'Shape fills',
+    'diamond-fill': 'Shape fills', 'triangle-30-60': 'Shape fills', 'triangle-45': 'Shape fills',
+    'circle-flat': 'Shape fills', 'oval-flat': 'Shape fills', 'rect-flat': 'Shape fills',
+    'diamond-flat': 'Shape fills', 'triangle-30-60-flat': 'Shape fills', 'triangle-45-flat': 'Shape fills',
+    'mirror-brush': 'Symmetric', 'rotation-pencil': 'Symmetric', 'screen-ribbon': 'Symmetric',
+};
+
+/** A tool's dropdown category, or 'Other' when it has none. */
+export function toolCategory(entry) {
+    return TOOL_CATEGORY[entry.id] ?? 'Other';
+}
+
+/**
+ * A registry split into dropdown sections: `[{ category, entries }]` in
+ * TOOL_CATEGORIES order (any leftover category last), each holding the given
+ * entries in their original order. Only categories present in `entries` appear,
+ * so a demo's subset shows just the sections it uses.
+ */
+export function groupTools(entries) {
+    const byCat = new Map();
+    for (const entry of entries) {
+        const cat = toolCategory(entry);
+        if (!byCat.has(cat)) byCat.set(cat, []);
+        byCat.get(cat).push(entry);
+    }
+    const groups = [];
+    for (const cat of TOOL_CATEGORIES) {
+        if (byCat.has(cat)) { groups.push({ category: cat, entries: byCat.get(cat) }); byCat.delete(cat); }
+    }
+    for (const [cat, list] of byCat) groups.push({ category: cat, entries: list });
+    return groups;
+}

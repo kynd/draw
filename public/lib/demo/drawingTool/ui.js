@@ -1,7 +1,7 @@
 import { Dial } from '../dial.js';
 import { FrameLatch } from '../latch.js';
 import { PALETTE_SCHEMES } from '../../SchemePaletteMaker.js';
-import { toolLabel } from '../toolRegistry.js';
+import { toolLabel, groupTools } from '../toolRegistry.js';
 
 const TEMPLATE = /* html */`
   <div class="dp-overlay-tr">
@@ -309,17 +309,26 @@ export function attachDrawingToolUi(tool, layout) {
     // ------------------------------------------------------------------
     // Tool section
     const toolSelect = $('tool-select');
-    tool.registry.forEach(entry => {
-        const o = document.createElement('option');
-        o.value = entry.id;
-        o.textContent = toolLabel(entry);
-        toolSelect.appendChild(o);
+    // The dropdown is split into category sections; the dial walks the same
+    // flattened order, so both step through the tools identically.
+    const toolGroups = groupTools(tool.registry);
+    const toolOrder = toolGroups.flatMap(g => g.entries);
+    toolGroups.forEach(group => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = group.category;
+        group.entries.forEach(entry => {
+            const o = document.createElement('option');
+            o.value = entry.id;
+            o.textContent = toolLabel(entry);
+            optgroup.appendChild(o);
+        });
+        toolSelect.appendChild(optgroup);
     });
     toolSelect.addEventListener('change', () => tool.selectTool(toolSelect.value));
     // The dial is a shortcut through the same order as the dropdown, not a reroll.
     const dialToolAdv = new Dial($('dial-tool-adv'),
-        { label: 'Tool', min: 0, max: tool.registry.length - 1, value: 0,
-          onInput: i => tool.selectTool(tool.registry[i].id) });
+        { label: 'Tool', min: 0, max: toolOrder.length - 1, value: 0,
+          onInput: i => tool.selectTool(toolOrder[i].id) });
 
     // ------------------------------------------------------------------
     // Parameters, rendered from the engine's spec: one generic mechanism, no
