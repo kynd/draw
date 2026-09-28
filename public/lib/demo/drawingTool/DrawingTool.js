@@ -12,7 +12,7 @@ import { INITIALIZERS } from '../initializers.js';
 import { rollSymmetry, symmetricCopies } from '../symmetries.js';
 import { pathArcLength } from '../pressure.js';
 import { StrokeRecorder } from '../strokeRecorder.js';
-import { DrawingPlayer, downloadDrawingZip } from '../drawingPlayer.js';
+import { DrawingPlayer, downloadDrawingZip, downloadBlob } from '../drawingPlayer.js';
 import { makeMarkBuilder, applyRecordTo } from '../markBuilder.js';
 import { randomValues, toolSplits, previewPathOf } from '../toolRegistry.js';
 import { DrawingToolConfig } from './DrawingToolConfig.js';
@@ -81,7 +81,11 @@ export class DrawingTool {
         // changes redraw the same shape; a tool change rolls a fresh one.
         this._previewShape = null;
 
-        this.stage = new StrokeStage(canvas);
+        // Supersample the drawing surface to at least 2x the world scale, matching the
+        // tool preview: fill shading (fine grain, facet edges, finite-difference normals)
+        // aliases at 1:1 device pixels on a low-density display, and drawing at twice the
+        // scale then downsampling on present resolves it the way the preview already does.
+        this.stage = new StrokeStage(canvas, { minPixelRatio: 2 });
         this.board = new DrawingBoard(this.stage);
         this.recorder = new StrokeRecorder();
 
@@ -699,6 +703,13 @@ export class DrawingTool {
         downloadDrawingZip(this.getDrawingData(), filename);
     }
 
+    /** The drawing saved as a PNG (the `snapshot` view: no preview, trace, or guide). */
+    async downloadImage(filename = 'drawing') {
+        if (this._replaying) return;
+        const blob = await this.snapshot();
+        if (blob) downloadBlob(blob, `${filename}.png`);
+    }
+
     /**
      * A PNG of the drawing, without the preview, trace, or guide — the same
      * view a recording captures.
@@ -948,8 +959,14 @@ export class DrawingTool {
         };
         const { seed } = this._previewShape;
         // The preview gesture's shape follows the tool's category, so a fill
-        // reads as a rounded mass and an endpoint shape from a short span.
-        const path = previewPath(previewPathOf(state.tool), c, this._previewSize, this._previewShape);
+        // reads as a rounded mass and an endpoint shape from a short span. A blob
+        // mass is drawn at two thirds of the box, since it fills its outline solidly
+        // and otherwise crowds the edges; endpoint shapes and strokes keep full size.
+        const massScale = state.tool.kind === 'blob' ? 2 / 3 : 1;
+        const previewSize = massScale === 1
+            ? this._previewSize
+            : { w: this._previewSize.w * massScale, h: this._previewSize.h * massScale };
+        const path = previewPath(previewPathOf(state.tool), c, previewSize, this._previewShape);
         const ctx = {
             colorA: state.colorA, colorB: state.colorB, colors: state.colors,
             texture: this.board.texture, seed,
@@ -958,7 +975,7 @@ export class DrawingTool {
         };
         let mark = null;
         if (state.tool.kind === 'blob') {
-            const contour = blobOutline(path, { span: 0.1, radius: Math.min(Math.max(width * 1.6, 0.16), 0.26) });
+            const contour = blobOutline(path, { span: 0.1, radius: Math.min(Math.max(width * 1.6, 0.16), 0.26) * massScale });
             if (contour) {
                 const renderer = state.tool.make(state.values, ctx);
                 mark = { mesh: renderer.build(contour, ctx.seed), renderer };

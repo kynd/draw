@@ -230,6 +230,14 @@ add it to the writing-style page, and apply it from then on.
 - Strokes are drawn into a `CanvasBuffer` render target, so the renderer's own
   `antialias` flag does nothing. Antialiasing comes from the target's `samples`
   (default 4). Leave it on unless there is a measured reason not to.
+- MSAA (`samples`) only smooths geometry edges; fill shading (fine grain, facet
+  edges, finite-difference normals) is interior and aliases at 1:1 device pixels
+  on a low-density display. The drawing surface counters this by supersampling:
+  `Viewport` takes a `minPixelRatio` floor (`StrokeStage` passes it through), and
+  the drawing tool renders at `minPixelRatio: 2`, so the surface draws at twice
+  the world scale and downsamples on present, matching the tool preview's fixed
+  `PIXELS_PER_UNIT * 2` target. On a 2x display this is already the case, so it
+  costs nothing there.
 - Prefer deterministic geometry and color over random — the same settings produce the
   same drawing, so two runs can be compared. Where a copied class offers a random helper,
   call the deterministic overload instead of removing the helper.

@@ -12,8 +12,8 @@ import { Viewport } from './viewport.js';
  * before each render. A demo never has to remember to do that.
  */
 export class StrokeStage {
-    constructor(canvas, { fit, background = '#ffffff', samples = 4 } = {}) {
-        this.viewport = new Viewport(canvas);
+    constructor(canvas, { fit, background = '#ffffff', samples = 4, minPixelRatio = 1 } = {}) {
+        this.viewport = new Viewport(canvas, { minPixelRatio });
 
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
         this.renderer.setPixelRatio(1);

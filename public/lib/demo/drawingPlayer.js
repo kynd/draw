@@ -335,7 +335,7 @@ export async function readDrawingZip(file) {
     return JSON.parse(strFromU8(entries[name]));
 }
 
-function downloadBlob(blob, filename) {
+export function downloadBlob(blob, filename) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = filename;

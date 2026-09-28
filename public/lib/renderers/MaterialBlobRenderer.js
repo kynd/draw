@@ -117,7 +117,7 @@ export class MaterialBlobRenderer extends BlobRenderer {
                 if (uMode == 0) {
                     // The outline swells on the relief's low band, so the
                     // silhouette waves where the surface does.
-                    d -= (mfbm(vWorld * 0.4 + uSeed * 13.0) - 0.5) * uRelief * 0.5;
+                    d -= (mfbm(vWorld * 0.4 + uSeed * 13.0) - 0.5) * uRelief * 1.0;
                 }
                 float alpha = 1.0 - smoothstep(-0.006, 0.0, d);
                 if (alpha <= 0.003) discard;
@@ -142,7 +142,7 @@ export class MaterialBlobRenderer extends BlobRenderer {
                     slope = vec2(
                         metalRelief(vWorld + vec2(em, 0.0)) - metalRelief(vWorld - vec2(em, 0.0)),
                         metalRelief(vWorld + vec2(0.0, em)) - metalRelief(vWorld - vec2(0.0, em))
-                    ) / (2.0 * em) * uRelief * 0.25;
+                    ) / (2.0 * em) * uRelief * 0.5;
                 } else {
                     slope = vec2(
                         reliefAt(vWorld + vec2(e, 0.0)) - reliefAt(vWorld - vec2(e, 0.0)),

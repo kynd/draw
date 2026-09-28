@@ -32,12 +32,18 @@ export class Viewport {
      * @param {HTMLCanvasElement} canvas
      * @param {object}  [opts]
      * @param {number}  [opts.maxPixelRatio]  Cap on devicePixelRatio, to bound cost.
+     * @param {number}  [opts.minPixelRatio]  Floor on the backing-store scale, so the
+     *                                        surface supersamples on a low-density
+     *                                        display: shading that aliases at 1:1 device
+     *                                        pixels is rendered denser and downsampled on
+     *                                        present. 1 keeps the device's own ratio.
      */
-    constructor(canvas, { maxPixelRatio = 2 } = {}) {
+    constructor(canvas, { maxPixelRatio = 2, minPixelRatio = 1 } = {}) {
         this.canvas = canvas;
         this.wrap = canvas.closest('.canvas-wrap') ?? canvas.parentElement;
         this.layout = canvas.closest('.demo-layout');
         this.maxPixelRatio = maxPixelRatio;
+        this.minPixelRatio = minPixelRatio;
         this._listeners = [];
         this.embedded = applyEmbeddedLayout();
         this._measure();
@@ -66,7 +72,9 @@ export class Viewport {
     _measure() {
         const width = Math.max(1, Math.round(this.wrap.clientWidth));
         const height = Math.max(1, Math.round(this.wrap.clientHeight));
-        const pixelRatio = Math.min(window.devicePixelRatio || 1, this.maxPixelRatio);
+        const pixelRatio = Math.min(
+            Math.max(window.devicePixelRatio || 1, this.minPixelRatio),
+            this.maxPixelRatio);
 
         if (width === this._width && height === this._height && pixelRatio === this._pixelRatio) {
             return false;

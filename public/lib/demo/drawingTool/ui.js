@@ -46,7 +46,10 @@ const TEMPLATE = /* html */`
     <div class="dp-btn-row">
       <button id="replay-btn" class="dp-btn secondary">Replay</button>
       <button id="record-btn" class="dp-btn secondary">Record</button>
-      <button id="download-btn" class="dp-btn secondary">Download</button>
+    </div>
+    <div class="dp-btn-row">
+      <button id="download-btn" class="dp-btn secondary">Download JSON</button>
+      <button id="download-image-btn" class="dp-btn secondary">Download PNG</button>
     </div>
 
     <div class="dp-sub-label">Guide image</div>
@@ -210,6 +213,7 @@ export function attachDrawingToolUi(tool, layout) {
     const replayBtn = $('replay-btn');
     const recordBtn = $('record-btn');
     const downloadBtn = $('download-btn');
+    const downloadImageBtn = $('download-image-btn');
 
     replayBtn.addEventListener('click', () => {
         if (tool.state.replaying) { tool.stopReplay(); return; }
@@ -219,11 +223,12 @@ export function attachDrawingToolUi(tool, layout) {
         if (tool.recordVideo()) recordBtn.classList.add('active');
     });
     downloadBtn.addEventListener('click', () => tool.downloadDrawing());
+    downloadImageBtn.addEventListener('click', () => tool.downloadImage());
 
     function setReplayUi(on) {
         replayBtn.textContent = on ? 'Stop' : 'Replay';
         for (const el of [initBtn, clearBtn, autoCheck, traceCheck, spineCheck, recordBtn, downloadBtn,
-            guideBtn, guideToggle, advBtn]) {
+            downloadImageBtn, guideBtn, guideToggle, advBtn]) {
             el.disabled = on;
         }
     }
