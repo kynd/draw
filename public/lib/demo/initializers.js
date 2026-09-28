@@ -53,17 +53,205 @@ function rollStrokeMark(extentX, extentY, tools, colors, { length } = {}) {
     };
 }
 
+const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+
+/** Builds a stroke mark from a ready-made path, choosing a random stroke tool
+ * (or a given one) and colors. */
+function strokeMark(tools, colors, path, { entry, widthPx } = {}) {
+    const e = entry ?? pick(strokesOf(tools));
+    return {
+        toolId: e.id, values: randomValues(e),
+        colorA: pick(colors), colorB: pick(colors),
+        widthPx: widthPx ?? 10 + Math.random() * 20,
+        path,
+    };
+}
+
+// --- Geometric shape paths, in world units, centered at (cx, cy) --------------
+// Each carries a gentle pressure hump so a pressure-sensitive tool tapers.
+
+function withPressure(points) {
+    const n = points.length;
+    points.forEach((p, i) => { p.pressure = 0.6 + 0.15 * Math.sin((i / (n - 1)) * Math.PI); });
+    return points;
+}
+
+function sinePath(cx, cy, angle, len, amp, cycles) {
+    const dx = Math.cos(angle), dy = Math.sin(angle);
+    const phase = Math.random() * Math.PI * 2;
+    return withPressure(Array.from({ length: 44 }, (_, i) => {
+        const t = i / 43, along = (t - 0.5) * len;
+        const across = Math.sin(t * cycles * Math.PI * 2 + phase) * amp;
+        return new THREE.Vector3(cx + dx * along - dy * across, cy + dy * along + dx * across, 0);
+    }));
+}
+
+function zigzagPath(cx, cy, angle, len, amp, teeth) {
+    const dx = Math.cos(angle), dy = Math.sin(angle), count = teeth * 2 + 1;
+    return withPressure(Array.from({ length: count }, (_, i) => {
+        const along = (i / (count - 1) - 0.5) * len;
+        const across = (i % 2 === 0 ? -1 : 1) * amp;
+        return new THREE.Vector3(cx + dx * along - dy * across, cy + dy * along + dx * across, 0);
+    }));
+}
+
+function spiralPath(cx, cy, turns, radius) {
+    const phase = Math.random() * Math.PI * 2, way = Math.random() < 0.5 ? 1 : -1;
+    return withPressure(Array.from({ length: 60 }, (_, i) => {
+        const t = i / 59, a = phase + way * t * turns * Math.PI * 2;
+        return new THREE.Vector3(cx + Math.cos(a) * radius * t, cy + Math.sin(a) * radius * t, 0);
+    }));
+}
+
+function circlePath(cx, cy, radius) {
+    const phase = Math.random() * Math.PI * 2, sweep = Math.PI * 2 * (0.8 + Math.random() * 0.4);
+    return withPressure(Array.from({ length: 48 }, (_, i) =>
+        new THREE.Vector3(cx + Math.cos(phase + (i / 47) * sweep) * radius,
+            cy + Math.sin(phase + (i / 47) * sweep) * radius, 0)));
+}
+
+function straightLinePath(cx, cy, angle, len) {
+    const dx = Math.cos(angle), dy = Math.sin(angle);
+    return withPressure(Array.from({ length: 10 }, (_, i) => {
+        const along = (i / 9 - 0.5) * len;
+        return new THREE.Vector3(cx + dx * along, cy + dy * along, 0);
+    }));
+}
+
+const SHAPES = ['sine', 'zigzag', 'spiral', 'circle', 'straight'];
+
+/** A shape of the named kind, sized so it roughly fits a circle of `size`. */
+function shapePath(kind, cx, cy, angle, size) {
+    switch (kind) {
+        case 'sine':   return sinePath(cx, cy, angle, size * 2.4, size * 0.5, 1.5 + Math.random() * 2);
+        case 'zigzag': return zigzagPath(cx, cy, angle, size * 2.2, size * 0.55, 3 + Math.floor(Math.random() * 4));
+        case 'spiral': return spiralPath(cx, cy, 1.5 + Math.random() * 2, size);
+        case 'circle': return circlePath(cx, cy, size * 0.9);
+        default:       return straightLinePath(cx, cy, angle, size * 2.4);
+    }
+}
+
+/** The bounding center and radius of a path, for spacing and overlap tests. */
+function pathBounds(path) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const p of path) {
+        minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+    }
+    return { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, r: 0.5 * Math.hypot(maxX - minX, maxY - minY) };
+}
+
+// --- Scatter strategies: each returns marks for a fresh canvas ----------------
+
 /** One to four scattered strokes; the first runs long, the rest stay short. */
-function rollScatterMarks(extentX, extentY, tools, colors) {
+function rollFreeMarks(ex, ey, tools, colors) {
     const count = 1 + Math.floor(Math.random() * 4);
-    return Array.from({ length: count }, (_, i) => rollStrokeMark(extentX, extentY, tools, colors,
+    return Array.from({ length: count }, (_, i) => rollStrokeMark(ex, ey, tools, colors,
         { length: i === 0 ? 2.0 + Math.random() * 1.2 : undefined }));
+}
+
+/** The same shape repeated across a grid, each copy a different stroke tool, the
+ * spacing set from the shape's size so the copies never overlap. */
+function rollRepeatMarks(ex, ey, tools, colors) {
+    const kind = pick(SHAPES), angle = Math.random() * Math.PI, size = 0.22 + Math.random() * 0.16;
+    const base = shapePath(kind, 0, 0, angle, size);
+    const spacing = 2 * pathBounds(base).r + 0.2 + Math.random() * 0.2;
+    // At most four cells, and only a layout that fits on the canvas.
+    const layouts = [[2, 1], [1, 2], [3, 1], [1, 3], [2, 2], [4, 1], [1, 4]]
+        .filter(([c, r]) => c * spacing <= 2 * ex && r * spacing <= 2 * ey);
+    const [cols, rows] = layouts.length ? pick(layouts) : [1, 1];
+    const strokes = shuffle(strokesOf(tools)), a = pick(colors), b = pick(colors), marks = [];
+    const x0 = -((cols - 1) / 2) * spacing, y0 = -((rows - 1) / 2) * spacing;
+    let k = 0;
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++, k++) {
+        const cx = x0 + i * spacing, cy = y0 + j * spacing;
+        const path = base.map(p => Object.assign(new THREE.Vector3(p.x + cx, p.y + cy, 0), { pressure: p.pressure }));
+        const mark = strokeMark(tools, colors, path, { entry: strokes[k % strokes.length] });
+        mark.colorA = k % 2 ? b : a; mark.colorB = k % 2 ? a : b;
+        marks.push(mark);
+    }
+    return marks;
+}
+
+/** Random scattered strokes, rejection-placed so their bounds never overlap. */
+function rollNonOverlapMarks(ex, ey, tools, colors) {
+    const target = 2 + Math.floor(Math.random() * 3), placed = [], marks = [];
+    for (let attempt = 0; marks.length < target && attempt < target * 12; attempt++) {
+        const path = scatterPath(ex, ey, { length: 0.6 + Math.random() * 1.0 });
+        const b = pathBounds(path), r = b.r + 0.1;
+        if (placed.some(o => Math.hypot(o.cx - b.cx, o.cy - b.cy) < o.r + r)) continue;
+        placed.push({ cx: b.cx, cy: b.cy, r });
+        marks.push(strokeMark(tools, colors, path));
+    }
+    return marks.length ? marks : rollFreeMarks(ex, ey, tools, colors);
+}
+
+/** The largest square that fits the canvas, centered and split into four cells,
+ * with one stroke centered in each cell (four cells, never more). */
+function rollQuadrantMarks(ex, ey, tools, colors) {
+    const h = Math.min(ex, ey), c = h / 2, size = h * 0.32, marks = [];
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+        const cx = sx * c, cy = sy * c;
+        const path = shapePath(pick(SHAPES), cx, cy, Math.random() * Math.PI * 2, size);
+        for (const p of path) {
+            p.x = Math.max(cx - c, Math.min(cx + c, p.x));
+            p.y = Math.max(cy - c, Math.min(cy + c, p.y));
+        }
+        marks.push(strokeMark(tools, colors, path));
+    }
+    return marks;
+}
+
+/** Two to four random straight strokes. */
+function rollStraightMarks(ex, ey, tools, colors) {
+    const count = 2 + Math.floor(Math.random() * 3);
+    return Array.from({ length: count }, () => strokeMark(tools, colors,
+        straightLinePath((Math.random() * 2 - 1) * ex * 0.65, (Math.random() * 2 - 1) * ey * 0.6,
+            Math.random() * Math.PI, 0.6 + Math.random() * 1.6)));
+}
+
+/** Two to four strokes, each tracing a random geometric shape (sine, zigzag,
+ * spiral, circle, or line). */
+function rollGeometricMarks(ex, ey, tools, colors) {
+    const count = 2 + Math.floor(Math.random() * 3);
+    return Array.from({ length: count }, () => strokeMark(tools, colors,
+        shapePath(pick(SHAPES), (Math.random() * 2 - 1) * ex * 0.55, (Math.random() * 2 - 1) * ey * 0.5,
+            Math.random() * Math.PI * 2, 0.3 + Math.random() * 0.45)));
+}
+
+/** A single stroke in the center of the canvas. */
+function rollCenterMarks(ex, ey, tools, colors) {
+    const size = Math.min(ex, ey) * (0.4 + Math.random() * 0.3);
+    return [strokeMark(tools, colors, shapePath(pick(SHAPES), 0, 0, Math.random() * Math.PI * 2, size))];
+}
+
+/** Three strokes at the vertices of a regular (equilateral) triangle. */
+function rollTriangleMarks(ex, ey, tools, colors) {
+    const radius = Math.min(ex, ey) * 0.55, size = Math.min(ex, ey) * 0.28, base = Math.random() * Math.PI * 2;
+    return Array.from({ length: 3 }, (_, i) => {
+        const a = base + i * (Math.PI * 2 / 3);
+        return strokeMark(tools, colors,
+            shapePath(pick(SHAPES), Math.cos(a) * radius, Math.sin(a) * radius, Math.random() * Math.PI * 2, size));
+    });
+}
+
+const SCATTER_STRATEGIES = [
+    rollFreeMarks, rollRepeatMarks, rollNonOverlapMarks, rollQuadrantMarks,
+    rollStraightMarks, rollGeometricMarks, rollCenterMarks, rollTriangleMarks,
+];
+
+/** Marks for a scattered start: a strategy is picked at random, so the strokes
+ * fall into a pattern (a repeat, a non-overlapping spread, one per quadrant,
+ * straight lines, geometric shapes) rather than always a free scatter. */
+function rollScatterMarks(extentX, extentY, tools, colors) {
+    return pick(SCATTER_STRATEGIES)(extentX, extentY, tools, colors);
 }
 
 // ---------------------------------------------------------------------------
 // Scatter: the drawing tool's own start.
 
-/** A paper gradient and one to four scattered strokes, the first one long. */
+/** A paper gradient and a scattered start, laid out by a randomly picked
+ * strategy (see `rollScatterMarks`). */
 function rollScatter({ extentX, extentY, palette, tools = toolRegistry }) {
     const colors = palette.entries.map(e => e.hex);
     return {
@@ -232,7 +420,7 @@ function rollSplit({ extentX, extentY, palette, tools = toolRegistry }) {
  */
 function rollFills({ extentX, extentY, palette, tools = toolRegistry }) {
     const colors = palette.entries.map(e => e.hex);
-    const count = 1 + Math.floor(Math.random() * 3);
+    const count = 1 + Math.floor(Math.random() * 2);
     const marks = [];
     for (let i = 0; i < count; i++) {
         const entry = pick(blobsOf(tools));

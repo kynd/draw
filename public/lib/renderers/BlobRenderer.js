@@ -60,12 +60,38 @@ export class BlobRenderer {
             perimeter += Math.hypot(next.x - pts[i].x, next.y - pts[i].y);
         }
 
+        // A smooth outward normal per vertex, the average of the two edges meeting there.
+        // sdBlob interpolates these along an edge, so the rim's outward direction turns
+        // continuously around the boundary instead of stepping per polygon edge (which the
+        // dome's slope, and the metal reflection reading it, break into radial streaks).
+        let area2 = 0;
+        for (let i = 0; i < n; i++) {
+            const a = pts[i], b = pts[(i + 1) % n];
+            area2 += a.x * b.y - b.x * a.y;
+        }
+        const wind = area2 >= 0 ? 1 : -1;
+        const edgeN = [];
+        for (let i = 0; i < n; i++) {
+            const a = pts[i], b = pts[(i + 1) % n];
+            const nx = (b.y - a.y) * wind, ny = -(b.x - a.x) * wind;
+            const L = Math.hypot(nx, ny) || 1;
+            edgeN.push([nx / L, ny / L]);
+        }
+        const normalArr = Array.from({ length: MAX_CONTOUR }, (_, i) => {
+            if (i >= n) return new THREE.Vector2(1, 0);
+            const prev = edgeN[(i - 1 + n) % n], cur = edgeN[i];
+            const nx = prev[0] + cur[0], ny = prev[1] + cur[1];
+            const L = Math.hypot(nx, ny) || 1;
+            return new THREE.Vector2(nx / L, ny / L);
+        });
+
         const geometry = new THREE.PlaneGeometry(maxX - minX, maxY - minY);
         geometry.translate((minX + maxX) / 2, (minY + maxY) / 2, 0);
 
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 uContour: { value: contourArr },
+                uNormal: { value: normalArr },
                 uArc: { value: arc },
                 uCount: { value: n },
                 uPerimeter: { value: Math.max(perimeter, 1e-6) },
@@ -112,6 +138,7 @@ const PRELUDE = /* glsl */`
     precision highp float;
     varying vec2 vWorld;
     uniform vec2 uContour[${MAX_CONTOUR}];
+    uniform vec2 uNormal[${MAX_CONTOUR}];
     uniform float uArc[${MAX_CONTOUR}];
     uniform int uCount;
     uniform float uPerimeter;
@@ -140,7 +167,10 @@ const PRELUDE = /* glsl */`
     }
     float valueNoise(vec2 p) {
         vec2 i = floor(p), f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
+        // Quintic smootherstep, not cubic smoothstep: it is C2, so the noise's slope is
+        // continuous across cell boundaries. Cubic leaves a slope kink at every boundary,
+        // which a finite-difference normal or a warped pattern reads as a grid of cells.
+        f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
         return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x),
                    mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x), f.y);
     }
@@ -204,7 +234,8 @@ const PRELUDE = /* glsl */`
     float sdBlob(vec2 p, out float arc, out vec2 outward) {
         float best = 1e18;
         arc = 0.0;
-        outward = vec2(1.0, 0.0);
+        vec2 bn0 = vec2(1.0, 0.0), bn1 = vec2(1.0, 0.0);
+        float bt = 0.0;
         bool inside = false;
         for (int i = 0; i < ${MAX_CONTOUR}; i++) {
             if (i >= uCount) break;
@@ -219,20 +250,20 @@ const PRELUDE = /* glsl */`
             if (d2 < best) {
                 best = d2;
                 arc = uArc[i] + length(e) * t;
-                outward = q;
+                // Capture the nearest edge's endpoint normals and the projection along it,
+                // so the outward direction can be the smooth boundary normal interpolated
+                // across the edge rather than the faceted edge-perpendicular.
+                bn0 = uNormal[i];
+                bn1 = uNormal[j];
+                bt = t;
             }
             if ((a.y > p.y) != (b.y > p.y)) {
                 float xint = a.x + (p.y - a.y) * e.x / e.y;
                 if (p.x < xint) inside = !inside;
             }
         }
-        float d = sqrt(best);
-        outward = d > 1e-6 ? outward / d : vec2(1.0, 0.0);
-        if (inside) {
-            d = -d;
-            outward = -outward;
-        }
-        return d;
+        outward = normalize(mix(bn0, bn1, bt));
+        return inside ? -sqrt(best) : sqrt(best);
     }
 
     // The local half-width, marched inward from a point along its inward normal at a

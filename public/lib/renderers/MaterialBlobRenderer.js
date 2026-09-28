@@ -62,18 +62,24 @@ export class MaterialBlobRenderer extends BlobRenderer {
             // value noise leaves, which the hard-edged reflection would otherwise show.
             float gnoise(vec2 p) {
                 vec2 i = floor(p), f = fract(p);
-                vec2 u = f * f * (3.0 - 2.0 * f);
+                // Quintic smootherstep (C2), so the gradient is continuous across cell
+                // boundaries; cubic left a slope kink there that the hard metal reflection
+                // amplified into a grid.
+                vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
                 float a = dot(hash22(i) - 0.5, f);
                 float b = dot(hash22(i + vec2(1.0, 0.0)) - 0.5, f - vec2(1.0, 0.0));
                 float c = dot(hash22(i + vec2(0.0, 1.0)) - 0.5, f - vec2(0.0, 1.0));
                 float d = dot(hash22(i + vec2(1.0, 1.0)) - 0.5, f - vec2(1.0, 1.0));
                 return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) + 0.5;
             }
-            // fbm over gradient noise, each octave rotated so no axis pattern builds up.
+            // fbm over gradient noise, each octave (the first included) rotated before it is
+            // sampled, so no octave's lattice is axis-aligned. Rotating only between octaves
+            // left the first one square, and the hard-edged metal reflection amplified it into
+            // a blocky grid.
             float mfbm(vec2 p) {
                 float v = 0.0, a = 0.5;
                 mat2 R = mat2(0.8, -0.6, 0.6, 0.8);
-                for (int i = 0; i < 5; i++) { v += a * gnoise(p); p = R * p * 2.0; a *= 0.5; }
+                for (int i = 0; i < 5; i++) { p = R * p; v += a * gnoise(p); p *= 2.0; a *= 0.5; }
                 return v;
             }
 
@@ -90,13 +96,17 @@ export class MaterialBlobRenderer extends BlobRenderer {
             // with hard edges. Sharp features in the reflection are what read as
             // metal; a plain gradient shades like matte paint.
             vec3 metalEnv(vec3 r) {
-                // The presented frame flips world y, so the sky side is -r.y. The bands
-                // are soft-edged: hard edges over the ridged relief break into facets.
+                // The presented frame flips world y, so the sky side is -r.y. Every band edge
+                // is widened by the reflection's own screen-space rate (fwidth), so where the
+                // ridged normal sweeps a band across the surface fast the edge stays a soft
+                // ramp of a pixel or so instead of aliasing into hard blocks; where the
+                // surface is calm the widening is nil and the bands keep their edges.
                 float ry = -r.y;
-                vec3 env = mix(vec3(0.05), vec3(0.4), smoothstep(-0.24, 0.28, ry));
-                env = mix(env, vec3(1.0), smoothstep(0.08, 0.26, ry) - smoothstep(0.38, 0.62, ry));
-                env = mix(env, vec3(0.82), smoothstep(-0.58, -0.4, ry) - smoothstep(-0.34, -0.16, ry));
-                env = mix(env, vec3(0.88), (smoothstep(0.22, 0.42, r.x) - smoothstep(0.5, 0.7, r.x)) * 0.6);
+                float wy = fwidth(ry) * 0.9, wx = fwidth(r.x) * 0.9;
+                vec3 env = mix(vec3(0.05), vec3(0.4), smoothstep(-0.24 - wy, 0.28 + wy, ry));
+                env = mix(env, vec3(1.0), smoothstep(0.08 - wy, 0.26 + wy, ry) - smoothstep(0.38 - wy, 0.62 + wy, ry));
+                env = mix(env, vec3(0.82), smoothstep(-0.58 - wy, -0.4 + wy, ry) - smoothstep(-0.34 - wy, -0.16 + wy, ry));
+                env = mix(env, vec3(0.88), (smoothstep(0.22 - wx, 0.42 + wx, r.x) - smoothstep(0.5 - wx, 0.7 + wx, r.x)) * 0.6);
                 return env;
             }
 

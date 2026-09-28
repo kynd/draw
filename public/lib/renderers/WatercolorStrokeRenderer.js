@@ -117,7 +117,8 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
                 }
                 float valueNoise(vec2 p) {
                     vec2 i = floor(p), f = fract(p);
-                    f = f * f * (3.0 - 2.0 * f);
+                    // Quintic smootherstep (C2), so the noise slope is continuous across cells.
+                    f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
                     return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x),
                                mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x), f.y);
                 }
