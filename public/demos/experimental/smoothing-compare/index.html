@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smoothing comparison — methods on a brush or glow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../../styles/demo-ui.css" />
+  <style>.canvas-wrap { cursor: crosshair; touch-action: none; }</style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Smoothing comparison</span></div>
+      <div class="dp-note">Draw a stroke. The black line is your raw path, the blue line is the spine the chosen method produces, and the mark is built around it. Switch method, mark, or splitting to compare them on the same stroke.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Method</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Smoothing</span>
+        <select id="method" class="dp-select">
+          <option value="current">Current</option>
+          <option value="forced">Forced from start</option>
+          <option value="bspline">B-spline</option>
+        </select>
+      </div>
+      <label class="dp-check"><input id="split" type="checkbox" />Split at sharp turns</label>
+
+      <div class="dp-hd"><span class="dp-title">Mark</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Type</span>
+        <select id="mark" class="dp-select">
+          <option value="brush">Brush stroke</option>
+          <option value="glow">Glow stroke</option>
+        </select>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Width</span>
+        <input id="width" class="dp-range" type="range" min="8" max="90" step="1" value="48" />
+        <span class="dp-val" id="width-val">48</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Canvas</span></div>
+      <div class="dp-btn-row">
+        <button id="clear-btn" class="dp-btn secondary">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

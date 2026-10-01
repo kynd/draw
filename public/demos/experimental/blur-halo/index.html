@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blur halo — glow and shadow without geometry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
+  <link rel="stylesheet" href="../../../styles/demo-ui.css" />
+  <style>.canvas-wrap { cursor: crosshair; touch-action: none; }</style>
+</head>
+<body>
+  <div class="demo-layout">
+    <div class="canvas-wrap">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="dp-panel">
+      <div class="dp-hd"><span class="dp-title">Blur halo</span></div>
+      <div class="dp-note">Draw a glow or shadow stroke, then switch Halo to compare the two techniques. The geometry halo inflates each split piece's own silhouette; the blur halo renders the whole gesture's cores into one target and blurs it there, so splits join into one soft shape.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Halo</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Technique</span>
+        <select id="halo" class="dp-select">
+          <option value="blur">Blur</option>
+          <option value="geometry">Geometry</option>
+        </select>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Effect</span>
+        <select id="effect" class="dp-select">
+          <option value="glow">Glow</option>
+          <option value="shadow">Shadow</option>
+        </select>
+      </div>
+      <label class="dp-check"><input id="split" type="checkbox" checked />Split at sharp turns</label>
+
+      <div class="dp-hd"><span class="dp-title">Shape</span></div>
+      <div class="dp-row">
+        <span class="dp-label">Blur</span>
+        <input id="blur" class="dp-range" type="range" min="1" max="8" step="1" value="4" />
+        <span class="dp-val" id="blur-val">4</span>
+      </div>
+      <div class="dp-row">
+        <span class="dp-label">Width</span>
+        <input id="width" class="dp-range" type="range" min="8" max="90" step="1" value="48" />
+        <span class="dp-val" id="width-val">48</span>
+      </div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Canvas</span></div>
+      <div class="dp-btn-row">
+        <button id="colors-btn" class="dp-btn">New colors</button>
+        <button id="clear-btn" class="dp-btn secondary">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

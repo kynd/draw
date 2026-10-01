@@ -1,0 +1,29 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Blur halo" slug="experimental/blur-halo">
+  <section class="demo-section" id="blur-halo">
+    <div class="demo-header">
+      <h2>Blur halo</h2>
+      <a href={`${base}/demos/experimental/blur-halo/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/experimental/blur-halo/index.html?embedded`} title="Blur halo" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>A prototype of glow and shadow built from a blurred silhouette instead of inflated geometry. Draw a stroke, then switch Halo between Blur and Geometry to compare the two on the same stroke.</p>
+      <div class="jp">グローとシャドウを、ジオメトリを膨らませる代わりに、ぼかしたシルエットから作る試作です。ストロークを描いてから、Haloの切り替えでBlurとGeometryを同じストロークで見比べられます。</div>
+
+      <p><strong>Geometry:</strong> the current <code>HaloStrokeRenderer</code>. Each split piece inflates its own silhouette and composites through the coverage layer. A sharp turn can fold the inflated edge, and a split's pieces meet at a seam.</p>
+      <div class="jp"><strong>Geometry：</strong>現行の<code>HaloStrokeRenderer</code>です。分割された各断片が自分のシルエットを膨らませ、カバレッジレイヤーを通して合成します。鋭い角では膨らませた輪郭が折り重なることがあり、分割の断片は継ぎ目で出会います。</div>
+
+      <p><strong>Blur:</strong> the whole gesture's cores, every split piece, render into one low-resolution target and blur there. The pieces union before the blur, so there is no seam and no fold, and the halo fades in with the stroke's length as one shape.</p>
+      <div class="jp"><strong>Blur：</strong>身振り全体のコア、分割されたすべての断片を1つの低解像度ターゲットに描き、そこでぼかします。断片はぼかしの前に結合されるため、継ぎ目も折り重なりもなく、ハローはストロークの長さに応じて一つの形としてフェードインします。</div>
+
+      <p>The blur costs one small target and a few passes per gesture, independent of how many pieces the stroke split into. A finished gesture bakes into the board, so only the live stroke carries a halo at any moment.</p>
+      <div class="jp">ぼかしのコストは身振りごとに小さなターゲット1つと数回のパスで、ストロークが何個の断片に分かれたかには依りません。描き終えた身振りはボードに焼き込まれるため、どの瞬間もハローを持つのはライブのストロークだけです。</div>
+    </div>
+  </section>
+</PageLayout>

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { resampleEvery, catmullRomSpline, splitByTurn, hasSettledStart, smoothByWidth } from '../curves.js';
 import { DrawInput } from './drawInput.js';
+import { StrokeHalo } from '../StrokeHalo.js';
 
 // Each symmetry copy owns a block of seed slots starting at (i + 1) * STRIDE, wide enough
 // that no hand-drawn gesture (whose base pieces count up from 0) reaches it. Exported so a
@@ -19,16 +20,19 @@ export const ECHO_STRIDE = 100;
  * the last baked mark keeps its wireframe, as plain black lines, until the next
  * mark starts.
  *
- * `build(path, points, seed)` receives one piece's smoothed path, its raw
- * points (which carry pressure), and the piece's seed, and returns
- * `{ mesh, renderer }` or null.
+ * `build(path, points, seed, colorK, srcLength)` receives one piece's smoothed
+ * path, its raw points (which carry pressure), the piece's seed, the echo copy
+ * index (null for the base gesture), and the arc length of the whole gesture the
+ * piece was split from (so a mark can fade over the stroke, not the piece). It
+ * returns `{ mesh, renderer }` or null.
  *
  * Each piece is held until it carries `holdArc` of arc, so a mark appears
  * with its direction already settled instead of flickering through the first
  * few samples; a piece still below the gate at release draws nothing. With a
  * `widthFor` callback the smoothing follows the width (`smoothByWidth`): a
  * narrow stroke tracks the hand, a wide one rounds its turns before they can
- * fold the geometry.
+ * fold the geometry. A `smooth(points, width)` callback replaces that step
+ * entirely, for a host that supplies its own smoothing (a comparison demo).
  *
  * The pointer is one source of strokes, not the only one: the returned `feed`
  * takes (points, done) exactly as the pointer produces them, so a replay or a
@@ -49,7 +53,7 @@ export const ECHO_STRIDE = 100;
  * `setPointerTrace` changes it later.
  */
 export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCommit, onRelease,
-    split = true, holdArc = 0.06, widthFor = null,
+    split = true, holdArc = 0.06, widthFor = null, smooth = null,
     echo = null, buildEcho = null,
     pointerTrace = true, bindInput = true }) {
     let seed = 1;
@@ -65,7 +69,59 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         if (!live) return;
         stage.remove(live.group);
         for (const piece of live.pieces) piece.renderer.dispose(piece.mesh);
+        if (live.sils) {
+            for (const sil of live.sils) sil.renderer.dispose(sil.mesh);
+            _halo?.setSource([]);
+        }
         live = null;
+    }
+
+    // A blurred halo under the cores, for tools whose build carries a `sil`
+    // (a silhouette of the piece) and a `halo` spec. One instance serves every
+    // halo gesture: only the live stroke needs it, since a finished one bakes
+    // into the board. Created on the first halo gesture, so a demo with no halo
+    // tool pays nothing. Its plane renders between the board and the cores.
+    let _halo = null;
+    function ensureHalo() {
+        if (_halo) return;
+        _halo = new StrokeHalo({ opacity: 1 });
+        _halo.mesh.position.z = 0.01;
+        stage.add(_halo.mesh);
+        // Updated every frame so the live halo tracks the growing gesture and a
+        // resize re-fits it; an empty source renders nothing.
+        stage.addPreRender((renderer, camera, w, h) => _halo.update(renderer, camera, w, h));
+    }
+
+    const HALO_HOLD = holdArc || 0.06;
+    // Points the halo at the live gesture's silhouettes (or clears it), fading it
+    // in over the whole gesture: nothing until the hold, full once the stroke is
+    // as long as it is wide. The core stays at full strength.
+    function driveHalo(current) {
+        if (current && current.haloSpec) {
+            ensureHalo();
+            const spec = current.haloSpec;
+            const width = widthFor?.() ?? 0;
+            const fade = width > HALO_HOLD
+                ? Math.min(Math.max((current.baseLength - HALO_HOLD) / (width - HALO_HOLD), 0), 1)
+                : (current.baseLength >= HALO_HOLD ? 1 : 0);
+            _halo.setSource(current.sils.map(s => s.mesh));
+            _halo.setColor(spec.color);
+            _halo.setOpacity(spec.opacity * fade);
+            _halo.blur = spec.blur;
+            _halo.mesh.position.set(spec.offset ?? 0, spec.offset ?? 0, 0.01);
+        } else if (_halo) {
+            _halo.setSource([]);
+        }
+    }
+
+    // After the bake: the bake borrowed the plane and switched its blending, so
+    // take both back, and drop the silhouettes now that the blur is on the board.
+    function finishHaloBake(current) {
+        stage.add(_halo.mesh);
+        _halo.mesh.material.blending = THREE.NormalBlending;
+        for (const sil of current.sils) sil.renderer.dispose(sil.mesh);
+        current.sils = null;
+        _halo.setSource([]);
     }
 
     // The last baked mark, kept as a wire-only overlay so the wireframe stays
@@ -168,8 +224,13 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         // the stroke grows.
         const width = widthFor?.();
         let path;
-        if (width != null) {
-            path = smoothByWidth(points, width);
+        if (smooth) {
+            // The host supplies the smoothing (a comparison demo swaps methods live).
+            path = smooth(points, width);
+        } else if (width != null) {
+            // Forced from the start: a stroke shorter than one span draws straight, then
+            // splines from the first point, so the start never follows the raw jitter.
+            path = smoothByWidth(points, width, { forceStart: true });
         } else {
             const knots = resampleEvery(points, 0.06);
             path = knots.length >= 3 ? catmullRomSpline(knots, 6) : points;
@@ -199,33 +260,50 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         const pieces = [];
         const committed = [];
         const spinePaths = [];
+        // Silhouettes of the halo pieces and the gesture's halo spec, collected
+        // so the whole gesture blurs as one shape (see driveHalo).
+        const sils = [];
+        let haloSpec = null;
+
+        // Arc length of a point list, so a mark can fade by the whole gesture it
+        // belongs to rather than by its own split piece.
+        const arcOf = pts => {
+            let s = 0;
+            for (let i = 1; i < pts.length; i++) s += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+            return s;
+        };
 
         // Builds one run at a fixed slot; its seed and z never depend on how
-        // many other runs exist.
-        const addRun = (run, slot, colorK) => {
+        // many other runs exist. `srcLength` is the length of the whole gesture the
+        // run was split from, passed on so a mark can fade over the stroke, not the piece.
+        const addRun = (run, slot, colorK, srcLength) => {
             if (holdArc && !hasSettledStart(run, holdArc)) return;
             const path = smoothPiece(run);
             if (!path) return;
             spinePaths.push(path);
             const builder = colorK === null ? build : (buildEcho ?? build);
-            const mark = builder(path, run, seed + slot, colorK);
+            const mark = builder(path, run, seed + slot, colorK, srcLength);
             if (!mark) return;
             // Single-coverage pieces composite through the coverage layer in
             // draw order, later over earlier; a hair of z keeps that order.
             mark.mesh.position.z += Math.min(slot, 40) * 0.0002;
             group.add(mark.mesh);
             pieces.push(mark);
+            if (mark.sil) { sils.push(mark.sil); haloSpec = mark.halo; }
             committed.push({ points: run, seed: seed + slot, echo: colorK });
         };
 
-        (cfg ? splitByTurn(points, cfg) : [points]).forEach((run, k) => addRun(run, k, null));
+        const baseLength = arcOf(points);
+        (cfg ? splitByTurn(points, cfg) : [points]).forEach((run, k) => addRun(run, k, null, baseLength));
         if (!pieces.length) return null;
         const paths = echo?.()?.(points) ?? [];
         paths.forEach((copy, i) => {
             const base = (i + 1) * STRIDE;
-            (cfg ? splitByTurn(copy, cfg) : [copy]).forEach((run, k) => addRun(run, base + k, i));
+            const copyLength = arcOf(copy);
+            (cfg ? splitByTurn(copy, cfg) : [copy]).forEach((run, k) => addRun(run, base + k, i, copyLength));
         });
-        return { group, pieces, committed, spinePaths, seedSpan: (paths.length + 1) * STRIDE };
+        return { group, pieces, committed, spinePaths, sils, haloSpec, baseLength,
+            seedSpan: (paths.length + 1) * STRIDE };
     }
 
     function feed(points, done) {
@@ -233,13 +311,23 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
         disposeLive();
         live = buildFromPoints(points);
         if (live) stage.add(live.group);
+        driveHalo(live);
         // The pointer trace and spine overlays stay after release, showing the finished
         // stroke until the next press begins one. A new press feeds a single point, which
         // clears both here (an empty spine, a one-point line with nothing to draw).
         setPointerLine(points);
         setSpineLine(live ? live.spinePaths : []);
         if (done && live) {
-            board.bake([live.group]);
+            if (live.haloSpec) {
+                // One render through the normal path blurs the final silhouettes into
+                // the halo texture (the preRender does the update); then the plane
+                // bakes under the cores in one pass.
+                stage.drawNow();
+                board.bake([_halo.mesh, live.group]);
+                finishHaloBake(live);
+            } else {
+                board.bake([live.group]);
+            }
             ghost = live;
             makeWireOnly(ghost.group);
             // The bake scene borrowed the group; the overlay needs it back.
@@ -271,6 +359,9 @@ export function setupDrawCycle({ stage, board, canvas, build, minDistance, onCom
             committed.push(...built.committed);
             spinePaths.push(...built.spinePaths);
             seedSpan = Math.max(seedSpan, built.seedSpan);
+            // feedGroup serves symmetric strokes, which carry no halo; drop any
+            // silhouettes a build produced so they cannot leak.
+            if (built.sils) for (const sil of built.sils) sil.renderer.dispose(sil.mesh);
         }
         live = pieces.length ? { group, pieces, committed, spinePaths, seedSpan } : null;
         if (live) stage.add(group);

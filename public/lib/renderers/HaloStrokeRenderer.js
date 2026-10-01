@@ -38,6 +38,7 @@ export class HaloStrokeRenderer extends StrokeRenderer {
         spread = null,
         cap = 'rounded',
         core = true,
+        fadeLength = null,
     } = {}) {
         super();
         this.mode = mode;
@@ -48,15 +49,25 @@ export class HaloStrokeRenderer extends StrokeRenderer {
         this.cap = cap;
         // With `core` off the mark is the soft silhouette alone, no solid ribbon on top.
         this.core = core;
+        // The length the silhouette fades over, when the mark is one piece of a longer
+        // gesture (a split stroke); the drawn length of this piece when null.
+        this.fadeLength = fadeLength;
     }
 
     build(def) {
         const group = new THREE.Group();
         const width = Math.max(def.maxWidth(), 1e-4);
 
+        // Fade the silhouette in by length (the core keeps full opacity): zero through
+        // the hold's arc, then ramping to full once the stroke is as long as it is wide,
+        // so the halo starts from nothing when it first clears the hold and grows in.
+        const HOLD = 0.06;
+        const fadeLength = this.fadeLength ?? def.polylineLength;
+        const fade = Math.min(Math.max((fadeLength - HOLD) / Math.max(width - HOLD, 1e-4), 0), 1);
+
         const halo = new SoftSilhouetteRenderer({
             color: this.haloColor,
-            opacity: this.opacity,
+            opacity: this.opacity * fade,
             inflate: 1 + this.spread,
             cap: this.cap,
         });

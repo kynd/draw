@@ -515,11 +515,29 @@ export function hasSettledStart(points, minArc = 0.06) {
  * its turns before they can fold the geometry over itself. `gain` scales the
  * spacing per unit of width, clamped to [minSpan, maxSpan]; the spline is the
  * local Catmull-Rom, so the settled part of a growing stroke holds still.
+ *
+ * `forceStart` caps the knot spacing to a third of the stroke's own length, so a
+ * stroke shorter than one span (or the start of any stroke, before three knots
+ * exist) still splines from the first point instead of falling back to the raw
+ * path. `spline` picks the curve: `'catmull'` passes through the knots (the
+ * default), `'bspline'` approximates them, which is smoother and does not need
+ * the three-knot fallback.
  */
 export function smoothByWidth(points, width, {
     gain = 1.6, minSpan = 0.02, maxSpan = 0.3, samplesPerSegment = 6,
+    forceStart = false, spline = 'catmull',
 } = {}) {
-    const span = Math.min(Math.max(width * gain, minSpan), maxSpan);
+    let span = Math.min(Math.max(width * gain, minSpan), maxSpan);
+    if (forceStart) {
+        let arc = 0;
+        for (let i = 1; i < points.length; i++) arc += points[i].distanceTo(points[i - 1]);
+        // Too short for a meaningful curve: draw it straight, start to end, so the
+        // beginning never follows the raw jitter.
+        if (arc < span) return [points[0].clone(), points[points.length - 1].clone()];
+        // Enough length: cap the knot spacing so it splines from the first point.
+        span = Math.min(span, arc / 3);
+    }
     const knots = resampleEvery(points, span);
+    if (spline === 'bspline') return bSpline(knots, samplesPerSegment);
     return knots.length >= 3 ? catmullRomSpline(knots, samplesPerSegment) : points.slice();
 }

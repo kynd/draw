@@ -51,7 +51,7 @@ Whether a growing gesture carries enough arc for a stable direction. Walks the p
 
 ## smoothByWidth
 
-Smoothing that follows the stroke's width: the knot spacing is width × `gain`, clamped to [`minSpan`, `maxSpan`], interpolated with the local Catmull-Rom so the settled part of a growing stroke holds still. A narrow stroke follows the hand directly; a wide one rounds its turns before they can fold the geometry over itself.
-<div class="jp">ストロークの幅に従う平滑化です。ノットの間隔は幅×`gain`で、[`minSpan`, `maxSpan`]に収められ、局所的なCatmull-Romで補間されます。そのため、伸びていくストロークのすでに描かれた部分は動きません。細いストロークは手の動きにそのまま従い、太いストロークは、ジオメトリが自分の上に折り重なる前に曲がりを丸めます。</div>
+Smoothing that follows the stroke's width: the knot spacing is width × `gain`, clamped to [`minSpan`, `maxSpan`], interpolated with the local Catmull-Rom so the settled part of a growing stroke holds still. A narrow stroke follows the hand directly; a wide one rounds its turns before they can fold the geometry over itself. `forceStart` draws a stroke shorter than one span straight, from first point to last, and beyond that length caps the knot spacing to a third of the length so it splines from the first point. Either way the start never follows the raw jitter. `spline` picks the curve: `'catmull'` passes through the knots (the default), `'bspline'` approximates them, which is smoother and needs no three-knot fallback.
+<div class="jp">ストロークの幅に従う平滑化です。ノットの間隔は幅×`gain`で、[`minSpan`, `maxSpan`]に収められ、局所的なCatmull-Romで補間されます。そのため、伸びていくストロークのすでに描かれた部分は動きません。細いストロークは手の動きにそのまま従い、太いストロークは、ジオメトリが自分の上に折り重なる前に曲がりを丸めます。`forceStart`は、1スパンより短いストロークを始点から終点まで直線で描き、それより長い場合はノットの間隔をストロークの長さの3分の1までに抑えて最初の点から曲線を引きます。どちらの場合も、描き始めが生のジッタをなぞることはありません。`spline`は曲線の種類を選びます。`'catmull'`はノットを通り（既定）、`'bspline'`はノットを近似します。後者はより滑らかで、ノット3つのフォールバックを必要としません。</div>
 
 </div>

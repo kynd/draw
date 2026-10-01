@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../StrokeDef.js';
 import { PIXELS_PER_UNIT } from '../CanvasBuffer.js';
+import { RibbonStrokeRenderer } from '../renderers/RibbonStrokeRenderer.js';
 import { blobOutline } from '../pathEffects.js';
 import { pressureAlong, pressureRatio, limitWidthSlope, averagePressure } from './pressure.js';
 
@@ -56,16 +57,27 @@ export function makeMarkBuilder({ state, board }) {
         }
         const renderer = state.tool.make(state.values, ctx);
         // Uniform width along the stroke; only pressure varies it.
-        const def = new StrokeDef({
+        const widthLeft = limitWidthSlope(path,
+            s => width * pressureRatio(pressureAt(s),
+                { range, sens: state.sens, floor: PRESSURE_FLOOR }));
+        const mesh = new StrokeDef({
             points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
-            widthLeft: limitWidthSlope(path,
-                s => width * pressureRatio(pressureAt(s),
-                    { range, sens: state.sens, floor: PRESSURE_FLOOR })),
-            renderer,
-            seed: useSeed,
-        });
-        const mesh = def.build();
+            widthLeft, renderer, seed: useSeed,
+        }).build();
         mesh.position.z = 0.05;
+        // A halo tool draws a plain core and hands the draw cycle a silhouette of
+        // the same shape plus its halo spec. The cycle blurs the whole gesture's
+        // silhouettes together and bakes the result under the cores, so the soft
+        // part is a blurred union, not inflated geometry, and splits leave no seam.
+        if (state.tool.halo) {
+            const silRenderer = new RibbonStrokeRenderer({ cap: 'rounded', color: '#ffffff' });
+            const sil = new StrokeDef({
+                points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
+                widthLeft, renderer: silRenderer, seed: useSeed,
+            }).build();
+            return { mesh, renderer, sil: { mesh: sil, renderer: silRenderer },
+                halo: state.tool.halo(state.values, ctx) };
+        }
         return { mesh, renderer };
     };
 }

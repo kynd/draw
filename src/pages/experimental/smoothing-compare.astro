@@ -1,0 +1,29 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Smoothing comparison" slug="experimental/smoothing-compare">
+  <section class="demo-section" id="smoothing-compare">
+    <div class="demo-header">
+      <h2>Smoothing comparison</h2>
+      <a href={`${base}/demos/experimental/smoothing-compare/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/experimental/smoothing-compare/index.html?embedded`} title="Smoothing comparison" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Width-based smoothing resamples the path to knots spaced by the stroke's width, then splines through them. A stroke shorter than one span keeps its raw points, so the start of a wide stroke can read as angular until enough knots exist. Draw a stroke and switch the method to see each on the same path, on a brush or a glow, with splitting on or off. The tools use Forced from start.</p>
+      <div class="jp">幅に応じたスムーシングは、パスをストロークの幅の間隔の節点に再サンプリングし、その節点を通る曲線を引きます。1スパンより短いストロークは生の点のまま残るため、太いストロークの描き始めは、節点が十分に増えるまで角張って見えることがあります。ストロークを描いてから手法を切り替えると、同じパスに対する3つの手法を、ブラシまたはグローで、分割のありなしも含めて見比べられます。ツールはForced from startを使います。</div>
+
+      <p><strong>Current:</strong> the width-based Catmull-Rom, which passes through the resampled knots.</p>
+      <div class="jp"><strong>Current：</strong>幅に応じたCatmull-Romで、再サンプリングした節点を通ります。</div>
+
+      <p><strong>Forced from start:</strong> draws the stroke straight until it is one span long, then splines from the first point, so the start never follows the raw jitter. This is what the tools use.</p>
+      <div class="jp"><strong>Forced from start：</strong>ストロークが1スパンの長さになるまでは直線で描き、その後は最初の点から曲線を引きます。描き始めが生のジッタをなぞることはありません。ツールが使うのはこれです。</div>
+
+      <p><strong>B-spline:</strong> approximates the knots instead of passing through them, which is smoother and needs no raw fallback.</p>
+      <div class="jp"><strong>B-spline：</strong>節点を通るのではなく近似します。より滑らかで、生の点へのフォールバックを必要としません。</div>
+    </div>
+  </section>
+</PageLayout>

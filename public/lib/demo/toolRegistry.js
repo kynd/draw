@@ -42,7 +42,6 @@ import { SpikeStrokeRenderer } from '../renderers/SpikeStrokeRenderer.js';
 import { PatternStrokeRenderer } from '../renderers/PatternStrokeRenderer.js';
 import { WetPatternStrokeRenderer } from '../renderers/WetPatternStrokeRenderer.js';
 import { AroundStrokeRenderer } from '../renderers/AroundStrokeRenderer.js';
-import { HaloStrokeRenderer } from '../renderers/HaloStrokeRenderer.js';
 import { SlitScanBlobRenderer, slitLineFromEnds } from '../renderers/SlitScanBlobRenderer.js';
 import { circleFromEnds, ovalFromEnds, rectFromEnds, diamondFromEnds, triangleFromEnds }
     from '../pathEffects.js';
@@ -275,19 +274,23 @@ export const toolRegistry = [
         make: (v, ctx) => new DebossStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, bevel: v.bevel, amount: v.amount,
         }) },
-    // Halo strokes draw one mark per gesture (no splitting at sharp turns): a soft
-    // silhouette relies on single coverage to union its folds, and splitting would
-    // composite each piece's halo separately and seam where the pieces overlap.
-    { id: 'shadow', kind: 'stroke', split: false,
+    // Halo strokes draw a plain core ribbon and a blurred halo under it. The draw
+    // cycle renders the whole gesture's cores (every split piece) into one target
+    // and blurs there (see `StrokeHalo`), so the soft part is a blurred union: no
+    // fold where the reach exceeds the curvature radius, and no seam at a split.
+    // `spread` sets the blur reach; `opacity` the halo's strength.
+    { id: 'shadow', kind: 'stroke',
         params: [{ key: 'spread', min: 0.4, max: 1.4 }, { key: 'opacity', min: 0.2, max: 0.6 }],
-        make: (v, ctx) => new HaloStrokeRenderer({
-            mode: 'shadow', color: ctx.colorA, spread: v.spread, opacity: v.opacity,
+        make: (v, ctx) => new RibbonStrokeRenderer({ cap: 'rounded', color: ctx.colorA }),
+        halo: (v, ctx) => ({
+            color: '#101014', opacity: v.opacity,
+            blur: Math.round(2 + v.spread * 3), offset: 0.008 + v.spread * 0.014,
         }) },
-    { id: 'glow', kind: 'stroke', split: false,
+    { id: 'glow', kind: 'stroke',
         params: [{ key: 'spread', min: 1, max: 2.4 }, { key: 'opacity', min: 0.5, max: 1 }],
-        make: (v, ctx) => new HaloStrokeRenderer({
-            mode: 'glow', color: ctx.colorA, haloColor: ctx.tintLight,
-            spread: v.spread, opacity: v.opacity,
+        make: (v, ctx) => new RibbonStrokeRenderer({ cap: 'rounded', color: ctx.colorA }),
+        halo: (v, ctx) => ({
+            color: ctx.tintLight, opacity: v.opacity, blur: Math.round(2 + v.spread * 3),
         }) },
     { id: 'cloud', kind: 'stroke', width: [5, 25],
         params: [{ key: 'blob', min: 0.35, max: 0.8 }, { key: 'offset', min: 0.4, max: 1.4 }],

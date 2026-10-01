@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../../StrokeDef.js';
+import { RibbonStrokeRenderer } from '../../renderers/RibbonStrokeRenderer.js';
+import { StrokeHalo } from '../../StrokeHalo.js';
 import { SchemePaletteMaker, PALETTE_SCHEMES, paperGradient } from '../../SchemePaletteMaker.js';
 import { PIXELS_PER_UNIT } from '../../CanvasBuffer.js';
 import { blobOutline } from '../../pathEffects.js';
@@ -807,6 +809,7 @@ export class DrawingTool {
         this.player.pause();
         this._listeners.clear();
         this._previewTarget?.dispose();
+        this._previewHalo?.dispose();
         this.stage.renderer.dispose();
     }
 
@@ -923,6 +926,9 @@ export class DrawingTool {
         this._previewCoverage = new CoverageLayer();
         this._previewCoverage.resize(this._previewTarget.width, this._previewTarget.height);
         this._previewScene = new THREE.Scene();
+        // A halo tool previews its blurred halo too, the same way the canvas draws
+        // it: the silhouette blurred under the core.
+        this._previewHalo = new StrokeHalo({ opacity: 1 });
         this._previewCamera = new THREE.OrthographicCamera(
             -this._previewSize.w / 2, this._previewSize.w / 2,
             this._previewSize.h / 2, -this._previewSize.h / 2, 0.1, 20);
@@ -1059,6 +1065,22 @@ export class DrawingTool {
                 marks.push({ mesh: def.build(), renderer });
             });
         }
+        // A halo tool blurs a silhouette of the wiggle under the core, exactly as
+        // the canvas does; its plane sits under the marks in the preview scene.
+        let previewHaloSil = null;
+        if (mark && state.tool.kind === 'stroke' && state.tool.halo) {
+            const spec = state.tool.halo(state.values, ctx);
+            const silRenderer = new RibbonStrokeRenderer({ cap: 'rounded', color: '#ffffff' });
+            const silDef = new StrokeDef({
+                points: path, widthLeft: uniformWidth(width), renderer: silRenderer, seed: ctx.seed,
+            });
+            previewHaloSil = { mesh: silDef.build(), renderer: silRenderer };
+            this._previewHalo.setSource([previewHaloSil.mesh]);
+            this._previewHalo.setColor(spec.color);
+            this._previewHalo.setOpacity(spec.opacity);
+            this._previewHalo.blur = spec.blur;
+            this._previewHalo.mesh.position.set(c.x + (spec.offset ?? 0), c.y + (spec.offset ?? 0), -0.02);
+        }
         const renderer = this.stage.renderer;
         const prevTarget = renderer.getRenderTarget();
         const prevAuto = renderer.autoClear;
@@ -1076,6 +1098,12 @@ export class DrawingTool {
             this._previewScene.add(m.mesh);
         });
         this._previewCamera.position.set(c.x, c.y, 5);
+        if (previewHaloSil) {
+            this._previewHalo.update(renderer, this._previewCamera,
+                this._previewTarget.width, this._previewTarget.height);
+            this._previewHalo.mesh.renderOrder = -1;
+            this._previewScene.add(this._previewHalo.mesh);
+        }
         renderer.autoClear = false;
         renderer.setRenderTarget(this._previewTarget);
         renderer.setClearColor('#888888', 0.5);
@@ -1098,6 +1126,11 @@ export class DrawingTool {
             this._previewScene.remove(m.mesh);
             m.renderer.dispose(m.mesh);
         });
+        if (previewHaloSil) {
+            this._previewScene.remove(this._previewHalo.mesh);
+            this._previewHalo.setSource([]);
+            previewHaloSil.renderer.dispose(previewHaloSil.mesh);
+        }
         this._preview.visible = !this._uiHidden && !this._replaying;
         this.stage.draw();
     }
