@@ -6,7 +6,7 @@ import { LineStrokeRenderer } from '../../lib/renderers/LineStrokeRenderer.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
-import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, uniformWidth } from '../../lib/demo/strokePaths.js';
 
 const COUNT = 3;
 const SEEDS = [1.0, 2.7, 4.9];
@@ -75,7 +75,7 @@ function rebuild() {
         const renderer = makeRenderer(i);
         const def = new StrokeDef({
             points: straightThenWiggle(centerY(i, COUNT, spread), { z0: 0.002 + i * 0.01 }),
-            widthLeft: taper(width),
+            widthLeft: uniformWidth(width),
             renderer,
             seed: SEEDS[i],
         });

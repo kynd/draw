@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { StrokeRenderer, resampleSpine } from './StrokeRenderer.js';
+import { seedOffset } from '../random.js';
 
 const MIN_SAMPLES = 8;
 const MAX_SAMPLES = 2048;
@@ -44,7 +45,7 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
      *     the stroke crosses itself. Alpha still takes the MAX either way.
      */
     constructor({ cap = 'rounded', inflate = 1, samplesPerUnit = 120, transparent = true,
-        depthWrite = true, singleCoverage = false, multiColor = false } = {}) {
+        depthWrite = true, singleCoverage = false, multiColor = false, clampCapToLength = true } = {}) {
         super();
         this.cap = cap;
         this.inflate = inflate;
@@ -53,6 +54,11 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
         this.depthWrite = depthWrite;
         this.singleCoverage = singleCoverage;
         this.multiColor = multiColor;
+        // A cap normally reaches no farther than the piece is long, so a sliver a split
+        // leaves does not sprout a cap that dwarfs it. A mark that never splits (a halo)
+        // turns this off, so a short or tightly curved stroke keeps a full round cap
+        // instead of a straight-cut one where the inflated reach exceeds the length.
+        this.clampCapToLength = clampCapToLength;
     }
 
     /** Subclasses return their fragment shader body. */
@@ -119,7 +125,8 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
                 // (a sliver a split leaves between two close turns) does not sprout a
                 // full-width cap that dwarfs its body and lands orphaned over its
                 // neighbors.
-                const reach = Math.min(Math.max(wL, wR) * this.inflate, length);
+                const full = Math.max(wL, wR) * this.inflate;
+                const reach = this.clampCapToLength ? Math.min(full, length) : full;
                 const p = samples[end.i];
                 const nrm = normals[end.i];
                 const tan = tangents[end.i];
@@ -165,7 +172,7 @@ export class ShaderStrokeRenderer extends StrokeRenderer {
                 uWorldToUv: { value: new THREE.Vector2(1, 1) },
                 uWidth: { value: maxWidth },
                 uInflate: { value: this.inflate },
-                uSeed: { value: def.seed },
+                uSeed: { value: seedOffset(def.seed ?? 1) },
                 uCap: { value: { square: 0, rounded: 1, ragged: 2 }[this.cap] ?? 1 },
                 uLength: { value: length },
                 ...this.uniforms(def),

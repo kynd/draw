@@ -275,12 +275,15 @@ export const toolRegistry = [
         make: (v, ctx) => new DebossStrokeRenderer({
             cap: 'rounded', color: ctx.colorA, bevel: v.bevel, amount: v.amount,
         }) },
-    { id: 'shadow', kind: 'stroke',
+    // Halo strokes draw one mark per gesture (no splitting at sharp turns): a soft
+    // silhouette relies on single coverage to union its folds, and splitting would
+    // composite each piece's halo separately and seam where the pieces overlap.
+    { id: 'shadow', kind: 'stroke', split: false,
         params: [{ key: 'spread', min: 0.4, max: 1.4 }, { key: 'opacity', min: 0.2, max: 0.6 }],
         make: (v, ctx) => new HaloStrokeRenderer({
             mode: 'shadow', color: ctx.colorA, spread: v.spread, opacity: v.opacity,
         }) },
-    { id: 'glow', kind: 'stroke',
+    { id: 'glow', kind: 'stroke', split: false,
         params: [{ key: 'spread', min: 1, max: 2.4 }, { key: 'opacity', min: 0.5, max: 1 }],
         make: (v, ctx) => new HaloStrokeRenderer({
             mode: 'glow', color: ctx.colorA, haloColor: ctx.tintLight,

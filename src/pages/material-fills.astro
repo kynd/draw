@@ -1,0 +1,82 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Surface & material fills" slug="material-fills">
+  <div class="monologue">
+    On this page, we shade a blob as a surface: metal and glass that reflect and refract, and stone.
+    <div class="jp">このページでは、ブロブを面として陰影付けします。反射し屈折する金属とガラス、そして石です。</div>
+  </div>
+
+  <div class="prose">
+    <p>Every fill here builds its region the way the <a href={`${base}/fills`}>Fills</a> overview describes, then treats it as a lit surface. A height field gives the region a normal, and each material reads that normal its own way: reflecting an environment, bending the background, or shading matte stone.</p>
+    <div class="jp">ここでの塗りはすべて、<a href={`${base}/fills`}>Fills</a>の概要で説明する方法で領域を作り、それを照らされた面として扱います。高さ場が領域に法線を与え、各素材はその法線を独自に読みます。環境を反射したり、背景を曲げたり、つや消しの石として陰影付けしたりします。</div>
+  </div>
+
+  <section class="demo-section" id="materials">
+    <div class="demo-header">
+      <h2>Materials</h2>
+      <a href={`${base}/demos/blob-materials/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-materials/index.html?embedded`} title="Materials" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The blob shaded as a surface: metal, smooth glass, and faceted glass.</p>
+      <div class="jp">面として陰影付けされたブロブです。金属、滑らかなガラス、そして面取りされたガラス。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Metal:</strong> The metal reflects an assumed chrome environment: a dark ground, a mid sky, and narrow bright bands with hard edges. Sharp features in the reflection are what read as metal (a plain gradient shades like matte paint), and the ridged relief streaks the band edges into liquid highlights. The smooth glass keeps a low-frequency wave surface instead.</p>
+        <div class="jp"><strong>金属：</strong>金属は想定されたクロームの環境を反射します。暗い地面、中間の空、そして硬い縁を持つ細く明るい帯です。反射の中の鋭い特徴こそが金属として読める理由で（ただのグラデーションはつや消しの絵の具のような陰影になります）、畝のある起伏が帯の縁を流れるようなハイライトへと引き伸ばします。滑らかなガラスは、低周波のうねりの面を保ちます。</div>
+
+        <p><strong>Glass:</strong> The background is sampled through the normal, bent hardest where the surface tilts most, with a Fresnel lightening at grazing angles.</p>
+        <div class="jp"><strong>ガラス：</strong>背景は法線を通して参照され、面が最も傾くところで最も曲げられます。浅い角度ではフレネルによって明るくなります。</div>
+
+        <p><strong>Facets:</strong> The faceted glass takes one random tilt per triangle of a lattice warped by low-frequency noise, so it breaks into irregular triangular panes that each displace the background their own way.</p>
+        <div class="jp"><strong>面取り：</strong>面取りガラスは、低周波のノイズでゆがめた三角格子の三角形ごとにひとつのランダムな傾きを取ります。そのため不規則な三角形の板に割れ、それぞれが背景を独自の方向へずらします。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="stones">
+    <div class="demo-header">
+      <h2>Stones</h2>
+      <a href={`${base}/demos/blob-stones/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-stones/index.html?embedded`} title="Stones" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The blob shaded as stone: rock, marble, and sand.</p>
+      <div class="jp">石として陰影付けされたブロブです。岩、大理石、そして砂。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Rock:</strong> The relief folds its noise into creases, valley side down, so the surface reads as fractured rather than bumpy. Two colors mottle the face in patches, the creases darken as crevices do, and the boundary breaks on the same crags.</p>
+        <div class="jp"><strong>岩：</strong>起伏はノイズを谷側へ折り返してひだにするため、面はでこぼこではなく割れたものとして読めます。2色が面を斑に染め、ひだは割れ目のように暗くなり、境界も同じ岩肌で割れます。</div>
+
+        <p><strong>Marble:</strong> Veins are a sine band warped by noise and raised to a high power, so they run as thin wandering lines over a near-white ground. The surface stays smooth and glossy.</p>
+        <div class="jp"><strong>大理石：</strong>脈は、ノイズでゆがめた正弦の帯を高い累乗に上げたものです。そのため、白に近い地の上を細く曲がりくねって走ります。面は滑らかで光沢を保ちます。</div>
+
+        <p><strong>Sand:</strong> The normal jitters per pixel from a hashed grid, so every grain catches the light its own way, and the brightest few glint. The edge dissolves into loose grains instead of cutting.</p>
+        <div class="jp"><strong>砂：</strong>法線はハッシュした格子からピクセルごとに揺らぎます。そのため一粒一粒が独自に光を受け、最も明るいわずかな粒がきらめきます。縁は切れずに、ばらけた粒に崩れます。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-surface-fills/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed" data-w="860" data-h="620" style="width:860px;height:620px">
+      <iframe src={`${base}/demos/try-surface-fills/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
+    </div>
+    <div class="prose">
+      <p>Paint with the surface fills on this page, in the drawing tool: the settings panel picks the fill, its colors, and its parameters exactly, the floating dials reroll the palette, set the width, and walk a trail of rolled fills, and Clear, Replay, and recording work as on the Drawing Tool Demo page. Each released gesture becomes one blob, and the glasses read the canvas itself, so they bend what is already painted. With a pen tablet, pressure scales the blob around its set size, light smaller and heavy larger; a mouse draws at the set size.</p>
+      <div class="jp">このページの面の塗りを使って、描画ツールの中で描いてみてください。設定パネルでは、塗りとその色、パラメータを正確に選べます。浮かぶ3つのダイヤルでは、パレットを引き直したり、幅を変えたり、ロールしてきた塗りの列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。描き終えた身振りはひとつのブロブになり、ガラスはキャンバスそのものを読むため、すでに描かれたものをゆがめます。ペンタブレットでは、筆圧が設定した大きさを中心にブロブを伸縮させます。軽ければ小さく、強ければ大きくなります。マウスは設定した大きさのまま描きます。</div>
+    </div>
+  </section>
+</PageLayout>

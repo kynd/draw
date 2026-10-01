@@ -29,6 +29,11 @@ const navItems: NavItem[] = [
           { label: 'Randomness',              href: '#randomness' },
         ]
       },
+      { label: 'Strokes', href: `${base}/strokes`, slug: 'strokes',
+        subLinks: [
+          { label: 'The spine', href: '#spine' },
+        ]
+      },
       { label: 'Stroke processing', href: `${base}/stroke-processing`, slug: 'stroke-processing',
         subLinks: [
           { label: 'Curve smoothing', href: '#smoothing' },
@@ -38,14 +43,19 @@ const navItems: NavItem[] = [
           { label: 'Split brush',     href: '#split-brush' },
           { label: 'Held start',      href: '#held-start' },
           { label: 'Width smoothing', href: '#width-smoothing' },
-          { label: 'Blob drawing',    href: '#blobs' },
-          { label: 'Tight blob',      href: '#tight-blobs' },
+        ]
+      },
+      { label: 'Fills', href: `${base}/fills`, slug: 'fills',
+        subLinks: [
+          { label: 'Blob drawing', href: '#blobs' },
+          { label: 'Tight blob',   href: '#tight-blobs' },
         ]
       },
       { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer',
         subLinks: [
-          { label: 'The buffer', href: '#demo' },
-          { label: 'Color', href: '#color' },
+          { label: 'The buffer',       href: '#demo' },
+          { label: 'Glow and shadow',  href: '#halo' },
+          { label: 'Two pigments',     href: '#color' },
         ]
       },
       { label: 'Pen pressure', href: `${base}/pen-pressure`, slug: 'pen-pressure',
@@ -67,7 +77,7 @@ const navItems: NavItem[] = [
   },
   { label: 'Strokes & fills', href: `${base}/strokes-and-fills`, slug: 'strokes-and-fills',
     children: [
-      { label: 'Strokes', href: `${base}/strokes`, slug: 'strokes',
+      { label: 'Basic Stroke', href: `${base}/basic-stroke`, slug: 'basic-stroke',
         subLinks: [
           { label: 'Common to every demo', href: '#common-to-every-demo' },
           { label: 'Basic strokes',    href: '#basic-strokes' },
@@ -116,15 +126,25 @@ const navItems: NavItem[] = [
           { label: 'Try drawing',    href: '#try' },
         ]
       },
-      { label: 'Fills', href: `${base}/fills`, slug: 'fills',
+      { label: 'Flat & pattern fills', href: `${base}/flat-fills`, slug: 'flat-fills',
         subLinks: [
-          { label: 'Blob fills',     href: '#fills' },
+          { label: 'Blob fills',      href: '#fills' },
           { label: 'Patterned fills', href: '#patterns' },
+          { label: 'Try drawing',     href: '#try' },
+        ]
+      },
+      { label: 'Painterly fills', href: `${base}/painterly-fills`, slug: 'painterly-fills',
+        subLinks: [
           { label: 'Textured paint', href: '#paints' },
           { label: 'Washes',         href: '#washes' },
-          { label: 'Materials',      href: '#materials' },
-          { label: 'Stones',         href: '#stones' },
           { label: 'Try drawing',    href: '#try' },
+        ]
+      },
+      { label: 'Surface & material fills', href: `${base}/material-fills`, slug: 'material-fills',
+        subLinks: [
+          { label: 'Materials',   href: '#materials' },
+          { label: 'Stones',      href: '#stones' },
+          { label: 'Try drawing', href: '#try' },
         ]
       },
       { label: 'Shape fills', href: `${base}/shape-fills`, slug: 'shape-fills',

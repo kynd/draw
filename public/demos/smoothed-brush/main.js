@@ -8,7 +8,7 @@ import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawInput } from '../../lib/demo/drawInput.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
-import { taper } from '../../lib/demo/strokePaths.js';
+import { uniformWidth } from '../../lib/demo/strokePaths.js';
 
 const DEFAULT_SPAN = 0.5;
 
@@ -58,7 +58,7 @@ function refresh() {
     });
     const def = new StrokeDef({
         points: smoothed,
-        widthLeft: taper(parseFloat(widthInput.value) / PIXELS_PER_UNIT),
+        widthLeft: uniformWidth(parseFloat(widthInput.value) / PIXELS_PER_UNIT),
         renderer,
         seed: 3.7,
     });

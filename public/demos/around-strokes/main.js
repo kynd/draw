@@ -5,7 +5,7 @@ import { spiralPath, entangledPaths, scatteredPaths } from '../../lib/pathEffect
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
-import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, uniformWidth } from '../../lib/demo/strokePaths.js';
 
 const ROWS = 3;
 const SEEDS = [3.0, 7.0, 11.0];
@@ -81,7 +81,7 @@ function rebuild() {
             });
             const def = new StrokeDef({
                 points: path,
-                widthLeft: taper(width),
+                widthLeft: uniformWidth(width),
                 renderer,
                 seed: SEEDS[i] + k,
             });

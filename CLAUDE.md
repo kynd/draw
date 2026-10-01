@@ -91,9 +91,12 @@ src/content/pages/
     writing-style.md                   how every explanation on this site is written
 src/pages/
   palette-maker.astro                  demo/log pages, written as .astro for embeds
-  strokes.astro  wet-material-strokes.astro  dry-media-strokes.astro
+  strokes.astro                         the stroke approach: geometry, spine, methods
+  fills.astro                           the fill approach: closing a gesture into a region
+  basic-stroke.astro  wet-material-strokes.astro  dry-media-strokes.astro
   shaped-strokes.astro  patterned-strokes.astro
-  fills.astro  shape-fills.astro  symmetric-strokes.astro
+  flat-fills.astro  painterly-fills.astro  material-fills.astro
+  shape-fills.astro  symmetric-strokes.astro
   stroke-processing.astro  pen-pressure.astro             every stroke demo, one section each
   coverage-layer.astro                  explains the single-coverage buffer live
   initializer.astro                     canvas initializer compositions

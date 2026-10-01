@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ShaderStrokeRenderer } from './ShaderStrokeRenderer.js';
+import { seedOffset } from '../random.js';
 
 /**
  * A wet wash that lets the background through, softened and tinted.
@@ -78,7 +79,7 @@ export class WatercolorStrokeRenderer extends ShaderStrokeRenderer {
                 uScreen: { value: new THREE.Vector2(1, 1) },
                 uBg: { value: this.background },
                 uColor: { value: new THREE.Color(this.color) },
-                uSeed: { value: def.seed ?? 1 },
+                uSeed: { value: seedOffset(def.seed ?? 1) },
                 uPigment: { value: this.pigment },
                 // Half strength: the rim read too dark, so an input of 1.0 lands at 0.5.
                 uRim: { value: this.rim * 0.5 },

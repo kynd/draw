@@ -1,0 +1,79 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Flat & pattern fills" slug="flat-fills">
+  <div class="monologue">
+    On this page, we fill a blob with flat color: the region as it is drawn, and the region filled with a repeating pattern.
+    <div class="jp">このページでは、ブロブを平坦な色で塗ります。描いたままの領域と、繰り返しのパターンで満たした領域です。</div>
+  </div>
+
+  <div class="prose">
+    <p>Every fill here builds its region the way the <a href={`${base}/fills`}>Fills</a> overview describes: the gesture is closed into a loop, offset, and smoothed, and the region is a signed distance field in the fragment shader. These renderers only lay color over that region, flat or patterned.</p>
+    <div class="jp">ここでの塗りはすべて、<a href={`${base}/fills`}>Fills</a>の概要で説明する方法で領域を作ります。身振りはループとして閉じられ、オフセットされ、滑らかにされ、領域はフラグメントシェーダの中の符号付き距離場になります。これらのレンダラは、その領域の上に色を平坦にあるいはパターンで載せるだけです。</div>
+  </div>
+
+  <section class="demo-section" id="fills">
+    <div class="demo-header">
+      <h2>Blob fills</h2>
+      <a href={`${base}/demos/blob-fills/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-fills/index.html?embedded`} title="Blob fills" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Three flat fills: the blob as it is, a spiky one, and a wobbly one.</p>
+      <div class="jp">3つの平坦な塗りです。そのままのブロブ、トゲのあるもの、うねりのあるもの。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Spikes:</strong> An integer count of spikes runs around the boundary's arc, so the profile meets itself at the seam in a valley. Each spike hashes its height and lean from its index. Spikes only stick out: every valley returns to the base contour, so the fill always covers its region.</p>
+        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧をひと回りするため、プロファイルは継ぎ目でも谷でつながります。各トゲは高さと傾きを自身のインデックスのハッシュから決めます。トゲは外側にだけ突き出します。谷は必ず元の輪郭まで戻るため、塗りはつねに自分の領域を覆います。</div>
+
+        <p><strong>Wobble:</strong> The bump offset is a noise of world position rather than arc, so it cannot show a seam at all.</p>
+        <div class="jp"><strong>うねり：</strong>ふくらみのオフセットは弧ではなくワールド座標のノイズなので、継ぎ目がそもそも現れません。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="patterns">
+    <div class="demo-header">
+      <h2>Patterned fills</h2>
+      <a href={`${base}/demos/patterned-fills/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/patterned-fills/index.html?embedded`} title="Patterned fills" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Three flat fills whose interior is a repeating pattern, evaluated in the shader over world space so it holds still wherever the shape lands.</p>
+      <div class="jp">内部が繰り返しのパターンになった3つの平坦な塗りです。パターンはワールド座標でシェーダの中で評価されるため、形がどこに置かれても止まったままです。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Polka dots:</strong> Circles on a hexagonal lattice, each a random color from the palette with a small seeded offset from its lattice point; the gaps take the paper.</p>
+        <div class="jp"><strong>水玉：</strong>六角格子の上の円で、それぞれパレットからランダムな色を取り、格子点からシードで少しずらされます。すき間は紙の色になります。</div>
+
+        <p><strong>Squares:</strong> A grid turned 45 degrees, a colored square inset in each cell, with no offset.</p>
+        <div class="jp"><strong>正方形：</strong>45度回した格子で、各セルの中に色の付いた正方形を少し内側に描きます。ずれはありません。</div>
+
+        <p><strong>Waves:</strong> Two colors from the palette in alternating bands that undulate, after Bridget Riley.</p>
+        <div class="jp"><strong>波：</strong>パレットの2色が、うねる交互の帯になります。ブリジット・ライリーにならったものです。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-flat-fills/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed" data-w="860" data-h="620" style="width:860px;height:620px">
+      <iframe src={`${base}/demos/try-flat-fills/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
+    </div>
+    <div class="prose">
+      <p>Paint with the flat and pattern fills on this page, in the drawing tool: the settings panel picks the fill, its colors, and its parameters exactly, the floating dials reroll the palette, set the width, and walk a trail of rolled fills, and Clear, Replay, and recording work as on the Drawing Tool Demo page. Each released gesture becomes one blob, appearing once its direction settles. With a pen tablet, pressure scales the blob around its set size, light smaller and heavy larger; a mouse draws at the set size.</p>
+      <div class="jp">このページの平坦な塗りとパターンの塗りを使って、描画ツールの中で描いてみてください。設定パネルでは、塗りとその色、パラメータを正確に選べます。浮かぶ3つのダイヤルでは、パレットを引き直したり、幅を変えたり、ロールしてきた塗りの列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。描き終えた身振りはひとつのブロブになり、向きが安定してから現れます。ペンタブレットでは、筆圧が設定した大きさを中心にブロブを伸縮させます。軽ければ小さく、強ければ大きくなります。マウスは設定した大きさのまま描きます。</div>
+    </div>
+  </section>
+</PageLayout>

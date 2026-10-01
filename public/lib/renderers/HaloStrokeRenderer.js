@@ -3,6 +3,7 @@ import { StrokeRenderer } from './StrokeRenderer.js';
 import { ShaderStrokeRenderer } from './ShaderStrokeRenderer.js';
 import { RibbonStrokeRenderer } from './RibbonStrokeRenderer.js';
 import { StrokeDef } from '../StrokeDef.js';
+import { smoothByWidth } from '../curves.js';
 
 /**
  * A ribbon with a soft silhouette around it, in one of two looks.
@@ -36,6 +37,7 @@ export class HaloStrokeRenderer extends StrokeRenderer {
         opacity = null,
         spread = null,
         cap = 'rounded',
+        core = true,
     } = {}) {
         super();
         this.mode = mode;
@@ -44,6 +46,8 @@ export class HaloStrokeRenderer extends StrokeRenderer {
         this.opacity = opacity ?? (mode === 'shadow' ? 0.4 : 0.85);
         this.spread = spread ?? (mode === 'shadow' ? 0.8 : 1.6);
         this.cap = cap;
+        // With `core` off the mark is the soft silhouette alone, no solid ribbon on top.
+        this.core = core;
     }
 
     build(def) {
@@ -56,8 +60,14 @@ export class HaloStrokeRenderer extends StrokeRenderer {
             inflate: 1 + this.spread,
             cap: this.cap,
         });
+        // The silhouette is much wider than the core, so a turn the core takes cleanly
+        // miters the wide offset into straight-edged notches. Rounding the halo's spine
+        // to its own reach keeps its turns gentle relative to its width; the core keeps
+        // the drawn spine, so only the soft halo rounds off a sharp corner.
+        const reach = width * (1 + this.spread);
+        const haloPoints = smoothByWidth(def.points, reach, { maxSpan: reach });
         const haloMesh = new StrokeDef({
-            points: def.points, widthLeft: def.widthLeft, widthRight: def.widthRight,
+            points: haloPoints, widthLeft: def.widthLeft, widthRight: def.widthRight,
             renderer: halo, seed: def.seed,
         }).build();
         if (this.mode === 'shadow') {
@@ -66,6 +76,11 @@ export class HaloStrokeRenderer extends StrokeRenderer {
         }
         haloMesh.position.z -= 0.002;
         group.add(haloMesh);
+
+        if (!this.core) {
+            group.userData.stats = { ...haloMesh.userData.stats };
+            return group;
+        }
 
         const ribbon = new RibbonStrokeRenderer({ cap: this.cap, color: this.color });
         const ribbonMesh = new StrokeDef({
@@ -89,7 +104,7 @@ export class HaloStrokeRenderer extends StrokeRenderer {
 /** The soft silhouette: opacity falls from the mark's edge to the geometry's. */
 class SoftSilhouetteRenderer extends ShaderStrokeRenderer {
     constructor({ color, opacity, inflate, cap }) {
-        super({ cap, inflate, depthWrite: false, singleCoverage: true });
+        super({ cap, inflate, depthWrite: false, singleCoverage: true, clampCapToLength: false });
         this.color = color;
         this.opacity = opacity;
     }

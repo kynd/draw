@@ -7,10 +7,9 @@ import { StrokeStage } from '../stage.js';
 import { CoverageLayer } from '../coverageLayer.js';
 import { DrawingBoard } from '../drawingBoard.js';
 import { setupDrawCycle, ECHO_STRIDE } from '../drawCycle.js';
-import { taperByArc, previewPath } from '../strokePaths.js';
+import { uniformWidth, previewPath } from '../strokePaths.js';
 import { INITIALIZERS } from '../initializers.js';
 import { rollSymmetry, symmetricCopies } from '../symmetries.js';
-import { pathArcLength } from '../pressure.js';
 import { StrokeRecorder } from '../strokeRecorder.js';
 import { DrawingPlayer, downloadDrawingZip, downloadBlob } from '../drawingPlayer.js';
 import { makeMarkBuilder, applyRecordTo } from '../markBuilder.js';
@@ -526,6 +525,15 @@ export class DrawingTool {
         this._regenPalette();
     }
 
+    /** A fresh random palette: new hue, scheme, and seed, the trail rebuilt around it. */
+    _rollPalette() {
+        this._paletteCfg.hue = Math.random() * 360;
+        this._paletteCfg.scheme = this._rollSchemes[Math.floor(Math.random() * this._rollSchemes.length)];
+        this._paletteCfg.seed = Math.floor(Math.random() * 1e9);
+        this._paletteTrail = this._buildPaletteTrail();
+        this._regenPalette();
+    }
+
     /** New seed, same hue, count, and scheme. */
     rerollPalette() {
         this._paletteCfg.seed = Math.floor(Math.random() * 1e9);
@@ -557,7 +565,8 @@ export class DrawingTool {
      * explicit `background` overrides the initializer's; with no configured
      * initializers the canvas clears to bare paper.
      */
-    /** Empties the canvas to a fresh background, with no strokes. */
+    /** Empties the canvas to a fresh background, keeping the current tool, width,
+     * parameters, and colors, so a clear is just a blank page to keep working on. */
     clear({ background = null } = {}) {
         this.cycle.disposeGhost();
         const bg = background ?? this._rollBackground();
@@ -568,6 +577,12 @@ export class DrawingTool {
     /** Empties the canvas, then lays down the configured initializer's strokes. */
     initialize({ background = null } = {}) {
         this.cycle.disposeGhost();
+        // The initializer loop overwrites the live state with each mark, so remember
+        // the current selection and restore it afterward, keeping the same tool.
+        const keptTool = this._state.tool;
+        const keptValues = this._state.values;
+        const keptSens = this._state.sens;
+        const keptPreviewShape = this._previewShape;
         const ids = this.config.initializers;
         const plan = ids.length
             ? INITIALIZERS[ids[Math.floor(Math.random() * ids.length)]]({
@@ -595,7 +610,12 @@ export class DrawingTool {
             this.cycle.feed(mark.path, true);
         }
         this._initializing = false;
-        this._finishClear(bg);
+        // Back to the live tool, then reroll its colors and width for a fresh start.
+        this._state.tool = keptTool;
+        this._state.values = keptValues;
+        this._state.sens = keptSens;
+        this._previewShape = keptPreviewShape;
+        this._finishClear(bg, { rerollPalette: true, rerollWidth: true });
     }
 
     _resetSurface(bg) {
@@ -604,11 +624,22 @@ export class DrawingTool {
         this._emitLive('clear', { background: bg });
     }
 
-    _finishClear(bg) {
-        // Back to the live selection: the palette from its config, the tool
-        // from the trail's current entry.
-        this._regenPalette();
-        this._applyRoll(this._trail[TRAIL_SIDE]);
+    _finishClear(bg, { rerollPalette = false, rerollWidth = false } = {}) {
+        // Clear keeps the live selection untouched; initialize rolls a fresh palette
+        // (new hue, scheme, and seed) and width for a fresh start on the same tool.
+        if (rerollPalette) this._rollPalette();
+        if (rerollWidth) {
+            const [min, max] = widthRangeOf(this._state.tool);
+            this._state.widthPx = min + Math.random() * (max - min);
+        }
+        // The live tool becomes the trail's current entry, so it survives the clear
+        // and tool stepping continues from it rather than snapping to a rolled tool.
+        this._trail[TRAIL_SIDE] = {
+            tool: this._state.tool, values: this._state.values,
+            widthPx: this._state.widthPx, sens: this._state.sens,
+            previewShape: this._previewShape,
+        };
+        this._nextRoll = null;
         this._refreshPreview();
         this._emit('clear', { background: bg });
         this._emit('tool');
@@ -1005,7 +1036,7 @@ export class DrawingTool {
         } else {
             const renderer = state.tool.make(state.values, ctx);
             const def = new StrokeDef({
-                points: path, widthLeft: taperByArc(width, pathArcLength(path)),
+                points: path, widthLeft: uniformWidth(width),
                 renderer, seed: ctx.seed,
             });
             mark = { mesh: def.build(), renderer };
@@ -1022,7 +1053,7 @@ export class DrawingTool {
                 const cctx = re ? { ...ctx, colorA: re.a, colorB: re.b } : ctx;
                 const renderer = state.tool.make(state.values, cctx);
                 const def = new StrokeDef({
-                    points: copy, widthLeft: taperByArc(width, pathArcLength(copy)),
+                    points: copy, widthLeft: uniformWidth(width),
                     renderer, seed: ctx.seed,
                 });
                 marks.push({ mesh: def.build(), renderer });

@@ -45,6 +45,9 @@ Samples sit at fixed arc-length steps from the start, not at even fractions of t
 Every renderer takes a seed. Anything random in a mark (its texture, its edge, its scatter) derives from that seed through hash functions, so the same seed with the same parameters reproduces the exact same result.
 <div class="jp">すべてのレンダラはシードを受け取ります。線の中の乱数的なもの（テクスチャ、縁、散らばり）はすべて、ハッシュ関数を通してこのシードから導かれます。そのため、同じシードと同じパラメータからは、完全に同じ結果が再現されます。</div>
 
+A shader receives the seed through `seedOffset(seed)` (from `random.js`), not the raw value. A drawing's seed counter climbs without bound across a session, and once a raw seed of a few thousand enters a noise coordinate (`p + uSeed * k`) float32 loses the fractional precision the hashes need, so the noise quantizes into blocks (worst on the hard metal reflection). `seedOffset` folds any seed onto a small range with a golden-ratio hash, keeping the coordinate precise while leaving consecutive seeds far apart, and stays deterministic so replay reproduces the mark.
+<div class="jp">シェーダはシードを生の値ではなく`seedOffset(seed)`（`random.js`）を通して受け取ります。描画のシードのカウンタはセッションを通じて上限なく増え続け、数千に達した生のシードがノイズの座標（`p + uSeed * k`）に入ると、float32はハッシュに必要な小数部の精度を失い、ノイズがブロック状に量子化されます（硬い金属の反射で最も顕著です）。`seedOffset`は黄金比のハッシュで任意のシードを小さな範囲に折り込み、座標の精度を保ちつつ連続するシードを十分に離すため、決定的で、再生でも同じ線が再現されます。</div>
+
 ### 2D framing
 
 The normal is the +90° rotation of the tangent in the XY plane. The tangent's Z component is **dropped before framing**.
@@ -210,11 +213,14 @@ Blurring a silhouette is the second design. Expanding the stroke's own geometry 
 
 ## HaloStrokeRenderer
 
-A ribbon with a soft silhouette around it, built as one mark. The silhouette is a shader falloff on inflated geometry rather than StrokeHalo's blurred target, so the mark builds once like any other renderer's and needs no per-frame pass. Two modes: `shadow` puts the silhouette dark and offset toward the lower right, so the mark reads as floating over the canvas; `glow` puts it wide, bright, and centered. Takes `mode`, `color` (the ribbon), `haloColor`, `opacity`, and `spread`, the silhouette's reach in widths past the mark.
-<div class="jp">まわりに柔らかいシルエットを持つリボンを、ひとつの筆跡として作ります。シルエットはStrokeHaloのぼかしターゲットではなく、広げたジオメトリの上のシェーダの減衰なので、筆跡は他のレンダラと同じく一度だけ作られ、フレームごとの処理を必要としません。2つのモードがあります。`shadow`はシルエットを暗くして右下へずらし、筆跡はキャンバスの上に浮いて見えます。`glow`はシルエットを広く明るくして、中央に置きます。`mode`、`color`（リボンの色）、`haloColor`、`opacity`、`spread`（シルエットが筆跡の外へ届く距離、幅単位）を受け取ります。</div>
+A ribbon with a soft silhouette around it, built as one mark. The silhouette is a shader falloff on inflated geometry rather than StrokeHalo's blurred target, so the mark builds once like any other renderer's and needs no per-frame pass. Two modes: `shadow` puts the silhouette dark and offset toward the lower right, so the mark reads as floating over the canvas; `glow` puts it wide, bright, and centered. Takes `mode`, `color` (the ribbon), `haloColor`, `opacity`, `spread` (the silhouette's reach in widths past the mark), and `core` (true by default; false draws the silhouette alone, with no ribbon).
+<div class="jp">まわりに柔らかいシルエットを持つリボンを、ひとつの筆跡として作ります。シルエットはStrokeHaloのぼかしターゲットではなく、広げたジオメトリの上のシェーダの減衰なので、筆跡は他のレンダラと同じく一度だけ作られ、フレームごとの処理を必要としません。2つのモードがあります。`shadow`はシルエットを暗くして右下へずらし、筆跡はキャンバスの上に浮いて見えます。`glow`はシルエットを広く明るくして、中央に置きます。`mode`、`color`（リボンの色）、`haloColor`、`opacity`、`spread`（シルエットが筆跡の外へ届く距離、幅単位）、`core`（既定は true。false ではリボンを描かず、シルエットだけを描きます）を受け取ります。</div>
 
 The falloff folds with the path where the reach exceeds the curvature radius, so the silhouette renders through the coverage layer: overlaps keep single coverage instead of stacking into creases. The ribbon renders through the same layer, because layered marks draw after the main pass in depth order among themselves, and only another layered mark can composite above the silhouette.
 <div class="jp">減衰は、届く距離が曲率半径を超える場所でパスに沿って折り重なります。そのためシルエットはカバレッジレイヤーを通して描画され、重なりは折り目として積み重なる代わりに単一の被覆を保ちます。リボンも同じレイヤーを通します。レイヤー化された筆跡はメインパスの後に、筆跡同士の深度順で描かれるため、シルエットの上に合成できるのは別のレイヤー化された筆跡だけだからです。</div>
+
+The silhouette is much wider than the ribbon, so a sharp turn the ribbon takes cleanly would miter the wide offset into straight-edged notches. The silhouette rounds its spine to its own reach before building, so its turns stay gentle relative to its width and a corner reads as rounded; the ribbon keeps the drawn spine. The silhouette also keeps a full cap on a short or tightly curved stroke rather than clamping the cap to the stroke length, since it never splits.
+<div class="jp">シルエットはリボンよりずっと広いため、リボンがきれいに曲がる鋭い角でも、広いオフセットはまっすぐな切り欠きに尖ってしまいます。そこでシルエットは、ジオメトリを作る前に自分の届く距離に合わせてスパインを丸め、幅に対して曲がりをゆるやかに保ちます。角は丸く見え、リボンは描いたスパインのままです。シルエットは分割されないため、短いストロークや急に曲がるストロークでも、端点をストロークの長さに切り詰めず、丸い端点を保ちます。</div>
 
 ## DebossStrokeRenderer
 

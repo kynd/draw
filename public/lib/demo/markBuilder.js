@@ -2,8 +2,7 @@ import * as THREE from 'three';
 import { StrokeDef } from '../StrokeDef.js';
 import { PIXELS_PER_UNIT } from '../CanvasBuffer.js';
 import { blobOutline } from '../pathEffects.js';
-import { taperByArc } from './strokePaths.js';
-import { pressureAlong, pressureRatio, limitWidthSlope, averagePressure, pathArcLength } from './pressure.js';
+import { pressureAlong, pressureRatio, limitWidthSlope, averagePressure } from './pressure.js';
 
 export const PRESSURE_FLOOR = 0.15;
 const DEFAULT_PRESSURE_RANGE = 2;
@@ -56,11 +55,11 @@ export function makeMarkBuilder({ state, board }) {
             return { mesh, renderer };
         }
         const renderer = state.tool.make(state.values, ctx);
-        const base = taperByArc(width, pathArcLength(path));
+        // Uniform width along the stroke; only pressure varies it.
         const def = new StrokeDef({
             points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
             widthLeft: limitWidthSlope(path,
-                s => base(s) * pressureRatio(pressureAt(s),
+                s => width * pressureRatio(pressureAt(s),
                     { range, sens: state.sens, floor: PRESSURE_FLOOR })),
             renderer,
             seed: useSeed,

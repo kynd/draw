@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { seedOffset } from '../random.js';
 
 export const MAX_CONTOUR = 200;
 
@@ -95,7 +96,7 @@ export class BlobRenderer {
                 uArc: { value: arc },
                 uCount: { value: n },
                 uPerimeter: { value: Math.max(perimeter, 1e-6) },
-                uSeed: { value: seed },
+                uSeed: { value: seedOffset(seed) },
                 uScreen: { value: new THREE.Vector2(1, 1) },
                 ...this.uniforms(),
             },

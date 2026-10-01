@@ -60,12 +60,28 @@ export class AroundDemoConfig extends DrawingToolConfig {
     }
 }
 
-export class PaintingDemoConfig extends DrawingToolConfig {
+export class FlatFillsDemoConfig extends DrawingToolConfig {
     constructor() {
         super({ tools: [
-            'flat-blob', 'wobbly-blob', 'spiky-blob', 'polka-dots', 'grid-squares', 'riley-waves',
+            'flat-blob', 'wobbly-blob', 'spiky-blob',
+            'polka-dots', 'grid-squares', 'riley-waves',
+        ] });
+    }
+}
+
+export class PainterlyFillsDemoConfig extends DrawingToolConfig {
+    constructor() {
+        super({ tools: [
             'dry-brush', 'flat-paint', 'knife-oil',
-            'wash', 'watery-wash', 'gouache', 'metal', 'glass-blob', 'facet-glass',
+            'wash', 'watery-wash', 'gouache',
+        ] });
+    }
+}
+
+export class SurfaceFillsDemoConfig extends DrawingToolConfig {
+    constructor() {
+        super({ tools: [
+            'metal', 'glass-blob', 'facet-glass',
             'rock', 'marble', 'sand',
         ] });
     }

@@ -3,7 +3,7 @@ import { DryMediaStrokeRenderer } from '../../lib/renderers/DryMediaStrokeRender
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
-import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, uniformWidth } from '../../lib/demo/strokePaths.js';
 
 const SEEDS = [1.0, 2.3, 5.1];
 const CAPS = ['rounded', 'square', 'square'];
@@ -60,7 +60,7 @@ function rebuild() {
         });
         const def = new StrokeDef({
             points: straightThenWiggle(centerY(i, MEDIA.length, spread), { z0: 0.01 + i * 0.01 }),
-            widthLeft: taper(media.width),
+            widthLeft: uniformWidth(media.width),
             renderer,
             seed: SEEDS[i],
         });

@@ -8,8 +8,7 @@ import { StrokeStage } from './stage.js';
 import { TestBackground } from './testBackground.js';
 import { wireCollapsibles, wireWireframeToggle } from './panel.js';
 import { toolRegistry, randomValues } from './toolRegistry.js';
-import { taperByArc } from './strokePaths.js';
-import { pathArcLength } from './pressure.js';
+import { uniformWidth } from './strokePaths.js';
 import { rollSymmetry, symmetricCopies } from './symmetries.js';
 
 const TOOL_IDS = ['pencil', 'brush', 'ribbon-ragged'];
@@ -88,7 +87,7 @@ export function setupSymmetryShowcase({ kind, scheme = 'vivid-dark' }) {
                 const renderer = entry.make(values, ctx);
                 const mesh = new StrokeDef({
                     points: p,
-                    widthLeft: taperByArc(width, pathArcLength(p)),
+                    widthLeft: uniformWidth(width),
                     renderer,
                     seed: SEEDS[i] + k,
                 }).build();

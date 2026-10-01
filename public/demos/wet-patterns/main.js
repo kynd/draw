@@ -4,7 +4,7 @@ import { WetPatternStrokeRenderer } from '../../lib/renderers/WetPatternStrokeRe
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
-import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, uniformWidth } from '../../lib/demo/strokePaths.js';
 import { TestBackground } from '../../lib/demo/testBackground.js';
 
 const MODES = ['dashes', 'dots', 'strips'];
@@ -53,7 +53,7 @@ function rebuild() {
         });
         const def = new StrokeDef({
             points: straightThenWiggle(centerY(i, MODES.length, spread), { z0: 0.01 + i * 0.01 }),
-            widthLeft: taper(width),
+            widthLeft: uniformWidth(width),
             renderer,
             seed: SEEDS[i],
         });

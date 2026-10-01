@@ -4,7 +4,7 @@ import { PatternStrokeRenderer } from '../../lib/renderers/PatternStrokeRenderer
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
-import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, uniformWidth } from '../../lib/demo/strokePaths.js';
 
 const MODES = ['feather', 'leaves', 'fringe'];
 const SEEDS = [1.0, 2.3, 5.1];
@@ -49,7 +49,7 @@ function rebuild() {
         });
         const def = new StrokeDef({
             points: straightThenWiggle(centerY(i, MODES.length, spread), { z0: 0.01 + i * 0.01 }),
-            widthLeft: taper(width),
+            widthLeft: uniformWidth(width),
             renderer,
             seed: SEEDS[i],
         });

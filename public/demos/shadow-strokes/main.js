@@ -6,7 +6,7 @@ import { StrokeHalo } from '../../lib/StrokeHalo.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
-import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, uniformWidth } from '../../lib/demo/strokePaths.js';
 
 const ROWS = 3;
 const SEEDS = [1.0, 2.3, 5.1];
@@ -62,7 +62,7 @@ function rebuild() {
     let samples = 0, vertices = 0, triangles = 0;
 
     const build = (renderer, points, seed, track = true) => {
-        const def = new StrokeDef({ points, widthLeft: taper(width), renderer, seed });
+        const def = new StrokeDef({ points, widthLeft: uniformWidth(width), renderer, seed });
         const mesh = def.build();
         if (track) {
             stage.add(mesh);

@@ -4,7 +4,7 @@ import { TubeStrokeRenderer } from '../../lib/renderers/TubeStrokeRenderer.js';
 import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
-import { straightThenWiggle, layout, centerY, taper, AMPLITUDE } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, uniformWidth, AMPLITUDE } from '../../lib/demo/strokePaths.js';
 import { TestBackground } from '../../lib/demo/testBackground.js';
 
 const ROWS = 3;
@@ -83,7 +83,7 @@ function rebuild() {
         const renderer = makeRenderer(i);
         const def = new StrokeDef({
             points: straightThenWiggle(centerY(i, ROWS, spread), { z0: 0, wiggleScale }),
-            widthLeft: taper(width),
+            widthLeft: uniformWidth(width),
             renderer,
             seed: SEEDS[i],
         });

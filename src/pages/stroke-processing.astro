@@ -122,31 +122,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
-  <section class="demo-section" id="blobs">
-    <div class="demo-header">
-      <h2>Blob drawing</h2>
-      <a href={`${base}/demos/blob-drawing/index.html`} target="_blank" rel="noopener">open full size ↗</a>
-    </div>
-    <div class="demo-embed">
-      <iframe src={`${base}/demos/blob-drawing/index.html?embedded`} title="Blob drawing" scrolling="no"></iframe>
-    </div>
-    <div class="prose">
-      <p>A fill needs a closed region, but a drawn gesture is an open path. This demo creates a closed path that contains the entire gesture: it finds the smallest convex region around all drawn points, then smooths and paints it.</p>
-      <div class="jp">塗りには閉じた領域が必要ですが、描いた身振りは開いたパスです。このデモでは、ジェスチャー全体を含む閉じたパスを作ります。描いたすべての点を囲む最小の凸領域を求め、それを滑らかにして塗りつぶします。</div>
-    </div>
-  </section>
-
-  <section class="demo-section" id="tight-blobs">
-    <div class="demo-header">
-      <h2>Tight blob</h2>
-      <a href={`${base}/demos/tight-blob/index.html`} target="_blank" rel="noopener">open full size ↗</a>
-    </div>
-    <div class="demo-embed">
-      <iframe src={`${base}/demos/tight-blob/index.html?embedded`} title="Tight blob" scrolling="no"></iframe>
-    </div>
-    <div class="prose">
-      <p>The convex hull method fills in every concavity, which can turn a crescent into a solid lump. This demo preserves those concavities instead. It closes the drawn path into a smooth loop, then defines the shape as everything within a chosen radius of that loop.</p>
-      <div class="jp">凸包の手法はすべての凹みを埋めてしまうため、三日月形でも丸まった塊になってしまいます。このデモでは、代わりに凹みを保ちます。描いたパスを滑らかなループとして閉じ、そのループから選択した半径以内の領域すべてを形として定義します。</div>
-    </div>
-  </section>
+  <div class="prose">
+    <p>Closing a gesture into a fillable region is the fill counterpart to this, covered on the <a href={`${base}/fills`}>Fills</a> page.</p>
+    <div class="jp">身振りを塗りつぶせる領域として閉じる処理は、これに対応する塗りの側の処理で、<a href={`${base}/fills`}>Fills</a>のページで扱います。</div>
+  </div>
 </PageLayout>

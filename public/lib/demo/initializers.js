@@ -6,8 +6,7 @@ import { blobOutline } from '../pathEffects.js';
 import { StrokeStage } from './stage.js';
 import { DrawingBoard } from './drawingBoard.js';
 import { toolRegistry, randomValues } from './toolRegistry.js';
-import { scatterPath, taperByArc } from './strokePaths.js';
-import { pathArcLength } from './pressure.js';
+import { scatterPath, uniformWidth } from './strokePaths.js';
 
 /**
  * Canvas initializers: compositions that fill a fresh canvas, so a drawing
@@ -499,7 +498,7 @@ export function runInitializer({ stage, board }, plan) {
         } else {
             mesh = new StrokeDef({
                 points: mark.path,
-                widthLeft: taperByArc(width, pathArcLength(mark.path)),
+                widthLeft: uniformWidth(width),
                 renderer,
                 seed: ctx.seed,
             }).build();

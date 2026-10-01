@@ -31,20 +31,31 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
   </section>
 
-  <section class="demo-section" id="color">
+  <section class="demo-section" id="halo">
     <div class="demo-header">
-      <h2>Color needs a second rule</h2>
-      <a href={`${base}/demos/coverage-overlap/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+      <h2>Glow and shadow: one hue</h2>
+      <a href={`${base}/demos/coverage-halo/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
     <div class="demo-embed">
-      <iframe src={`${base}/demos/coverage-overlap/index.html?embedded`} title="Glow, shadow, and a brush self-overlapping" scrolling="no"></iframe>
+      <iframe src={`${base}/demos/coverage-halo/index.html?embedded`} title="A single-hue halo self-overlapping" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>MAX keeps single coverage on the alpha: as a mark folds over itself the buffer holds the strongest covering, so the overlap neither darkens nor doubles. Three self-crossing strokes sit here, left to right: a glow and a shadow (a halo carries one color, so a self-overlap keeps that color) and a two-pigment brush.</p>
-      <div class="jp">MAXはアルファについて単一被覆を保ちます。筆跡が自分の上に折り重なっても、バッファは最も強い被覆を保持するため、重なりは濃くも二重にもなりません。ここには自分と交差する3本のストロークが左から並びます。グロー、シャドウ（ハローは一色を持つので、自分との重なりでもその色が保たれます）、そして2つの顔料の筆です。</p>
+      <p>MAX keeps single coverage on the alpha: as a mark folds over itself the buffer holds the strongest covering, so the overlap neither darkens nor doubles. A halo, a glow or a shadow, carries one color, and the maximum of a color with itself is that color, so running MAX on the color too is right and the mark needs nothing more. Draw a self-crossing loop on the left and watch the crossing stay one flat tone, on the canvas and in the buffer alike.</p>
+      <div class="jp">MAXはアルファについて単一被覆を保ちます。筆跡が自分の上に折り重なっても、バッファは最も強い被覆を保持するため、重なりは濃くも二重にもなりません。ハロー（グローやシャドウ）は一色を持ち、ある色とその色自身の最大値はその色なので、色にもMAXをかけてよく、それ以上は何も要りません。左半分で自分と交差するループを描いてみてください。交差はキャンバスでもバッファでも、ひとつの平らな濃さのままです。</div>
+    </div>
+  </section>
 
-      <p>The color is where the halo and the brush part ways. Running MAX on the color too is right only while the mark is one hue: the maximum of a color with itself is that color, so the glow and the shadow need nothing more. A brush lays two pigments, and the per-channel maximum of two hues climbs toward white — cyan over red maxes to white — so the crossing of a two-color stroke would blow out. A multicolor mark therefore keeps the MAX on its coverage but composites its color as a straight over, letting the top covering win, so the crossing blends the pigments the way they layer instead of brightening.</p>
-      <div class="jp">グローと筆が分かれるのは色です。色にもMAXをかけてよいのは、筆跡が一色のあいだだけです。ある色とその色自身の最大値はその色なので、グローとシャドウはそれ以上何も要りません。筆は2つの顔料を置き、2つの色相のチャンネルごとの最大値は白へ近づきます。シアンが赤に重なると白になります。ですから2色のストロークの交差は白飛びしてしまいます。そこで多色の筆跡は、被覆にはMAXを保ちつつ、色は素直なオーバーで合成し、上の被覆を勝たせます。交差は明るくなるのではなく、顔料が重なるように混ざります。</p>
+  <section class="demo-section" id="color">
+    <div class="demo-header">
+      <h2>Two pigments: color over</h2>
+      <a href={`${base}/demos/coverage-color/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/coverage-color/index.html?embedded`} title="A two-pigment brush self-overlapping" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>The color is where a brush parts ways with the halo. A brush lays two pigments, and the per-channel maximum of two hues climbs toward white (cyan over red maxes to white), so the crossing of a two-color stroke would blow out. A multicolor mark therefore keeps the MAX on its coverage but composites its color as a straight over, letting the top covering win, so the crossing blends the pigments the way they layer instead of brightening. Draw a self-crossing loop and watch the crossing blend rather than lighten.</p>
+      <div class="jp">色は、筆がハローと分かれるところです。筆は2つの顔料を置き、2つの色相のチャンネルごとの最大値は白へ近づきます（シアンが赤に重なると白になります）。ですから2色のストロークの交差は白飛びしてしまいます。そこで多色の筆跡は、被覆にはMAXを保ちつつ、色は素直なオーバーで合成し、上の被覆を勝たせます。交差は明るくなるのではなく、顔料が重なるように混ざります。自分と交差するループを描いて、交差が明るくならずに混ざる様子を見てください。</div>
     </div>
   </section>
 </PageLayout>

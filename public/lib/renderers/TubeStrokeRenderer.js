@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Stroke3DRenderer, STROKE3D_GLSL, SHOW_NORMALS_GLSL } from './Stroke3DRenderer.js';
+import { seedOffset } from '../random.js';
 
 const RADIAL = 14;
 const CAP_LAT = 5;
@@ -350,7 +351,7 @@ export class TubeStrokeRenderer extends Stroke3DRenderer {
                 uStripes: { value: this.stripes },
                 uBend: { value: this.bend },
                 uLength: { value: length },
-                uSeed: { value: seed },
+                uSeed: { value: seedOffset(seed) },
                 uShowNormal: { value: this.showNormals ? 1 : 0 },
                 uScreen: { value: new THREE.Vector2(1, 1) },
             },

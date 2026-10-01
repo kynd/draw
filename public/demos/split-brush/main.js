@@ -7,7 +7,7 @@ import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawInput } from '../../lib/demo/drawInput.js';
 import { wireCollapsibles, wireWireframeToggle } from '../../lib/demo/panel.js';
-import { taper } from '../../lib/demo/strokePaths.js';
+import { uniformWidth } from '../../lib/demo/strokePaths.js';
 
 const readout = document.getElementById('readout');
 const angleInput = document.getElementById('angle');
@@ -54,7 +54,7 @@ function refresh() {
         });
         const def = new StrokeDef({
             points: smoothed.map(p => new THREE.Vector3(p.x, p.y, 0)),
-            widthLeft: taper(width),
+            widthLeft: uniformWidth(width),
             renderer,
             seed: 3.7 + i,
         });

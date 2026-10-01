@@ -7,7 +7,7 @@ import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawInput } from '../../lib/demo/drawInput.js';
 import { wireCollapsibles } from '../../lib/demo/panel.js';
-import { taper } from '../../lib/demo/strokePaths.js';
+import { uniformWidth } from '../../lib/demo/strokePaths.js';
 
 const readout = document.getElementById('readout');
 const widthInput = document.getElementById('width');
@@ -56,7 +56,7 @@ function buildStroke(path, width, i) {
     });
     const def = new StrokeDef({
         points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
-        widthLeft: taper(width),
+        widthLeft: uniformWidth(width),
         renderer,
         seed: 3.7 + i,
     });

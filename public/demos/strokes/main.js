@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { straightThenWiggle, layout, centerY, taper } from '../../lib/demo/strokePaths.js';
+import { straightThenWiggle, layout, centerY, uniformWidth } from '../../lib/demo/strokePaths.js';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { RibbonStrokeRenderer } from '../../lib/renderers/RibbonStrokeRenderer.js';
 import { CanvasBuffer, PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
@@ -95,7 +95,7 @@ function rebuild(colors) {
         });
         const def = new StrokeDef({
             points: straightThenWiggle(centerY(i, STROKES.length, spread), { z0: 0.002 + i * 0.01 }),
-            widthLeft: taper(width),
+            widthLeft: uniformWidth(width),
             renderer: strokeRenderer,
             seed: spec.seed,
         });

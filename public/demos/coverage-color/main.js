@@ -1,44 +1,60 @@
 import * as THREE from 'three';
 import { StrokeDef } from '../../lib/StrokeDef.js';
 import { PIXELS_PER_UNIT } from '../../lib/CanvasBuffer.js';
-import { DryMediaStrokeRenderer } from '../../lib/renderers/DryMediaStrokeRenderer.js';
+import { BrushStrokeRenderer } from '../../lib/renderers/BrushStrokeRenderer.js';
+import { randomSchemePalette, paperColor } from '../../lib/SchemePaletteMaker.js';
 import { StrokeStage } from '../../lib/demo/stage.js';
 import { DrawingBoard } from '../../lib/demo/drawingBoard.js';
 import { setupDrawCycle } from '../../lib/demo/drawCycle.js';
 import { uniformWidth } from '../../lib/demo/strokePaths.js';
 
-const PAPER = '#f3f0ea';
-const CHARCOAL = '#2a2a2e';
-
+// A two-pigment brush drawn through the coverage layer. The left half draws it;
+// the right half shows the layer's buffer in color. MAX keeps single coverage on
+// the alpha, but the color composites as a straight over, so a self-crossing
+// blends the pigments the way they layer instead of maxing two hues toward white.
 const widthInput = document.getElementById('width');
-const stage = new StrokeStage(document.getElementById('canvas'), { background: PAPER });
-const board = new DrawingBoard(stage, { background: PAPER });
+const width = () => parseFloat(widthInput.value) / PIXELS_PER_UNIT;
+
+let colorA = '#b0431f';
+let colorB = '#2f6f8f';
+let paper = '#f3f0ea';
+
+const stage = new StrokeStage(document.getElementById('canvas'), { background: paper });
+const board = new DrawingBoard(stage, { background: paper });
+
+function rollColors() {
+    const palette = randomSchemePalette('vivid-wheel');
+    const hex = palette.toHexArray();
+    colorA = hex[0];
+    colorB = hex[Math.min(3, hex.length - 1)];
+    paper = paperColor(palette.entries[0].H);
+    stage.setBackground(paper);
+    board.clear(paper);
+}
 
 const cycle = setupDrawCycle({
     stage, board,
     canvas: document.getElementById('canvas'),
     build: (path, points, seed) => {
-        const width = parseFloat(widthInput.value) / PIXELS_PER_UNIT;
-        const renderer = new DryMediaStrokeRenderer({
-            cap: 'ragged', color: CHARCOAL,
-            grain: 0.7, tooth: 4.5, pressure: 0.5, softness: 0.5, edge: 0.3, opacity: 0.92,
+        const renderer = new BrushStrokeRenderer({
+            cap: 'ragged', colorA, colorB, rough: 0.85, dry: 0.5,
         });
         const def = new StrokeDef({
             points: path.map(p => new THREE.Vector3(p.x, p.y, 0)),
-            widthLeft: uniformWidth(width),
-            renderer,
-            seed,
+            widthLeft: uniformWidth(width()), renderer, seed,
         });
         const mesh = def.build();
         mesh.position.z = 0.05;
         return { mesh, renderer };
     },
+    widthFor: width,
+    split: false,
     pointerTrace: false,
 });
 
-// The right half shows the coverage layer's own buffer: a dark backing, and a
-// quad sampling the layer's target, so the piece being drawn appears there
-// alone, at half scale, with its self-overlaps already reduced.
+// The right half: the coverage layer's buffer, in color. A colored mark leaves
+// premultiplied color there, so the crossing shows the two pigments layered
+// rather than brightening toward white.
 const backing = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.MeshBasicMaterial({ color: '#232323' })
@@ -47,24 +63,20 @@ backing.position.z = 1.0;
 backing.userData.overlay = true;
 stage.add(backing);
 
-// The buffer's coverage drawn as brightness, so the single-coverage result
-// reads directly: a fold does not brighten, because MAX kept one covering.
 const view = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.ShaderMaterial({
         uniforms: { uMap: { value: stage.coverage.target.texture } },
         vertexShader: /* glsl */`
             varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
+            void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
         `,
         fragmentShader: /* glsl */`
             uniform sampler2D uMap;
             varying vec2 vUv;
             void main() {
-                gl_FragColor = vec4(vec3(texture2D(uMap, vUv).a), 1.0);
+                vec4 c = texture2D(uMap, vUv);
+                gl_FragColor = vec4(c.rgb, 1.0);
             }
         `,
     })
@@ -82,7 +94,12 @@ function layoutBufferView() {
 
 document.getElementById('clear-btn').addEventListener('click', () => {
     cycle.disposeGhost();
-    board.clear(PAPER);
+    board.clear(paper);
+    stage.draw();
+});
+document.getElementById('random-btn').addEventListener('click', () => {
+    cycle.disposeGhost();
+    rollColors();
     stage.draw();
 });
 widthInput.addEventListener('input', () => {
@@ -90,6 +107,6 @@ widthInput.addEventListener('input', () => {
 });
 
 stage.onResize(() => layoutBufferView());
+rollColors();
 layoutBufferView();
-board.clear(PAPER);
 stage.draw();

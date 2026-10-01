@@ -1,0 +1,88 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Painterly fills" slug="painterly-fills">
+  <div class="monologue">
+    On this page, we fill a blob as paint: opaque paint with relief, and watercolor washes that let the background through.
+    <div class="jp">このページでは、ブロブを絵の具として塗ります。起伏を持つ不透明な絵の具と、背景を透かす水彩の塗りです。</div>
+  </div>
+
+  <div class="prose">
+    <p>Every fill here builds its region the way the <a href={`${base}/fills`}>Fills</a> overview describes, then shades it as pigment. The paints carry a height field lit as relief; the washes read the canvas underneath and drag it like water.</p>
+    <div class="jp">ここでの塗りはすべて、<a href={`${base}/fills`}>Fills</a>の概要で説明する方法で領域を作り、それを顔料として陰影付けします。絵の具は起伏として照らされる高さ場を持ち、washは下のキャンバスを読んで水のように引きずります。</div>
+  </div>
+
+  <section class="demo-section" id="paints">
+    <div class="demo-header">
+      <h2>Textured paint</h2>
+      <a href={`${base}/demos/blob-paints/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-paints/index.html?embedded`} title="Textured paint" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Opaque paint with relief: dry and scratched, flat with a gentle rise and fall, and thick oil laid with a knife.</p>
+      <div class="jp">起伏を持つ不透明な絵の具です。乾いてかすれたもの、ゆるやかな起伏を持つ平坦なもの、そしてナイフで置かれた厚塗りの油絵の具。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Height:</strong> An edge dome plus interior noise. The dome is a smoothstep of distance with an analytic slope, so the rise eases into the flat interior with no crease, and the noise mixes a low frequency for broad swell with a high one for detail.</p>
+        <div class="jp"><strong>高さ：</strong>縁のドームと内部のノイズです。ドームは距離のsmoothstepで、傾きは解析的に求まるため、立ち上がりは折り目なく平坦な内部へとなだらかに続きます。ノイズは、大きなうねりのための低周波と、細部のための高周波を混ぜています。</div>
+
+        <p><strong>Dry brush:</strong> A tooth like the dry media's, only denser, erodes both the edge and the interior, leaving rough transparent speckle where the paint ran out.</p>
+        <div class="jp"><strong>ドライブラシ：</strong>ドライメディアと同様の、ただしより密な紙の目が、縁と内部の両方を削り、絵の具が途切れた場所に粗い透明の粒を残します。</div>
+
+        <p><strong>Two pigments:</strong> Every paint mixes two colors in smooth patches, the way a loaded brush lays down more than one. The thick oil sharpens the mix instead: its colors meet on a hard boundary shaped by low-frequency noise, two paints laid side by side without blending.</p>
+        <div class="jp"><strong>2つの顔料：</strong>すべての絵の具は2色をなだらかな斑で混ぜます。絵の具を含んだ筆が複数の色を置いていくのと同じです。厚塗りの油絵の具は、逆に混合を鋭くします。2色は低周波ノイズが形作る硬い境界で接し、混ざらないまま並べて置かれた2つの絵の具になります。</div>
+
+        <p><strong>The knife:</strong> The thick oil's height is flat patches, each with its own drag direction and striations along it, meeting at hard steps. The rim does not trace the edge: a noise varies it around the boundary, tall and steep in some stretches, scraped nearly flat in others. The edge is straight cut segments, offset piecewise-linearly along the boundary's arc.</p>
+        <div class="jp"><strong>ナイフ：</strong>厚塗りの油絵の具の高さは平らな斑からなり、それぞれが独自の引き方向とそれに沿った筋を持ち、硬い段差で接します。縁の盛り上がりは輪郭をなぞらず、ノイズによって境界に沿って変化します。高く急な区間もあれば、削がれてほとんど平らな区間もあります。輪郭は、境界の弧に沿って区分線形にオフセットされた、まっすぐに切られた線分です。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="washes">
+    <div class="demo-header">
+      <h2>Washes</h2>
+      <a href={`${base}/demos/blob-washes/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/blob-washes/index.html?embedded`} title="Washes" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Watercolor fills over the background: watery, medium, and gouache.</p>
+      <div class="jp">背景の上の水彩の塗りです。水の多いもの、中間、そしてガッシュ。</div>
+
+      <details>
+        <summary>Details</summary>
+        <p><strong>Water:</strong> One renderer spans the three. The paint meets the background two ways: a min that darkens like pigment layered over it, and a mix that covers like body. Water decides the balance, and the more of it, the more the paint darkens instead of covering; less sharpens the edge and covers, until the fill reads as gouache. Water also pools the opacity, leaving patches where the fill is nearly bare.</p>
+        <div class="jp"><strong>水：</strong>ひとつのレンダラが3つすべてを描き分けます。絵の具は2つの方法で背景と重なります。上に重ねた顔料のように暗くするminと、絵の具の厚みとして覆うmixです。水がその配分を決め、多いほど絵の具は覆うのではなく暗くなります。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。水はまた、不透明度をたまりに偏らせ、塗りがほとんど残らない斑を作ります。</div>
+
+        <p><strong>Flow:</strong> The background is not read at one point but dragged along a direction that wanders with position, so the pigment looks carried by water. The gouache covers most and drags hardest, which is what implies the brush.</p>
+        <div class="jp"><strong>流れ：</strong>背景は1点で読まれるのではなく、位置とともに揺らぐ方向に沿って引きずられます。そのため顔料は水に運ばれたように見えます。ガッシュは最も覆いが強く、最も強く引きずります。それが筆を思わせる理由です。</div>
+
+        <p><strong>The edge:</strong> The boundary wanders by a noise of world position, as a wet edge does, and pigment collects just inside it.</p>
+        <div class="jp"><strong>縁：</strong>境界はワールド座標のノイズで揺らぎ、濡れた縁のように振る舞います。顔料はそのすぐ内側に集まります。</div>
+
+        <p><strong>The gouache:</strong> It stays flat and covers nearly fully, and its edge grows brush marks, streaks elongated along directions that wander with position.</p>
+        <div class="jp"><strong>ガッシュ：</strong>平坦なまま、ほぼ完全に覆います。縁には筆の跡が生え、位置とともに揺らぐ方向に沿って引き伸ばされた筋になります。</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="demo-section" id="try">
+    <div class="demo-header">
+      <h2>Try drawing</h2>
+      <a href={`${base}/demos/try-painterly-fills/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed" data-w="860" data-h="620" style="width:860px;height:620px">
+      <iframe src={`${base}/demos/try-painterly-fills/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
+    </div>
+    <div class="prose">
+      <p>Paint with the painterly fills on this page, in the drawing tool: the settings panel picks the fill, its colors, and its parameters exactly, the floating dials reroll the palette, set the width, and walk a trail of rolled fills, and Clear, Replay, and recording work as on the Drawing Tool Demo page. Each released gesture becomes one blob, and the washes read the canvas itself, so they bleed and drag what is already painted. With a pen tablet, pressure scales the blob around its set size, light smaller and heavy larger; a mouse draws at the set size.</p>
+      <div class="jp">このページの絵の具の塗りを使って、描画ツールの中で描いてみてください。設定パネルでは、塗りとその色、パラメータを正確に選べます。浮かぶ3つのダイヤルでは、パレットを引き直したり、幅を変えたり、ロールしてきた塗りの列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。描き終えた身振りはひとつのブロブになり、washはキャンバスそのものを読むため、すでに描かれたものをにじませ、引きずります。ペンタブレットでは、筆圧が設定した大きさを中心にブロブを伸縮させます。軽ければ小さく、強ければ大きくなります。マウスは設定した大きさのまま描きます。</div>
+    </div>
+  </section>
+</PageLayout>

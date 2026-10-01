@@ -140,6 +140,10 @@ html, body {
   border: 1px solid #cccccc; background: var(--demo-bg);
   padding: 3px 5px; width: 100%; cursor: pointer; color: var(--demo-fg);
 }
+/* The native dropdown clips optgroup labels and options when the control font is
+   this small (category-title descenders get cut). Give the list items a readable
+   size of their own; the closed control keeps its compact face. */
+.dp-select option, .dp-select optgroup { font-size: 0.8rem; line-height: 1.6; }
 
 /* Buttons */
 .dp-btn {

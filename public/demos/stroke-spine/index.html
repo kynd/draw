@@ -3,31 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coverage overlap — glow, shadow, brush</title>
+  <title>Stroke spine — path, spine, and outline</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;700&family=Google+Sans+Code:wght@400&display=swap" rel="stylesheet" />
   <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js"}}</script>
   <link rel="stylesheet" href="../../styles/demo-ui.css" />
+  <style>.canvas-wrap { cursor: crosshair; touch-action: none; }</style>
 </head>
 <body>
   <div class="demo-layout">
-    <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+    <div class="canvas-wrap">
+      <canvas id="canvas"></canvas>
+    </div>
 
     <div class="dp-panel">
-      <div class="dp-hd"><span class="dp-title">Self-overlap</span></div>
-      <div class="dp-note">Left to right: glow, shadow, brush. Each stroke crosses itself once.</div>
+      <div class="dp-hd"><span class="dp-title">Stroke spine</span></div>
+      <div class="dp-note">Draw on the canvas. The black line is your raw pointer path, the blue line is the smoothed spine, and the filled shape is the stroke built around that spine.</div>
+
+      <hr class="dp-divider" />
+
+      <div class="dp-hd"><span class="dp-title">Stroke</span></div>
       <div class="dp-row">
         <span class="dp-label">Width</span>
-        <input id="width" class="dp-range" type="range" min="8" max="40" step="1" value="24" />
-        <span class="dp-val" id="width-val">24</span>
+        <input id="width" class="dp-range" type="range" min="8" max="90" step="1" value="44" />
+        <span class="dp-val" id="width-val">44</span>
       </div>
 
       <hr class="dp-divider" />
 
-      <div class="dp-hd"><span class="dp-title">Color</span></div>
+      <div class="dp-hd"><span class="dp-title">Canvas</span></div>
       <div class="dp-btn-row">
-        <button id="random-btn" class="dp-btn secondary">Randomize colors</button>
+        <button id="clear-btn" class="dp-btn secondary">Clear</button>
       </div>
     </div>
   </div>
