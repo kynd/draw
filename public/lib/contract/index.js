@@ -205,7 +205,9 @@ class DrawingPlayerWrapper {
         this._endWait = 1.0;
         this._instantInitial = true;
         this._loopTimer = 0;
+        this._drawnStart = 0;
         this._ended = new Set();
+        this._progress = new Set();
     }
 
     mount(container) {
@@ -214,6 +216,10 @@ class DrawingPlayerWrapper {
         if (this._tool) return;
         this._tool = new DrawingTool(this._canvas, new ViewConfig());
         this._tool.applyLive({ type: 'clear', background: '#ffffff' });
+        this._tool.player.on('progress', () => {
+            const progress = this._progressOverDrawn();
+            this._progress.forEach(fn => fn(progress));
+        });
         this._tool.player.on('end', () => {
             if (this._loop) {
                 // The rest after the finished drawing, then again from blank.
@@ -238,7 +244,22 @@ class DrawingPlayerWrapper {
         const records = log.records ?? [];
         let n = 0;
         while (n < records.length && records[n].initial) n++;
+        this._drawnStart = n;
         this._tool.player.seek(n);
+    }
+
+    // `seek` and `onProgress` run over the drawn strokes alone: what the
+    // initializer laid down sits before 0, in place as it is after `load`.
+    _drawnLength() {
+        return Math.max(0, this._tool.player.length - this._drawnStart);
+    }
+
+    _progressOverDrawn() {
+        const player = this._tool.player;
+        const drawn = this._drawnLength();
+        if (drawn === 0) return 1;
+        const fed = player.progress * player.length;
+        return Math.min(1, Math.max(0, (fed - this._drawnStart) / drawn));
     }
 
     _playOptions() {
@@ -272,11 +293,15 @@ class DrawingPlayerWrapper {
         this._tool.player.pause();
     }
 
-    /** Shows the state at `progress` (0..1); 1 is the finished drawing. */
+    /** Shows the state at `progress` (0..1 over the drawn strokes, whole
+     * strokes only): 0 has only the initializer's marks in place, 1 is the
+     * finished drawing. */
     seek(progress) {
         clearTimeout(this._loopTimer);
-        const player = this._tool.player;
-        player.seek(Math.round(Math.min(Math.max(progress, 0), 1) * player.length));
+        const drawn = this._drawnLength();
+        const clamped = Math.min(Math.max(progress, 0), 1);
+        const count = clamped >= 1 ? drawn : Math.floor(clamped * drawn);
+        this._tool.player.seek(this._drawnStart + count);
     }
 
     /** Fires when playback reaches the end (not on loop restarts). */
@@ -285,9 +310,17 @@ class DrawingPlayerWrapper {
         return () => this._ended.delete(listener);
     }
 
+    /** Fires as playback advances and after a seek, with the position on the
+     * scale `seek` takes (0..1 over the drawn strokes). */
+    onProgress(listener) {
+        this._progress.add(listener);
+        return () => this._progress.delete(listener);
+    }
+
     destroy() {
         clearTimeout(this._loopTimer);
         this._ended.clear();
+        this._progress.clear();
         this._tool?.dispose();
         this._canvas?.remove();
         this._tool = null;

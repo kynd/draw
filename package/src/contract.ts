@@ -55,6 +55,10 @@ export interface DrawingLiveView {
 // default). Without `loop`, playback simply ends at the last stroke. With
 // `instantInitial` (true by default), what the canvas initializer laid down
 // at the start of the recording is placed instantly instead of animated.
+// `seek` takes a position 0..1 over the drawn strokes and shows the strokes
+// that lie whole before it: at 0 only what the initializer laid down is in
+// place (as after `load`), at 1 the drawing is finished. `onProgress` reports
+// that position as playback advances and after a seek.
 export interface DrawingPlayer {
     mount(container: HTMLElement): void;
     // On load, the background and what the initializer laid down show
@@ -67,5 +71,6 @@ export interface DrawingPlayer {
     pause(): void;
     seek(progress: number): void;
     onEnded(listener: () => void): () => void;
+    onProgress(listener: (progress: number) => void): () => void;
     destroy(): void;
 }

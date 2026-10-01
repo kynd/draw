@@ -67,6 +67,16 @@ export class DrawingPlayer {
     get hasData() { return (this.data?.records.length ?? 0) > 0; }
     get length() { return this.data?.records.length ?? 0; }
     get position() { return this._pos; }
+    /** How far playback has come, 0..1 over every record, counting the
+     * fed part of the record under way; 1 is the finished drawing. */
+    get progress() {
+        if (!this.length) return 0;
+        if (this._pi === 0) return Math.min(1, this._pos / this.length);
+        const span = this._group ? this._group.end - this._pos : 1;
+        const total = this._group ? this._group.len : this.data.records[this._pos].points.length;
+        const part = total > 0 ? (this._pi / total) * span : 0;
+        return Math.min(1, (this._pos + part) / this.length);
+    }
     get playing() { return this._playing; }
     get recording() { return this._recording; }
 
@@ -158,6 +168,7 @@ export class DrawingPlayer {
         }
         if (this._pos >= this.length) {
             this._playing = false;
+            this._emit('progress');
             this._emit('end');
             const done = this._onDone;
             this._onDone = null;
@@ -191,6 +202,7 @@ export class DrawingPlayer {
                     this._waitUntil = performance.now() + this._strokeWaitMs;
                 }
             }
+            this._emit('progress');
             this._raf = requestAnimationFrame(() => this._frame());
             return;
         }
@@ -207,6 +219,7 @@ export class DrawingPlayer {
                 this._waitUntil = performance.now() + this._strokeWaitMs;
             }
         }
+        this._emit('progress');
         this._raf = requestAnimationFrame(() => this._frame());
     }
 
@@ -236,6 +249,7 @@ export class DrawingPlayer {
             this._pi = 0;
         }
         this._emit('step');
+        this._emit('progress');
         if (wasPlaying && this._pos < this.length) {
             this.play({
                 pointsPerFrame: this._ppf, strokeWaitMs: this._strokeWaitMs,

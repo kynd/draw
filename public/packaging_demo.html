@@ -140,7 +140,10 @@
     player.onEnded(() => {
       playing = false;
       playBtn.textContent = 'Play';
-      seek.value = '1';
+    });
+
+    player.onProgress(progress => {
+      seek.value = String(progress);
     });
   </script>
 </body>
