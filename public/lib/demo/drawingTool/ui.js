@@ -2,6 +2,7 @@ import { Dial } from '../dial.js';
 import { FrameLatch } from '../latch.js';
 import { PALETTE_SCHEMES } from '../../SchemePaletteMaker.js';
 import { toolLabel, groupTools } from '../toolRegistry.js';
+import { readDrawingZip } from '../drawingPlayer.js';
 
 const TEMPLATE = /* html */`
   <div class="dp-overlay-tr">
@@ -51,6 +52,9 @@ const TEMPLATE = /* html */`
       <button id="download-btn" class="dp-btn secondary">Download JSON</button>
       <button id="download-image-btn" class="dp-btn secondary">Download PNG</button>
     </div>
+    <div class="dp-btn-row">
+      <button id="load-btn" class="dp-btn secondary">Load JSON</button>
+    </div>
 
     <div class="dp-sub-label">Guide image</div>
     <div class="dp-btn-row">
@@ -86,6 +90,7 @@ const TEMPLATE = /* html */`
   </div>
 
   <input id="guide-file" type="file" accept="image/*" style="display:none" />
+  <input id="load-file" type="file" accept=".zip,application/zip,.json,application/json" style="display:none" />
 `;
 
 /** Injects the drawing tool's layout into `root` and returns it with its canvas. */
@@ -214,6 +219,8 @@ export function attachDrawingToolUi(tool, layout) {
     const recordBtn = $('record-btn');
     const downloadBtn = $('download-btn');
     const downloadImageBtn = $('download-image-btn');
+    const loadBtn = $('load-btn');
+    const loadFile = $('load-file');
 
     replayBtn.addEventListener('click', () => {
         if (tool.state.replaying) { tool.stopReplay(); return; }
@@ -225,10 +232,26 @@ export function attachDrawingToolUi(tool, layout) {
     downloadBtn.addEventListener('click', () => tool.downloadDrawing());
     downloadImageBtn.addEventListener('click', () => tool.downloadImage());
 
+    // Load a saved drawing (the zip Download JSON wrote) and keep drawing on it.
+    loadBtn.addEventListener('click', () => {
+        if (tool.state.replaying) return;
+        loadFile.click();
+    });
+    loadFile.addEventListener('change', async () => {
+        const file = loadFile.files?.[0];
+        loadFile.value = '';
+        if (!file) return;
+        try {
+            tool.resumeFrom(await readDrawingZip(file));
+        } catch (e) {
+            console.log('[tool] could not read drawing:', e.message);
+        }
+    });
+
     function setReplayUi(on) {
         replayBtn.textContent = on ? 'Stop' : 'Replay';
         for (const el of [initBtn, clearBtn, autoCheck, traceCheck, spineCheck, recordBtn, downloadBtn,
-            downloadImageBtn, guideBtn, guideToggle, advBtn]) {
+            downloadImageBtn, loadBtn, guideBtn, guideToggle, advBtn]) {
             el.disabled = on;
         }
     }

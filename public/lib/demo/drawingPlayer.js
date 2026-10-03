@@ -284,8 +284,17 @@ export class DrawingPlayer {
     record({ filename = 'drawing', onDone } = {}) {
         if (this._playing || this._recording || !this.hasData) return false;
         const stream = this.canvas.captureStream(60);
-        const mime = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']
-            .find(c => window.MediaRecorder && MediaRecorder.isTypeSupported(c));
+        // H.264 (mp4) caps the frame size (about 36864 macroblocks, 4096 to a side).
+        // A supersampled canvas on a large window exceeds it, and the mp4 encoder then
+        // yields an empty file, so past the cap we skip mp4 for webm (VP9 allows far
+        // larger). A canvas within the cap still records as mp4.
+        const w = this.canvas.width, h = this.canvas.height;
+        const h264Fits = w <= 4096 && h <= 4096
+            && Math.ceil(w / 16) * Math.ceil(h / 16) <= 36864;
+        const candidates = h264Fits
+            ? ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']
+            : ['video/webm;codecs=vp9', 'video/webm'];
+        const mime = candidates.find(c => window.MediaRecorder && MediaRecorder.isTypeSupported(c));
         if (!mime) { console.log('[player] MediaRecorder unavailable'); return false; }
         const media = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 12_000_000 });
         const chunks = [];
@@ -294,18 +303,30 @@ export class DrawingPlayer {
             const ext = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
             downloadBlob(new Blob(chunks, { type: mime }), `${filename}.${ext}`);
         };
-        media.start();
+        // A timeslice flushes chunks during the recording rather than only at stop.
+        media.start(250);
         this._recording = true;
         this._primed = false;   // recording always starts from the beginning
         this._emit('record-start');
-        const ok = this.play({
-            onDone: () => {
-                media.stop();
-                this._recording = false;
-                this._emit('record-end');
-                onDone?.();
-            },
-        });
+        const finish = () => {
+            // Pad a short tail of the finished drawing before stopping: too few frames
+            // yield an empty file (the encoder emits nothing), and a brief drawing can
+            // replay in under that. requestFrame re-captures the current canvas without
+            // a redraw, so the video also ends on the complete drawing.
+            const track = stream.getVideoTracks()[0];
+            let n = 0;
+            const tail = setInterval(() => {
+                track?.requestFrame?.();
+                if (++n >= 36) {
+                    clearInterval(tail);
+                    media.stop();
+                    this._recording = false;
+                    this._emit('record-end');
+                    onDone?.();
+                }
+            }, 1000 / 60);
+        };
+        const ok = this.play({ onDone: finish });
         if (!ok) {
             media.stop();
             this._recording = false;

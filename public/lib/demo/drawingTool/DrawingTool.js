@@ -730,6 +730,35 @@ export class DrawingTool {
         this._emit('clear', { background: this.recorder.background });
     }
 
+    /**
+     * Loads a saved drawing and places every mark on the canvas at once, ready to
+     * keep drawing on: new strokes append to the loaded log and download together.
+     * The live tool, width, and colors stay as they are, so loading does not change
+     * the current selection.
+     */
+    resumeFrom(data) {
+        if (this._replaying) return;
+        const saved = {
+            tool: this._state.tool, values: { ...this._state.values },
+            widthPx: this._state.widthPx, sens: this._state.sens,
+            colorA: this._state.colorA, colorB: this._state.colorB,
+            colors: [...this._state.colors],
+        };
+        // Load the records, then draw them all instantly through the player. Its
+        // feeds are guarded from re-recording, so the log is not doubled, and each
+        // mark bakes onto the board the way a replay's final frame does.
+        this.setDrawingData(data);
+        this.player.setData(data);
+        this.player.seek(this.player.length);
+        // The instant placement left the state on the last loaded mark; restore the
+        // user's selection and clear the replay seed override so the next stroke
+        // continues with the current tool and a fresh seed.
+        Object.assign(this._state, saved, { seedOverride: null });
+        this._refreshPreview();
+        this._emit('tool');
+        this.stage.draw();
+    }
+
     /** The log zipped and saved, as the Player page reads it. */
     downloadDrawing(filename = 'drawing') {
         if (this._replaying || this.recorder.records.length === 0) return;
