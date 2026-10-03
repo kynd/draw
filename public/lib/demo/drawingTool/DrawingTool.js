@@ -263,7 +263,19 @@ export class DrawingTool {
         this._listeners.get(event)?.forEach(fn => fn(payload));
         if ((event === 'tool' || event === 'palette') && !this._applyingLive) {
             this._emitLiveState();
+            this._rebuildLiveStroke();
         }
+    }
+
+    // A change made while the pen rests mid-stroke (a dial turned, say) shows
+    // at once: the live stroke rebuilds from its points under the new state,
+    // instead of waiting for the next move to feed it. An empty 'points' event
+    // makes a mirror rebuild its stroke the same way. Nothing commits until
+    // release, so the record keeps the state the stroke ends with, as before.
+    _rebuildLiveStroke() {
+        if (!this._drawing || this._points.length === 0) return;
+        this._emitLive('points', { points: [] });
+        this.cycle.feed(this._points, false);
     }
 
     _liveActive() { return (this._listeners.get('live')?.size ?? 0) > 0; }
