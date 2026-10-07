@@ -5,46 +5,42 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Strokes" slug="strokes">
   <div class="monologue">
-    On this page, we explain how a stroke becomes geometry: a spine traced from the pointer, smoothed, and given width, built as one shape.
-    <div class="jp">このページでは、ストロークがどのようにジオメトリになるかを説明します。ポインタからたどったスパインを滑らかにし、幅を与えて、ひとつの形として作ります。</div>
+    This page explains how strokes are constructed.
+    <div class="jp">このページでは、ストロークがどのように構築されるかを説明します。</div>
   </div>
 
   <div class="prose">
-    <h2>Approaches to a stroke</h2>
-    <p>A drawing tool has to turn a moving pointer into a mark, and there are a few established ways to do it. Each trades cost against how directly it models the medium.</p>
-    <div class="jp">描画ツールは、動くポインタをマークに変えなければならず、その方法にはいくつか定着したものがあります。それぞれ、媒体をどれだけ直接的に模すかと、その計算コストとを引き換えにします。</div>
+    <h2>Stroke approaches</h2>
+    <p>A drawing tool must turn the pointer's path into a mark. Several established methods do this, each with its own advantages and disadvantages.</p>
+    <div class="jp">描画ツールは、ポインターの軌跡を筆跡に変換する必要があります。いくつかの確立された手法があり、それぞれに長所と短所があります。</div>
 
-    <p><strong>Stamping:</strong> Most raster paint programs stamp a brush tip (a small textured shape) at close intervals along the path and blend the overlapping stamps, so the mark is the accumulation of many dabs.</p>
-    <div class="jp"><strong>スタンプ：</strong>多くのラスターのペイントソフトは、ブラシの先端（小さなテクスチャの形）をパスに沿って短い間隔で押し当て、重なったスタンプを合成します。マークは多数のダブ（dab）の積み重ねになります。</div>
+    <p><strong>Stamping:</strong> Most raster paint programs stamp a brush tip (a small textured shape) at short intervals along the path, then blend the overlapping stamps. These dabs build up the mark.</p>
+    <div class="jp"><strong>スタンピング：</strong> ラスター形式のペイントソフトの多くは、軌跡に沿って短い間隔でブラシ先端の形状（小さなテクスチャ）を繰り返し配置し、重なった部分を合成します。この積み重ねが筆跡を形づくります。</div>
 
-    <p><strong>Simulation:</strong> Natural-media engines model the medium itself, the flow of ink or water, the bend of the bristles, the diffusion of pigment, and let the mark emerge from that. It is the most physically faithful and generally the most expensive.</p>
-    <div class="jp"><strong>シミュレーション：</strong>ナチュラルメディアのエンジンは媒体そのものを模します。インクや水の流れ、毛のしなり、顔料の拡散などで、マークはそこから立ち現れます。物理的に最も忠実ですが、一般に最も高コストです。</div>
+    <p><strong>Simulation:</strong> Engines model the medium itself (the flow of ink or water, the bend of the bristles, the diffusion of pigment) and let the mark emerge from those interactions. This approach is the most physically faithful and generally the most computationally expensive.</p>
+    <div class="jp"><strong>シミュレーション：</strong> 描画エンジンが、インクや水の流れ、筆の毛のしなり、顔料の拡散など、画材そのものをモデル化し、それらの相互作用から描画結果を生み出します。この手法は物理現象を最も忠実に再現できますが、一般に計算コストも最も高くなります。</div>
 
-    <p><strong>Geometry:</strong> A geometry approach builds the mark's shape directly, offsetting the drawn centerline by the width into an outline and filling or shading it.</p>
-    <div class="jp"><strong>ジオメトリ：</strong>ジオメトリの手法は、マークの形を直接作ります。描いた中心線を幅の分だけオフセットして輪郭にし、それを塗ったり陰影付けしたりします。</div>
+    <p><strong>Geometry:</strong> A geometry-based approach builds the mark's shape directly based on the drawn line, then fills or shades it.</p>
+    <div class="jp"><strong>ジオメトリ：</strong> ジオメトリベースの手法は、描かれた線に応じて形を作り、その内側を塗りつぶすかシェーディングすることで、筆跡を直接構築します。</div>
 
-    <h2>A geometry approach</h2>
-    <p>We take the geometry approach. The entire stroke or fill is built in a single pass: one mesh from the path and width, shaded by a fragment shader, with no per-dab compositing loop and no simulation timestep. It is light, it keeps the mark as data, and it animates easily.</p>
-    <div class="jp">私たちはジオメトリの手法を取ります。ストロークや塗りの全体を一度に作ります。パスと幅からひとつのメッシュを作り、フラグメントシェーダで陰影を付けます。ダブごとの合成ループも、シミュレーションの時間刻みもありません。軽く、マークをデータのまま保ち、アニメーションも容易です。</div>
-
-    <p>Because a mark is its path, width, tool, and colors, it can be replayed as an animation (the <a href={`${base}/player`}>Player</a> redraws it progressively), saved and reloaded one stroke at a time (the recorder), and rebuilt at any scale or mirrored without drawing it again.</p>
-    <div class="jp">マークはそのパス、幅、ツール、色そのものなので、アニメーションとして再生でき（<a href={`${base}/player`}>Player</a>が少しずつ描き直します）、ストローク単位で保存して読み戻すことができ（レコーダ）、描き直すことなく任意の大きさで作り直したり左右反転したりできます。</div>
+    <p>We use the geometry-based approach. Each stroke or fill is built in a single pass as a mesh generated from the path, then shaded by a fragment shader. No per-dab compositing loop or simulation timestep is needed, so the stroke can be drawn immediately. This approach is lightweight, keeps each mark as data, and makes animation easy.</p>
+    <div class="jp">ここではジオメトリベースの手法を使います。ストロークや塗りつぶしは、軌跡から生成したメッシュとして一度の処理で構築し、その後フラグメントシェーダーでシェーディングします。描点ごとの合成ループやシミュレーションの時間ステップが不要なため、ストロークを即座に描画できます。この手法は軽量で、それぞれの筆跡をデータとして保持でき、アニメーションも容易に行えます。</div>
   </div>
 
   <section class="demo-section" id="spine">
     <div class="demo-header">
-      <h2>The spine</h2>
+      <h2>Demo</h2>
       <a href={`${base}/demos/stroke-spine/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
     <div class="demo-embed">
-      <iframe src={`${base}/demos/stroke-spine/index.html?embedded`} title="The spine" scrolling="no"></iframe>
+      <iframe src={`${base}/demos/stroke-spine/index.html?embedded`} title="Demo" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A stroke starts from a spine, the centerline traced from the pointer. Draw on the canvas: the black line is your raw pointer path, the blue line is the smoothed spine, and the filled shape is the stroke built around it. The raw path is jittery, so we smooth it before giving it width, and the wider the stroke, the more its turns are rounded. The smoothing methods are on the <a href={`${base}/stroke-processing`}>Stroke processing</a> page.</p>
-      <div class="jp">ストロークはスパイン、つまりポインタからたどった中心線から始まります。キャンバスに描いてみてください。黒い線があなたの生のポインタのパス、青い線が滑らかにしたスパイン、塗られた形がそのまわりに作られたストロークです。生のパスはがたつくため、幅を与える前に滑らかにします。ストロークが太いほど、曲がりは強く丸められます。平滑化の手法は<a href={`${base}/stroke-processing`}>Stroke processing</a>のページにあります。</div>
+      <p>A stroke begins with a spine traced from the pointer's path. We smooth the spine based on the tool type and stroke width. A thin pencil stroke should follow the user's input precisely, while a thick brush stroke can be less sensitive to hand movement and often looks better with smoother lines. See the <a href={`${base}/stroke-processing`}>Stroke processing</a> page for smoothing methods.</p>
+      <div class="jp">ストロークは、ポインターの軌跡に基づく中心線から始まります。この中心線はツールの種類とストロークの幅に応じて、滑らかにされます。細い鉛筆の線はユーザーの入力を正確に追ったほうが良いですが、太いブラシのストロークは手の動きにそれほど敏感でなく、線をより滑らかにしたほうが見栄えが良くなります。スムージングについては、<a href={`${base}/stroke-processing`}>Stroke processing</a> のページをご覧ください。</div>
 
-      <p>The stroke and its renderers are on the <a href={`${base}/basic-stroke`}>Basic Stroke</a> page; the classes are documented on <a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a> and <a href={`${base}/documentation/renderers`}>Renderers</a>.</p>
-      <div class="jp">ストロークとそのレンダラは<a href={`${base}/basic-stroke`}>Basic Stroke</a>のページにあります。各クラスは<a href={`${base}/documentation/stroke-definition`}>Stroke Definition</a>と<a href={`${base}/documentation/renderers`}>Renderers</a>に記載しています。</div>
+      <p>Draw on the canvas to see the raw pointer path in black, the smoothed spine in blue, and the filled shape of the stroke around it.</p>
+      <div class="jp">キャンバスに描いて試してみましょう。元のポインターの軌跡が黒、滑らかにした中心線が青で表示され、その周りに塗りつぶされたストロークの形が描かれます。</div>
     </div>
   </section>
 </PageLayout>
