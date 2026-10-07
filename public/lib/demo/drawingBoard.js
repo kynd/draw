@@ -23,6 +23,11 @@ export class DrawingBoard {
 
         this._targets = [0, 1].map(() => this._makeTarget());
         this._front = 0;
+        // A copy of the accumulation from just before the last bake, for one step
+        // of undo. Saved on every bake; `undoLast` blits it back. Invalidated by a
+        // clear or a resize, since neither leaves a stroke to take back.
+        this._undo = this._makeTarget();
+        this._undoValid = false;
 
         this.plane = new THREE.Mesh(
             new THREE.PlaneGeometry(1, 1),
@@ -113,6 +118,10 @@ export class DrawingBoard {
             this._bakeScene.clear();
 
             oldTargets.forEach(t => t.dispose());
+            // The undo copy is the old size and no longer matches; drop it.
+            this._undo.dispose();
+            this._undo = this._makeTarget();
+            this._undoValid = false;
             this._fit();
             this._covered = { x: this.stage.extentX, y: this.stage.extentY };
             this.plane.material.map = this.texture;
@@ -208,6 +217,8 @@ export class DrawingBoard {
      * texture. A bare clear leaves the texture untouched, and it shows black.
      */
     clear(background) {
+        // A clear is a fresh page, not a stroke; there is nothing to take back.
+        this._undoValid = false;
         this._clearSpec = background;
         const base = background?.type === 'regions' ? background.base : background;
         this._clearColor.set(typeof base === 'string' || base.isColor
@@ -239,6 +250,9 @@ export class DrawingBoard {
      * to destination-preserving alpha blending.
      */
     bake(meshes) {
+        // Keep the accumulation from just before this bake, so the gesture it adds
+        // can be taken back by one step of undo.
+        this._saveUndo();
         const renderer = this.stage.renderer;
         const camera = this.stage.buffer.camera;
         const back = this._targets[1 - this._front];
@@ -301,5 +315,46 @@ export class DrawingBoard {
         this._front = 1 - this._front;
         this.plane.material.map = this.texture;
         this.plane.material.needsUpdate = true;
+    }
+
+    /** Draws one texture over a whole target, through the copy plane. */
+    _blit(srcTexture, dstTarget) {
+        const renderer = this.stage.renderer;
+        const previous = renderer.getRenderTarget();
+        const previousAuto = renderer.autoClear;
+        renderer.autoClear = false;
+        this._copyPlane.material.map = srcTexture;
+        this._copyPlane.material.needsUpdate = true;
+        this._copyPlane.scale.set(this.stage.extentX * 2, this.stage.extentY * 2, 1);
+        this._bakeScene.clear();
+        this._bakeScene.add(this._copyPlane);
+        renderer.setRenderTarget(dstTarget);
+        renderer.clear(true, true, false);
+        renderer.render(this._bakeScene, this.stage.buffer.camera);
+        this._bakeScene.clear();
+        renderer.setRenderTarget(previous);
+        renderer.autoClear = previousAuto;
+    }
+
+    /** Saves the current accumulation as the single undo point. */
+    _saveUndo() {
+        this._blit(this.texture, this._undo);
+        this._undoValid = true;
+    }
+
+    /**
+     * Restores the accumulation to the saved undo point, taking back the last
+     * baked gesture. Returns whether it ran; the point is spent once used, so
+     * undo is a single step.
+     */
+    undoLast() {
+        if (!this._undoValid) return false;
+        const back = this._targets[1 - this._front];
+        this._blit(this._undo.texture, back);
+        this._front = 1 - this._front;
+        this.plane.material.map = this.texture;
+        this.plane.material.needsUpdate = true;
+        this._undoValid = false;
+        return true;
     }
 }

@@ -27,6 +27,9 @@ const TEMPLATE = /* html */`
       <button id="clear-btn" class="dp-btn secondary">Clear</button>
       <button id="fullscreen-btn" class="dp-btn secondary">Full screen</button>
     </div>
+    <div class="dp-btn-row">
+      <button id="undo-btn" class="dp-btn secondary">Undo</button>
+    </div>
     <div class="dp-row" id="size-row" style="display:none">
       <span class="dp-label">Size</span>
       <select id="size-select" class="dp-select">
@@ -205,6 +208,12 @@ export function attachDrawingToolUi(tool, layout) {
         if (tool.state.replaying) return;
         tool.initialize();
     });
+    // Undo takes back the last stroke; its enabled state follows the engine, so a
+    // replay (which clears undo) leaves it disabled until the next stroke.
+    const undoBtn = $('undo-btn');
+    undoBtn.disabled = !tool.canUndo();
+    undoBtn.addEventListener('click', () => tool.undo());
+    tool.on('undo-availability', available => { undoBtn.disabled = !available; });
 
     const autoCheck = $('auto-check');
     autoCheck.addEventListener('change', () => tool.setAutoRandomize(autoCheck.checked));

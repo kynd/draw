@@ -34,4 +34,17 @@ export class StrokeRecorder {
         const last = this.records[this.records.length - 1];
         if (last) last.release = true;
     }
+
+    /**
+     * Removes and returns the last gesture's records: everything after the
+     * previous release, so one step of undo drops exactly one stroke with its
+     * split pieces and symmetry copies. The base pieces come first, so the
+     * returned array's first entry is the gesture's base.
+     */
+    undoLast() {
+        if (!this.records.length) return [];
+        let start = this.records.length - 1;
+        while (start > 0 && !this.records[start - 1].release) start--;
+        return this.records.splice(start);
+    }
 }

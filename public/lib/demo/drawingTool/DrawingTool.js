@@ -41,7 +41,8 @@ function widthRangeOf(tool) {
  * Events, fired for every mutation whatever its source: 'tool' (tool or any
  * parameter), 'palette' (config or colors), 'stroke-start' / 'stroke-end',
  * 'clear' (with the background), 'replay-start' / 'replay-end',
- * 'record-start' / 'record-end', 'resize' (with { width, height }).
+ * 'record-start' / 'record-end', 'resize' (with { width, height }),
+ * 'undo-availability' (with whether undo is now possible).
  *
  * 'live' streams the drawing as resolved outcomes for a mirror: the engine
  * rolls randomness internally (per-stroke seeds, palette rerolls, clear's
@@ -78,6 +79,9 @@ export class DrawingTool {
         this._clearOnResize = false;
         this._applyingLive = false;
         this._livePoints = [];
+        // Whether the last committed stroke can be taken back. Armed on release,
+        // cleared by a clear, an undo, a replay, or a resize.
+        this._canUndo = false;
         // The preview's wiggle and mark seed, held so color and parameter
         // changes redraw the same shape; a tool change rolls a fresh one.
         this._previewShape = null;
@@ -150,6 +154,8 @@ export class DrawingTool {
                 } else {
                     this.rerollPalette();
                 }
+                // A real gesture committed, so its stroke can be taken back.
+                this._setCanUndo(true);
             },
             pointerTrace: config.pointerTrace,
         });
@@ -224,6 +230,8 @@ export class DrawingTool {
         });
 
         this.stage.onResize((width, height) => {
+            // The board drops its undo copy on resize, so undo is no longer available.
+            this._setCanUndo(false);
             this._positionPreview();
             this._refreshPreview();
             this._fitGuide();
@@ -437,6 +445,14 @@ export class DrawingTool {
                     this.board.clear(event.background);
                     this.stage.draw();
                     break;
+                case 'undo':
+                    // The mirror takes back the same stroke by restoring its own
+                    // board, saved when it baked that stroke's 'end'.
+                    this._livePoints = [];
+                    this.cycle.disposeGhost();
+                    this.board.undoLast();
+                    this.stage.draw();
+                    break;
             }
         } finally {
             this._applyingLive = false;
@@ -635,6 +651,7 @@ export class DrawingTool {
     _resetSurface(bg) {
         this.board.clear(bg);
         this.recorder.begin(bg);
+        this._setCanUndo(false);
         this._emitLive('clear', { background: bg });
     }
 
@@ -738,6 +755,7 @@ export class DrawingTool {
         this.recorder.records = [...(data.records ?? [])];
         this.cycle.disposeGhost();
         this.board.clear(this.recorder.background);
+        this._setCanUndo(false);
         this.stage.draw();
         this._emit('clear', { background: this.recorder.background });
     }
@@ -768,6 +786,61 @@ export class DrawingTool {
         Object.assign(this._state, saved, { seedOverride: null });
         this._refreshPreview();
         this._emit('tool');
+        this.stage.draw();
+    }
+
+    /** Whether the last stroke can be taken back right now. */
+    canUndo() { return this._canUndo; }
+
+    _setCanUndo(value) {
+        value = Boolean(value);
+        if (this._canUndo === value) return;
+        this._canUndo = value;
+        this._emit('undo-availability', value);
+    }
+
+    /**
+     * Takes back the last stroke: restores the canvas to before it, drops its
+     * records, and snaps the live selection and seed back to the one that drew
+     * it, so the panel and dials show exactly that and redrawing reproduces it.
+     * A single step; a mirror follows through an `undo` live event. Does nothing
+     * while replaying or when there is nothing to take back.
+     */
+    undo() {
+        if (this._replaying || !this._canUndo) return;
+        // The board holds the single undo point; if it is gone (a resize), bail
+        // before touching the records so the two cannot drift apart.
+        if (!this.board.undoLast()) { this._setCanUndo(false); return; }
+        const popped = this.recorder.undoLast();
+        this.cycle.disposeGhost();
+        // Restore the undone stroke's whole selection and its seed from its base
+        // record (the base pieces record before the symmetry copies, so it is
+        // first), and sync the trail so a relative dial steps from that tool.
+        const base = popped.find(r => (r.echo ?? null) === null) ?? popped[0];
+        if (base) {
+            const tool = this._registry.find(e => e.id === base.toolId);
+            if (tool) this._state.tool = tool;
+            this._state.values = { ...base.values };
+            this._state.widthPx = base.widthPx;
+            this._state.sens = base.sens;
+            this._state.colorA = base.colorA;
+            this._state.colorB = base.colorB;
+            this._state.colors = [...base.colors];
+            this._state.seedOverride = null;
+            this.cycle.setSeed(base.seed);
+            this._toolValues[this._state.tool.id] = this._state.values;
+            this._trail[TRAIL_SIDE] = {
+                tool: this._state.tool, values: this._state.values,
+                widthPx: this._state.widthPx, sens: this._state.sens, previewShape: null,
+            };
+            this._previewShape = null;
+            this._nextRoll = null;
+        }
+        this._setCanUndo(false);
+        this._emitLive('undo');
+        this._refreshPreview();
+        this._emit('tool');
+        this._emit('palette');
         this.stage.draw();
     }
 
@@ -814,6 +887,7 @@ export class DrawingTool {
         if (this._replaying || this.recorder.records.length === 0) return false;
         this._replaying = true;
         this._inputEnabled = false;
+        this._setCanUndo(false);
         this._setSceneFurnitureVisible(false);
         this._emit(mode === 'record' ? 'record-start' : 'replay-start');
         const saved = {

@@ -111,6 +111,19 @@ class DrawingEngineWrapper {
     // behavior this contract has always had; the demo UI's plain clear is separate.
     clear() { this._tool.initialize(); }
 
+    /** Takes back the last stroke, one step. A live event carries the same undo
+     * to any mounted live view. Does nothing when there is nothing to take back. */
+    undo() { this._tool.undo(); }
+
+    /** Whether a stroke can be taken back right now. */
+    canUndo() { return this._tool.canUndo(); }
+
+    /** Fires when undo becomes available or unavailable. Returns the unsubscribe. */
+    onUndoAvailabilityChange(listener) {
+        this._tool.on('undo-availability', listener);
+        return () => this._tool.off('undo-availability', listener);
+    }
+
     /** `value` is a dial position, 0..1. */
     setParameter(id, value) {
         const v = Math.round(Math.min(Math.max(value, 0), 1) * DIAL_MAX);

@@ -33,6 +33,15 @@ export interface DrawingEngine {
     mount(container: HTMLElement): void;
     clear(): void;
     setParameter(id: ParameterId, value: number): void;
+    // Takes back the last stroke, one step (a pen-down to pen-up, its split
+    // pieces and symmetry copies included). `clear` is not taken back. The
+    // taken-back stroke is dropped from exportImage and exportRecording, and an
+    // undo live event takes it back on any mounted DrawingLiveView too.
+    undo(): void;
+    // Whether a stroke can be taken back right now.
+    canUndo(): boolean;
+    // Fires when undo becomes available or unavailable. Returns the unsubscribe.
+    onUndoAvailabilityChange(listener: (available: boolean) => void): () => void;
     exportImage(): Promise<Blob>;
     exportRecording(): Promise<DrawingRecording>;
     onLiveEvent(listener: (event: DrawingLiveEvent) => void): () => void;

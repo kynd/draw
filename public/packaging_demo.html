@@ -49,6 +49,7 @@
         <div class="row"><label>Stroke width</label><input id="dial-width" type="range" min="0" max="1" step="0.001" value="0.4" /></div>
         <div class="row"><label>Tool</label><input id="dial-tool" type="range" min="0" max="1" step="0.001" value="0.5" /></div>
         <div class="row">
+          <button id="undo-btn" disabled>Undo</button>
           <button id="clear-btn">Clear</button>
           <button id="send-btn">Send to playback</button>
         </div>
@@ -102,6 +103,18 @@
         engine.setParameter(ParameterId.TOOL, parseFloat(e.target.value)));
 
     document.getElementById('clear-btn').addEventListener('click', () => engine.clear());
+
+    // Undo: the engine takes back the last stroke and sends an undo live event,
+    // so the DrawingLiveView mirror takes back the same stroke. The button follows
+    // the engine's availability; feature-detected so an older package still runs.
+    const undoBtn = document.getElementById('undo-btn');
+    if (typeof engine.undo === 'function') {
+        undoBtn.addEventListener('click', () => engine.undo());
+        engine.onUndoAvailabilityChange(available => { undoBtn.disabled = !available; });
+        undoBtn.disabled = !engine.canUndo();
+    } else {
+        undoBtn.hidden = true;
+    }
 
     const controls = document.getElementById('player-controls');
     const playBtn = document.getElementById('play-btn');
