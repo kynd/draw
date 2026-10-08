@@ -85,6 +85,9 @@ export class DrawingTool {
         // The preview's wiggle and mark seed, held so color and parameter
         // changes redraw the same shape; a tool change rolls a fresh one.
         this._previewShape = null;
+        // Which bottom corner the preview box sits in: 'left' by default,
+        // 'right' for a left-handed drawer, so the hand never covers it.
+        this._previewSide = 'left';
 
         // Supersample the drawing surface to at least 2x the world scale, matching the
         // tool preview: fill shading (fine grain, facet edges, finite-difference normals)
@@ -792,6 +795,20 @@ export class DrawingTool {
     /** Whether the last stroke can be taken back right now. */
     canUndo() { return this._canUndo; }
 
+    /**
+     * Moves the preview box to the bottom-left ('left', the default) or the
+     * bottom-right ('right') corner, so it sits away from the drawing hand.
+     * The box is an overlay, so neither the drawing nor the records change.
+     */
+    setPreviewSide(side) {
+        const next = side === 'right' ? 'right' : 'left';
+        if (next === this._previewSide) return;
+        this._previewSide = next;
+        this._positionPreview();
+        this._refreshPreview();
+        this.stage.draw();
+    }
+
     _setCanUndo(value) {
         value = Boolean(value);
         if (this._canUndo === value) return;
@@ -1015,8 +1032,9 @@ export class DrawingTool {
     }
 
     // ------------------------------------------------------------------
-    // Preview internals: a box at the bottom left showing the current tool on
-    // a wiggle, drawn in the scene with the real renderers.
+    // Preview internals: a box in a bottom corner (left unless `setPreviewSide`
+    // moved it) showing the current tool on a wiggle, drawn in the scene with
+    // the real renderers.
 
     _buildPreview() {
         this._preview = null;
@@ -1083,9 +1101,11 @@ export class DrawingTool {
     }
 
     _previewCenter() {
+        const inset = 0.08;
+        const x = this.stage.extentX - inset - this._previewSize.w / 2;
         return {
-            x: -this.stage.extentX + 0.08 + this._previewSize.w / 2,
-            y: -this.stage.extentY + 0.08 + this._previewSize.h / 2,
+            x: this._previewSide === 'right' ? x : -x,
+            y: -this.stage.extentY + inset + this._previewSize.h / 2,
         };
     }
 

@@ -59,6 +59,7 @@ class DrawingEngineWrapper {
         this._listeners = new Set();
         this._buckets = {};
         this._unbind = null;
+        this._previewSide = 'left';
     }
 
     /** Adds the canvas to `container`. Later mounts re-append the same
@@ -68,6 +69,7 @@ class DrawingEngineWrapper {
         container.appendChild(this._canvas);
         if (this._tool) return;
         this._tool = new DrawingTool(this._canvas, new ProductionConfig());
+        this._tool.setPreviewSide(this._previewSide);
         this._tool.on('live', data => {
             const event = envelope(data);
             this._listeners.forEach(fn => fn(event));
@@ -145,6 +147,15 @@ class DrawingEngineWrapper {
         this._buckets[id] = bucket;
         if (previous === undefined || bucket === previous) return;
         if (id === ParameterId.TOOL) this._tool.stepTool(bucket - previous);
+    }
+
+    /** Puts the tool preview box in the bottom-left ('left', the default) or
+     * bottom-right ('right') corner of the canvas, so it sits away from the
+     * drawing hand. Works before `mount` too; the box is an overlay, so the
+     * drawing, the recording, and the live events are unchanged. */
+    setPreviewSide(side) {
+        this._previewSide = side === 'right' ? 'right' : 'left';
+        this._tool?.setPreviewSide(this._previewSide);
     }
 
     /** @returns {Promise<Blob>} the drawing as a PNG. */
