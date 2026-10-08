@@ -1,6 +1,6 @@
 {
   "name": "@kynd/drawing-engine",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "A drawing engine, live view, and player behind a minimal embedding interface",
   "repository": {
     "type": "git",
