@@ -28,11 +28,19 @@ export interface DrawingLiveEvent {
     data: unknown;
 }
 
+// Which bottom corner of the canvas the tool preview box sits in.
+export type PreviewSide = 'left' | 'right';
+
 // The engine a person draws with. It attaches its own pen input listeners.
 export interface DrawingEngine {
     mount(container: HTMLElement): void;
     clear(): void;
     setParameter(id: ParameterId, value: number): void;
+    // Moves the tool preview box to the bottom-left ('left', the default) or
+    // bottom-right corner, away from the drawing hand. May be called before
+    // `mount`. The box is an overlay: the drawing, the recording, and the
+    // live events are unchanged.
+    setPreviewSide(side: PreviewSide): void;
     // Takes back the last stroke, one step (a pen-down to pen-up, its split
     // pieces and symmetry copies included). `clear` is not taken back. The
     // taken-back stroke is dropped from exportImage and exportRecording, and an
