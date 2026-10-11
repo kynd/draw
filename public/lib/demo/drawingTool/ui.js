@@ -3,6 +3,7 @@ import { FrameLatch } from '../latch.js';
 import { PALETTE_SCHEMES } from '../../SchemePaletteMaker.js';
 import { toolLabel, groupTools } from '../toolRegistry.js';
 import { readDrawingZip } from '../drawingPlayer.js';
+import { bindToolInput } from '../toolInput.js';
 
 const TEMPLATE = /* html */`
   <div class="dp-overlay-tr">
@@ -123,27 +124,9 @@ export function attachDrawingToolUi(tool, layout) {
 
     // ------------------------------------------------------------------
     // Pointer forwarding. The engine attaches no listeners; the UI's adapter
-    // hands events over, gating pressure to pens.
-    const toLocal = event => {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top,
-            pressure: event.pointerType === 'pen' ? event.pressure : 0,
-        };
-    };
-    canvas.addEventListener('pointerdown', event => {
-        // Only the primary button draws; a right or middle click leaves the
-        // canvas alone so its context menu (save image, and so on) still opens.
-        if (event.button !== 0) return;
-        tool.pointerDown(toLocal(event));
-        // Capturing an inactive pointer throws (a synthetic event's id is not
-        // an active pointer), and the stroke must not depend on it.
-        try { canvas.setPointerCapture(event.pointerId); } catch (e) {}
-    });
-    canvas.addEventListener('pointermove', event => tool.pointerMove(toLocal(event)));
-    canvas.addEventListener('pointerup', () => tool.pointerUp());
-    canvas.addEventListener('pointercancel', () => tool.pointerCancel());
+    // hands events over through the shared binding, which guarantees a gesture
+    // ends even when its release is missed.
+    bindToolInput(canvas, tool);
 
     // Everything overlaid fades while the pen is down.
     tool.on('stroke-start', () => layout.classList.add('dp-ui-hidden'));

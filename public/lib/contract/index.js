@@ -11,6 +11,7 @@
 
 import { DrawingTool } from '../demo/drawingTool/DrawingTool.js';
 import { DrawingToolConfig } from '../demo/drawingTool/DrawingToolConfig.js';
+import { bindToolInput } from '../demo/toolInput.js';
 
 export const ParameterId = {
     COLOR: 'color',
@@ -78,35 +79,9 @@ class DrawingEngineWrapper {
     }
 
     _bindPointer() {
-        const canvas = this._canvas;
-        const toLocal = event => {
-            const rect = canvas.getBoundingClientRect();
-            return {
-                x: event.clientX - rect.left,
-                y: event.clientY - rect.top,
-                pressure: event.pointerType === 'pen' ? event.pressure : 0,
-            };
-        };
-        const down = event => {
-            // Only the primary button draws, so a right or middle click can open
-            // the canvas's context menu (save image, and so on) instead.
-            if (event.button !== 0) return;
-            this._tool.pointerDown(toLocal(event));
-            try { canvas.setPointerCapture(event.pointerId); } catch (e) {}
-        };
-        const move = event => this._tool.pointerMove(toLocal(event));
-        const up = () => this._tool.pointerUp();
-        const cancel = () => this._tool.pointerCancel();
-        canvas.addEventListener('pointerdown', down);
-        canvas.addEventListener('pointermove', move);
-        canvas.addEventListener('pointerup', up);
-        canvas.addEventListener('pointercancel', cancel);
-        this._unbind = () => {
-            canvas.removeEventListener('pointerdown', down);
-            canvas.removeEventListener('pointermove', move);
-            canvas.removeEventListener('pointerup', up);
-            canvas.removeEventListener('pointercancel', cancel);
-        };
+        // The shared binding guarantees a gesture ends even when its release is
+        // missed, so a later parameter change cannot rewrite a finished stroke.
+        this._unbind = bindToolInput(this._canvas, this._tool);
     }
 
     // The packaged clear resets the canvas and lays down the initializer, the

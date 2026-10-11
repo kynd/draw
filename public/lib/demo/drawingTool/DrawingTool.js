@@ -401,6 +401,8 @@ export class DrawingTool {
             this._state.colorB = colorB;
         }
         this.cycle.feed(this._points, true);
+        // The stroke is baked; drop its points so nothing holds a finished gesture.
+        this._points = [];
         this._symmetry = null;
         this._setUiHidden(false);
         this._emit('stroke-end');
