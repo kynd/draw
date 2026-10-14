@@ -5,13 +5,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Initializer" slug="initializer">
   <div class="monologue">
-    On this page, we explore ways to start a canvas, laying down a composition before the first stroke so a drawing never begins on blank paper.
-    <div class="jp">このページでは、キャンバスの始め方を探ります。最初のストロークの前に構成を置くことで、描画が白紙から始まることはなくなります。</div>
+    Starting with a blank canvas can feel intimidating. This page explores ways to prepare a composition on the canvas before making the first stroke.
+    <div class="jp">真っ白なキャンバスから描き始めるのは不安に感じることもあります。このページでは、最初の一筆を描く前に、キャンバスに構図を用意する方法を紹介します。</div>
   </div>
 
   <div class="prose">
-    <p>Each initializer rolls one composition (its tools, colors, and placement) and bakes it over a paper gradient. The button on the canvas corner runs it again with a fresh palette. The initializers live as one group in the library, and the drawing tool runs them too: its Initialize button, and the fresh canvas it opens with, pick one at random from its config's list, so the try-drawing demos start with the scatter, and the Drawing Tool Demo and the packaging layer start with any of the four.</p>
-    <div class="jp">それぞれのイニシャライザは、ひとつの構成（ツール、色、配置）をロールし、紙のグラデーションの上に焼き込みます。キャンバスの角のボタンで、新しいパレットでもう一度実行できます。イニシャライザはライブラリの中にひとつのグループとして置かれ、描画ツールもこれを使います。Initializeボタン、そして開いたときの新しいキャンバスが、設定のリストからランダムにひとつを選ぶため、Try drawingのデモはスキャッタから始まり、Drawing Tool Demoとパッケージング層は4つのどれかから始まります。</div>
+    <p>Each initializer generates an initial composition (choosing tools, colors, and placement) and renders it over a gradient. The button in the corner of the canvas generates another composition with a fresh palette.</p>
+    <div class="jp">各イニシャライザは、ツールや色、配置を選び、グラデーションを背景にした最初の構図を生成します。キャンバスの隅にあるボタンを押すと、新しいパレットを使って別の構図を生成できます。</div>
   </div>
 
   <section class="demo-section" id="scatter">
@@ -23,8 +23,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/init-scatter/index.html?embedded`} title="Gradient and scatter" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The drawing tool's own start: a paper gradient and a scattered set of strokes in random tools and palette colors. The layout is one of a few strategies, picked at random, so the strokes fall into a pattern rather than always a free scatter: a free scatter (one to four strokes, the first long), the same shape repeated across a grid each in a different tool, a non-overlapping spread, one shape in each quadrant, random straight lines, strokes each tracing a geometric shape (sine, zigzag, spiral, circle, line), a single stroke in the center, or three at the vertices of a regular triangle.</p>
-      <div class="jp">描画ツール自身のスタートです。紙のグラデーションと、ランダムなツールとパレットの色で散らされたストローク。配置はいくつかの戦略からランダムに選ばれるので、ストロークは常に自由な散らばりではなく、パターンに落ち着きます。自由な散らばり（1本から4本、最初の1本は長い）、同じ形を格子状に繰り返しそれぞれ別のツールで描くもの、重ならない散らばり、各象限にひとつずつの形、ランダムな直線、それぞれが幾何学的な形（サイン波、ジグザグ、螺旋、円、直線）をたどるストローク、中央にひとつのストローク、あるいは正三角形の頂点に3つのストロークです。</div>
+      <p>A gradient serves as the backdrop for strokes drawn with randomly selected tools and palette colors. The layout is also chosen at random from several options, so the strokes aren't always scattered freely. These options include a free scatter of one to four strokes; the same shape repeated on a grid, with a different tool for each; a non-overlapping arrangement; one shape in each quadrant; random straight lines; strokes tracing geometric shapes (sine waves, zigzags, spirals, circles, or lines); a single stroke in the center; or three strokes at the vertices of an equilateral triangle.</p>
+      <div class="jp">グラデーションを背景に、ランダムに選んだツールとパレットの色でストロークを描きます。配置も複数の方式からランダムに選ばれるため、ストロークが常に自由に散らばるとは限りません。方式には、1〜4本のストロークを自由に散らす、同じ形を異なるツールで格子状に繰り返す、重ならないように配置する、4つの各区画に形をひとつずつ置く、といったものがあります。そのほか、ランダムな直線や、幾何学的な形（サイン波、ジグザグ、螺旋、円、直線）をたどるストローク、中央に1本だけ置く配置、正三角形の各頂点に1本ずつ置く配置もあります。</div>
     </div>
   </section>
 
@@ -37,8 +37,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/init-pattern/index.html?embedded`} title="Stroke patterns" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A random stroke tool draws one narrow-lined composition over the paper (stripes at a random angle, a grid, or wave rows) in two alternating palette colors, with even odds of a second composition overlapping the first.</p>
-      <div class="jp">ランダムなストロークのツールが、紙の上に細い線のひとつの構成を描きます（ランダムな角度のストライプ、グリッド、または波の列）。2つのパレットの色を交互に使います。五分五分の確率で、2つめの構成が最初の構成に重なります。</div>
+      <p>A randomly selected stroke tool draws a fine-line pattern over the paper, alternating between two palette colors. The pattern can be stripes at a random angle, a grid, or rows of waves. There is a 50% chance that a second pattern will be drawn over the first.</p>
+      <div class="jp">ランダムに選んだストロークツールで、紙の上に細い線のパターンを描きます。パレットから選んだ2色を交互に使い、ランダムな角度のストライプ、格子、波状の線が並ぶパターンのいずれかを描きます。50%の確率で、さらに別のパターンを重ねます。</div>
     </div>
   </section>
 
@@ -51,8 +51,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/init-split/index.html?embedded`} title="Split colors" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The canvas is divided by a random straight line, and each part is divided again at even odds, a few levels deep. Every region takes a flat palette color, and one to four random strokes land on top.</p>
-      <div class="jp">キャンバスはランダムな直線で分割され、分かれたそれぞれの領域は五分五分の確率でさらに分割されます（数レベルまで）。各領域はパレットから平坦な色を取り、最後にランダムなストロークが1本から4本乗ります。</div>
+      <p>A random straight line divides the canvas. Each resulting region has a 50% chance of being divided again, with the process repeating for a few levels. Each region is filled with a solid palette color, then one to four random strokes are drawn on top.</p>
+      <div class="jp">ランダムな直線でキャンバスを分割します。分割された各領域は50%の確率でさらに分割され、この処理を数段階繰り返します。各領域をパレットの色で塗りつぶし、最後にランダムなストロークを1〜4本重ねます。</div>
     </div>
   </section>
 
@@ -65,8 +65,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/init-fills/index.html?embedded`} title="Big fills" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>One to three very big fills with random fill tools. Each fill's spine runs from a point past one edge into the far half of the canvas, so it always crosses the midline without having to cover the center.</p>
-      <div class="jp">ランダムな塗りのツールによる、1つから3つのとても大きな塗りです。それぞれの塗りの芯は、ひとつの縁の先からキャンバスの反対側の半分まで走ります。そのため塗りはつねに中心線を越えますが、中心を覆うとは限りません。</div>
+      <p>Randomly selected fill tools create one to three very large fills. Each fill's spine extends from a point beyond one edge into the opposite half of the canvas. This ensures that the fill crosses the midline, though it does not necessarily cover the center.</p>
+      <div class="jp">ランダムに選んだ塗りのツールで、大きな塗りを1〜3つ描きます。それぞれの塗りの軸となる線は、キャンバスの端の外側から、反対側の半分まで伸びます。そのため、塗りは必ず中央の境界線を越えますが、キャンバスの中心を覆うとは限りません。</div>
     </div>
   </section>
 </PageLayout>

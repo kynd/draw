@@ -5,16 +5,16 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Pen pressure" slug="pen-pressure">
   <div class="monologue">
-    On this page, we study how pen pressure alone shapes a single stroke of one color.
-    <div class="jp">このページでは、ひとつの色のストロークを、筆圧だけがどう形づくるかを調べます。</div>
+    On this page, we explore how pen pressure shapes a stroke.
+    <div class="jp">このページでは、筆圧によってストロークがどのように変化するかを見ていきます。</div>
   </div>
 
   <div class="prose">
-    <p>A stroke feels more expressive when its width follows the pen, swelling under a hard press and tapering as it lifts. This demo draws a plain rounded stroke in gray, so the only thing to watch is how pressure becomes width. Draw with a pen tablet; a mouse reports no pressure and draws a constant width.</p>
-    <div class="jp">ストロークは、幅がペンに従うと、より表情豊かになります。強く押せばふくらみ、離せば細くなります。このデモは基本の丸いストロークをグレーで描くので、見るのは筆圧がどのように幅になるかだけです。ペンタブレットで描いてみてください。マウスは筆圧を報告しないため、一定の幅で描きます。</div>
+    <p>A stroke feels more expressive when its width responds to the pen, swelling under pressure and tapering as pressure eases. This demo uses a simple, rounded gray stroke, so you can focus on how pressure affects width. Draw with a pen tablet; a mouse does not report pressure, so the stroke stays a constant width.</p>
+    <div class="jp">ストロークの幅がペンの動きに応じて変わると、表現がより豊かになります。強く押すと太くなり、筆圧を弱めると細くなります。このデモでは、筆圧が幅にどう反映されるかに注目できるよう、シンプルで丸みのあるグレーの線を使っています。ペンタブレットで描いてみてください。マウスは筆圧を検知しないため、線幅は一定です。</div>
 
-    <p>Pressure maps to width as a ratio around a set width: middle pressure draws it as set, a light touch thins it and a hard press widens it, up to the <strong>Scale</strong> at either end. A dead zone (<strong>Threshold</strong>) treats the faintest touch as zero, since a pen never truly reports it, and a response curve (<strong>Curve</strong>) reshapes the low end, where raw tablet pressure feels front-loaded. A slope limit (<strong>Limit</strong>) then caps how fast the width may change along the stroke, so a hard press swells and a quick release tapers instead of stepping.</p>
-    <div class="jp">筆圧は、設定した幅を中心にした倍率として幅に写されます。中間の筆圧では設定どおりの幅で描かれ、軽いタッチは細く、強い押し込みは太くし、両端で<strong>Scale</strong>に達します。不感帯（<strong>Threshold</strong>）は、ごく弱いタッチをゼロとして扱います。ペンは決して完全なゼロを報告しないからです。応答カーブ（<strong>Curve</strong>）は低域を作り直します。タブレットの生の筆圧は立ち上がりが早く感じられるためです。そのあと勾配の制限（<strong>Limit</strong>）が、ストロークに沿って幅が変化できる速さを抑えるので、強い押し込みはふくらみになり、素早い離しは段差ではなく先細りになります。</div>
+    <p>Pressure controls width relative to a set base width: at medium pressure, the stroke matches that width; a light touch makes it thinner, and a firm press makes it wider, up to the <strong>Scale</strong> setting at either end. A dead zone (<strong>Threshold</strong>) treats the lightest touches as zero, since pens rarely report a true zero. The response curve (<strong>Curve</strong>) reshapes the low-pressure range, where raw tablet input can feel too sensitive. Finally, a slope limit (<strong>Limit</strong>) caps how quickly the width can change along the stroke, so pressing firmly makes it swell and releasing quickly makes it taper smoothly rather than change abruptly.</p>
+    <div class="jp">線幅は、設定した基準幅をもとに筆圧に応じて変化します。中程度の筆圧では基準幅と同じになり、軽く触れると細く、強く押すと太くなります。太さの変化の幅は<strong>Scale</strong>で設定します。ペンが検知する筆圧は完全にゼロになることが少ないため、筆圧のしきい値（<strong>Threshold</strong>）を設け、ごく弱い筆圧をゼロとして扱います。応答カーブ（<strong>Curve</strong>）では、筆圧が弱いときの線幅の変わり方を調整します。タブレットの入力をそのまま使うと、弱い筆圧に反応しすぎることがあるためです。最後に、変化の速さの上限（<strong>Limit</strong>）で、ストロークに沿って線幅が変わる速さを抑えます。これにより、強く押すと線が滑らかに太くなり、急に力を抜いても線幅が唐突に変わらず、滑らかに先細りになります。</div>
   </div>
 
   <section class="demo-section" id="scale">
@@ -26,8 +26,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/pressure-scale/index.html?embedded`} title="Scaled width" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Draw with a pen and vary the pressure; every control described above is a slider in the panel.</p>
-      <div class="jp">ペンで、筆圧を変えながら描いてみてください。上で説明したコントロールは、すべてパネルのスライダーです。</div>
+      <p>Try drawing with a pen and vary the pressure; every control described above is a slider in the panel.</p>
+      <div class="jp">ペンで筆圧を変えながら描いてみてください。上で説明したコントロールは、すべてパネルのスライダーです。</div>
     </div>
   </section>
 
