@@ -5,13 +5,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Fills" slug="fills">
   <div class="monologue">
-    On this page, we close a drawn gesture into a region a fill can cover, and study the two ways to shape that region.
-    <div class="jp">このページでは、描いた身振りを塗りが覆える領域として閉じ、その領域を形づくる2つの方法を調べます。</div>
+    On this page, we explore ways to close a drawn gesture into a region that can be filled.
+    <div class="jp">このページでは、描いた線を塗りつぶせる領域として閉じ、その形をつくる方法を探ります。</div>
   </div>
 
   <div class="prose">
-    <p>A fill needs a closed region, but a drawn gesture is an open path. Closing it is the fill counterpart to the <a href={`${base}/strokes`}>spine</a> a stroke builds: the same gesture becomes an area instead of a centerline. The region is a signed distance field in the fragment shader, so a fill can push the boundary, texture the interior, or shade it as a surface without new geometry. The three fill pages build on this shape: <a href={`${base}/flat-fills`}>Flat &amp; pattern fills</a>, <a href={`${base}/painterly-fills`}>Painterly fills</a>, and <a href={`${base}/material-fills`}>Surface &amp; material fills</a>.</p>
-    <div class="jp">塗りには閉じた領域が必要ですが、描いた身振りは開いたパスです。それを閉じることは、ストロークが作る<a href={`${base}/strokes`}>スパイン</a>に対応する、塗りの側の処理です。同じ身振りが、中心線ではなく面積になります。領域はフラグメントシェーダの中の符号付き距離場なので、塗りは新しいジオメトリなしに、境界を押したり、内部にテクスチャを与えたり、面として陰影付けしたりできます。3つの塗りのページは、この形の上に作られます。<a href={`${base}/flat-fills`}>Flat &amp; pattern fills</a>、<a href={`${base}/painterly-fills`}>Painterly fills</a>、<a href={`${base}/material-fills`}>Surface &amp; material fills</a>です。</p>
+    <p>The two methods below turn an open path into a closed region. The region is represented as a signed distance field in the fragment shader, allowing a fill to push the boundary, texture the interior, or shade it as a surface without adding geometry.</p>
+    <div class="jp">以下の2つの手法では、開いたパスを閉じた領域に変換します。この領域はフラグメントシェーダ内で符号付き距離場として表現されるため、ジオメトリを追加せずに、塗りで境界を押し広げたり、内部にテクスチャを適用したり、表面として陰影をつけたりできます。</div>
   </div>
 
   <section class="demo-section" id="blobs">
@@ -23,8 +23,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/blob-drawing/index.html?embedded`} title="Blob drawing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A fill needs a closed region, but a drawn gesture is an open path. This demo creates a closed path that contains the entire gesture: it finds the smallest convex region around all drawn points, then smooths and paints it.</p>
-      <div class="jp">塗りには閉じた領域が必要ですが、描いた身振りは開いたパスです。このデモでは、ジェスチャー全体を含む閉じたパスを作ります。描いたすべての点を囲む最小の凸領域を求め、それを滑らかにして塗りつぶします。</div>
+      <p>This demo creates a closed path that encloses the entire drawn gesture. It finds the smallest convex region containing all drawn points, then smooths and fills it.</p>
+      <div class="jp">このデモでは、描いた線全体を囲む閉じたパスを作ります。描いたすべての点を含む最小の凸領域を求め、それを滑らかにして塗りつぶします。</div>
     </div>
   </section>
 
@@ -37,8 +37,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/tight-blob/index.html?embedded`} title="Tight blob" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The convex hull method fills in every concavity, which can turn a crescent into a solid lump. This demo preserves those concavities instead. It closes the drawn path into a smooth loop, then defines the shape as everything within a chosen radius of that loop. Every fill on the site is built from this tight region.</p>
-      <div class="jp">凸包の手法はすべての凹みを埋めてしまうため、三日月形でも丸まった塊になってしまいます。このデモでは、代わりに凹みを保ちます。描いたパスを滑らかなループとして閉じ、そのループから選択した半径以内の領域すべてを形として定義します。サイト上のすべての塗りは、このタイトな領域から作られます。</div>
+      <p>The convex hull method fills in every concavity, which can turn a crescent into a solid lump. This demo's method closes the drawn path into a smooth loop, then defines the shape as the region within a chosen radius of that loop.</p>
+      <div class="jp">凸包法はすべての凹みを埋めてしまうため、三日月形も凹みのない塊になってしまいます。このデモでは、描いた線を滑らかなループとして閉じ、そのループから指定した半径以内の領域を形として定義します。</div>
     </div>
   </section>
 </PageLayout>

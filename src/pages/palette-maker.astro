@@ -21,8 +21,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <p>Rather than relying on randomly chosen colors or letting users pick arbitrary ones, we develop several strategies for selecting a more harmonious palette based on relationships between colors.</p>
       <div class="jp">ランダムに選んだ色や、ユーザに適当に選ばせた色に頼るのではなく、色どうしの関係に基づいて、より調和の取れた配色を選ぶための戦略をいくつか構築します。</div>
 
-      <p>We base this logic on OKLCH, as we did in the Geom project. OKLCH is one of the most perceptually accurate and computationally performant color models.</p>
-      <div class="jp">このロジックは、Geomプロジェクトと同様にOKLCHを元にしています。OKLCHは、知覚的に正確で、計算上も効率的なカラーモデルのひとつです。</div>
+      <p>We base this logic on OKLCH, as we did in the <a href="https://www.kynd.info/geom/" target="_blank" rel="noopener">Geom project</a>. OKLCH is one of the most perceptually accurate and computationally performant color models.</p>
+      <div class="jp">このロジックは、<a href="https://www.kynd.info/geom/" target="_blank" rel="noopener">Geomプロジェクト</a>と同様にOKLCHを元にしています。OKLCHは、知覚的に正確で、計算上も効率的なカラーモデルのひとつです。</div>
 
       <p>The logic takes a key hue and generates the rest of the palette (for the requested number of colors) using a specified strategy (scheme).</p>
       <div class="jp">ロジックは基準となる色相を受け取り、指定された戦略（スキーム）を使って、要求された色数に応じてパレットの残りを生成します。</div>
@@ -55,7 +55,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
       <h2 id="randomness">Randomness</h2>
       <p>Every scheme except Black jitters the hue and lightness of the colors other than the key color. The palette sets a random seed, and the jitter is derived from that seed, so the same settings reproduce the same palette.</p>
-      <div class="jp">Black以外のすべての配色では、基準色以外の色の色相と明度に揺らぎを加えます。パレットには乱数シードが設定され、揺らぎはそのシードから生成されるため、同じ設定なら同じパレットが再現されます。</div>
+      <div class="jp">Black以外のすべての配色では、基準色以外の色の色相と明度にランダムな変化を加えます。パレットには乱数シードが設定され、変化量はそのシードに基づいて決まるため、同じ設定なら同じパレットが再現されます。</div>
 
       <p>The class is documented on <a href={`${base}/documentation/palette`}>Palette</a>.</p>
       <div class="jp">このクラスについては、<a href={`${base}/documentation/palette`}>Palette</a>に記載されています。</div>

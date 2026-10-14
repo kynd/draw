@@ -5,8 +5,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Stroke processing" slug="stroke-processing">
   <div class="monologue">
-    On this page, we explore methods for reshaping a drawn path to suit the stroke or fill it will become. Different results call for different qualities: a smoother curve, marks that stay separate at a corner, or a closed region that can be filled.
-    <div class="jp">このページでは、描いたパスを、それがなるストロークや塗りに合わせて変形する手法を探ります。求める結果によって必要な性質は異なります。より滑らかな曲線、角で分かれたままのマーク、塗りつぶせる閉じた領域などです。</div>
+    This page explores ways to reshape a drawn path to suit the stroke or fill it will become. Different results call for different qualities: smoother curves, marks that remain separate at corners, or closed regions that can be filled.
+    <div class="jp">このページでは、描いたパスを、最終的なストロークや塗りに合わせて整える方法を紹介します。より滑らかな曲線、角で分離したままのマーク、塗りつぶせる閉じた領域など、求める結果によって必要な性質は異なります。</div>
   </div>
 
   <section class="demo-section" id="smoothing">
@@ -18,14 +18,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/stroke-processing/index.html?embedded`} title="Curve smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Raw pointer input is often shaky, so it helps to smooth the path before rendering strokes. Draw on the canvas with the mouse. The gray line shows the drawn path exactly, one pixel wide; the blue and red lines show the Natural and Hobby curves.</p>
-      <div class="jp">生のポインター入力は手ぶれを含むことが多いため、ストロークを描画する前にパスを滑らかにすると効果的です。マウスを使ってキャンバスに描いてみてください。グレーの線は描いたパスをそのまま1ピクセル幅で示し、青と赤の線はNatural曲線とHobby曲線によって滑らかにした結果を示します。</div>
+      <p>Raw pointer input is often shaky, so smoothing the path before rendering a stroke can help. Draw on the canvas with the mouse. The gray line shows the raw path at one-pixel width; the blue and red lines show the Natural and Hobby curves.</p>
+      <div class="jp">ポインター入力には手ぶれが含まれることが多いため、ストロークを描画する前にパスを平滑化すると効果的です。マウスでキャンバスに描いてみてください。グレーの線は入力したパスそのものを1ピクセル幅で表示し、青と赤の線はそれぞれNatural曲線とHobby曲線を示します。</div>
 
-      <p>Both methods use the same knots, so the <strong>Span</strong> slider adjusts the balance between fidelity and smoothness for both at once. We walk along the drawn path by arc length and take one knot per span. This discards any wobble between knots, so the span controls the smoothing strength.</p>
-      <div class="jp">どちらの手法も同じノットを使うため、<strong>Span</strong>スライダーで両方の忠実度と滑らかさのバランスを同時に調整できます。描いたパスに沿ってたどり、一定のスパンごとに1つのノットを取ります。ノット間の揺れが取り除かれるため、スパンによってスムーシングの強さを調整できます。</div>
+      <p>Both methods use the same knots, so the <strong>Span</strong> slider adjusts their balance between fidelity and smoothness at the same time. We sample one knot per span along the path's arc length. This removes wobble between knots, so the span determines the strength of the smoothing.</p>
+      <div class="jp">どちらの手法も同じノットを使うため、<strong>Span</strong>スライダーで両方の忠実度と滑らかさのバランスを同時に調整できます。パスの弧長に沿って、一定のスパンごとにノットを1つ取ります。ノット間の揺れが取り除かれるため、スパンによって平滑化の強さが決まります。</div>
 
       <p>For more about the Natural and Hobby curves, see <a href="https://www.kynd.info/writing/controlling-curves/" target="_blank" rel="noopener">Controlling curves</a>.</p>
-      <div class="jp">Natural曲線とHobby曲線については、<a href="https://www.kynd.info/writing/controlling-curves/" target="_blank" rel="noopener">Controlling curves（曲線のコントロール）</a>を見てください。</div>
+      <div class="jp">Natural曲線とHobby曲線について詳しくは、<a href="https://www.kynd.info/writing/controlling-curves/" target="_blank" rel="noopener">Controlling curves（曲線のコントロール）</a>をご覧ください。</div>
     </div>
   </section>
 
@@ -38,17 +38,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/local-smoothing/index.html?embedded`} title="Local smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>In the first demo, you may have noticed a problem: while the resulting lines are smooth and appealing, they can sometimes jump suddenly when a point is added. The methods in this demo avoid that. The part already on the canvas should stay still. You can compare two curves that preserve the settled portion of a growing stroke: a Catmull–Rom spline (blue) and a cubic B-spline (green). The stability readout shows the largest movement in the settled portion for each added point; for both curves, it remains exactly zero.</p>
-      <div class="jp">最初のデモでは、結果の線は滑らかできれいですが、点を追加した瞬間に線が急に跳ねるように動くことがあると気づくかもしれません。このデモの手法は、すでにキャンバス上に描かれた部分を静止させることで、この問題を避けます。伸びていくストロークの確定した部分を保つ2つの曲線、Catmull-Romスプライン（青）と3次B-スプライン（緑）を比較できます。Stabilityの表示は、点を1つ追加するごとの確定部分の最大移動量を示し、どちらの曲線でも正確にゼロを保ちます。</div>
+      <p>In the first demo, you may have noticed that the lines sometimes jump abruptly when a new point is added. The methods in this demo prevent this by keeping the portion already drawn on the canvas fixed. Compare two curves that preserve the settled portion of a growing stroke: a Catmull-Rom spline (blue) and a cubic B-spline (green). The stability readout shows how much that portion moves each time a point is added. For both curves, the movement remains exactly zero.</p>
+      <div class="jp">最初のデモでは、新しい点を追加したときに線が急に跳ねることがあるのに気づいたかもしれません。このデモでは、キャンバスにすでに描かれた部分を固定することで、こうした動きを防ぐ方法を紹介します。伸びていくストロークの確定部分を保つ2種類の曲線、Catmull-Romスプライン（青）と3次B-スプライン（緑）を比べてみてください。Stabilityの表示は、点を追加するたびにその部分がどれだけ動くかを示します。どちらの曲線でも、動きは常に正確にゼロです。</div>
 
-      <p>The Natural and Hobby curves each solve one system across all knots. Adding a new knot therefore recalculates the entire curve. Its influence decreases with distance but never reaches zero.</p>
-      <div class="jp">Natural曲線とHobby曲線は、それぞれすべてのノットにまたがる1つの連立方程式を解きます。そのため、新しいノットを追加すると曲線全体が再計算されます。影響は距離とともに小さくなりますが、ゼロにはなりません。</div>
+      <p>The Natural and Hobby curves each solve a system across all knots. Adding a knot therefore recalculates the entire curve. Its influence decreases with distance but never reaches zero.</p>
+      <div class="jp">Natural曲線とHobby曲線は、それぞれすべてのノットを使って連立方程式を解きます。そのため、新しいノットを追加すると曲線全体が再計算されます。新しいノットの影響は離れるほど小さくなりますが、ゼロにはなりません。</div>
 
-      <p>Each segment of the Catmull-Rom and B-spline curves depends only on its four surrounding knots. Adding a knot changes only the final segments, while everything before them stays fixed.</p>
-      <div class="jp">Catmull-Rom曲線とB-スプライン曲線の各セグメントは、周囲の4つのノットだけに依存します。ノットを追加しても変化するのは末尾のセグメントだけで、それより前の部分は固定されたままです。</div>
+      <p>Each segment of a Catmull-Rom or B-spline curve depends only on its four surrounding knots. Adding a knot changes only the final segments; everything before them stays fixed.</p>
+      <div class="jp">Catmull-Rom曲線とB-スプライン曲線は、各セグメントが周囲の4つのノットだけに依存します。ノットを追加しても変わるのは末尾のセグメントだけで、それより前の部分は固定されたままです。</div>
 
-      <p>The Catmull-Rom curve passes through every knot, but it is only C1 continuous, so its curvature can kink at the knots. The B-spline is C2 continuous and smoother, but it approximates the knots instead of passing through them, visibly cutting across corners.</p>
-      <div class="jp">Catmull-Rom曲線はすべてのノットを通りますが、C1連続にとどまるため、ノットで曲率が折れることがあります。B-スプラインはC2連続でより滑らかですが、ノットを通らずに近似するため、角を目に見えて横切ります。</div>
+      <p>The Catmull-Rom curve passes through every knot, but it is only C1 continuous, so its curvature may change abruptly at the knots. The B-spline is C2 continuous and therefore smoother, but it approximates the knots rather than passing through them.</p>
+      <div class="jp">Catmull-Rom曲線はすべてのノットを通りますが、C1連続であるため、ノットで曲率が急変することがあります。B-スプラインはC2連続でより滑らかですが、ノットを通るのではなく、その近くを通るように近似します。</div>
     </div>
   </section>
 
@@ -61,8 +61,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/stroke-splitting/index.html?embedded`} title="Stroke splitting" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Many strokes in this project try to wrap the drawn path with a certain width, but very sharp corners can produce non-ideal rendering, especially when quickly squiggling back and forth. In this demo, we split a drawn line whenever its direction changes beyond a threshold angle. A fast zigzag becomes a sequence of short strokes rather than a single folded line.</p>
-      <div class="jp">このプロジェクトの多くのストロークは、描いたパスを一定の幅で包むように描画しますが、非常に鋭い角、特に素早く往復して描いた場合には、望ましくない結果が生じることがあります。このデモでは、方向の変化がしきい値の角度を超えるたびに、描いた線を分割します。速いジグザグは、折り返された1本の線ではなく、短いストロークの連なりになります。</div>
+      <p>Many strokes in this project wrap the drawn path at a set width, but very sharp corners can render poorly, especially when you quickly scribble back and forth. In this demo, a line is split whenever its direction changes beyond a threshold angle. A fast zigzag becomes a series of short strokes instead of one folded line.</p>
+      <div class="jp">このプロジェクトの多くのストロークは、描いたパスに一定の幅を持たせて描画されます。しかし、特に素早く往復しながら描くと、非常に鋭い角が不自然に描画されることがあります。このデモでは、線の向きがしきい値となる角度を超えて変化するたびに、線を分割します。速いジグザグも、折り重なった1本の線ではなく、短いストロークの連なりとして描画されます。</div>
     </div>
   </section>
 
@@ -75,8 +75,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/smoothed-brush/index.html?embedded`} title="Smoothed brush" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>In this demo, you can see how smoothing methods apply to actual strokes, not just bare lines. Use the dropdown to choose from all four methods.</p>
-      <div class="jp">このデモでは、スムーシングの手法を単なる線ではなく、実際のストロークに適用した結果を確認できます。ドロップダウンから4つの手法を選べます。</div>
+      <p>This demo shows how all four smoothing methods work on actual strokes, not just bare lines. Select a method from the dropdown to compare them.</p>
+      <div class="jp">このデモでは、単なる線だけでなく、実際のストロークに各平滑化手法を適用した結果を確認できます。ドロップダウンから4つの手法を選んで比較できます。</div>
     </div>
   </section>
 
@@ -89,8 +89,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/split-brush/index.html?embedded`} title="Split brush" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>In this demo, you can see how the splitting method can be applied to actual strokes.</p>
-      <div class="jp">このデモでは、分割の手法を実際のストロークに適用した結果を確認できます。</div>
+      <p>This demo shows how the splitting method works on actual strokes.</p>
+      <div class="jp">このデモでは、実際のストロークに分割手法を適用した結果を確認できます。</div>
     </div>
   </section>
 
@@ -103,8 +103,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/hold-start/index.html?embedded`} title="Held start" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>At the beginning of a stroke, when there are only a few points to sample, it's hard to predict which direction the user is drawing. This can sometimes cause a flickering result. To prevent this, each stroke remains hidden until it has enough arc length to establish a stable direction; then it appears in a settled state.</p>
-      <div class="jp">ストロークの始まりでは、サンプリングできる点が少ないため、ユーザーがどの方向に描いているのかを正確に予測するのが困難です。その結果、表示がちらつくことがあります。これを防ぐため、それぞれのストロークは安定した方向を確立できるだけの弧長に達するまで隠され、落ち着いたところで表示されます。</div>
+      <p>At the start of a stroke, only a few points are available, making it hard to predict the direction of the user's movement. This can cause flickering. To prevent it, each stroke stays hidden until it has enough arc length to establish a stable direction, then appears in a settled state.</p>
+      <div class="jp">ストロークの始めはサンプリングできる点が少なく、描画方向を予測しにくいため、表示がちらつくことがあります。これを防ぐため、安定した方向を判断できるだけの弧長に達するまでストロークを隠し、形が落ち着いてから表示します。</div>
     </div>
   </section>
 
@@ -117,13 +117,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/width-smoothing/index.html?embedded`} title="Width smoothing" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A sharp turn can fold a wide ribbon over itself. To prevent this, tie the amount of smoothing to the stroke width: a narrow stroke tracks the hand closely, while a wide stroke rounds its turns. The tools also smooth from the first point: a stroke shorter than one span draws straight, then splines, so the start never follows the raw jitter.</p>
-      <div class="jp">幅のあるリボンは急なカーブで自分自身の上に折り重なってしまうことがあります。これを防ぐため、スムーシングの量をストロークの幅に合わせます。細いストロークは手の動きに忠実に従い、太いストロークは緩やかなカーブを描きます。ツールは最初の点からも平滑化します。1スパンより短いストロークは直線で描かれ、その後は曲線になるため、描き始めが生のジッタをなぞることはありません。</div>
+      <p>A sharp turn can fold a wide ribbon over itself. To prevent this, the amount of smoothing is tied to the stroke width: narrow strokes follow the hand closely, while wide strokes round off their turns.</p>
+      <div class="jp">幅のあるリボンは、カーブが急だと自分自身に折り重なることがあります。これを防ぐため、平滑化の度合いをストロークの幅に合わせます。細いストロークは手の動きに忠実に従い、太いストロークは角が丸くなります。</div>
     </div>
   </section>
-
-  <div class="prose">
-    <p>Closing a gesture into a fillable region is the fill counterpart to this, covered on the <a href={`${base}/fills`}>Fills</a> page.</p>
-    <div class="jp">身振りを塗りつぶせる領域として閉じる処理は、これに対応する塗りの側の処理で、<a href={`${base}/fills`}>Fills</a>のページで扱います。</div>
-  </div>
 </PageLayout>

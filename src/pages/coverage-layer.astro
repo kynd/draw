@@ -5,13 +5,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Coverage layer" slug="coverage-layer">
   <div class="monologue">
-    On this page, we study what a translucent stroke does before it reaches the canvas.
-    <div class="jp">このページでは、半透明のストロークがキャンバスに届く前に何をするのかを調べます。</div>
+    Here, we examine what happens to a translucent stroke before it reaches the canvas.
+    <div class="jp">このページでは、半透明のストロークがキャンバスに描画される前に何が起きるのかを見ていきます。</div>
   </div>
 
   <div class="prose">
-    <p>A translucent stroke whose geometry covers a pixel more than once (a bend folding the ribbon over itself) would composite that pixel more than once and darken into creases. Marks that opt in render alone into an offscreen buffer with MAX blending first, so any number of coverings leaves the strongest single one, and the buffer then composites into the canvas exactly once. There are no thresholds, so there is nothing for a seam to form along.</p>
-    <div class="jp">半透明のストロークでは、ジオメトリが同じピクセルを二度以上覆うと（曲がりでリボンが自分の上に折り重なると）、そのピクセルが二度以上合成され、折り目のように濃くなってしまいます。オプトインした筆跡は、まず単独でオフスクリーンのバッファにMAXブレンディングで描画されます。何度覆われても最も強いひとつだけが残り、バッファはその後、ちょうど一度だけキャンバスへ合成されます。しきい値がないため、継ぎ目の生まれる場所がありません。</div>
+    <p>When the geometry of a translucent stroke covers the same pixel more than once (for example, when a bend causes the ribbon to fold over itself), the pixel is composited repeatedly, creating dark creases. To prevent this, we use an offscreen buffer. First, we render each stroke into the buffer on its own, using MAX blending. No matter how many times a stroke covers a pixel, only its greatest coverage is retained. We then composite the buffer onto the canvas exactly once.</p>
+    <div class="jp">半透明のストロークの形状が同じピクセルを複数回覆うと、たとえば曲がり角でリボン状のストロークが折り返して重なると、そのピクセルが繰り返し合成され、濃い筋ができてしまいます。これを防ぐため、オフスクリーンバッファを使います。まず、それぞれストロークを個別にバッファへ描画し、MAXブレンディングを適用します。ストロークが同じピクセルを何度覆っても、最も高い被覆率だけが保持されます。次に、バッファをキャンバスへ一度だけ合成します。</div>
   </div>
 
   <section class="demo-section" id="demo">
@@ -23,39 +23,36 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/coverage-layer/index.html?embedded`} title="The buffer, live" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Draw on the left half with a broad charcoal; the right half shows the coverage buffer while you draw, its coverage drawn as brightness. Curl the stroke tightly over itself and watch both sides: the buffer holds the piece alone at uniform strength, its folds already reduced to single coverage, and the canvas receives exactly that.</p>
-      <div class="jp">左半分に幅の広い木炭で描いてみてください。描いている間、右半分にはカバレッジバッファが表示され、被覆が明るさとして描かれます。ストロークを自分の上にきつく巻いて、両側を見比べてください。バッファには断片だけが均一な濃さで保持され、折り重なりはすでに単一の被覆にまとめられていて、キャンバスが受け取るのはまさにその状態です。</div>
-
-      <p>The single-coverage mechanism is documented on <a href={`${base}/documentation/renderers`}>Renderers</a>.</p>
-      <div class="jp">単一被覆の仕組みは<a href={`${base}/documentation/renderers`}>Renderers</a>に記載しています。</div>
+      <p>Draw with a broad charcoal brush on the left half. The right half displays the coverage buffer as you draw. Curl the stroke tightly back over itself and watch both sides: the buffer shows the mark at uniform strength, with folds already reduced to a single coverage.</p>
+      <div class="jp">左半分に幅広の木炭ブラシで描いてみてください。右半分には、描画中の被覆バッファが表示されます。ストロークをきつく折り返して自分自身に重ね、両側を見比べてみましょう。バッファでは筆跡が均一な強さで表示され、折り重なった部分もすでに単一の被覆にまとめられています。</div>
     </div>
   </section>
 
   <section class="demo-section" id="halo">
     <div class="demo-header">
-      <h2>Glow and shadow: one hue</h2>
+      <h2>Single Color</h2>
       <a href={`${base}/demos/coverage-halo/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
     <div class="demo-embed">
-      <iframe src={`${base}/demos/coverage-halo/index.html?embedded`} title="A single-hue halo self-overlapping" scrolling="no"></iframe>
+      <iframe src={`${base}/demos/coverage-halo/index.html?embedded`} title="Single Color" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>MAX keeps single coverage on the alpha: as a mark folds over itself the buffer holds the strongest covering, so the overlap neither darkens nor doubles. A halo, a glow or a shadow, carries one color, and the maximum of a color with itself is that color, so running MAX on the color too is right and the mark needs nothing more. Draw a self-crossing loop on the left and watch the crossing stay one flat tone, on the canvas and in the buffer alike.</p>
-      <div class="jp">MAXはアルファについて単一被覆を保ちます。筆跡が自分の上に折り重なっても、バッファは最も強い被覆を保持するため、重なりは濃くも二重にもなりません。ハロー（グローやシャドウ）は一色を持ち、ある色とその色自身の最大値はその色なので、色にもMAXをかけてよく、それ以上は何も要りません。左半分で自分と交差するループを描いてみてください。交差はキャンバスでもバッファでも、ひとつの平らな濃さのままです。</div>
+      <p>MAX preserves single coverage in the alpha channel. When a mark folds over itself, the buffer retains only the greatest coverage, so the overlap neither darkens nor doubles.</p>
+      <div class="jp">アルファチャンネルでは、MAXによって被覆率の重複を防げます。筆跡が自分自身に折り重なっても、バッファには最大の被覆率だけが残るため、重なった部分が濃くなったり二重になったりしません。</div>
     </div>
   </section>
 
   <section class="demo-section" id="color">
     <div class="demo-header">
-      <h2>Two pigments: color over</h2>
+      <h2>Multi Colors</h2>
       <a href={`${base}/demos/coverage-color/index.html`} target="_blank" rel="noopener">open full size ↗</a>
     </div>
     <div class="demo-embed">
-      <iframe src={`${base}/demos/coverage-color/index.html?embedded`} title="A two-pigment brush self-overlapping" scrolling="no"></iframe>
+      <iframe src={`${base}/demos/coverage-color/index.html?embedded`} title="Multi Colors" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The color is where a brush parts ways with the halo. A brush lays two pigments, and the per-channel maximum of two hues climbs toward white (cyan over red maxes to white), so the crossing of a two-color stroke would blow out. A multicolor mark therefore keeps the MAX on its coverage but composites its color as a straight over, letting the top covering win, so the crossing blends the pigments the way they layer instead of brightening. Draw a self-crossing loop and watch the crossing blend rather than lighten.</p>
-      <div class="jp">色は、筆がハローと分かれるところです。筆は2つの顔料を置き、2つの色相のチャンネルごとの最大値は白へ近づきます（シアンが赤に重なると白になります）。ですから2色のストロークの交差は白飛びしてしまいます。そこで多色の筆跡は、被覆にはMAXを保ちつつ、色は素直なオーバーで合成し、上の被覆を勝たせます。交差は明るくなるのではなく、顔料が重なるように混ざります。自分と交差するループを描いて、交差が明るくならずに混ざる様子を見てください。</div>
+      <p>A brush lays down two pigments. Taking the per-channel maximum of two hues pushes the result toward white (for example, cyan over red produces white), so a two-color stroke would blow out where it crosses itself. A multicolor mark still uses MAX blending for coverage, but composites color with standard blending, allowing the top layer to win. The pigments then blend as they layer at the crossing instead of becoming brighter. Draw a self-crossing loop and watch the colors blend rather than lighten.</p>
+      <div class="jp">筆は2色の顔料を描き重ねますが、2つの色の各チャンネルで最大値を取ると、結果は白に近づきます（たとえば、赤にシアンを重ねると白になります）。そのため、2色のストロークでは交差部分が白飛びしてしまいます。多色の筆跡では、被覆率には引き続きMAXブレンディングを使い、色は標準的なブレンディングで合成して、上の色を優先します。その結果、交差部分は明るくなるのではなく、色が重なって混ざります。自分自身と交差するループを描き、交差部分で色が明るくならずに混ざる様子を見てください。</div>
     </div>
   </section>
 </PageLayout>
