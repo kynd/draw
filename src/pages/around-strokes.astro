@@ -10,8 +10,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   </div>
 
   <div class="prose">
-    <p>The look is a set of paths derived from the drawn one: a coil around it, wiggly copies of it, short strokes scattered along it, or a single crossing wave. The generators (<code>spiralPath</code>, <code>entangledPaths</code>, <code>scatteredPaths</code>, and <code>wigglePath</code> on the <a href={`${base}/documentation/path-effects`}>Path Effects</a> page) return plain point arrays, so each derived path is an ordinary stroke drawn by the brush renderer. Every spatial size follows the stroke's width, so a heavier stroke spreads further; every count follows the path's length, so the pattern keeps its spacing as the stroke grows rather than crowding a short stroke and stretching a long one.</p>
-    <div class="jp">見た目は、描いたパスから導かれた一群のパスです。パスを巻くコイル、揺れる複製、パスに沿って散らばる短いストローク、あるいは一本の横切る波。生成器（<a href={`${base}/documentation/path-effects`}>Path Effects</a>ページの<code>spiralPath</code>、<code>entangledPaths</code>、<code>scatteredPaths</code>、<code>wigglePath</code>）は通常の点の配列を返すため、導かれた各パスはbrushレンダラで描かれる普通のストロークです。空間的な大きさはすべてストロークの幅に従うため、太いストロークほど遠くへ広がります。本数はすべてパスの長さに従うため、短いストロークで詰まり長いストロークで伸びることなく、パターンは間隔を保ちます。</div>
+    <p>The look is a set of paths derived from the drawn one: a coil around it, wiggly copies of it, short strokes scattered along it, or a single crossing wave. The generators (<code>spiralPath</code>, <code>entangledPaths</code>, <code>scatteredPaths</code>, and <code>wigglePath</code>) return plain point arrays, so each derived path is an ordinary stroke drawn by the brush renderer. Every spatial size follows the stroke's width, so a heavier stroke spreads further; every count follows the path's length, so the pattern keeps its spacing as the stroke grows rather than crowding a short stroke and stretching a long one.</p>
+    <div class="jp">見た目は、描いたパスから導かれた一群のパスです。パスを巻くコイル、揺れる複製、パスに沿って散らばる短いストローク、あるいは一本の横切る波。生成器（<code>spiralPath</code>、<code>entangledPaths</code>、<code>scatteredPaths</code>、<code>wigglePath</code>）は通常の点の配列を返すため、導かれた各パスはbrushレンダラで描かれる普通のストロークです。空間的な大きさはすべてストロークの幅に従うため、太いストロークほど遠くへ広がります。本数はすべてパスの長さに従うため、短いストロークで詰まり長いストロークで伸びることなく、パターンは間隔を保ちます。</div>
   </div>
 
   <section class="demo-section" id="around-strokes">
@@ -37,8 +37,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <p><strong>Scattered:</strong> Short strokes copy small segments of the base and move sideways by a seeded offset. The stroke count follows the length, so the scatter keeps its density as the stroke grows.</p>
         <div class="jp"><strong>散布：</strong>短いストロークが元のパスの一部を写し取り、シード付きのオフセットで横へ移動します。ストロークの本数は長さに従うため、散らばりは伸びても密度を保ちます。</div>
 
-        <p>The generators return plain point arrays, documented on <a href={`${base}/documentation/path-effects`}>Path Effects</a>, so any renderer can draw the result.</p>
-        <div class="jp">生成器は通常の点の配列を返すため（<a href={`${base}/documentation/path-effects`}>Path Effects</a>に記載）、どのレンダラでも結果を描画できます。</div>
+        <p>The generators return plain point arrays, so any renderer can draw the result.</p>
+        <div class="jp">生成器は通常の点の配列を返すため、どのレンダラでも結果を描画できます。</div>
       </details>
     </div>
   </section>
