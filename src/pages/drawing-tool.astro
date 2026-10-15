@@ -9,22 +9,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <div class="jp">このページでは、ここまでのすべてをひとつの道具に繋ぎ合わせます。</div>
   </div>
 
-  <div class="prose">
-    <p>One canvas that mixes the strokes, the fills, the palette, the pen pressure, and the MIDI input, built as a reusable component: it takes any registry of tools and builds the whole interface around it, so the try-drawing demos on the other pages are the same instrument with each page's tools. A settings panel floats over the right edge of the canvas, open by default and toggled by the icon at the top right, holding every control; only the three dials float over the canvas, and the whole interface fades away while the pen is down. A turn sharper than a threshold splits a drawn stroke, so a fast zigzag bakes and records as separate strokes; fills (blobs and shapes) never split and draw one mark per gesture. Each piece appears once its direction settles, and the wider the stroke, the harder its turns smooth.</p>
-    <div class="jp">ストローク、塗り、パレット、筆圧、MIDI入力を混ぜ合わせた、ひとつのキャンバスです。再利用可能なコンポーネントとして作られており、任意のツールのレジストリを受け取り、その周りにインターフェース全体を組み立てます。そのため、他のページのTry drawingデモは、各ページのツールを組み込んだ同じ道具です。設定パネルはキャンバスの右端に重なって浮かび、すべてのコントロールを収めます。既定で開いており、右上のアイコンで開閉できます。キャンバスの上に浮かぶのは3つのダイヤルだけで、ペンを下ろしている間はインターフェース全体が消えます。しきい値より鋭い曲がりで描いたストロークは分割されるため、速いジグザグは別々のストロークとして焼き込まれ、記録されます。塗り（ブロブと形）は分割されず、ひと筆でひとつの筆跡を描きます。各断片は向きが安定してから現れ、ストロークが太いほど曲がりは強く滑らかになります。</div>
-
-    <p>Three dials float over the canvas. The hue dial steps the palette, moving the key hue and rolling a fresh scheme; the width dial maps a position into the current tool's width range and holds it across tool changes; the tool dial steps through a trail of rolled tools, each with its own width, parameters, and pressure sensitivity. Both the tool and the palette remember a run of past states on each side, so dialing back returns the same one, its preview included. Every release rerolls the palette's jitter under the same hue and scheme, so the key color holds while the rest moves, and the dials also listen to MIDI. The box at the bottom left previews the current tool. No tool paints one flat color: the flat ones fill with a gradient between the two current colors, along the drawn spine or across it.</p>
-    <div class="jp">3つのダイヤルがキャンバスの上に浮かびます。色相ダイヤルはパレットを進め、基準の色相を動かして新しい配色をロールします。幅ダイヤルは現在のツールの幅レンジに位置を写し、ツールを変えても保ちます。ツールダイヤルは、ロールされたツールの列をたどります。各ツールは自分の幅、パラメータ、筆圧の感度を持ちます。ツールもパレットも、両側に過去の状態を一連だけ記憶するため、戻せばプレビューも含めて同じものに帰れます。ペンを離すたびに、同じ色相と配色のままパレットの揺らぎが引き直されるので、基準の色は保たれ、残りが動きます。ダイヤルはMIDIからも操作できます。左下の箱は現在のツールをプレビューします。単色で塗るツールはありません。平坦なツールは、現在の2色の間のグラデーションで、描かれたスパインに沿って、あるいは横切って塗ります。</div>
-
-    <p>Initialize fills the canvas with a palette gradient and a few scattered marks; Clear empties it to a fresh background instead. Replay redraws everything since the canvas was last reset through the same drawing cycle, since each mark stores its tool, parameters, colors, seed, and drawn points rather than the resulting raster. A checkbox rerolls the tool and colors on every release, another shows the pointer's own path, and a third draws the smoothed spine the stroke is built from over everything for debugging; the path and spine stay after a stroke until the next one begins. Record captures the replay to a video, and Download saves the drawing's log as a zip of JSON that the Player page reads back. In full screen a dropdown offers fixed canvas sizes.</p>
-    <div class="jp">Initializeはキャンバスをパレットのグラデーションで塗り、いくつかのランダムな筆跡を散らします。Clearは代わりに、新しい背景に空にします。Replayは、キャンバスを最後にリセットして以降のすべてを同じ描画サイクルで描き直します。各筆跡はツール、パラメータ、色、シード、描かれた点を保存し、結果のラスタは保存しないからです。チェックボックスで、ペンを離すたびにツールと色を引き直せます。別のチェックボックスはポインタ自身の軌跡を表示し、3つ目は、ストロークが実際に使う平滑化されたスパインを、デバッグ用にすべての上に描きます。軌跡とスパインは、ストロークのあとも次のストロークが始まるまで残ります。録画ボタンはリプレイをビデオにキャプチャし、ダウンロードボタンは描画のログを、Playerページで再生できるJSONのzipとして保存します。全画面では、固定のキャンバスサイズを選ぶドロップダウンが現れます。</div>
-  </div>
-
-  <div class="prose">
-    <p>The settings panel groups the buttons at its top (canvas, replay, and guide image) and the exact selections below. The palette is picked exactly: a small dial sets the key hue, a dropdown picks the scheme, and a reroll button draws a new jitter under the same settings; the whole palette shows with the tool's colors outlined. The tool is picked by a dropdown or a dial that steps through the same order, and every parameter of the current tool sits below as sliders, width and pressure included. A guide image can be laid over the canvas, fit to it, with its own opacity and visibility controls; it is never baked, and replay and recording behave as if it did not exist.</p>
-    <div class="jp">設定パネルの上部にはボタン（キャンバス、リプレイ、ガイド画像）が、その下には正確に選ぶためのコントロールがまとまっています。パレットは正確に選べます。小さなダイヤルで基準の色相を設定し、ドロップダウンで配色を選び、rerollボタンで同じ設定のまま新しい揺らぎを引きます。パレット全体が表示され、ツールが使う色には枠が付きます。ツールはドロップダウンか、同じ順序を進むダイヤルで選び、現在のツールのすべてのパラメータが、幅と筆圧も含めて、その下にスライダとして並びます。ガイド画像はキャンバスに合わせて重ねられ、専用の不透明度と表示のコントロールを持ちます。焼き込まれることはなく、リプレイと録画は画像が存在しないかのように振る舞います。</div>
-  </div>
-
   <section class="demo-section" id="demo">
     <div class="demo-header">
       <h2>Drawing tool</h2>
@@ -38,4 +22,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <div class="jp">キャンバスに描き、ダイヤルを回し、右の設定パネル（クリア、リプレイ、録画、全画面）を使ってみてください。</div>
     </div>
   </section>
+
+  <div class="prose">
+    <p>This demo brings together all the features we have discussed, including strokes, fills, and the palette. The three dials floating over the canvas correspond to those built into the actual installation and control colors, stroke widths, and tools, respectively. You can also operate them via MIDI by connecting a MIDI controller. The panel on the right provides fine-grained controls for debugging.</p>
+    <div class="jp">このデモは、ストローク、塗り、パレットなど、これまで見てきたすべての機能をひとまめにしたものです。キャンバスの上に浮かぶ3つのダイヤルは、実際のインスタレーションに組み込んだダイヤルに対応し、それぞれ色、ストロークの幅、ツールを操作します。MIDIコントローラーを接続すれば、MIDI経由でも操作できます。右側のパネルでは、デバッグのための細かな調整ができます。</div>
+  </div>
+
+  <figure class="page-figure">
+    <img src={`${base}/images/installation-interface.jpg`} alt="The installation's physical interface: a console with three metal dials, a pen tablet, and the exposed microcontroller that reads them." width="1200" height="900" loading="lazy" />
+    <figcaption>
+      The installation's physical interface
+      <span class="jp">インスタレーションで用いた物理インターフェース</span>
+    </figcaption>
+  </figure>
 </PageLayout>

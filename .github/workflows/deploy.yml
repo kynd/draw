@@ -27,7 +27,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       # Experimental pages and demos are local-only; strip them from the deploy.
-      - run: rm -rf dist/experimental dist/demos/experimental
+      - run: rm -rf dist/experimental dist/demos/experimental dist/documentation
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

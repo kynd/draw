@@ -17,6 +17,13 @@ interface NavItem {
 
 const { title, slug } = Astro.props;
 
+// Marks an item and its whole subtree as `sketch`, so the nav dims it the way it
+// dims the experimental pages: a visible signal that these pages are dev-only and
+// never reach the published site.
+function markSketch(item: NavItem): NavItem {
+  return { ...item, sketch: true, children: item.children?.map(markSketch) };
+}
+
 const navItems: NavItem[] = [
   { label: 'Intro', href: `${base}/`, slug: '' },
   { label: 'Techniques', href: `${base}/techniques`, slug: 'techniques',
@@ -71,15 +78,12 @@ const navItems: NavItem[] = [
           { label: 'Big fills',            href: '#fills' },
         ]
       },
-      { label: 'Drawing Tool Demo', href: `${base}/drawing-tool`, slug: 'drawing-tool' },
-      { label: 'Player', href: `${base}/player`, slug: 'player' },
     ]
   },
   { label: 'Strokes & fills', href: `${base}/strokes-and-fills`, slug: 'strokes-and-fills',
     children: [
       { label: 'Basic Stroke', href: `${base}/basic-stroke`, slug: 'basic-stroke',
         subLinks: [
-          { label: 'Common to every demo', href: '#common-to-every-demo' },
           { label: 'Basic strokes',    href: '#basic-strokes' },
           { label: 'Brush strokes',    href: '#brush-strokes' },
           { label: 'Dry brush',        href: '#dry-brush' },
@@ -166,7 +170,11 @@ const navItems: NavItem[] = [
       },
     ]
   },
-  { label: 'Documentation', href: `${base}/documentation`, slug: 'documentation',
+  { label: 'Drawing Tool Demo', href: `${base}/drawing-tool`, slug: 'drawing-tool' },
+  // Documentation: visible only in the dev server; the deploy workflow strips the
+  // built pages so they never reach the published site.
+  ...(import.meta.env.DEV ? [
+  markSketch({ label: '[Local] Documentation', href: `${base}/documentation`, slug: 'documentation',
     children: [
       { label: 'Stroke Definition', href: `${base}/documentation/stroke-definition`, slug: 'documentation/stroke-definition',
         subLinks: [
@@ -264,7 +272,8 @@ const navItems: NavItem[] = [
         ]
       },
     ]
-  },
+  }),
+  ] : []),
 // Experimental pages: visible only in the dev server. The deploy workflow also
   // removes their built pages and demos, so they never reach the published site.
   ...(import.meta.env.DEV ? [
@@ -494,6 +503,12 @@ const isPublic    = currentIdx >= 0;
        same left indent and bottom rhythm so pages without demos still line up. */
     .main-inner > .prose { margin-left: 1.5rem; margin-bottom: 4rem; }
     .main-inner > .demo-embed { margin-left: 1.5rem; margin-bottom: 4rem; }
+
+    /* A content image with a caption, aligned to the text column. */
+    .page-figure { width: 800px; max-width: calc(100% - 1.5rem); margin: 0 0 4rem 1.5rem; }
+    .page-figure img { display: block; width: 100%; height: auto; border-radius: 2px; }
+    .page-figure figcaption { margin-top: 0.7rem; font-size: 0.86rem; line-height: 1.6; color: var(--fg-muted); }
+    .page-figure figcaption .jp { display: block; }
 
     /* Prose */
     .prose {

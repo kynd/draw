@@ -5,13 +5,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Wet & material strokes" slug="wet-material-strokes">
   <div class="monologue">
-    On this page, we build strokes that read the canvas and react to what is under them.
-    <div class="jp">このページでは、キャンバスを読み、その下にあるものに反応するストロークを作ります。</div>
+    On this page, we build strokes that sample and respond to the colors on the canvas.
+    <div class="jp">このページでは、キャンバスの色を読み取り、それに反応するストロークを作ります。</div>
   </div>
 
   <div class="prose">
-    <p>Every stroke on this page samples the background at its own pixels: wet media drag and blur it, oil buries it under paint, and the materials reflect or refract it. The renderers are documented under <a href={`${base}/documentation/renderers`}>Renderers</a>, in the background samplers and height field sections.</p>
-    <div class="jp">このページのすべてのストロークは、自身のピクセルの位置で背景をサンプリングします。濡れた画材は背景を引きずってぼかし、油絵の具は背景を絵の具の下に埋め、マテリアルは背景を反射または屈折させます。各レンダラは<a href={`${base}/documentation/renderers`}>Renderers</a>のbackground samplersとheight fieldの各セクションに記載しています。</div>
+    <p>Each stroke samples the background according to the pixels it covers.</p>
+    <div class="jp">それぞれのストロークは、ピクセルの位置に応じて背景をサンプリングします。</div>
   </div>
 
   <section class="demo-section" id="wet-strokes">
@@ -23,29 +23,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/wet-strokes/index.html?embedded`} title="Wet strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Strokes that read the background underneath and move it. Top to bottom: a watercolor wash, a brush dragging color along its path, and the two combined with less water.</p>
-      <div class="jp">下にある背景を読み、それを動かすストロークです。上から順に、水彩のにじみ、筆がパスに沿って色を引きずるもの、そして水を減らしてその両方を組み合わせたものです。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>Inflated geometry:</strong> Geometry is built wider than the visible mark, and the shader receives the position of the visual edge inside that margin, so effects that reach past the stroke have fragments to land on.</p>
-        <div class="jp"><strong>広げたジオメトリ：</strong>ジオメトリは見える線より広く作られ、シェーダはその余白の中での視覚的な輪郭の位置を受け取ります。そのため、ストロークの外へ届く効果にもフラグメントの受け皿があります。</div>
-
-        <p><strong>Background sampling:</strong> The background is sampled by screen position, not by the stroke's own coordinates.</p>
-        <div class="jp"><strong>背景のサンプリング：</strong>背景はストローク自身の座標ではなく、画面上の位置で参照されます。</div>
-
-        <p><strong>Caps:</strong> Ends are carved in the shader inside the same margin, so one quad past the end serves rounded, square, and ragged caps.</p>
-        <div class="jp"><strong>端点：</strong>終端は同じ余白の中でシェーダによって削り出されるため、終端の先のひとつの四角形が、rounded、square、raggedのすべてに使えます。</div>
-
-        <p><strong>Watercolor:</strong> A flat silhouette is captured through the coverage layer as one clean shape, so a stroke that folds over itself never seams; a post-process then blurs that mask into a feathered edge and paints the wash, mixing the background through. Pigment collects just inside the boundary, leaving a darker rim.</p>
-        <div class="jp"><strong>水彩：</strong>平坦なシルエットをカバレッジレイヤーでひとつのきれいな形として捉えるため、自分の上に折り返すストロークでも継ぎ目が出ません。その後、後処理がマスクをぼかして羽状の縁にし、背景を混ぜながらにじみを描きます。顔料は輪郭のすぐ内側に集まり、濃い縁を残します。</div>
-
-        <p><strong>Smear:</strong> Each fragment samples backward along the stroke's direction in screen space and averages the result, so the background streaks the way the mark traveled. The sampling distance varies with noise across and along the mark.</p>
-        <div class="jp"><strong>引きずり：</strong>各フラグメントは、画面上でストロークの向きに沿って後方をサンプリングして平均するため、背景は線が進んだ方向に筋を引きます。サンプリングの距離は、幅方向と長さ方向のノイズによって変わります。</div>
-
-        <p><strong>Wet brush:</strong> The drag runs first, over a mix of the sharp and blurred background, and the wash then tints the result.</p>
-        <div class="jp"><strong>濡れた筆：</strong>まず引きずりが、鮮明な背景とぼかした背景を混ぜたものの上で走り、そのあとで水彩がその結果を染めます。</div>
-      </details>
+      <p>Strokes that sample and move the background beneath them. From top to bottom: a watercolor wash, a brush dragging color along its path, and a combination of the two using less water.</p>
+      <div class="jp">下にある背景を読み取り、動かすストロークです。上から順に、水彩のにじみ、筆が軌跡に沿って色を引きずるもの、そしてその2つを水の量を減らして組み合わせたものです。</div>
     </div>
   </section>
 
@@ -58,20 +37,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/oil-strokes/index.html?embedded`} title="Oil strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Thick paint: the wet stroke's drag under a dominant paint color, lit through a height field.</p>
-      <div class="jp">厚塗りの絵の具です。wetストロークの引きずりに支配的な絵の具の色をかぶせ、高さフィールドを通してライティングします。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>Drag:</strong> Each fragment samples backward along the stroke's direction, the same walk as the smear, with the reach varied by lane noise.</p>
-        <div class="jp"><strong>引きずり：</strong>各フラグメントは、smearと同じ方法でストロークの向きに沿って後方をサンプリングします。届く距離はレーンのノイズによって変わります。</div>
-
-        <p><strong>Paint:</strong> The dragged background is mixed under the stroke's color at a high ratio, thinner where the height field dips, so the background survives only as streaks in the crevices.</p>
-        <div class="jp"><strong>絵の具：</strong>引きずられた背景の上には、ストロークの色が高い比率で重ねられます。高さフィールドがくぼむ場所では層が薄くなるため、背景は溝の中の筋としてだけ残ります。</div>
-
-        <p><strong>Lighting:</strong> Ridges stretched along the path supply a surface normal, and diffuse and specular lighting from a fixed light make the relief read as thickness. The drag and the ridges share one lane noise, so the paint that moved furthest also sits highest.</p>
-        <div class="jp"><strong>ライティング：</strong>パスに沿って引き伸ばされた畝が表面の法線を与え、固定光源からの拡散反射と鏡面反射によって、起伏が厚みとして読み取れます。引きずりと畝はひとつのレーンノイズを共有するため、最も動いた絵の具が最も高く盛り上がります。</div>
-      </details>
+      <p>Thick paint: the drag of a wet stroke beneath a dominant paint color, illuminated with a height field to emphasize the bumpy texture.</p>
+      <div class="jp">厚塗りの絵の具です。ウェットストロークによる引きずり効果に、絵の具の色を強く重ねています。高さフィールドを使ったライティングで、表面の凹凸を表現しています。</div>
     </div>
   </section>
 
@@ -84,26 +51,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/material-strokes/index.html?embedded`} title="Material strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Strokes shaded as a surface rather than a fill, using a height field over the mark. Top to bottom: metal against an assumed environment, metal reflecting the real background, and glass.</p>
-      <div class="jp">塗りではなく面として陰影付けされたストロークで、線の上の高さフィールドを使います。上から順に、仮定した環境を映す金属、実際の背景を映す金属、そしてガラスです。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>Height field:</strong> Height is built from distance to the edge, which rounds the cross-section into a bead, plus noise stretched along the path, which reads as liquid dragged along the stroke. The surface normal comes from finite differences in the stroke's own frame.</p>
-        <div class="jp"><strong>高さフィールド：</strong>高さは、断面を丸い盛り上がりにする輪郭からの距離と、パス方向に引き伸ばされ、線に沿って引きずられた液体に見えるノイズから作られます。表面の法線は、ストローク自身の座標系での差分から求めます。</div>
-
-        <p>The bead is parabolic, not a hemisphere: a hemisphere's slope is infinite at the rim, which breaks the finite differences there. Height and the across coordinate are both measured in half-widths, so the gradient is dimensionless at any width.</p>
-        <div class="jp">盛り上がりは半球ではなく放物線です。半球は縁で傾きが無限大になり、そこでの差分が破綻します。高さと幅方向の座標はどちらも半幅を単位とするため、勾配はどの太さでも無次元になります。</div>
-
-        <p><strong>Chrome:</strong> The environment is two tones split at a horizon; the boundary sweeping across the curved surface reads as metal.</p>
-        <div class="jp"><strong>クローム：</strong>環境は地平線で分かれた2つの色調です。曲面を横切るその境界が、金属として読み取られます。</div>
-
-        <p><strong>Frosted glass:</strong> The clear-glass lens, roughened. Each fragment scatters its background lookup over several taps in a per-pixel random direction, so the refraction reads grainy and blurred rather than as a sharp bend.</p>
-        <div class="jp"><strong>すりガラス：</strong>透明なガラスのレンズを粗くしたものです。各フラグメントは背景の参照を、ピクセルごとにランダムな方向へ複数回散らして平均するため、屈折は鮮明に曲がるのではなく、ざらついて滲んで見えます。</div>
-
-        <p><strong>Glass:</strong> Refraction offsets the background lookup along the surface normal, largest where the surface tilts most. Reflection is mixed in by a Fresnel term (mirror-like at glancing angles).</p>
-        <div class="jp"><strong>ガラス：</strong>屈折は背景の参照位置を表面の法線方向にずらし、表面が最も傾く場所でずれが最大になります。反射はフレネル項（浅い角度で鏡のようになる性質）によって混ぜられます。</div>
-      </details>
+      <p>From top to bottom: metal reflecting a virtual environment, metal reflecting the actual background, and glass. A height field determines how each stroke reflects colors from a virtual environment or refracts colors from the canvas, conveying the qualities of each material.</p>
+      <div class="jp">上から順に、仮想環境を映す金属、実際の背景を映す金属、そしてガラスです。高さフィールドによって、仮想環境の色を反射させたり、キャンバスの色を屈折させたりして、それぞれの素材感を表現します。</div>
     </div>
   </section>
 
@@ -116,8 +65,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/try-wet-strokes/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
     </div>
     <div class="prose">
-      <p>Draw with the strokes on this page, in the drawing tool: the settings panel picks the tool, its colors, and its parameters exactly, the floating dials reroll the palette, set the width, and walk a trail of rolled tools, and Clear, Replay, and recording work as on the Drawing Tool Demo page. A turn sharper than a threshold splits the drawn line, so a fast zigzag bakes as separate strokes; each piece appears once its direction settles, and the wider the stroke, the harder its turns smooth. Every stroke here reads the canvas itself, so it drags, buries, or bends what is already painted. With a pen tablet, pressure scales the stroke around the set width, light thinner and heavy wider, each tool by its own amount; a mouse draws at the set width.</p>
-      <div class="jp">このページのストロークを使って、描画ツールの中で描いてみてください。設定パネルでは、ツールとその色、パラメータを正確に選べます。浮かぶ3つのダイヤルでは、パレットを引き直したり、幅を変えたり、ロールしてきたツールの列をたどったりできます。Clear、Replay、録画はDrawing Tool Demoページと同じように動きます。しきい値より鋭く曲がると描いた線はそこで分割されるため、速いジグザグは別々のストロークとして焼き込まれます。各断片は向きが安定してから現れ、ストロークが太いほど曲がりは強く滑らかになります。ここにあるすべてのストロークはキャンバスそのものを読むため、すでに描かれたものを引きずり、埋め、ゆがめます。ペンタブレットでは、筆圧が設定した幅を中心にストロークを伸縮させます。軽ければ細く、強ければ太く、その振れ幅はツールごとに異なります。マウスは設定した幅のまま描きます。</div>
+      <p>Try these strokes in the drawing tool.</p>
+      <div class="jp">描画ツールで、このページのストロークを試してみましょう。</div>
     </div>
   </section>
 </PageLayout>
