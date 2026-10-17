@@ -12,9 +12,9 @@ title: Intro
 
 <div class="jp">このサイトでは、<a href="https://avex.jp/ja/meetyourart/festival/" target="_blank" rel="noopener">東京で開催されたMYAF 2026</a>で展示した<a href="https://eop.neort.io/ja" target="_blank" rel="noopener"><em>Étude on Painting (Unlock)</em></a>のために制作した技法やツールを紹介します。この展示は、絵を描き慣れた人だけでなく、通りかかってちょっと描いてみたいと思った人に向けたものです。慣れた描き方に頼ったり、真っ白なキャンバスを前に気後れしたりせず、思いがけない結果に驚きながら、手を動かして描き方を見つけられるよう、少し不思議で予測のつかない仕組みにしました。予想外のことが起きたら、道具のせいにして、目の前に現れたものに反応すればいいのです。</div>
 
-<p>To make the drawings portable (so they could be displayed and animated on the large screen at the venue or viewed later on the website), we built a simple system that represents each mark as a series of points with an associated style. This allowed us to easily store every drawing (we gathered more than 900 in four days!) and reproduce it anywhere while preserving the traces of the artist's hand.</p>
+<p>To make the drawings portable (so they could be displayed and animated on the large screen at the venue or viewed later on the website), we built a simple system that represents each mark as a series of points with an associated style. This allowed us to easily store every drawing (we gathered <a href="https://eop.neort.io/en/works" target="_blank" rel="noopener">more than 900 in four days</a>!) and reproduce it anywhere while preserving the traces of the artist's hand.</p>
 
-<div class="jp">描いた絵を会場の大きなスクリーンに映して動かしたり、後からウェブサイトで見返したりできるよう、一つひとつの描画の筆跡を、点の連なりとそれに付随するスタイルで表現するシンプルな仕組みをつくりました。これにより、描き手の手の動きの痕跡を残しながら、すべての絵を簡単に保存し、どこでも再現できるようになりました（4日間で900点以上の絵が集まりました！）。</div>
+<div class="jp">描いた絵を会場の大きなスクリーンに映して動かしたり、後からウェブサイトで見返したりできるよう、一つひとつの描画の筆跡を、点の連なりとそれに付随するスタイルで表現するシンプルな仕組みをつくりました。これにより、描き手の手の動きの痕跡を残しながら、すべての絵を簡単に保存し、どこでも再現できるようになりました（4日間で<a href="https://eop.neort.io/ja/works" target="_blank" rel="noopener">900点以上の絵</a>が集まりました！）。</div>
 
 <div class="intro-photos">
 <img src="/unlock/images/installation-drawing.jpg" alt="A visitor drawing with a pen on the installation's tablet." />
