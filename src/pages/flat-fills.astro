@@ -5,13 +5,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Flat & pattern fills" slug="flat-fills">
   <div class="monologue">
-    On this page, we fill a blob with flat color: the region as it is drawn, and the region filled with a repeating pattern.
-    <div class="jp">このページでは、ブロブを平坦な色で塗ります。描いたままの領域と、繰り返しのパターンで満たした領域です。</div>
+    On this page, we fill a large area at once rather than draw a line with a stroke.
+    <div class="jp">このページでは、ストロークで線を描くのではなく、広い領域を一度に塗ります。</div>
   </div>
 
   <div class="prose">
-    <p>Every fill here builds its region the way the <a href={`${base}/fills`}>Fills</a> overview describes: the gesture is closed into a loop, offset, and smoothed, and the region is a signed distance field in the fragment shader. These renderers only lay color over that region, flat or patterned.</p>
-    <div class="jp">ここでの塗りはすべて、<a href={`${base}/fills`}>Fills</a>の概要で説明する方法で領域を作ります。身振りはループとして閉じられ、オフセットされ、滑らかにされ、領域はフラグメントシェーダの中の符号付き距離場になります。これらのレンダラは、その領域の上に色を平坦にあるいはパターンで載せるだけです。</div>
+    <p>Every fill here builds its region as described in the <a href={`${base}/fills`}>Fills</a> overview: the gesture is closed into a loop, offset, and smoothed. The region is represented as a signed distance field in the fragment shader.</p>
+    <div class="jp">ここでの塗りはすべて、<a href={`${base}/fills`}>Fills</a>の概要で説明した方法で領域を作ります。描いた軌跡を閉じてループにし、オフセットを加えて滑らかにします。その領域は、フラグメントシェーダ内で符号付き距離場として表されます。</div>
   </div>
 
   <section class="demo-section" id="fills">
@@ -23,17 +23,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/blob-fills/index.html?embedded`} title="Blob fills" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Three flat fills: the blob as it is, a spiky one, and a wobbly one.</p>
-      <div class="jp">3つの平坦な塗りです。そのままのブロブ、トゲのあるもの、うねりのあるもの。</div>
+      <p>Three flat fills: the original blob, a spiky version, and a wobbly version.</p>
+      <div class="jp">3種類の単色の塗りです。元の形をそのまま使ったもの、トゲを加えたもの、うねりを加えたものがあります。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Spikes:</strong> An integer count of spikes runs around the boundary's arc, so the profile meets itself at the seam in a valley. Each spike hashes its height and lean from its index. Spikes only stick out: every valley returns to the base contour, so the fill always covers its region.</p>
-        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧をひと回りするため、プロファイルは継ぎ目でも谷でつながります。それぞれのトゲは高さと傾きを自身のインデックスのハッシュから決めます。トゲは外側にだけ突き出します。谷は必ず元の輪郭まで戻るため、塗りはつねに自分の領域を覆います。</div>
+      <p><strong>Spikes:</strong> An integer number of spikes fits around the boundary, so the profile meets at a valley along the seam. Each spike's height and lean are determined by a hash of its index. Spikes extend only outward, and every valley returns to the base contour, so the fill always covers the original region.</p>
+      <div class="jp"><strong>トゲ：</strong>境界を一周するトゲの数を整数にすることで、継ぎ目が谷でつながります。それぞれのトゲの高さと傾きは、そのインデックスのハッシュから決まります。トゲは外側にだけ突き出し、谷は必ず元の輪郭に戻るため、塗りは常に元の領域を覆います。</div>
 
-        <p><strong>Wobble:</strong> The bump offset is a noise of world position rather than arc, so it cannot show a seam at all.</p>
-        <div class="jp"><strong>うねり：</strong>ふくらみのオフセットは弧ではなくワールド座標のノイズなので、継ぎ目がそもそも現れません。</div>
-      </details>
+      <p><strong>Wobble:</strong> The bump offset uses noise based on world position rather than position along the arc, avoiding a seam.</p>
+      <div class="jp"><strong>うねり：</strong>ふくらみのオフセットには、弧に沿った位置ではなくワールド座標に基づくノイズを使うことで、継ぎ目をなくしています。</div>
     </div>
   </section>
 
@@ -46,20 +43,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/patterned-fills/index.html?embedded`} title="Patterned fills" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Three flat fills whose interior is a repeating pattern, evaluated in the shader over world space so it holds still wherever the shape lands.</p>
-      <div class="jp">内部が繰り返しのパターンになった3つの平坦な塗りです。パターンはワールド座標でシェーダの中で評価されるため、形がどこに置かれても止まったままです。</div>
+      <p>Three flat fills with repeating patterns. Each pattern is evaluated in world space in the shader, so it stays fixed regardless of where the shape is placed.</p>
+      <div class="jp">繰り返しパターンを使った、3種類のフラットな塗りです。パターンはシェーダ内でワールド座標に基づいて計算されるため、形をどこに置いてもパターンの位置は変わりません。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Polka dots:</strong> Circles on a hexagonal lattice, each a random color from the palette with a small seeded offset from its lattice point; the gaps take the paper.</p>
-        <div class="jp"><strong>水玉：</strong>六角格子の上の円で、それぞれパレットからランダムな色を取り、格子点からシードで少しずらされます。すき間は紙の色になります。</div>
+      <p><strong>Polka dots:</strong> Circles arranged on a hexagonal lattice, each with a randomly selected palette color and a small, seeded offset from its lattice point. The paper shows through the gaps.</p>
+      <div class="jp"><strong>水玉：</strong>六角格子上に円を並べ、それぞれにパレットからランダムに選んだ色を付けます。それぞれの円は、シードに基づいて格子点から少しずらして配置します。すき間からは紙の色が見えます。</div>
 
-        <p><strong>Squares:</strong> A grid turned 45 degrees, a colored square inset in each cell, with no offset.</p>
-        <div class="jp"><strong>正方形：</strong>45度回した格子で、それぞれのセルの中に色の付いた正方形を少し内側に描きます。ずれはありません。</div>
+      <p><strong>Squares:</strong> A grid rotated 45 degrees, with a colored square inset in each cell and no offset.</p>
+      <div class="jp"><strong>正方形：</strong>45度回転させた格子のそれぞれのセルに、余白を残して色付きの正方形を描きます。</div>
 
-        <p><strong>Waves:</strong> Two colors from the palette in alternating bands that undulate, after Bridget Riley.</p>
-        <div class="jp"><strong>波：</strong>パレットの2色が、うねる交互の帯になります。ブリジット・ライリーにならったものです。</div>
-      </details>
+      <p><strong>Waves:</strong> Alternating, undulating bands in two palette colors, inspired by Bridget Riley.</p>
+      <div class="jp"><strong>波：</strong>ブリジット・ライリーにならい、パレットの2色でうねる帯を交互に描きます。</div>
     </div>
   </section>
 

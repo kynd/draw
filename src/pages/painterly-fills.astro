@@ -5,13 +5,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Painterly fills" slug="painterly-fills">
   <div class="monologue">
-    On this page, we fill a blob as paint: opaque paint with relief, and watercolor washes that let the background through.
-    <div class="jp">このページでは、ブロブを絵の具として塗ります。起伏を持つ不透明な絵の具と、背景を透かす水彩の塗りです。</div>
+    Here, we fill blobs with paint: opaque, relief-textured paint and watercolor washes that let the background show through.
+    <div class="jp">このページでは、ブロブを絵の具で塗ります。立体感のある不透明な絵の具と、背景が透けて見える水彩のウォッシュを扱います。</div>
   </div>
 
   <div class="prose">
-    <p>Every fill here builds its region the way the <a href={`${base}/fills`}>Fills</a> overview describes, then shades it as pigment. The paints carry a height field lit as relief; the washes read the canvas underneath and drag it like water.</p>
-    <div class="jp">ここでの塗りはすべて、<a href={`${base}/fills`}>Fills</a>の概要で説明する方法で領域を作り、それを顔料として陰影付けします。絵の具は起伏として照らされる高さ場を持ち、washは下のキャンバスを読んで水のように引きずります。</div>
+    <p>Each fill creates a region as described in the <a href={`${base}/fills`}>Fills</a> overview, then shades it like pigment. Thick paint uses a height field that lighting renders as relief; washes sample the canvas beneath and pull it along like water.</p>
+    <div class="jp">どの塗りも、<a href={`${base}/fills`}>Fills</a>の概要で説明されている方法で領域を作り、顔料のような陰影を加えます。厚みのある絵の具では、高さ情報に光を当てて立体感を表現します。一方、ウォッシュは下地のキャンバスを読み取り、水のように引きずります。</div>
   </div>
 
   <section class="demo-section" id="paints">
@@ -23,23 +23,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/blob-paints/index.html?embedded`} title="Textured paint" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Opaque paint with relief: dry and scratched, flat with a gentle rise and fall, and thick oil laid with a knife.</p>
-      <div class="jp">起伏を持つ不透明な絵の具です。乾いてかすれたもの、ゆるやかな起伏を持つ平坦なもの、そしてナイフで置かれた厚塗りの油絵の具。</div>
+      <p>Opaque paint with surface relief: dry and scratched, flat with gentle undulations, or thick oil applied with a knife.</p>
+      <div class="jp">表面に起伏のある不透明な絵の具です。乾いてかすれた質感、平らな面がゆるやかにうねる質感、ナイフで厚く塗った油絵の具を表現します。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Height:</strong> An edge dome plus interior noise. The dome is a smoothstep of distance with an analytic slope, so the rise eases into the flat interior with no crease, and the noise mixes a low frequency for broad swell with a high one for detail.</p>
-        <div class="jp"><strong>高さ：</strong>縁のドームと内部のノイズです。ドームは距離のsmoothstepで、傾きは解析的に求まるため、立ち上がりは折り目なく平坦な内部へとなだらかに続きます。ノイズは、大きなうねりのための低周波と、細部のための高周波を混ぜています。</div>
+      <p>The height field combines a dome-shaped rise along the edge with noise in the interior. The dome uses a smoothstep function of distance, and its analytically derived slope ensures a smooth transition into the flat interior without a crease. Low-frequency noise creates broad swells, while high-frequency noise adds fine detail. For the knife-painted oil, straight-cut segments create sharp creases and steps.</p>
+      <div class="jp">高さ情報は、縁のドーム状の盛り上がりと内部のノイズを組み合わせて作ります。ドームには距離に応じたsmoothstep関数を用い、解析的に導出した勾配によって、折れ目を生じさせずに平らな内部へ滑らかにつなげます。低周波ノイズが大きなうねりを生み、高周波ノイズが細かな質感を加えます。ナイフで塗った油絵の具には、直線的な切り口を使って鋭い折れ目や段差を加えます。</div>
 
-        <p><strong>Dry brush:</strong> A tooth like the dry media's, only denser, erodes both the edge and the interior, leaving rough transparent speckle where the paint ran out.</p>
-        <div class="jp"><strong>ドライブラシ：</strong>ドライメディアと同様の、ただしより密な紙の目が、縁と内部の両方を削り、絵の具が途切れた場所に粗い透明の粒を残します。</div>
-
-        <p><strong>Two pigments:</strong> Every paint mixes two colors in smooth patches, the way a loaded brush lays down more than one. The thick oil sharpens the mix instead: its colors meet on a hard boundary shaped by low-frequency noise, two paints laid side by side without blending.</p>
-        <div class="jp"><strong>2つの顔料：</strong>すべての絵の具は2色をなだらかな斑で混ぜます。絵の具を含んだ筆が複数の色を置いていくのと同じです。厚塗りの油絵の具は、逆に混合を鋭くします。2色は低周波ノイズが形作る硬い境界で接し、混ざらないまま並べて置かれた2つの絵の具になります。</div>
-
-        <p><strong>The knife:</strong> The thick oil's height is flat patches, each with its own drag direction and striations along it, meeting at hard steps. The rim does not trace the edge: a noise varies it around the boundary, tall and steep in some stretches, scraped nearly flat in others. The edge is straight cut segments, offset piecewise-linearly along the boundary's arc.</p>
-        <div class="jp"><strong>ナイフ：</strong>厚塗りの油絵の具の高さは平らな斑からなり、それぞれが独自の引き方向とそれに沿った筋を持ち、硬い段差で接します。縁の盛り上がりは輪郭をなぞらず、ノイズによって境界に沿って変化します。高く急な区間もあれば、削がれてほとんど平らな区間もあります。輪郭は、境界の弧に沿って区分線形にオフセットされた、まっすぐに切られた線分です。</div>
-      </details>
+      <p>Each paint blends two colors in mottled patches, like a brush loaded with multiple colors. Thick oil keeps the transition sharp: the colors meet along a distinct boundary shaped by low-frequency noise, as if two paints had been laid side by side without blending.</p>
+      <div class="jp">それぞれの絵の具は、複数の色を含ませた筆のように、2色をまだらに混ぜ合わせます。厚い油絵の具では、色の境目をくっきりと保ちます。低周波ノイズで形作られた明確な境界に沿って2色が接し、混ざらずに隣り合わせに置かれた絵の具のように見えます。</div>
     </div>
   </section>
 
@@ -52,23 +43,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/blob-washes/index.html?embedded`} title="Washes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Watercolor fills over the background: watery, medium, and gouache.</p>
-      <div class="jp">背景の上の水彩の塗りです。水の多いもの、中間、そしてガッシュ。</div>
+      <p>Watercolor fills layered over the background, ranging from watery washes through medium washes to gouache.</p>
+      <div class="jp">背景の上に重ねる水彩の塗りです。水分の多いウォッシュから、中間的なウォッシュ、ガッシュまでを表現します。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Water:</strong> One renderer spans the three. The paint meets the background two ways: a min that darkens like pigment layered over it, and a mix that covers like body. Water decides the balance, and the more of it, the more the paint darkens instead of covering; less sharpens the edge and covers, until the fill reads as gouache. Water also pools the opacity, leaving patches where the fill is nearly bare.</p>
-        <div class="jp"><strong>水：</strong>ひとつのレンダラが3つすべてを描き分けます。絵の具は2つの方法で背景と重なります。上に重ねた顔料のように暗くするminと、絵の具の厚みとして覆うmixです。水がその配分を決め、多いほど絵の具は覆うのではなく暗くなります。少ないほど縁は鋭くなり、覆いが強まり、やがてガッシュとして読めるようになります。水はまた、不透明度をたまりに偏らせ、塗りがほとんど残らない斑を作ります。</div>
+      <p>A single renderer handles all three. The paint interacts with the background in two ways: a min operation darkens it like layered pigment, while a mix covers it like an opaque layer. Water controls the balance: more water favors darkening the background over covering it. With less water, the edge sharpens and coverage increases until the fill resembles gouache. Water also creates uneven opacity, leaving nearly transparent patches.</p>
+      <div class="jp">3種類すべてを1つのレンダラーで表現します。絵の具は背景に2通りの作用をもたらします。min演算では顔料を重ねたように背景を暗くし、mixでは不透明な層のように背景を覆います。水分量によって両者のバランスが変わり、水分が多いほど、背景を覆うよりも暗くする作用が強まります。水分が少なくなると、縁がくっきりとし、背景を覆う力が強まって、ガッシュのような塗りになります。また、水分によって不透明度にむらが生じ、ほとんど透明な部分が残ります。</div>
 
-        <p><strong>Flow:</strong> The background is not read at one point but dragged along a direction that wanders with position, so the pigment looks carried by water. The gouache covers most and drags hardest, which is what implies the brush.</p>
-        <div class="jp"><strong>流れ：</strong>背景は1点で読まれるのではなく、位置とともに揺らぐ方向に沿って引きずられます。そのため顔料は水に運ばれたように見えます。ガッシュは最も覆いが強く、最も強く引きずります。それが筆を思わせる理由です。</div>
-
-        <p><strong>The edge:</strong> The boundary wanders by a noise of world position, as a wet edge does, and pigment collects just inside it.</p>
-        <div class="jp"><strong>縁：</strong>境界はワールド座標のノイズで揺らぎ、濡れた縁のように振る舞います。顔料はそのすぐ内側に集まります。</div>
-
-        <p><strong>The gouache:</strong> It stays flat and covers nearly fully, and its edge grows brush marks, streaks elongated along directions that wander with position.</p>
-        <div class="jp"><strong>ガッシュ：</strong>平坦なまま、ほぼ完全に覆います。縁には筆の跡が生え、位置とともに揺らぐ方向に沿って引き伸ばされた筋になります。</div>
-      </details>
+      <p>Rather than sampling the background at a single point, the renderer samples it along a direction that shifts with position. This makes the pigment appear to flow with the water. Gouache covers the most and pulls the background the farthest, evoking a brushstroke.</p>
+      <div class="jp">背景は一点だけでなく、位置に応じて変わる方向に沿って読み取ります。これにより、顔料が水とともに流れるように見えます。ガッシュは背景を強く覆い最も遠くまで引きずるため、筆跡が見えるような表現になります。</div>
     </div>
   </section>
 
