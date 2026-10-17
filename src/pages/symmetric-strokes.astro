@@ -5,13 +5,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Symmetric strokes" slug="symmetric-strokes">
   <div class="monologue">
-    On this page, we build strokes that repeat one gesture, the drawn path coming back mirrored, rotated, or reflected across the canvas.
-    <div class="jp">このページでは、ひとつの身振りを繰り返すストロークを作ります。描いたパスが、鏡映しに、回転して、あるいはキャンバスの中心で反転して返ってきます。</div>
+    We set out to draw strokes in unexpected places. Each stroke begins with a single gesture, then repeats as its path is mirrored, rotated, or reflected across the canvas.
+    <div class="jp">ここでは、思いがけない場所に線を描いてみます。それぞれのストロークはひとつの動きから始まり、その軌跡がキャンバス上で鏡映・回転・反転されながら繰り返されます。</div>
   </div>
 
   <div class="prose">
-    <p>The symmetry is a path transform: <code>mirroredPath</code> and <code>rotatedPaths</code> (on the Path Effects page) derive the copies from the drawn path, and every copy is an ordinary stroke drawn by the same tool. The drawing tool applies them through the registry's <code>symmetry</code> field: the roll (a rotation count, the screen axes) lands at the stroke's start, the copies show while the gesture grows, and they land at release as ordinary strokes, so they record, replay, and mirror like anything drawn. At even odds a stroke's copies take their own palette colors.</p>
-    <div class="jp">対称性はパスの変換です。<code>mirroredPath</code>と<code>rotatedPaths</code>（Path Effectsページ）が描かれたパスから複製を導き、それぞれの複製は同じツールで描かれる通常のストロークです。描画ツールはレジストリの<code>symmetry</code>フィールドを通してこれを適用します。ロール（回転の数、画面の軸）はストロークの始まりに決まり、複製は描いている間から表示され、離した瞬間に通常のストロークとして置かれます。そのため複製は描いたものと同じように記録され、再生され、ミラーされます。五分五分の確率で、ストロークの複製はそれぞれ自分のパレットの色を取ります。</div>
+    <p>Symmetry is a path transform. At the start of each stroke, the rotation count or screen axes are chosen at random. Copies appear as the gesture develops and become ordinary strokes when you release, so they can be recorded, replayed, and mirrored like any other stroke. There is a 50% chance that each copy will use its own palette color.</p>
+    <div class="jp">対称性はパスの変換によって生まれます。回転の数や画面の軸は、ストロークの開始時にランダムに決まります。複製は描いている間も表示され、描き終えて離すと通常のストロークとして確定します。そのため、ほかのストロークと同じように記録、再生、ミラーリングができます。50%の確率で、複製にはそれぞれ個別のパレットの色が使われます。</div>
   </div>
 
   <section class="demo-section" id="mirror">
@@ -23,8 +23,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/symmetric-mirror/index.html?embedded`} title="Mirrored strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Each gesture comes with its mirror across the vertical line through its starting point. Three seeded gestures, drawn with the pencil, the brush, and the ragged ribbon.</p>
-      <div class="jp">それぞれの身振りには、その始点を通る垂直線に対して鏡映しになった複製が付きます。鉛筆、筆、ラグドリボンで描かれた、シード付きの3つの身振りです。</div>
+      <p>Each gesture is mirrored across the vertical line through its starting point. The three gestures are drawn with the pencil, brush, and ragged ribbon.</p>
+      <div class="jp">それぞれの線は、始点を通る垂直線を軸に鏡映しになります。3つの線を元に、鉛筆、筆、ギザギザの筆で描いています。</div>
     </div>
   </section>
 
@@ -37,8 +37,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/symmetric-rotation/index.html?embedded`} title="Rotational strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Each gesture is repeated evenly around its starting point. The count (2 to 6) rolls when the stroke begins and holds while it grows.</p>
-      <div class="jp">それぞれの身振りは、その始点の周りに均等に繰り返されます。繰り返しの数（2から6）はストロークの始まりにロールされ、描いている間は変わりません。</div>
+      <p>Each gesture is repeated at equal intervals around its starting point. The repetition count (2 to 6) is randomly chosen when the stroke begins and stays fixed as you draw.</p>
+      <div class="jp">それぞれの線は、始点の周りに等間隔で繰り返されます。繰り返しの数（2〜6）はストロークの開始時にランダムに決まり、描いている間は変わりません。</div>
     </div>
   </section>
 
@@ -51,8 +51,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/symmetric-screen/index.html?embedded`} title="Screen-space symmetry" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Each gesture is mirrored across the canvas's center axis: the vertical one, the horizontal one, or both (both adds the point reflection, four strokes in all). The axes roll per stroke.</p>
-      <div class="jp">それぞれの身振りは、キャンバスの中心軸に対して鏡映しになります。垂直の軸、水平の軸、またはその両方です（両方のときは点対称の複製も加わり、合わせて4本になる）。軸はストロークごとにロールされます。</div>
+      <p>Each gesture is mirrored across the canvas's vertical center axis, horizontal center axis, or both. Using both axes also adds a point-reflected copy, for four strokes in total. The axes are randomly chosen for each stroke.</p>
+      <div class="jp">それぞれの線は、キャンバスの中心を通る垂直軸、水平軸、またはその両方を基準に鏡映しになります。両方の軸を使う場合は、点対称の複製も加わり、合計4本のストロークになります。軸はストロークごとにランダムに選ばれます。</div>
     </div>
   </section>
 

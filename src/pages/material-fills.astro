@@ -3,15 +3,10 @@ import PageLayout from '../layouts/PageLayout.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
-<PageLayout title="Surface & material fills" slug="material-fills">
+<PageLayout title="Material fills" slug="material-fills">
   <div class="monologue">
-    On this page, we shade a blob as a surface: metal and glass that reflect and refract, and stone.
-    <div class="jp">このページでは、ブロブを面として陰影付けします。反射し屈折する金属とガラス、そして石です。</div>
-  </div>
-
-  <div class="prose">
-    <p>Every fill here builds its region the way the <a href={`${base}/fills`}>Fills</a> overview describes, then treats it as a lit surface. A height field gives the region a normal, and each material reads that normal its own way: reflecting an environment, bending the background, or shading matte stone.</p>
-    <div class="jp">ここでの塗りはすべて、<a href={`${base}/fills`}>Fills</a>の概要で説明する方法で領域を作り、それを照らされた面として扱います。高さ場が領域に法線を与え、それぞれの素材はその法線を独自に読みます。環境を反射したり、背景を曲げたり、つや消しの石として陰影付けしたりします。</div>
+    On this page, we shade a blob to look like metal, glass, and stone, using reflection and refraction.
+    <div class="jp">このページでは、反射や屈折を用いて、塗りに金属、ガラス、石のような陰影を付けます。</div>
   </div>
 
   <section class="demo-section" id="materials">
@@ -23,20 +18,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/blob-materials/index.html?embedded`} title="Materials" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The blob shaded as a surface: metal, smooth glass, and faceted glass.</p>
-      <div class="jp">面として陰影付けされたブロブです。金属、滑らかなガラス、そして面取りされたガラス。</div>
+      <p>The blob shaded to resemble metal, smooth glass, and faceted glass.</p>
+      <div class="jp">金属、滑らかなガラス、ファセットガラスの質感を表現した塗りです。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Metal:</strong> The metal reflects an assumed chrome environment: a dark ground, a mid sky, and narrow bright bands with hard edges. Sharp features in the reflection are what read as metal (a plain gradient shades like matte paint), and the ridged relief streaks the band edges into liquid highlights. The smooth glass keeps a low-frequency wave surface instead.</p>
-        <div class="jp"><strong>金属：</strong>金属は想定されたクロームの環境を反射します。暗い地面、中間の空、そして硬い縁を持つ細く明るい帯です。反射の中の鋭い特徴こそが金属として読める理由で（ただのグラデーションはつや消しの絵の具のような陰影になります）、畝のある起伏が帯の縁を流れるようなハイライトへと引き伸ばします。滑らかなガラスは、低周波のうねりの面を保ちます。</div>
+      <p><strong>Metal:</strong> The metal reflects a simulated environment to create a chrome-like appearance: dark ground, a mid-tone sky, and narrow bands of bright light with sharp edges.</p>
+      <div class="jp"><strong>金属：</strong>金属は、クロームのような見た目を表現するため、想定した環境を反射します。環境は、暗い地面、中間調の空、輪郭の鋭い細い光の帯で構成されています。こうした鋭い反射が、表面に金属らしさを与えます。</div>
 
-        <p><strong>Glass:</strong> The background is sampled through the normal, bent hardest where the surface tilts most, with a Fresnel lightening at grazing angles.</p>
-        <div class="jp"><strong>ガラス：</strong>背景は法線を通して参照され、面が最も傾くところで最も曲げられます。浅い角度ではフレネルによって明るくなります。</div>
+      <p><strong>Glass:</strong> The surface normal determines which part of the background is sampled, with distortion strongest where the surface is most tilted. The Fresnel effect brightens the glass at grazing angles.</p>
+      <div class="jp"><strong>ガラス：</strong>面の法線に応じて背景を参照する位置が決まり、面が大きく傾くほどゆがみが強くなります。面をかすめる角度では、フレネル効果によってガラスが明るく見えます。</div>
 
-        <p><strong>Facets:</strong> The faceted glass takes one random tilt per triangle of a lattice warped by low-frequency noise, so it breaks into irregular triangular panes that each displace the background their own way.</p>
-        <div class="jp"><strong>面取り：</strong>面取りガラスは、低周波のノイズでゆがめた三角格子の三角形ごとにひとつのランダムな傾きを取ります。そのため不規則な三角形の板に割れ、それぞれが背景を独自の方向へずらします。</div>
-      </details>
+      <p><strong>Facets:</strong> The faceted glass uses a triangular lattice distorted by low-frequency noise, with each triangle assigned a random tilt. This creates irregular triangular panes that each displace the background in a different direction.</p>
+      <div class="jp"><strong>ファセット：</strong>ファセットガラスには、低周波ノイズでゆがめた三角格子を使い、三角形ごとにランダムな傾きを与えます。これにより、不規則な三角形の面が生まれ、それぞれが異なる方向に背景をずらします。</div>
     </div>
   </section>
 
@@ -49,20 +41,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/blob-stones/index.html?embedded`} title="Stones" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The blob shaded as stone: rock, marble, and sand.</p>
-      <div class="jp">石として陰影付けされたブロブです。岩、大理石、そして砂。</div>
+      <p>A blob shaded to resemble rock, marble, and sand.</p>
+      <div class="jp">岩、大理石、砂の質感を表現した塗りです。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Rock:</strong> The relief folds its noise into creases, valley side down, so the surface reads as fractured rather than bumpy. Two colors mottle the face in patches, the creases darken as crevices do, and the boundary breaks on the same crags.</p>
-        <div class="jp"><strong>岩：</strong>起伏はノイズを谷側へ折り返してひだにするため、面はでこぼこではなく割れたものとして読めます。2色が面を斑に染め、ひだは割れ目のように暗くなり、境界も同じ岩肌で割れます。</div>
+      <p><strong>Rock:</strong> Folding noise into valley-shaped creases creates relief that makes the surface look fractured rather than merely bumpy. Two colors form mottled patches, while the creases appear as dark crevices. The outline follows the same jagged features.</p>
+      <div class="jp"><strong>岩：</strong>ノイズを谷状に折り返して起伏を作り、単なるでこぼこではなく、ひび割れた岩肌のように見せます。2色で表面にまだら模様を作り、谷を割れ目のように暗くします。輪郭も同じ起伏に沿ってギザギザになります。</div>
 
-        <p><strong>Marble:</strong> Veins are a sine band warped by noise and raised to a high power, so they run as thin wandering lines over a near-white ground. The surface stays smooth and glossy.</p>
-        <div class="jp"><strong>大理石：</strong>脈は、ノイズでゆがめた正弦の帯を高い累乗に上げたものです。そのため、白に近い地の上を細く曲がりくねって走ります。面は滑らかで光沢を保ちます。</div>
+      <p><strong>Marble:</strong> A sine band, warped by noise and raised to a high power, creates thin, winding veins across a nearly white base. The surface stays smooth and glossy.</p>
+      <div class="jp"><strong>大理石：</strong>ノイズでゆがめた正弦波の帯を高いべき乗で細く絞り、白に近い下地に、細く曲がりくねった筋模様を作ります。表面は滑らかで、光沢を保ちます。</div>
 
-        <p><strong>Sand:</strong> The normal jitters per pixel from a hashed grid, so every grain catches the light its own way, and the brightest few glint. The edge dissolves into loose grains instead of cutting.</p>
-        <div class="jp"><strong>砂：</strong>法線はハッシュした格子からピクセルごとに揺らぎます。そのため一粒一粒が独自に光を受け、最も明るいわずかな粒がきらめきます。縁は切れずに、ばらけた粒に崩れます。</div>
-      </details>
+      <p><strong>Sand:</strong> A hashed grid perturbs the normal at each pixel, making each grain catch the light at a different angle. Rather than forming a sharp edge, the outline dissolves into loose grains.</p>
+      <div class="jp"><strong>砂：</strong>格子のハッシュ値でピクセルごとに法線を揺らし、一粒一粒が異なる角度で光を受けるようにします。輪郭はくっきりとした境界を作らず、ばらばらの粒へとほどけていきます。</div>
     </div>
   </section>
 

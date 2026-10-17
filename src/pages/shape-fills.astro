@@ -5,13 +5,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Shape fills" slug="shape-fills">
   <div class="monologue">
-    On this page, we build geometric fills from two points: the gesture's start and end place the shape, and the path between them is ignored.
-    <div class="jp">このページでは、2点から作る幾何学的な塗りを作ります。身振りの始点と終点が形を決め、その間のパスは無視されます。</div>
-  </div>
-
-  <div class="prose">
-    <p>Unlike the blob fills, which enclose the whole gesture, these shapes are built from the endpoints alone. The contour generators live with the path effects (<code>circleFromEnds</code>, <code>ovalFromEnds</code>, <code>rectFromEnds</code>, <code>diamondFromEnds</code>, <code>triangleFromEnds</code>), and the contours feed the same blob renderers as any other closed region.</p>
-    <div class="jp">身振り全体を包み込むブロブの塗りと違い、これらの形は端点だけから作られます。輪郭の生成器はパスエフェクトの仲間です（<code>circleFromEnds</code>、<code>ovalFromEnds</code>、<code>rectFromEnds</code>、<code>diamondFromEnds</code>、<code>triangleFromEnds</code>）。輪郭は、他の閉じた領域と同じブロブレンダラに渡されます。</div>
+    Unlike blob fills, which enclose the entire gesture, the shapes on this page are determined solely by the gesture's start and end points; the path between them is ignored.
+    <div class="jp">ジェスチャー全体を包み込むブロブの塗りとは異なり、このページの形はジェスチャーの始点と終点だけで決まり、その間の軌跡は無視されます。</div>
   </div>
 
   <section class="demo-section" id="shapes">
@@ -23,14 +18,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/endpoint-shapes/index.html?embedded`} title="Circle, oval, rectangle" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Three flat fills from two points, each built from one seeded segment. The circle runs from its center to its edge; the oval and the rectangle read the endpoints as the corners of their bounding box.</p>
-      <div class="jp">2点から作られる3つの平坦な塗りです。それぞれシード付きの1本の線分から作られます。円は中心から縁まで。楕円と長方形は、端点を外接する箱の角として読みます。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>One contract:</strong> Every generator returns a closed counterclockwise contour, or null when the endpoints are too close to span a shape, so a degenerate click draws nothing.</p>
-        <div class="jp"><strong>ひとつの契約：</strong>すべての生成器は、閉じた反時計回りの輪郭を返します。端点が近すぎて形にならないときはnullを返すため、その場でのクリックは何も描きません。</div>
-      </details>
+      <p>Three flat-filled shapes are built from two points. For the circle, the segment runs from the center to the edge; for the oval and rectangle, the endpoints define opposite corners of the bounding box. If the endpoints are too close to form a shape, null is returned. A click without movement therefore draws nothing.</p>
+      <div class="jp">2点から作る3種類の単色の図形です。円では、線分が中心と円周上の点を結びます。楕円と長方形では、両端点が外接矩形の対角の頂点を定めます。端点が近すぎて形を作れない場合はnullが返されるため、移動を伴わないクリックでは何も描かれません。</div>
     </div>
   </section>
 
@@ -43,8 +32,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/endpoint-triangles/index.html?embedded`} title="Diamond and triangles" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The diamond takes the endpoints as its long diagonal. The triangles stand on the segment with fixed interior angles (30-60-90 and 45-45-90); which corner takes which angle, and which side of the segment the apex lands on, are seeded.</p>
-      <div class="jp">ひし形は端点を長い対角線として取ります。三角形は線分の上に、決まった内角（30-60-90と45-45-90）で立ちます。どの角にどの角度が割り当てられるか、頂点が線分のどちら側に立つかはシードで決まります。</div>
+      <p>The diamond uses the segment between the endpoints as its long diagonal. The triangles are built on the segment with fixed interior angles (30-60-90 and 45-45-90). The seed determines which angle is assigned to each corner and which side of the segment the apex lies on.</p>
+      <div class="jp">ひし形は、両端点を結ぶ線分を長い対角線として使います。三角形は、決まった内角（30-60-90と45-45-90）で線分をもとに作られます。各頂点への角度の割り当てと、頂点を線分のどちら側に置くかは、シードで決まります。</div>
     </div>
   </section>
 
@@ -57,17 +46,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/slit-scan-shapes/index.html?embedded`} title="Slit-scan shapes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The same shapes over the patterned test background, colored by <code>SlitScanBlobRenderer</code>: the background is sampled along one seeded line, every fragment reads the sample at its projection onto that line, and the result mixes with a flat base color. Each line of samples stretches into bands orthogonal to it, the way a slit-scan photograph stretches one slit over time.</p>
-      <div class="jp">同じ形をパターン化されたテスト背景の上に置き、<code>SlitScanBlobRenderer</code>が塗ります。背景はシードで決まる1本の線に沿ってサンプリングされ、それぞれのフラグメントはその線への射影の位置にあるサンプルを読み、結果は平坦なベースの色と混ぜられます。サンプルの列はその線と直交する帯として引き伸ばされます。スリットスキャン写真が1本のスリットを時間方向に引き伸ばすのと同じです。</div>
-
-      <details>
-        <summary>Details</summary>
-        <p><strong>The sampling line:</strong> Seeded per shape, through the midpoint of the endpoints, so it always crosses the shape and the sampled colors come from under it.</p>
-        <div class="jp"><strong>サンプリングの線：</strong>形ごとにシードで決まり、端点の中点を通ります。そのため線はつねに形を横切り、サンプリングされる色はその下から来ます。</div>
-
-        <p><strong>The mix:</strong> The sample weight is a parameter; 0 is the flat base color, 1 is the pure slit-scan.</p>
-        <div class="jp"><strong>混合：</strong>サンプルの重みはパラメータです。0で平坦なベースの色、1で純粋なスリットスキャンになります。</div>
-      </details>
+      <p>These fills sample the image at the point where it projects onto the line, then blend the result with a flat base color. The samples stretch into bands perpendicular to the line, much like a slit-scan photograph stretches a single slit over time.</p>
+      <div class="jp">これらの塗りでは、画像を線上への投影位置でサンプリングし、その結果を単色のベースカラーとブレンドします。サンプルは線に垂直な帯状に引き伸ばされます。スリットスキャン写真で、1本のスリットが時間の経過とともに引き伸ばされるのとよく似ています。</div>
     </div>
   </section>
 
@@ -80,8 +60,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/slit-scan-triangles/index.html?embedded`} title="Slit-scan triangles" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>The diamond and the triangles under the same slit-scan coloring, over the same patterned background.</p>
-      <div class="jp">ひし形と三角形に、同じスリットスキャンの塗りを適用したものです。同じパターン化された背景の上に置かれています。</div>
+      <p>The diamond and triangles use the same slit-scan fill.</p>
+      <div class="jp">ひし形と三角形にも、同じスリットスキャンの塗りを適用します。</div>
     </div>
   </section>
 
