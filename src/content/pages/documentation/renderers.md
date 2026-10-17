@@ -15,8 +15,8 @@ Swap one field and the same path becomes a different kind of mark.
 
 ## The base class
 
-A renderer turns a <a href="/draw/documentation/stroke-definition">`StrokeDef`</a> into a `THREE.Object3D`. One renderer instance can build any number of strokes — it carries style, never state about a particular stroke. That is why the renderer sits on the definition as a reference rather than being constructed per stroke.
-<div class="jp">レンダラは<a href="/draw/documentation/stroke-definition">`StrokeDef`</a>を`THREE.Object3D`に変換します。レンダラのインスタンスひとつで、いくつでもストロークを構築できます。保持するのはスタイルであって、特定のストロークの状態ではありません。だからこそ、レンダラはストロークごとに生成されるのではなく、定義側から参照として保持されます。</div>
+A renderer turns a <a href="/unlock/documentation/stroke-definition">`StrokeDef`</a> into a `THREE.Object3D`. One renderer instance can build any number of strokes — it carries style, never state about a particular stroke. That is why the renderer sits on the definition as a reference rather than being constructed per stroke.
+<div class="jp">レンダラは<a href="/unlock/documentation/stroke-definition">`StrokeDef`</a>を`THREE.Object3D`に変換します。レンダラのインスタンスひとつで、いくつでもストロークを構築できます。保持するのはスタイルであって、特定のストロークの状態ではありません。だからこそ、レンダラはストロークごとに生成されるのではなく、定義側から参照として保持されます。</div>
 
 `StrokeRenderer` is the base class. Subclasses implement `build(def)`; `dispose(object)` is inherited and releases the geometry and materials of anything the renderer built. `resampleSpine(def, samplesPerUnit)` is exported alongside it and does the shared resampling, so tessellation behaves identically across the group rather than being reimplemented per renderer.
 <div class="jp">`StrokeRenderer`が基底クラスです。サブクラスは`build(def)`を実装します。`dispose(object)`は継承され、そのレンダラが構築したもののジオメトリとマテリアルを解放します。`resampleSpine(def, samplesPerUnit)`も併せてエクスポートされ、共通の再サンプリングを担います。これにより、テセレーションの挙動はレンダラごとに再実装されるのではなく、グループ全体で同一になります。</div>

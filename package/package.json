@@ -4,7 +4,7 @@
   "description": "A drawing engine, live view, and player behind a minimal embedding interface",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kynd/draw.git"
+    "url": "git+https://github.com/kynd/unlock.git"
   },
   "license": "CC-BY-SA-4.0",
   "publishConfig": {

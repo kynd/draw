@@ -60,7 +60,7 @@ number of strokes, because it carries style and never state about a particular s
 <div class="jp">`renderer`はサブクラス用のフックではなく参照です。一つのレンダラのインスタンスで、いくつでもストロークを構築できます。保持するのはスタイルであって、特定のストロークの状態ではないからです。`build()` は単に定義を渡すだけです。</div>
 
 Renderers, the contract they share, and `RibbonStrokeRenderer` are documented on
-<a href="/draw/documentation/renderers">Renderers</a>.
-<div class="jp">レンダラ、レンダラ同士が共有する契約、そして `RibbonStrokeRenderer` については<a href="/draw/documentation/renderers">Renderers</a>に記載しています。</div>
+<a href="/unlock/documentation/renderers">Renderers</a>.
+<div class="jp">レンダラ、レンダラ同士が共有する契約、そして `RibbonStrokeRenderer` については<a href="/unlock/documentation/renderers">Renderers</a>に記載しています。</div>
 
 </div>

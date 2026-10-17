@@ -4,7 +4,7 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
   integrations: [mdx()],
   site: 'https://www.kynd.info',
-  base: '/draw',
+  base: '/unlock',
   output: 'static',
   build: {
     assets: 'assets',
