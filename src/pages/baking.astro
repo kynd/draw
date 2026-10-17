@@ -1,0 +1,39 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<PageLayout title="Baking" slug="baking">
+  <div class="monologue">
+    Here, we examine how a completed mark is merged into the canvas.
+    <div class="jp">このページでは、描き終えた筆跡がどのようにキャンバスへ統合されるかを見ていきます。</div>
+  </div>
+
+  <div class="prose">
+    <p>The mark being drawn is live 3D geometry. As the gesture grows, the renderer rebuilds and redraws it every frame, responding to movement and pen pressure in real time.</p>
+    <div class="jp">描画中の筆跡は、リアルタイムの3Dジオメトリです。線が伸びるたびにレンダラが形状を作り直し、毎フレーム描画することで、動きや筆圧をリアルタイムに反映します。</div>
+
+    <p>To store all previous marks, we use a canvas buffer: a raster image in an offscreen render target. Each finished gesture is flattened into this single image, so the buffer stores the entire drawing as one layer rather than as a stack of individual strokes.</p>
+    <div class="jp">それまでのすべての筆跡を保持するために、キャンバスバッファを使います。これは、オフスクリーンのレンダーターゲットに保存されるラスター画像です。描き終えたジェスチャは一つずつこの画像に統合されるため、バッファには個々のストロークの積み重ねではなく、絵全体が一枚のレイヤーとして保存されます。</div>
+
+    <p>While the user draws with the pen down, the live mark is drawn over the buffer each frame. It is merged (baked) into the buffer only when the pointer is released. Until then, the buffer remains unchanged, and the live mark can still be altered or undone.</p>
+    <div class="jp">ペンを下ろして描いている間、描画中の筆跡は毎フレーム、バッファの上に重ねて描かれるだけです。筆跡がバッファに統合（ベイク）されるのは、ポインタを離したときだけです。それまではバッファは変わらず、描画中の筆跡を変更したり取り消したりできます。</div>
+
+    <p>This separation keeps the architecture simple and fast. The scene never needs to redraw committed marks, and only one mark is live at a time. The result is a rough approximation, not an accurate physical simulation. Still, the live mark can sample the buffer beneath it to suggest physical effects such as smudging, bleeding, and reflection.</p>
+    <div class="jp">この分離によって、アーキテクチャをシンプルかつ高速に保てます。確定済みの筆跡をシーンが再描画する必要はなく、描画中の筆跡も常に一つだけです。これは正確な物理シミュレーションではなく、大まかな近似です。それでも、描画中の筆跡がその下のバッファを参照することで、こすれやにじみ、反射といった物理的な効果を表現できます。</div>
+  </div>
+
+  <section class="demo-section" id="demo">
+    <div class="demo-header">
+      <h2>Live stroke and canvas buffer</h2>
+      <a href={`${base}/demos/baking/index.html`} target="_blank" rel="noopener">open full size ↗</a>
+    </div>
+    <div class="demo-embed">
+      <iframe src={`${base}/demos/baking/index.html?embedded`} title="Live stroke and canvas buffer" scrolling="no"></iframe>
+    </div>
+    <div class="prose">
+      <p>Draw with a brush in the left pane. It shows only the current stroke against a transparency grid, with no canvas content behind it. The right pane shows the committed drawing in the canvas buffer before the current stroke is baked in. The current stroke is added to the buffer only when you release the pointer.</p>
+      <div class="jp">左半分にブラシを使って描いてみましょう。左側には、透明を表す市松模様の上に現在の筆跡だけが表示され、背景にキャンバスの内容は表示されません。右側には、現在の筆跡がベイクされる前の、キャンバスバッファに確定済みの絵が表示されます。現在の筆跡がバッファに加わるのは、ポインタを離したときだけです。</div>
+    </div>
+  </section>
+</PageLayout>

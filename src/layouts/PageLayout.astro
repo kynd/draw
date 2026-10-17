@@ -58,6 +58,11 @@ const navItems: NavItem[] = [
           { label: 'Tight blob',   href: '#tight-blobs' },
         ]
       },
+      { label: 'Baking', href: `${base}/baking`, slug: 'baking',
+        subLinks: [
+          { label: 'Live stroke and canvas buffer', href: '#demo' },
+        ]
+      },
       { label: 'Coverage layer', href: `${base}/coverage-layer`, slug: 'coverage-layer',
         subLinks: [
           { label: 'The buffer',       href: '#demo' },
@@ -504,6 +509,10 @@ const isPublic    = currentIdx >= 0;
     .main-inner > .prose { margin-left: 1.5rem; margin-bottom: 4rem; }
     .main-inner > .demo-embed { margin-left: 1.5rem; margin-bottom: 4rem; }
 
+    /* Two photos stacked at the top of the intro, aligned to the text column. */
+    .intro-photos { display: flex; flex-direction: column; gap: 0.8rem; margin: 0 0 2.6rem; max-width: 800px; }
+    .intro-photos img { display: block; width: 100%; height: auto; border-radius: 2px; }
+
     /* A content image with a caption, aligned to the text column. */
     .page-figure { width: 800px; max-width: calc(100% - 1.5rem); margin: 0 0 4rem 1.5rem; }
     .page-figure img { display: block; width: 100%; height: auto; border-radius: 2px; }
@@ -545,6 +554,22 @@ const isPublic    = currentIdx >= 0;
     .page-note strong { color: var(--fg); font-weight: 500; }
     .page-note p:last-child { margin-bottom: 0; }
     .page-note .math-block { margin: 1rem 0; }
+    .prose blockquote {
+      position: relative;
+      margin: 3rem 0; padding: 0 0 0 2.8rem;
+    }
+    .prose blockquote::before {
+      content: '\201C';
+      position: absolute; left: -0.1rem; top: 0.9rem;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 4.5rem; line-height: 0; color: var(--border);
+      pointer-events: none;
+    }
+    .prose blockquote .quote-en > :first-child,
+    .prose blockquote .quote-jp > :first-child { margin-top: 0; }
+    .prose blockquote .quote-jp { margin-top: 2.5rem; }
+    .prose blockquote p { color: var(--fg-muted); }
+    .prose blockquote .quote-en p { font-style: italic; }
     .prose h3 {
       font-size: 0.92rem; font-weight: 600; letter-spacing: -0.005em;
       margin-top: 2rem; margin-bottom: 0.6rem;
