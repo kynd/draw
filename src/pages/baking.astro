@@ -10,8 +10,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   </div>
 
   <div class="prose">
-    <p>The mark being drawn is live 3D geometry. As the gesture grows, the renderer rebuilds and redraws it every frame, responding to movement and pen pressure in real time.</p>
-    <div class="jp">描画中の筆跡は、リアルタイムの3Dジオメトリです。線が伸びるたびにレンダラが形状を作り直し、毎フレーム描画することで、動きや筆圧をリアルタイムに反映します。</div>
+    <p>The mark being drawn is live 3D geometry. As the gesture grows, the renderer rebuilds and redraws it every frame, responding to movement and <a href={`${base}/pen-pressure`}>pen pressure</a> in real time.</p>
+    <div class="jp">描画中の筆跡は、リアルタイムの3Dジオメトリです。線が伸びるたびにレンダラが形状を作り直し、毎フレーム描画することで、動きや<a href={`${base}/pen-pressure`}>筆圧</a>をリアルタイムに反映します。</div>
 
     <p>To store all previous marks, we use a canvas buffer: a raster image in an offscreen render target. Each finished gesture is flattened into this single image, so the buffer stores the entire drawing as one layer rather than as a stack of individual strokes.</p>
     <div class="jp">それまでのすべての筆跡を保持するために、キャンバスバッファを使います。これは、オフスクリーンのレンダーターゲットに保存されるラスター画像です。描き終えたジェスチャは一つずつこの画像に統合されるため、バッファには個々のストロークの積み重ねではなく、絵全体が一枚のレイヤーとして保存されます。</div>

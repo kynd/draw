@@ -5,8 +5,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Shape fills" slug="shape-fills">
   <div class="monologue">
-    Unlike blob fills, which enclose the entire gesture, the shapes on this page are determined solely by the gesture's start and end points; the path between them is ignored.
-    <div class="jp">ジェスチャー全体を包み込むブロブの塗りとは異なり、このページの形はジェスチャーの始点と終点だけで決まり、その間の軌跡は無視されます。</div>
+    Unlike <a href={`${base}/flat-fills`}>blob fills</a>, which enclose the entire gesture, the shapes on this page are determined solely by the gesture's start and end points; the path between them is ignored.
+    <div class="jp">ジェスチャー全体を包み込む<a href={`${base}/flat-fills`}>ブロブの塗り</a>とは異なり、このページの形はジェスチャーの始点と終点だけで決まり、その間の軌跡は無視されます。</div>
   </div>
 
   <section class="demo-section" id="shapes">
