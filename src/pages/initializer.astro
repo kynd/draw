@@ -11,7 +11,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   <div class="prose">
     <p>Each initializer generates an initial composition (choosing tools, colors, and placement) and renders it over a gradient. The button in the corner of the canvas generates another composition with a fresh palette.</p>
-    <div class="jp">各イニシャライザは、ツールや色、配置を選び、グラデーションを背景にした最初の構図を生成します。キャンバスの隅にあるボタンを押すと、新しいパレットを使って別の構図を生成できます。</div>
+    <div class="jp">それぞれのイニシャライザは、ツールや色、配置を選び、グラデーションを背景にした最初の構図を生成します。キャンバスの隅にあるボタンを押すと、新しいパレットを使って別の構図を生成できます。</div>
   </div>
 
   <section class="demo-section" id="scatter">
@@ -24,7 +24,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>A gradient serves as the backdrop for strokes drawn with randomly selected tools and palette colors. The layout is also chosen at random from several options, so the strokes aren't always scattered freely. These options include a free scatter of one to four strokes; the same shape repeated on a grid, with a different tool for each; a non-overlapping arrangement; one shape in each quadrant; random straight lines; strokes tracing geometric shapes (sine waves, zigzags, spirals, circles, or lines); a single stroke in the center; or three strokes at the vertices of an equilateral triangle.</p>
-      <div class="jp">グラデーションを背景に、ランダムに選んだツールとパレットの色でストロークを描きます。配置も複数の方式からランダムに選ばれるため、ストロークが常に自由に散らばるとは限りません。方式には、1〜4本のストロークを自由に散らす、同じ形を異なるツールで格子状に繰り返す、重ならないように配置する、4つの各区画に形をひとつずつ置く、といったものがあります。そのほか、ランダムな直線や、幾何学的な形（サイン波、ジグザグ、螺旋、円、直線）をたどるストローク、中央に1本だけ置く配置、正三角形の各頂点に1本ずつ置く配置もあります。</div>
+      <div class="jp">グラデーションを背景に、ランダムに選んだツールとパレットの色でストロークを描きます。配置も複数の方式からランダムに選ばれるため、ストロークが常に自由に散らばるとは限りません。方式には、1〜4本のストロークを自由に散らす、同じ形を異なるツールで格子状に繰り返す、重ならないように配置する、4つのそれぞれの区画に形をひとつずつ置く、といったものがあります。そのほか、ランダムな直線や、幾何学的な形（サイン波、ジグザグ、螺旋、円、直線）をたどるストローク、中央に1本だけ置く配置、正三角形のそれぞれの頂点に1本ずつ置く配置もあります。</div>
     </div>
   </section>
 
@@ -52,7 +52,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>A random straight line divides the canvas. Each resulting region has a 50% chance of being divided again, with the process repeating for a few levels. Each region is filled with a solid palette color, then one to four random strokes are drawn on top.</p>
-      <div class="jp">ランダムな直線でキャンバスを分割します。分割された各領域は50%の確率でさらに分割され、この処理を数段階繰り返します。各領域をパレットの色で塗りつぶし、最後にランダムなストロークを1〜4本重ねます。</div>
+      <div class="jp">ランダムな直線でキャンバスを分割します。分割されたそれぞれの領域は50%の確率でさらに分割され、この処理を数段階繰り返します。それぞれの領域をパレットの色で塗りつぶし、最後にランダムなストロークを1〜4本重ねます。</div>
     </div>
   </section>
 

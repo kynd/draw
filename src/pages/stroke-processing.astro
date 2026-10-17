@@ -45,7 +45,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <div class="jp">Natural曲線とHobby曲線は、それぞれすべてのノットを使って連立方程式を解きます。そのため、新しいノットを追加すると曲線全体が再計算されます。新しいノットの影響は離れるほど小さくなりますが、ゼロにはなりません。</div>
 
       <p>Each segment of a Catmull-Rom or B-spline curve depends only on its four surrounding knots. Adding a knot changes only the final segments; everything before them stays fixed.</p>
-      <div class="jp">Catmull-Rom曲線とB-スプライン曲線は、各セグメントが周囲の4つのノットだけに依存します。ノットを追加しても変わるのは末尾のセグメントだけで、それより前の部分は固定されたままです。</div>
+      <div class="jp">Catmull-Rom曲線とB-スプライン曲線は、それぞれのセグメントが周囲の4つのノットだけに依存します。ノットを追加しても変わるのは末尾のセグメントだけで、それより前の部分は固定されたままです。</div>
 
       <p>The Catmull-Rom curve passes through every knot, but it is only C1 continuous, so its curvature may change abruptly at the knots. The B-spline is C2 continuous and therefore smoother, but it approximates the knots rather than passing through them.</p>
       <div class="jp">Catmull-Rom曲線はすべてのノットを通りますが、C1連続であるため、ノットで曲率が急変することがあります。B-スプラインはC2連続でより滑らかですが、ノットを通るのではなく、その近くを通るように近似します。</div>
@@ -76,7 +76,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>This demo shows how all four smoothing methods work on actual strokes, not just bare lines. Select a method from the dropdown to compare them.</p>
-      <div class="jp">このデモでは、単なる線だけでなく、実際のストロークに各平滑化手法を適用した結果を確認できます。ドロップダウンから4つの手法を選んで比較できます。</div>
+      <div class="jp">このデモでは、単なる線だけでなく、実際のストロークにそれぞれの平滑化手法を適用した結果を確認できます。ドロップダウンから4つの手法を選んで比較できます。</div>
     </div>
   </section>
 

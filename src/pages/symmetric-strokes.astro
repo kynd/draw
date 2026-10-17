@@ -11,7 +11,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   <div class="prose">
     <p>The symmetry is a path transform: <code>mirroredPath</code> and <code>rotatedPaths</code> (on the Path Effects page) derive the copies from the drawn path, and every copy is an ordinary stroke drawn by the same tool. The drawing tool applies them through the registry's <code>symmetry</code> field: the roll (a rotation count, the screen axes) lands at the stroke's start, the copies show while the gesture grows, and they land at release as ordinary strokes, so they record, replay, and mirror like anything drawn. At even odds a stroke's copies take their own palette colors.</p>
-    <div class="jp">対称性はパスの変換です。<code>mirroredPath</code>と<code>rotatedPaths</code>（Path Effectsページ）が描かれたパスから複製を導き、各複製は同じツールで描かれる通常のストロークです。描画ツールはレジストリの<code>symmetry</code>フィールドを通してこれを適用します。ロール（回転の数、画面の軸）はストロークの始まりに決まり、複製は描いている間から表示され、離した瞬間に通常のストロークとして置かれます。そのため複製は描いたものと同じように記録され、再生され、ミラーされます。五分五分の確率で、ストロークの複製はそれぞれ自分のパレットの色を取ります。</div>
+    <div class="jp">対称性はパスの変換です。<code>mirroredPath</code>と<code>rotatedPaths</code>（Path Effectsページ）が描かれたパスから複製を導き、それぞれの複製は同じツールで描かれる通常のストロークです。描画ツールはレジストリの<code>symmetry</code>フィールドを通してこれを適用します。ロール（回転の数、画面の軸）はストロークの始まりに決まり、複製は描いている間から表示され、離した瞬間に通常のストロークとして置かれます。そのため複製は描いたものと同じように記録され、再生され、ミラーされます。五分五分の確率で、ストロークの複製はそれぞれ自分のパレットの色を取ります。</div>
   </div>
 
   <section class="demo-section" id="mirror">

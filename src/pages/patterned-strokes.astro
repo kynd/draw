@@ -9,6 +9,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <div class="jp">ここでは、ひとつの動きをたくさんの小さな筆跡に分けるストロークを作ります。</div>
   </div>
 
+  <div class="prose">
+    <p>Repeating small strokes or patterns can create textures that a single stroke cannot. Hatching (the repeated layering of fine lines) has long been a standard technique for creating shading with pencils and pens. On this page, we'll create tools that draw multiple shapes in a single gesture, exploring styles ranging from traditional pen drawing to more graphic effects. Some of these tools might also fit on the graphical stroke page, but the categories used across these pages are for convenience.</p>
+    <div class="jp">小さなストロークやパターンを繰り返すことで、1本のストロークだけでは表現できない質感を生み出せます。ハッチング（細い線を重ねて陰影をつける技法）は、鉛筆やペンで陰影を表現する定番の手法として、長く使われてきました。このページでは、1回の操作で複数の形を描けるツールを作り、伝統的なペン画から、よりグラフィカルな表現までを探ります。これらの一部は graphical stroke のページに含めてもよさそうですが、それぞれのページの分類は便宜上のものです。</div>
+  </div>
+
   <section class="demo-section" id="patterns">
     <div class="demo-header">
       <h2>Dashes, dots, strips</h2>
@@ -19,7 +24,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>These strokes are made up of many small elements rather than one solid shape: short, rounded dashes spaced along the spine; uneven, hand-drawn dots; and longer strips placed loosely enough to overlap. The elements fill the stroke's width and follow its taper. Each row across the width follows the arc from the start, using its own seeded random sequence. As the stroke grows, new elements are added at the tip without shifting those already in place.</p>
-      <div class="jp">ひとつのまとまった形ではなく、多数の小さな要素で構成されたストロークです。中心線に沿って並ぶ短く丸みのあるダッシュ、不揃いな手描き風の点、そして互いに重なるようゆとりを持たせて配置された長めの帯でできています。要素はストロークの幅全体を埋め、テーパーに沿います。幅方向の各列は、それぞれ固有のシード付き乱数列を使って、始点から弧をたどります。そのため、ストロークが伸びても、すでに配置された要素は並べ直されず、先端に新しい要素が加わります。</div>
+      <div class="jp">ひとつのまとまった形ではなく、多数の小さな要素で構成されたストロークです。中心線に沿って並ぶ丸みのある短い線、不揃いな手描き風の点、そして互いに重なるようゆとりを持たせて配置された長めの帯でできています。要素はストロークの幅全体を埋め、テーパーに沿います。幅方向の各列は、それぞれ固有のシード付き乱数列を使って、始点から弧をたどります。そのため、ストロークが伸びても、すでに配置された要素は並べ直されず、先端に新しい要素が加わります。</div>
     </div>
   </section>
 
@@ -33,7 +38,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>The placement stays the same, but each element is rendered as a wet mark that pulls the background along. A dash or strip samples colors behind it along its direction and blends them, with the strongest pull near its tail. This makes each element look like a short stroke of wet paint. A dot draws the surrounding color inward, creating a blot. The sampled background is tinted with the element's color.</p>
-      <div class="jp">配置方法は同じですが、各要素を背景を引きずる濡れた筆跡として描きます。ダッシュや帯は、進行方向に沿って後方の色をサンプリングして平均し、尾に近いほど強く引き込みます。そのため、各要素は濡れた絵の具で描いた短い筆跡のように見えます。点は周囲の色を内側へ引き込み、しみを作ります。サンプリングした背景色には、要素の色が重なります。</div>
+      <div class="jp">配置方法は同じですが、それぞれの要素を背景を引きずる濡れた筆跡として描きます。短い線や帯は、進行方向に沿って後方の色をサンプリングして平均し、尾に近いほど強く引き込みます。そのため、それぞれの要素は濡れた絵の具で描いた短い筆跡のように見えます。点は周囲の色を内側へ引き込み、しみを作ります。サンプリングした背景色には、要素の色が重なります。</div>
     </div>
   </section>
 
@@ -67,10 +72,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <div class="jp"><strong>ピクセル：</strong>セルを中心線から外側へスタンプし、グリッド座標で重複を取り除きます。内外の判定には中心線からの符号付き距離を使い、左右の幅を個別に保ちます。</div>
 
       <p><strong>Facets:</strong> The spine is resampled at wider intervals, and each triangle is filled with a flat color. Jittering the vertices across the width breaks up both the shading and the silhouette.</p>
-      <div class="jp"><strong>面：</strong>中心線をより広い間隔で再サンプリングし、各三角形を単色で塗ります。頂点を幅方向に揺らすことで、陰影と輪郭の両方に変化をつけます。</div>
+      <div class="jp"><strong>面：</strong>中心線をより広い間隔で再サンプリングし、それぞれの三角形を単色で塗ります。頂点を幅方向に揺らすことで、陰影と輪郭の両方に変化をつけます。</div>
 
       <p><strong>Lanes:</strong> Each lane is a separate, thin ribbon offset across the width, allowing it to follow the curve.</p>
-      <div class="jp"><strong>レーン：</strong>各レーンは幅方向にずらして配置した独立した細いリボンで、曲線に沿って伸びます。</div>
+      <div class="jp"><strong>レーン：</strong>それぞれのレーンは幅方向にずらして配置した独立した細いリボンで、曲線に沿って伸びます。</div>
     </div>
   </section>
 

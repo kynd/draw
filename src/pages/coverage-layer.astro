@@ -52,7 +52,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </div>
     <div class="prose">
       <p>A brush lays down two pigments. Taking the per-channel maximum of two hues pushes the result toward white (for example, cyan over red produces white), so a two-color stroke would blow out where it crosses itself. A multicolor mark still uses MAX blending for coverage, but composites color with standard blending, allowing the top layer to win. The pigments then blend as they layer at the crossing instead of becoming brighter. Draw a self-crossing loop and watch the colors blend rather than lighten.</p>
-      <div class="jp">筆は2色の顔料を描き重ねますが、2つの色の各チャンネルで最大値を取ると、結果は白に近づきます（たとえば、赤にシアンを重ねると白になります）。そのため、2色のストロークでは交差部分が白飛びしてしまいます。多色の筆跡では、被覆率には引き続きMAXブレンディングを使い、色は標準的なブレンディングで合成して、上の色を優先します。その結果、交差部分は明るくなるのではなく、色が重なって混ざります。自分自身と交差するループを描き、交差部分で色が明るくならずに混ざる様子を見てください。</div>
+      <div class="jp">筆は2色の顔料を描き重ねますが、2つの色のそれぞれのチャンネルで最大値を取ると、結果は白に近づきます（たとえば、赤にシアンを重ねると白になります）。そのため、2色のストロークでは交差部分が白飛びしてしまいます。多色の筆跡では、被覆率には引き続きMAXブレンディングを使い、色は標準的なブレンディングで合成して、上の色を優先します。その結果、交差部分は明るくなるのではなく、色が重なって混ざります。自分自身と交差するループを描き、交差部分で色が明るくならずに混ざる様子を見てください。</div>
     </div>
   </section>
 </PageLayout>

@@ -32,7 +32,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <div class="jp"><strong>Monochrome：</strong>すべての色を同じ色相に保ちます。最初の色は、その色相が最も鮮やかになる点、つまり指定された色相の彩度が最大になる明度に置かれます。残りの色は、その最初の色を固定したうえで利用可能な明度範囲をできるだけ均等に分割し、それぞれの明度で可能な最大の彩度を使用します。</div>
 
       <p><strong>Vivid &amp; dark:</strong> evenly divides the color wheel, starting at the key hue. It makes the half closest to the key hue vivid, using each hue's representative lightness (see below), and makes the opposite half dark.</p>
-      <div class="jp"><strong>Vivid &amp; dark：</strong>基準色相から始めて、色相環全体を均等に分割します。基準の色相に近い半分は、各色相の代表的な明度（下記参照）で鮮やかにし、反対側の半分は暗くします。</div>
+      <div class="jp"><strong>Vivid &amp; dark：</strong>基準色相から始めて、色相環全体を均等に分割します。基準の色相に近い半分は、それぞれの色相の代表的な明度（下記参照）で鮮やかにし、反対側の半分は暗くします。</div>
 
       <p><strong>Pastel cluster:</strong> distributes hues clustered around the key hue and keeps all colors light and low in chroma.</p>
       <div class="jp"><strong>Pastel cluster：</strong>基準の色相の周囲に色相を集中させ、すべての色を明るく低彩度に保ちます。</div>
@@ -51,7 +51,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <div class="jp">人が典型的だと認識し、最も単純な色名（赤、緑、青、ピンクなど）で表す色があります。こうした色には最も典型的に見える特定の明るさがあり、その明るさは多くの場合、彩度が最大になる明度とは異なります。例えば黄色は明るいときにだけ黄色らしく見える一方、緑や青が最もそれらしく見える明度は、彩度のピークよりかなり低い位置にあります。</div>
 
       <p>Vivid &amp; dark uses this lightness, anchored by color term (red 0.58, yellow 0.90, yellow-green 0.82, green 0.50, blue 0.45, pink 0.78) and interpolated around the wheel. These values are set arbitrarily by the author, not scientifically; these prototypes are cultural, and where the colors sit depends on who you ask.</p>
-      <div class="jp">Vivid &amp; darkではこの明度を使用します。各色名に対応する値（赤 0.58、黄 0.90、黄緑 0.82、緑 0.50、青 0.45、ピンク 0.78）を基準点とし、色相環に沿って補間します。これらの値は科学的なものではなく、作者が任意に設定したものです。こうした典型色は文化的なものであり、色の位置は誰に尋ねるかによって変わります。</div>
+      <div class="jp">Vivid &amp; darkではこの明度を使用します。それぞれの色名に対応する値（赤 0.58、黄 0.90、黄緑 0.82、緑 0.50、青 0.45、ピンク 0.78）を基準点とし、色相環に沿って補間します。これらの値は科学的なものではなく、作者が任意に設定したものです。こうした典型色は文化的なものであり、色の位置は誰に尋ねるかによって変わります。</div>
 
       <h2 id="randomness">Randomness</h2>
       <p>Every scheme except Black jitters the hue and lightness of the colors other than the key color. The palette sets a random seed, and the jitter is derived from that seed, so the same settings reproduce the same palette.</p>

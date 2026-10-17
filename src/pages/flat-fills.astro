@@ -29,7 +29,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <details>
         <summary>Details</summary>
         <p><strong>Spikes:</strong> An integer count of spikes runs around the boundary's arc, so the profile meets itself at the seam in a valley. Each spike hashes its height and lean from its index. Spikes only stick out: every valley returns to the base contour, so the fill always covers its region.</p>
-        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧をひと回りするため、プロファイルは継ぎ目でも谷でつながります。各トゲは高さと傾きを自身のインデックスのハッシュから決めます。トゲは外側にだけ突き出します。谷は必ず元の輪郭まで戻るため、塗りはつねに自分の領域を覆います。</div>
+        <div class="jp"><strong>トゲ：</strong>整数本のトゲが境界の弧をひと回りするため、プロファイルは継ぎ目でも谷でつながります。それぞれのトゲは高さと傾きを自身のインデックスのハッシュから決めます。トゲは外側にだけ突き出します。谷は必ず元の輪郭まで戻るため、塗りはつねに自分の領域を覆います。</div>
 
         <p><strong>Wobble:</strong> The bump offset is a noise of world position rather than arc, so it cannot show a seam at all.</p>
         <div class="jp"><strong>うねり：</strong>ふくらみのオフセットは弧ではなくワールド座標のノイズなので、継ぎ目がそもそも現れません。</div>
@@ -55,7 +55,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <div class="jp"><strong>水玉：</strong>六角格子の上の円で、それぞれパレットからランダムな色を取り、格子点からシードで少しずらされます。すき間は紙の色になります。</div>
 
         <p><strong>Squares:</strong> A grid turned 45 degrees, a colored square inset in each cell, with no offset.</p>
-        <div class="jp"><strong>正方形：</strong>45度回した格子で、各セルの中に色の付いた正方形を少し内側に描きます。ずれはありません。</div>
+        <div class="jp"><strong>正方形：</strong>45度回した格子で、それぞれのセルの中に色の付いた正方形を少し内側に描きます。ずれはありません。</div>
 
         <p><strong>Waves:</strong> Two colors from the palette in alternating bands that undulate, after Bridget Riley.</p>
         <div class="jp"><strong>波：</strong>パレットの2色が、うねる交互の帯になります。ブリジット・ライリーにならったものです。</div>
