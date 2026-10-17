@@ -5,8 +5,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Shaped strokes" slug="shaped-strokes">
   <div class="monologue">
-    On this page, we build strokes whose outline is a shape of its own, not a thickened path.
-    <div class="jp">このページでは、輪郭が太らせたパスではなく、それ自体ひとつの形になっているストロークを作ります。</div>
+    On this page, we build strokes whose outlines form distinct shapes, rather than simply tracing thickened paths.
+    <div class="jp">このページでは、単にパスを太くするのではなく、輪郭そのものが独自の形をなすストロークを作ります。</div>
   </div>
 
   <section class="demo-section" id="shapes">
@@ -18,20 +18,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/shaped-strokes/index.html?embedded`} title="Cloud, squares, spikes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Three outlines built from the same path: a cloud of large discs, a run of rounded squares, and a broad stroke with sharp spikes.</p>
-      <div class="jp">同じパスから作られた3つの輪郭です。大きな円のかたまりによる雲、丸みを帯びた正方形の連なり、そして鋭いトゲを持つ太いストロークです。</div>
+      <p>Three outlines built from the same path: a cloud of large discs, a chain of rounded squares, and a broad stroke with sharp spikes.</p>
+      <div class="jp">同じパスから作られた3つの輪郭です。大きな円が集まった雲、角丸の正方形の連なり、そして鋭いトゲを持つ太いストロークです。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Cloud:</strong> Discs are seeded offsets from the spine with large radii, and the fragment shader draws their union. A union has one well-defined outline whatever the placement, so the boundary never crosses itself, however far the blobs are thrown.</p>
-        <div class="jp"><strong>雲：</strong>円は、スパインからシード付きのオフセットで置かれた半径の大きな円で、フラグメントシェーダはその和集合を描きます。和集合の輪郭は配置によらずひとつに定まるため、円をどれだけ遠くへ飛ばしても、境界が自分自身と交差することはありません。</div>
+      <p><strong>Cloud:</strong> Large discs are placed at seeded offsets from the spine, and the fragment shader draws their union.</p>
+      <div class="jp"><strong>雲：</strong>半径の大きな円を、シードに基づくオフセットで中心線からずらして配置し、フラグメントシェーダでその和集合を描きます。</div>
 
-        <p><strong>Rounded squares:</strong> Cells are stamped on a fixed grid like the pixel stroke, but drawn as a smooth-minimum over every cell's rounded-box distance. Adding a square reshapes the outline around it instead of overlapping it: the boundary is recomputed as a whole each time.</p>
-        <div class="jp"><strong>角丸の正方形：</strong>セルはピクセルのストロークと同じく固定グリッドに置かれますが、全セルの角丸ボックス距離のsmooth minimumとして描かれます。正方形を加えると、重なるのではなくその周りの輪郭が作り直されます。境界は毎回、全体として再計算されます。</div>
+      <p><strong>Rounded squares:</strong> Cells are stamped on a fixed grid, as in the pixel stroke, but rendered using a smooth minimum of the rounded-box distances across all cells.</p>
+      <div class="jp"><strong>角丸の正方形：</strong>セルはピクセルのストロークと同じく固定グリッドに配置しますが、描画には全セルの角丸ボックス距離の滑らかな最小値（smooth minimum）を使います。</div>
 
-        <p><strong>Spikes:</strong> The boundary is pushed outward by a power of a triangle wave. The corner at each tip survives any power, while the valley's derivative goes to zero, so the tips stay sharp and the valleys stay rounded.</p>
-        <div class="jp"><strong>トゲ：</strong>境界は三角波の累乗によって外へ押し出されます。先端の角はどんな累乗でも残り、谷の微分はゼロに向かうため、先端は鋭いまま、谷は丸いままになります。</div>
-      </details>
+      <p><strong>Spikes:</strong> The boundary is pushed outward by a power of a triangle wave. The corner at each tip is preserved at any power, while the derivative at each valley goes to zero, keeping the tips sharp and the valleys rounded.</p>
+      <div class="jp"><strong>トゲ：</strong>境界は三角波の累乗によって外へ押し出されます。先端の角はどの累乗でも保たれ、谷では微分がゼロに向かうため、先端は鋭く、谷は丸くなります。</div>
     </div>
   </section>
 
@@ -44,23 +41,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/tube-strokes/index.html?embedded`} title="Tube strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>3D tubes around the spine, closed by rounded caps: candy stripes, a wobbling width, and metal that reflects the canvas.</p>
-      <div class="jp">スパインを囲む3Dチューブを、丸いキャップで閉じたものです。キャンディの縞、うねる幅、そしてキャンバスを反射する金属。</div>
+      <p>3D tubes built around the spine and capped with rounded ends, in three styles: candy stripes, wobbling widths, and canvas-reflecting metal. A seeded wave based on arc length gives the spine depth, making the tube appear to lie above the canvas.</p>
+      <div class="jp">中心線を囲む3Dチューブの両端を、丸いキャップで閉じます。キャンディの縞模様、うねる太さ、キャンバスを映す金属の3つのスタイルがあります。弧長に応じたシード付きの波で中心線に奥行きを与え、チューブがキャンバスの上に浮かんで見えるようにします。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Depth and rotation:</strong> The spine gains depth from a seeded wave of arc length, so the tube reads as an object lying over the canvas. The shape also rotates around the spine by an angle keyed to the distance from the stroke's start, and a seeded offset pushes it slightly off the spine in a direction that rotates with the same angle, so the mark orbits the spine along its length while holding still as the stroke grows. The mark floats about 100 pixels over the canvas, lit from the upper left.</p>
-        <div class="jp"><strong>深さと回転：</strong>スパインは弧長のシード付き波から深さを得るため、チューブはキャンバスの上に置かれた物体として読めます。形はさらに、ストロークの始点からの距離に応じた角度でスパインの周りを回転し、同じ角度で回転する方向へ、シード付きのオフセットでスパインからわずかにずらされます。そのため筆跡はスパインの周りを長さに沿って周回しつつ、ストロークが伸びても止まったままです。筆跡はキャンバスの約100ピクセル上に浮かび、左上からの光に照らされます。</div>
+      <p><strong>Candy:</strong> Diagonal stripes from a list of colors wrap around the tube like stripes on a candy bar.</p>
+      <div class="jp"><strong>キャンディ：</strong>色のリストを使った斜めの縞が、アメの縞模様のようにチューブを包みます。</div>
 
-        <p><strong>Candy:</strong> Diagonal stripes from a list of colors, wrapping with the tube's angle so they run like a barber pole, shaded like glossy plastic: the shadow side and the rim fall back to a saturated deep version of the stripe color, as if light scatters inside the body, under a tight white highlight.</p>
-        <div class="jp"><strong>キャンディ：</strong>色のリストからなる斜めの縞が、チューブの角度とともに巻き付き、床屋のポールのように走ります。光沢のあるプラスチックとして陰影付けされます。影の側と縁は、光が中で散乱しているかのように、縞の色を深く鮮やかにした色へ沈み、その上に鋭い白いハイライトが乗ります。</div>
+      <p><strong>Wobble:</strong> The radius expands and contracts with a seeded wave, while the color follows a gradient driven by both the wobble and the position along the stroke.</p>
+      <div class="jp"><strong>うねり：</strong>半径はシード付きの波に応じて大きくなったり小さくなったりし、色はうねりとストロークに沿った位置の両方に応じたグラデーションになります。</div>
 
-        <p><strong>Wobble:</strong> The radius swells and thins on a seeded wave, and the color runs a gradient driven by both the wobble and the position along the stroke.</p>
-        <div class="jp"><strong>うねり：</strong>半径はシード付きの波に乗ってふくらんだり細くなったりし、色は、うねりとストロークに沿った位置の両方に応じたグラデーションになります。</div>
-
-        <p><strong>Metal:</strong> The current canvas is the environment map: the reflected direction offsets a lookup into it, so the tube mirrors whatever has been drawn around it.</p>
-        <div class="jp"><strong>金属：</strong>現在のキャンバスが環境マップです。反射方向がキャンバスへの参照をずらすため、チューブは周りに描かれたものを映します。</div>
-      </details>
+      <p><strong>Metal:</strong> The current canvas serves as the environment map. The reflection direction offsets the sampling position, so the tube mirrors whatever has been drawn around it.</p>
+      <div class="jp"><strong>金属：</strong>現在のキャンバスを環境マップとして使います。反射方向に応じてサンプリング位置をずらすことで、チューブに周囲の描画を映し込みます。</div>
     </div>
   </section>
 
@@ -73,17 +64,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/tetra-strokes/index.html?embedded`} title="Solid strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Chains of flat-shaded 3D solids scattered along the spine, in three shapes: tetrahedra, boxes, and cones. Every face takes one flat color from the palette.</p>
-      <div class="jp">スパインに沿って散らされた、フラットに陰影付けされた3Dの立体の連なりで、四面体・立方体・円錐の3つの形があります。各面はパレットから平坦な色をひとつ取ります。</div>
+      <p>Chains of flat-shaded 3D solids scattered along the spine, in three shapes: tetrahedra, boxes, and cones. Each face is filled with a single color from the palette.</p>
+      <div class="jp">フラットシェーディングを施した3D立体を、中心線に沿って散らした連なりです。形は四面体・立方体・円錐の3種類で、各面をパレットから選んだ単色で塗ります。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Placement:</strong> Each solid takes a seeded size, side, and orientation, on the same deepened spine as the tubes. It is thrown to one side of the spine, so the chain fills a band rather than a line. The step between neighbors is their two circumradii plus <code>spacing</code> of their sum, so tighter spacing packs more of them.</p>
-        <div class="jp"><strong>配置：</strong>各立体は、シードによる大きさ・左右・向きを取り、チューブと同じ深さのついたスパインの上に置かれます。スパインの片側へ振り出されるため、連なりは線ではなく帯を埋めます。隣どうしの間隔は、2つの外接半径にその和の<code>spacing</code>倍を足したものなので、間隔を詰めるほど数が増えます。</div>
+      <p>Each solid is assigned a seeded size, side, and orientation along the same depth-varying spine used for the tubes. Offsetting each solid to one side of the spine spreads the chain into a band rather than a line.</p>
+      <div class="jp">各立体の大きさ・配置する側・向きをシードに基づいて決め、チューブと同じ奥行きのある中心線に沿って配置します。それぞれを中心線の片側へずらすことで、連なりが線ではなく帯状に広がります。</div>
 
-        <p><strong>Rotation:</strong> The rotation keys on distance from the tip, so the whole chain turns as the stroke grows. Color is chosen per face group, so a cube's square and a cone's base are each one flat color while a tetrahedron's every face is its own.</p>
-        <div class="jp"><strong>回転：</strong>回転は先端からの距離に基づくため、連なり全体はストロークが伸びるにつれて回ります。色は面のグループごとに選ばれるため、立方体の正方形と円錐の底面はそれぞれ一色、四面体は各面が自分の色になります。</div>
-      </details>
+      <p>Rotation depends on the distance from the tip, so the whole chain turns as the stroke grows.</p>
+      <div class="jp">回転は先端からの距離に基づくため、ストロークが伸びるにつれて連なり全体が回ります。</div>
     </div>
   </section>
 
@@ -96,8 +84,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/try-shaped-strokes/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
     </div>
     <div class="prose">
-      <p>Try these strokes in the drawing tool.</p>
-      <div class="jp">描画ツールで、このページのストロークを試してみましょう。</div>
+      <p>Try drawing freely with the tools on this page.</p>
+      <div class="jp">このページのツールで自由に描いてみましょう。</div>
     </div>
   </section>
 </PageLayout>

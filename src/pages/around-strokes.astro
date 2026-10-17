@@ -5,13 +5,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <PageLayout title="Around strokes" slug="around-strokes">
   <div class="monologue">
-    On this page, we build strokes that wind a family of marks around the drawn path, coiling, bundling, scattering, or crossing back and forth over it instead of laying one ribbon along it.
-    <div class="jp">このページでは、描いたパスのまわりにマークの群れを巻きつけるストロークを作ります。一本のリボンをパスに沿わせるのではなく、コイルにし、束ね、散らし、あるいは左右に往復させます。</div>
-  </div>
-
-  <div class="prose">
-    <p>The look is a set of paths derived from the drawn one: a coil around it, wiggly copies of it, short strokes scattered along it, or a single crossing wave. The generators (<code>spiralPath</code>, <code>entangledPaths</code>, <code>scatteredPaths</code>, and <code>wigglePath</code>) return plain point arrays, so each derived path is an ordinary stroke drawn by the brush renderer. Every spatial size follows the stroke's width, so a heavier stroke spreads further; every count follows the path's length, so the pattern keeps its spacing as the stroke grows rather than crowding a short stroke and stretching a long one.</p>
-    <div class="jp">見た目は、描いたパスから導かれた一群のパスです。パスを巻くコイル、揺れる複製、パスに沿って散らばる短いストローク、あるいは一本の横切る波。生成器（<code>spiralPath</code>、<code>entangledPaths</code>、<code>scatteredPaths</code>、<code>wigglePath</code>）は通常の点の配列を返すため、導かれた各パスはbrushレンダラで描かれる普通のストロークです。空間的な大きさはすべてストロークの幅に従うため、太いストロークほど遠くへ広がります。本数はすべてパスの長さに従うため、短いストロークで詰まり長いストロークで伸びることなく、パターンは間隔を保ちます。</div>
+    On this page, we create strokes that coil, bundle, scatter, or weave around the drawn path rather than follow it as a single ribbon.
+    <div class="jp">このページでは、描いたパスのまわりに巻きついたり、束になったり、散らばったり、左右に横切ったりするストロークを作ります。一本のリボンをパスに沿わせるのではなく、さまざまな筆跡でパスを取り囲みます。</div>
   </div>
 
   <section class="demo-section" id="around-strokes">
@@ -23,23 +18,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/around-strokes/index.html?embedded`} title="Around strokes" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>Paths derived from the base path (spiral, entangled, and scattered from top to bottom), drawn with the brush renderer. The <strong>Cycle</strong> slider sets how far the spiral advances per turn as a multiple of its radius, so the loops half-overlap at 1 and sit beside each other near 2.</p>
-      <div class="jp">元のパスから導いたパスです（上から順にspiral、entangled、scattered）。描画にはbrushレンダラを使います。<strong>Cycle</strong>スライダーは、スパイラルが1回転で進む距離を半径の倍数で決めます。1でループは半分重なり、2付近で隣り合います。</div>
+      <p>These paths are derived from the base path and drawn as new strokes.</p>
+      <div class="jp">元のパスから導いたパスを、新たな筆跡として描画します。</div>
 
-      <details>
-        <summary>Details</summary>
-        <p><strong>Spiral:</strong> The tip circles with sin and cos while its center moves along the base path, producing one continuous coil. One turn per cycle of arc length, so every loop advances the same distance whatever the stroke's length.</p>
-        <div class="jp"><strong>スパイラル：</strong>中心が元のパスに沿って進むあいだ、先端がsinとcosで円を描き、一本の連続したコイルになります。弧長のcycleごとに1回転するため、ストロークの長さによらず、各ループは同じ距離だけ進みます。</div>
+      <p><strong>Spiral:</strong> The tip circles using sin and cos while its center moves along the base path, producing one continuous coil. It completes one turn for each cycle of arc length, so every loop advances the same distance regardless of the stroke's length.</p>
+      <div class="jp"><strong>スパイラル：</strong>中心が元のパスに沿って進むあいだ、先端がsinとcosで円を描き、一本の連続したコイルになります。弧長のcycleごとに1回転するため、ストロークの長さによらず、各ループは同じ距離だけ進みます。</div>
 
-        <p><strong>Entangled:</strong> Copies of the path are offset by seeded low-frequency waves, and their endpoints pull back toward the base so the bundle reads as one gesture. The wave count follows the length, so a long stroke wiggles as often as a short one.</p>
-        <div class="jp"><strong>もつれ：</strong>パスの複製がシード付きの低周波の波でずらされます。端点は元のパスへ引き戻されるため、束はひとつの身振りとして読めます。波の数は長さに従うため、長いストロークは短いものと同じ頻度で揺れます。</div>
+      <p><strong>Entangled:</strong> Copies of the path are offset by seeded low-frequency waves. The wave count scales with the path's length, keeping the wiggles evenly spaced on both long and short strokes.</p>
+      <div class="jp"><strong>もつれ：</strong>パスの複製を、シード付きの低周波の波でずらします。波の数はパスの長さに応じて変わるため、長いストロークでも短いストロークでも、同じ間隔で揺れます。</div>
 
-        <p><strong>Scattered:</strong> Short strokes copy small segments of the base and move sideways by a seeded offset. The stroke count follows the length, so the scatter keeps its density as the stroke grows.</p>
-        <div class="jp"><strong>散布：</strong>短いストロークが元のパスの一部を写し取り、シード付きのオフセットで横へ移動します。ストロークの本数は長さに従うため、散らばりは伸びても密度を保ちます。</div>
-
-        <p>The generators return plain point arrays, so any renderer can draw the result.</p>
-        <div class="jp">生成器は通常の点の配列を返すため、どのレンダラでも結果を描画できます。</div>
-      </details>
+      <p><strong>Scattered:</strong> Short strokes copy small segments of the base path and shift sideways by a seeded offset. The stroke count scales with the path's length, maintaining the scatter's density as the path grows.</p>
+      <div class="jp"><strong>散布：</strong>元のパスの一部を写し取った短いストロークを、シード付きのオフセットで横にずらします。本数はパスの長さに応じて変わるため、パスが長くなっても散らばりの密度を保ちます。</div>
     </div>
   </section>
 
@@ -52,8 +41,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/wiggle-strokes/index.html?embedded`} title="Wiggle" scrolling="no"></iframe>
     </div>
     <div class="prose">
-      <p>A single path crossing the base from side to side. The width sets the wave's amplitude, so it grows the whole shape, and the wavelength is an absolute size in pixels; the brush line that traces the wave is derived from the two and clamped between 2 and 6 pixels, so it stays balanced to the shape. The wave count follows the length, so the pattern reads the same on any stroke, and the offset holds full amplitude the whole way, so the first crossing is as wide as the last. The three rows are the variations: the wavelength tightening from loose at the start to tight at the end, the same wave at a constant wavelength, and a constant wavelength whose lobes are U turns instead of sine humps.</p>
-      <div class="jp">元のパスを左右に横切る一本のパスです。幅が波の振幅を決めるため形全体が大きくなり、波長はピクセル単位の絶対的な大きさです。波をなぞる筆の線はその2つから導かれ、2〜6ピクセルに収められるため、形に対して釣り合いを保ちます。波の数は長さに従うため、パターンはどのストロークでも同じように読めます。オフセットは全体を通して振幅いっぱいを保つため、最初の横切りは最後と同じ幅になります。3つの行はその変種です。波長が始めのゆるいものから終わりのきついものへと詰まるもの、同じ波を一定の波長で描いたもの、そして一定の波長でローブがサインの山ではなくU字のターンになるもの。</div>
+      <p>A single path weaves from side to side across the base path. The width controls the wave's amplitude and scales the overall shape, while the wavelength is a fixed distance in pixels. The brush line's thickness is calculated from these two values and kept between 2 and 6 pixels to remain proportional to the shape. The number of waves scales with the path's length, keeping the pattern consistent across strokes.</p>
+      <div class="jp">一本のパスが、元のパスを左右に横切りながら進みます。幅は波の振幅を決め、形全体の大きさを変えます。一方、波長はピクセル単位の固定値です。波をなぞる筆の線幅は、この2つの値から算出し、2〜6ピクセルの範囲に収めて、形との釣り合いを保ちます。波の数はパスの長さに応じて変わるため、どのストロークでも一貫したパターンになります。</div>
     </div>
   </section>
 
@@ -66,8 +55,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <iframe src={`${base}/demos/try-around-strokes/index.html?embedded`} title="Try drawing" scrolling="no" style="width:860px;height:620px"></iframe>
     </div>
     <div class="prose">
-      <p>Try these strokes in the drawing tool.</p>
-      <div class="jp">描画ツールで、このページのストロークを試してみましょう。</div>
+      <p>Try drawing freely with the tools on this page.</p>
+      <div class="jp">このページのツールで自由に描いてみましょう。</div>
     </div>
   </section>
 </PageLayout>
